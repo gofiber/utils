@@ -6,8 +6,11 @@ package utils
 
 import (
 	"os"
+	"path/filepath"
 	"reflect"
+	"runtime"
 	"strings"
+	"testing"
 	"unsafe"
 )
 
@@ -53,16 +56,25 @@ func TrimRight(s string, cutset byte) string {
 	return s[:lenStr]
 }
 
-// TrimSpace ...
-func TrimSpace(s string) string {
+// TrimLeft
+func TrimLeft(s string, cutset byte) string {
+	lenStr, start := len(s), 0
+	for start < lenStr && s[start] == cutset {
+		start++
+	}
+	return s[start:]
+}
+
+// Trim ...
+func Trim(s string, cutset byte) string {
 	i, j := 0, len(s)-1
 	for ; i < j; i++ {
-		if s[i] != ' ' {
+		if s[i] != cutset {
 			break
 		}
 	}
 	for ; i < j; j-- {
-		if s[j] != ' ' {
+		if s[j] != cutset {
 			break
 		}
 	}
@@ -84,6 +96,25 @@ func GetBytes(s string) []byte {
 		Cap:  sh.Len,
 	}
 	return *(*[]byte)(unsafe.Pointer(&bh))
+}
+
+// AssertEqual checks if values are equal
+func AssertEqual(t testing.TB, a interface{}, b interface{}, information ...string) {
+	if reflect.DeepEqual(a, b) {
+		return
+	}
+	info := ""
+	if len(information) > 0 {
+		info = information[0]
+	}
+	_, file, line, _ := runtime.Caller(1)
+	t.Fatalf(`
+		Test: 	 	%s
+		Trace: 	 	%s:%d
+		Error: 	 	Not equal
+		Expect: 	%v [%s]
+		Result: 	%v [%s]
+		Message:  	%s`, t.Name(), filepath.Base(file), line, a, reflect.TypeOf(a).Name(), b, reflect.TypeOf(b).Name(), info)
 }
 
 const MIMEOctetStream = "application/octet-stream"
