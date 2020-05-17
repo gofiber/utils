@@ -5,6 +5,7 @@
 package utils
 
 import (
+	"bytes"
 	"testing"
 )
 
@@ -26,6 +27,34 @@ func Test_Utils_ToLower(t *testing.T) {
 	AssertEqual(t, "/my3/name/is/:param/*", res)
 	res = ToLower("/MY4/NAME/IS/:PARAM/*")
 	AssertEqual(t, "/my4/name/is/:param/*", res)
+}
+
+func Test_Utils_ToLowerBytes(t *testing.T) {
+	t.Parallel()
+	res := ToLowerBytes([]byte("/MY/NAME/IS/:PARAM/*"))
+	AssertEqual(t, true, bytes.Equal([]byte("/my/name/is/:param/*"), res))
+	res = ToLowerBytes([]byte("/MY1/NAME/IS/:PARAM/*"))
+	AssertEqual(t, true, bytes.Equal([]byte("/my1/name/is/:param/*"), res))
+	res = ToLowerBytes([]byte("/MY2/NAME/IS/:PARAM/*"))
+	AssertEqual(t, true, bytes.Equal([]byte("/my2/name/is/:param/*"), res))
+	res = ToLowerBytes([]byte("/MY3/NAME/IS/:PARAM/*"))
+	AssertEqual(t, true, bytes.Equal([]byte("/my3/name/is/:param/*"), res))
+	res = ToLowerBytes([]byte("/MY4/NAME/IS/:PARAM/*"))
+	AssertEqual(t, true, bytes.Equal([]byte("/my4/name/is/:param/*"), res))
+}
+
+func Test_Utils_EqualsFold(t *testing.T) {
+	t.Parallel()
+	res := EqualsFold([]byte("/MY/NAME/IS/:PARAM/*"), []byte("/my/name/is/:param/*"))
+	AssertEqual(t, true, res)
+	res = EqualsFold([]byte("/MY1/NAME/IS/:PARAM/*"), []byte("/MY1/NAME/IS/:PARAM/*"))
+	AssertEqual(t, true, res)
+	res = EqualsFold([]byte("/my2/name/is/:param/*"), []byte("/my2/name"))
+	AssertEqual(t, false, res)
+	res = EqualsFold([]byte("/MY3/NAME/IS/:PARAM/*"), []byte("/my3/name/is/:param/*"))
+	AssertEqual(t, true, res)
+	res = EqualsFold([]byte("/MY4/NAME/IS/:PARAM/*"), []byte("/my4/nAME/IS/:param/*"))
+	AssertEqual(t, true, res)
 }
 
 func Test_Utils_TrimRight(t *testing.T) {
@@ -52,15 +81,10 @@ func Test_Utils_Trim(t *testing.T) {
 
 	res = Trim("test", ' ')
 	AssertEqual(t, "test", res)
+
+	res = Trim(".test", '.')
+	AssertEqual(t, "test", res)
 }
-
-// func Test_Utils_AssertEqual(t *testing.T) {
-// 	// TODO
-// }
-
-// func Test_Utils_setETag(t *testing.T) {
-// 	// TODO
-// }
 
 func Test_Utils_GetMIME(t *testing.T) {
 	t.Parallel()
