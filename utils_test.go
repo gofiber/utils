@@ -51,6 +51,8 @@ func Test_Utils_EqualsFold(t *testing.T) {
 	AssertEqual(t, true, res)
 	res = EqualsFold([]byte("/my2/name/is/:param/*"), []byte("/my2/name"))
 	AssertEqual(t, false, res)
+	res = EqualsFold([]byte("/dddddd"), []byte("eeeeee"))
+	AssertEqual(t, false, res)
 	res = EqualsFold([]byte("/MY3/NAME/IS/:PARAM/*"), []byte("/my3/name/is/:param/*"))
 	AssertEqual(t, true, res)
 	res = EqualsFold([]byte("/MY4/NAME/IS/:PARAM/*"), []byte("/my4/nAME/IS/:param/*"))
@@ -97,8 +99,11 @@ func Test_Utils_GetMIME(t *testing.T) {
 	res = GetMIME("xml")
 	AssertEqual(t, "application/xml", res)
 
-	res = GetMIME("json")
-	AssertEqual(t, "application/json", res)
+	res = GetMIME("unknown")
+	AssertEqual(t, MIMEOctetStream, res)
+	// empty case
+	res = GetMIME("")
+	AssertEqual(t, "", res)
 }
 
 // func Test_Utils_getArgument(t *testing.T) {
@@ -108,6 +113,32 @@ func Test_Utils_GetMIME(t *testing.T) {
 // func Test_Utils_parseTokenList(t *testing.T) {
 // 	// TODO
 // }
+
+func Test_Utils_GetCharPos(t *testing.T) {
+	t.Parallel()
+	res := GetCharPos("/foo/bar/foobar/test", '/', 3)
+	AssertEqual(t, 8, res)
+	res = GetCharPos("foo/bar/foobar/test", '/', 3)
+	AssertEqual(t, 14, res)
+	res = GetCharPos("foo/bar/foobar/test", '/', 1)
+	AssertEqual(t, 3, res)
+	res = GetCharPos("foo/bar/foobar/test", 'f', 2)
+	AssertEqual(t, 8, res)
+	res = GetCharPos("foo/bar/foobar/test", 'f', 0)
+	AssertEqual(t, 0, res)
+}
+
+func Test_Utils_GetTrimmedParam(t *testing.T) {
+	t.Parallel()
+	res := GetTrimmedParam("*")
+	AssertEqual(t, "*", res)
+	res = GetTrimmedParam(":param")
+	AssertEqual(t, "param", res)
+	res = GetTrimmedParam(":param1?")
+	AssertEqual(t, "param1", res)
+	res = GetTrimmedParam("noParam")
+	AssertEqual(t, "noParam", res)
+}
 
 func Test_Utils_GetString(t *testing.T) {
 	t.Parallel()

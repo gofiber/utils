@@ -156,9 +156,9 @@ func GetCharPos(s string, char byte, matchCount int) int {
 	if matchCount == 0 {
 		matchCount = 1
 	}
-	endPos, pos := 0, 0
+	endPos, pos := 0, -2
 	for matchCount > 0 && pos != -1 {
-		if pos > 0 {
+		if pos > -1 {
 			s = s[pos+1:]
 			endPos++
 		}
