@@ -116,10 +116,10 @@ func AssertEqual(t testing.TB, a interface{}, b interface{}, title ...string) {
 	}
 	var aType = "<nil>"
 	var bType = "<nil>"
-	if reflect.ValueOf(a).IsValid() {
+	if !reflect.ValueOf(a).IsNil() {
 		aType = reflect.TypeOf(a).Name()
 	}
-	if reflect.ValueOf(b).IsValid() {
+	if !reflect.ValueOf(b).IsNil() {
 		bType = reflect.TypeOf(b).Name()
 	}
 
