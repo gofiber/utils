@@ -1,3 +1,11 @@
+## Utils
+![Test](https://github.com/gofiber/utils/workflows/Test/badge.svg)
+![Security](https://github.com/gofiber/utils/workflows/Security/badge.svg)
+![Linter](https://github.com/gofiber/utils/workflows/Linter/badge.svg)
+
+A collection of common functions but with better performance and less allocations. This package is used in the [Fiber](https://github.com/gofiber/fiber) web framework.
+
+
 ```go
 // go test -v -benchmem -run=^$ -bench=Benchmark_ -count=2
 
