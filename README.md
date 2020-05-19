@@ -1,4 +1,6 @@
 ```go
+// go test -v -benchmem -run=^$ -bench=Benchmark_ -count=2
+
 Benchmark_GetMIME                     23092065                49.1 ns/op             0 B/op          0 allocs/op
 Benchmark_GetMIME                     23079230                48.7 ns/op             0 B/op          0 allocs/op
 
