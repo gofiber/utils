@@ -110,7 +110,7 @@ func GetBytes(s string) []byte {
 }
 
 // AssertEqual checks if values are equal
-func AssertEqual(t testing.TB, a interface{}, b interface{}, title ...string) {
+func AssertEqual(t testing.TB, a interface{}, b interface{}, description ...string) {
 	if reflect.DeepEqual(a, b) {
 		return
 	}
@@ -133,8 +133,8 @@ func AssertEqual(t testing.TB, a interface{}, b interface{}, title ...string) {
 	fmt.Fprintf(w, "\nExpect:\t%v\t[%s]", a, aType)
 	fmt.Fprintf(w, "\nResult:\t%v\t[%s]", b, bType)
 
-	if len(title) > 0 {
-		fmt.Fprintf(w, "\nDescription:\t%s", title[0])
+	if len(description) > 0 {
+		fmt.Fprintf(w, "\nDescription:\t%s", description[0])
 	}
 
 	w.Flush()
