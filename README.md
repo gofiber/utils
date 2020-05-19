@@ -4,8 +4,8 @@ Benchmark_GetMIME                     23079230                48.7 ns/op        
 
 Benchmark_ToLower/fiber               22987184                48.2 ns/op            48 B/op          1 allocs/op
 Benchmark_ToLower/fiber               24491794                49.6 ns/op            48 B/op          1 allocs/op
-Benchmark_ToLower/default              9232608               123 ns/op              48 B/op          1 allocs/op
-Benchmark_ToLower/default              9454870               123 ns/op              48 B/op          1 allocs/op
+Benchmark_ToLower/default              9232608                123 ns/op             48 B/op          1 allocs/op
+Benchmark_ToLower/default              9454870                123 ns/op             48 B/op          1 allocs/op
 
 Benchmark_ToLowerBytes/fiber          44463876                26.1 ns/op             0 B/op          0 allocs/op
 Benchmark_ToLowerBytes/fiber          39997200                26.1 ns/op             0 B/op          0 allocs/op
