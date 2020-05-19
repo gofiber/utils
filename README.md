@@ -1,9 +1,9 @@
 ```go
-Benchmark_GetMIME-4             23092065                49.1 ns/op             0 B/op          0 allocs/op
-Benchmark_GetMIME-4             23079230                48.7 ns/op             0 B/op          0 allocs/op
+Benchmark_GetMIME-4                     23092065                49.1 ns/op             0 B/op          0 allocs/op
+Benchmark_GetMIME-4                     23079230                48.7 ns/op             0 B/op          0 allocs/op
 
-Benchmark_ToLower/fiber-4       22987184                48.2 ns/op            48 B/op          1 allocs/op
-Benchmark_ToLower/fiber-4       24491794                49.6 ns/op            48 B/op          1 allocs/op
+Benchmark_ToLower/fiber-4               22987184                48.2 ns/op            48 B/op          1 allocs/op
+Benchmark_ToLower/fiber-4               24491794                49.6 ns/op            48 B/op          1 allocs/op
 Benchmark_ToLower/default-4              9232608               123 ns/op              48 B/op          1 allocs/op
 Benchmark_ToLower/default-4              9454870               123 ns/op              48 B/op          1 allocs/op
 
