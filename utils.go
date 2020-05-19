@@ -44,6 +44,14 @@ func ToUpper(b string) string {
 	return GetString(res)
 }
 
+// ToUpperBytes ...
+func ToUpperBytes(b []byte) []byte {
+	for i := 0; i < len(b); i++ {
+		b[i] = toUpperTable[b[i]]
+	}
+	return b
+}
+
 // TrimRight ...
 func TrimRight(s string, cutset byte) string {
 	lenStr := len(s)
@@ -53,16 +61,16 @@ func TrimRight(s string, cutset byte) string {
 	return s[:lenStr]
 }
 
-// TrimSpace ...
-func TrimSpace(s string) string {
+// Trim ...
+func Trim(s string, cutset byte) string {
 	i, j := 0, len(s)-1
 	for ; i < j; i++ {
-		if s[i] != ' ' {
+		if s[i] != cutset {
 			break
 		}
 	}
 	for ; i < j; j-- {
-		if s[j] != ' ' {
+		if s[j] != cutset {
 			break
 		}
 	}
@@ -86,6 +94,52 @@ func GetBytes(s string) []byte {
 	return *(*[]byte)(unsafe.Pointer(&bh))
 }
 
+// GetArgument check if key is in arguments
+func GetArgument(arg string) bool {
+	for i := range os.Args[1:] {
+		if os.Args[1:][i] == arg {
+			return true
+		}
+	}
+	return false
+}
+
+// GetOffer returns valid offer for header negotiation
+func GetOffer(header string, offers ...string) string {
+	if len(offers) == 0 {
+		return ""
+	} else if header == "" {
+		return offers[0]
+	}
+
+	spec, commaPos := "", 0
+	for len(header) > 0 && commaPos != -1 {
+		commaPos = strings.IndexByte(header, ',')
+		if commaPos != -1 {
+			spec = Trim(header[:commaPos], ' ')
+		} else {
+			spec = header
+		}
+		if factorSign := strings.IndexByte(spec, ';'); factorSign != -1 {
+			spec = spec[:factorSign]
+		}
+
+		for _, offer := range offers {
+			// has star prefix
+			if len(spec) >= 1 && spec[len(spec)-1] == '*' {
+				return offer
+			} else if strings.HasPrefix(spec, offer) {
+				return offer
+			}
+		}
+		if commaPos != -1 {
+			header = header[commaPos+1:]
+		}
+	}
+
+	return ""
+}
+
 const MIMEOctetStream = "application/octet-stream"
 
 // GetMIME ...
@@ -102,50 +156,6 @@ func GetMIME(extension string) (mime string) {
 		return MIMEOctetStream
 	}
 	return mime
-}
-
-// GetTrimmedParam ...
-func GetTrimmedParam(param string) string {
-	start := 0
-	end := len(param)
-
-	if param[start] != ':' { // is not a param
-		return param
-	}
-	start++
-	if param[end-1] == '?' { // is ?
-		end--
-	}
-
-	return param[start:end]
-}
-
-// GetCharPos ...
-func GetCharPos(s string, char byte, matchCount int) int {
-	if matchCount == 0 {
-		matchCount = 1
-	}
-	endPos, pos := 0, 0
-	for matchCount > 0 && pos != -1 {
-		if pos > 0 {
-			s = s[pos+1:]
-			endPos++
-		}
-		pos = strings.IndexByte(s, char)
-		endPos += pos
-		matchCount--
-	}
-	return endPos
-}
-
-// GetArgument check if key is in arguments
-func GetArgument(arg string) bool {
-	for i := range os.Args[1:] {
-		if os.Args[1:][i] == arg {
-			return true
-		}
-	}
-	return false
 }
 
 // MIME types were copied from https://github.com/nginx/nginx/blob/master/conf/mime.types
