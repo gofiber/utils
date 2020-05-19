@@ -41,6 +41,6 @@ Benchmark_TrimLeft/default            25001926                 45.3 ns/op       
 
 Benchmark_TrimRight/fiber             374543056                3.15 ns/op            0 B/op          0 allocs/op
 Benchmark_TrimRight/fiber             336067616                3.15 ns/op            0 B/op          0 allocs/op
-Benchmark_TrimRight/default           20868186                 52.8 ns/op            32 B/op         1 allocs/op
-Benchmark_TrimRight/default           21434695                 55.1 ns/op            32 B/op         1 allocs/op
+Benchmark_TrimRight/default           20868186                 52.8 ns/op           32 B/op          1 allocs/op
+Benchmark_TrimRight/default           21434695                 55.1 ns/op           32 B/op          1 allocs/op
 ```
