@@ -116,10 +116,10 @@ func AssertEqual(t testing.TB, a interface{}, b interface{}, title ...string) {
 	}
 	var aType = "<nil>"
 	var bType = "<nil>"
-	if !reflect.ValueOf(a).IsNil() {
+	if reflect.ValueOf(a).IsValid() {
 		aType = reflect.TypeOf(a).Name()
 	}
-	if !reflect.ValueOf(b).IsNil() {
+	if reflect.ValueOf(b).IsValid() {
 		bType = reflect.TypeOf(b).Name()
 	}
 
@@ -134,7 +134,7 @@ func AssertEqual(t testing.TB, a interface{}, b interface{}, title ...string) {
 	fmt.Fprintf(w, "\nResult:\t%v\t[%s]", b, bType)
 
 	if len(title) > 0 {
-		fmt.Fprintf(w, "\nTitle:\t%s", title[0])
+		fmt.Fprintf(w, "\nDescription:\t%s", title[0])
 	}
 
 	w.Flush()
