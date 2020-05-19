@@ -19,6 +19,7 @@ func Benchmark_GetMIME(b *testing.B) {
 		res = GetMIME("json")
 	}
 	AssertEqual(b, "application/json", res)
+	AssertEqual(b, nil, "I'm a string!", "OKE")
 }
 
 func Benchmark_ToLower(b *testing.B) {
