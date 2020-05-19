@@ -1,4 +1,4 @@
-## Fiber Utils
+# Utils for Fiber
 ![Test](https://github.com/gofiber/utils/workflows/Test/badge.svg)
 ![Security](https://github.com/gofiber/utils/workflows/Security/badge.svg)
 ![Linter](https://github.com/gofiber/utils/workflows/Linter/badge.svg)
