@@ -3,7 +3,7 @@
 ![Security](https://github.com/gofiber/utils/workflows/Security/badge.svg)
 ![Linter](https://github.com/gofiber/utils/workflows/Linter/badge.svg)
 
-A collection of common functions but with better performance and less allocations. This package is used in the [Fiber](https://github.com/gofiber/fiber) web framework.
+A collection of common functions but with better performance and less allocations created for [Fiber](https://github.com/gofiber/fiber).
 
 
 ```go
