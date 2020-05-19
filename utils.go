@@ -6,8 +6,11 @@ package utils
 
 import (
 	"os"
+	"path/filepath"
 	"reflect"
+	"runtime"
 	"strings"
+	"testing"
 	"unsafe"
 )
 
@@ -61,6 +64,15 @@ func TrimRight(s string, cutset byte) string {
 	return s[:lenStr]
 }
 
+// TrimLeft
+func TrimLeft(s string, cutset byte) string {
+	lenStr, start := len(s), 0
+	for start < lenStr && s[start] == cutset {
+		start++
+	}
+	return s[start:]
+}
+
 // Trim ...
 func Trim(s string, cutset byte) string {
 	i, j := 0, len(s)-1
@@ -94,50 +106,23 @@ func GetBytes(s string) []byte {
 	return *(*[]byte)(unsafe.Pointer(&bh))
 }
 
-// GetArgument check if key is in arguments
-func GetArgument(arg string) bool {
-	for i := range os.Args[1:] {
-		if os.Args[1:][i] == arg {
-			return true
-		}
+// AssertEqual checks if values are equal
+func AssertEqual(t testing.TB, a interface{}, b interface{}, information ...string) {
+	if reflect.DeepEqual(a, b) {
+		return
 	}
-	return false
-}
-
-// GetOffer returns valid offer for header negotiation
-func GetOffer(header string, offers ...string) string {
-	if len(offers) == 0 {
-		return ""
-	} else if header == "" {
-		return offers[0]
+	info := ""
+	if len(information) > 0 {
+		info = information[0]
 	}
-
-	spec, commaPos := "", 0
-	for len(header) > 0 && commaPos != -1 {
-		commaPos = strings.IndexByte(header, ',')
-		if commaPos != -1 {
-			spec = Trim(header[:commaPos], ' ')
-		} else {
-			spec = header
-		}
-		if factorSign := strings.IndexByte(spec, ';'); factorSign != -1 {
-			spec = spec[:factorSign]
-		}
-
-		for _, offer := range offers {
-			// has star prefix
-			if len(spec) >= 1 && spec[len(spec)-1] == '*' {
-				return offer
-			} else if strings.HasPrefix(spec, offer) {
-				return offer
-			}
-		}
-		if commaPos != -1 {
-			header = header[commaPos+1:]
-		}
-	}
-
-	return ""
+	_, file, line, _ := runtime.Caller(1)
+	t.Fatalf(`
+		Test: 	 	%s
+		Trace: 	 	%s:%d
+		Error: 	 	Not equal
+		Expect: 	%v [%s]
+		Result: 	%v [%s]
+		Message:  	%s`, t.Name(), filepath.Base(file), line, a, reflect.TypeOf(a).Name(), b, reflect.TypeOf(b).Name(), info)
 }
 
 const MIMEOctetStream = "application/octet-stream"
@@ -156,6 +141,64 @@ func GetMIME(extension string) (mime string) {
 		return MIMEOctetStream
 	}
 	return mime
+}
+
+// GetTrimmedParam ...
+func GetTrimmedParam(param string) string {
+	start := 0
+	end := len(param)
+
+	if param[start] != ':' { // is not a param
+		return param
+	}
+	start++
+	if param[end-1] == '?' { // is ?
+		end--
+	}
+
+	return param[start:end]
+}
+
+// GetCharPos ...
+func GetCharPos(s string, char byte, matchCount int) int {
+	if matchCount == 0 {
+		matchCount = 1
+	}
+	endPos, pos := 0, -2
+	for matchCount > 0 && pos != -1 {
+		if pos > -1 {
+			s = s[pos+1:]
+			endPos++
+		}
+		pos = strings.IndexByte(s, char)
+		endPos += pos
+		matchCount--
+	}
+	return endPos
+}
+
+// equalsFold Bytes compare
+func EqualsFold(b, s []byte) (equals bool) {
+	n := len(b)
+	equals = n == len(s)
+	if equals {
+		for i := 0; i < n; i++ {
+			if equals = b[i]|0x20 == s[i]|0x20; !equals {
+				break
+			}
+		}
+	}
+	return
+}
+
+// GetArgument check if key is in arguments
+func GetArgument(arg string) bool {
+	for i := range os.Args[1:] {
+		if os.Args[1:][i] == arg {
+			return true
+		}
+	}
+	return false
 }
 
 // MIME types were copied from https://github.com/nginx/nginx/blob/master/conf/mime.types

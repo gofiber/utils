@@ -10,134 +10,140 @@ import (
 	"testing"
 )
 
-// go test -v -run=^$ -bench=Benchmark_ToLower -benchmem -count=4
-func Benchmark_ToLower(b *testing.B) {
-	var str = "LoNg_DeMo_StRiNg"
+func Benchmark_Utils_getMIME(b *testing.B) {
 	var res string
 	for n := 0; n < b.N; n++ {
-		res = ToLower(str)
+		res = GetMIME(".json")
+		res = GetMIME(".xml")
+		res = GetMIME("xml")
+		res = GetMIME("json")
 	}
-	if res != "long_demo_string" {
-		b.Fatalf("Invalid result: %s", res)
-	}
-}
-func Benchmark_ToLower_Default(b *testing.B) {
-	var str = "LoNg_DeMo_StRiNg"
-	var res string
-	for n := 0; n < b.N; n++ {
-		res = strings.ToLower(str)
-	}
-	if res != "long_demo_string" {
-		b.Fatalf("Invalid result: %s", res)
-	}
+	AssertEqual(b, "application/json", res)
 }
 
-// go test -v -run=^$ -bench=Benchmark_ToLowerBytes -benchmem -count=4
-func Benchmark_ToLowerBytes(b *testing.B) {
-	var str = []byte("LoNg_DeMo_StRiNg")
+func Benchmark_Utils_ToLower(b *testing.B) {
+	var path = "/RePos/GoFiBer/FibEr/iSsues/187643/CoMmEnts"
+	var res string
+
+	b.Run("fiber ToLower", func(b *testing.B) {
+		for n := 0; n < b.N; n++ {
+			res = ToLower(path)
+		}
+		AssertEqual(b, "/repos/gofiber/fiber/issues/187643/comments", res)
+	})
+	b.Run("strings.ToLower", func(b *testing.B) {
+		for n := 0; n < b.N; n++ {
+			res = strings.ToLower(path)
+		}
+		AssertEqual(b, "/repos/gofiber/fiber/issues/187643/comments", res)
+	})
+}
+
+func Benchmark_Utils_ToLowerBytes(b *testing.B) {
+	var path = []byte("/RePos/GoFiBer/FibEr/iSsues/187643/CoMmEnts")
 	var res []byte
-	for n := 0; n < b.N; n++ {
-		res = ToLowerBytes(str)
-	}
-	if !bytes.Equal([]byte("long_demo_string"), res) {
-		b.Fatalf("Invalid result: %s", res)
-	}
-}
-func Benchmark_ToLowerBytes_Default(b *testing.B) {
-	var str = []byte("LoNg_DeMo_StRiNg")
-	var res []byte
-	for n := 0; n < b.N; n++ {
-		res = bytes.ToLower(str)
-	}
-	if !bytes.Equal([]byte("long_demo_string"), res) {
-		b.Fatalf("Invalid result: %s", res)
-	}
+
+	b.Run("fiber ToLowerBytes", func(b *testing.B) {
+		for n := 0; n < b.N; n++ {
+			res = ToLowerBytes(path)
+		}
+		AssertEqual(b, bytes.EqualFold(GetBytes("/repos/gofiber/fiber/issues/187643/comments"), res), true)
+	})
+	b.Run("bytes.ToLower", func(b *testing.B) {
+		for n := 0; n < b.N; n++ {
+			res = bytes.ToLower(path)
+		}
+		AssertEqual(b, bytes.EqualFold(GetBytes("/repos/gofiber/fiber/issues/187643/comments"), res), true)
+	})
 }
 
-// go test -v -run=^$ -bench=Benchmark_ToUpper -benchmem -count=4
-func Benchmark_ToUpper(b *testing.B) {
-	var str = "LoNg_DeMo_StRiNg"
+func Benchmark_Utils_ToUpper(b *testing.B) {
+	var path = "/RePos/GoFiBer/FibEr/iSsues/187643/CoMmEnts"
 	var res string
-	for n := 0; n < b.N; n++ {
-		res = ToUpper(str)
-	}
-	if res != "LONG_DEMO_STRING" {
-		b.Fatalf("Invalid result: %s", res)
-	}
-}
-func Benchmark_ToUpper_Default(b *testing.B) {
-	var str = "LoNg_DeMo_StRiNg"
-	var res string
-	for n := 0; n < b.N; n++ {
-		res = strings.ToUpper(str)
-	}
-	if res != "LONG_DEMO_STRING" {
-		b.Fatalf("Invalid result: %s", res)
-	}
+
+	b.Run("fiber ToUpper", func(b *testing.B) {
+		for n := 0; n < b.N; n++ {
+			res = ToUpper(path)
+		}
+		AssertEqual(b, "/REPOS/GOFIBER/FIBER/ISSUES/187643/COMMENTS", res)
+	})
+	b.Run("strings.ToUpper", func(b *testing.B) {
+		for n := 0; n < b.N; n++ {
+			res = strings.ToUpper(path)
+		}
+		AssertEqual(b, "/REPOS/GOFIBER/FIBER/ISSUES/187643/COMMENTS", res)
+	})
 }
 
-// go test -v -run=^$ -bench=Benchmark_ToUpperBytes -benchmem -count=4
-func Benchmark_ToUpperBytes(b *testing.B) {
-	var str = []byte("LoNg_DeMo_StRiNg")
-	var res []byte
-	for n := 0; n < b.N; n++ {
-		res = ToUpperBytes(str)
-	}
-	if !bytes.Equal([]byte("LONG_DEMO_STRING"), res) {
-		b.Fatalf("Invalid result: %s", res)
-	}
-}
-func Benchmark_ToUpperBytes_Default(b *testing.B) {
-	var str = []byte("LoNg_DeMo_StRiNg")
-	var res []byte
-	for n := 0; n < b.N; n++ {
-		res = bytes.ToUpper(str)
-	}
-	if !bytes.Equal([]byte("LONG_DEMO_STRING"), res) {
-		b.Fatalf("Invalid result: %s", res)
-	}
-}
+func Benchmark_Utils_EqualFolds(b *testing.B) {
+	var left = []byte("/RePos/GoFiBer/FibEr/iSsues/187643/CoMmEnts")
+	var right = []byte("/RePos/goFiber/Fiber/issues/187643/COMMENTS")
+	var res bool
 
-// go test -v -run=^$ -bench=Benchmark_TrimRight -benchmem -count=4
-func Benchmark_TrimRight(b *testing.B) {
-	var str = "LoNg_DeMo_StRiNg/////"
-	var res string
-	for n := 0; n < b.N; n++ {
-		res = TrimRight(str, '/')
-	}
-	if res != "LoNg_DeMo_StRiNg" {
-		b.Fatalf("Invalid result: %s", res)
-	}
+	b.Run("fiber EqualsFold", func(b *testing.B) {
+		for n := 0; n < b.N; n++ {
+			res = EqualsFold(left, right)
+		}
+		AssertEqual(b, true, res)
+	})
+	b.Run("bytes.EqualFold", func(b *testing.B) {
+		for n := 0; n < b.N; n++ {
+			res = bytes.EqualFold(left, right)
+		}
+		AssertEqual(b, true, res)
+	})
 }
-func Benchmark_TrimRight_Default(b *testing.B) {
-	var str = "LoNg_DeMo_StRiNg/////"
+func Benchmark_Utils_Trim(b *testing.B) {
 	var res string
-	for n := 0; n < b.N; n++ {
-		res = strings.TrimRight(str, "/")
-	}
-	if res != "LoNg_DeMo_StRiNg" {
-		b.Fatalf("Invalid result: %s", res)
-	}
-}
 
-// go test -v -run=^$ -bench=Benchmark_Trim -benchmem -count=4
-func Benchmark_Trim(b *testing.B) {
-	var str = "/////LoNg_DeMo_StRiNg/////"
-	var res string
-	for n := 0; n < b.N; n++ {
-		res = Trim(str, '/')
-	}
-	if res != "LoNg_DeMo_StRiNg" {
-		b.Fatalf("Invalid result: %s", res)
-	}
+	b.Run("fiber Trim", func(b *testing.B) {
+		for n := 0; n < b.N; n++ {
+			res = Trim("  foobar   ", ' ')
+		}
+		AssertEqual(b, "foobar", res)
+	})
+	b.Run("strings.Trim", func(b *testing.B) {
+		for n := 0; n < b.N; n++ {
+			res = strings.Trim("  foobar   ", " ")
+		}
+		AssertEqual(b, "foobar", res)
+	})
+	b.Run("strings.TrimSpace", func(b *testing.B) {
+		for n := 0; n < b.N; n++ {
+			res = strings.TrimSpace("  foobar   ")
+		}
+		AssertEqual(b, "foobar", res)
+	})
 }
-func Benchmark_Trim_Default(b *testing.B) {
-	var str = "/////LoNg_DeMo_StRiNg/////"
+func Benchmark_Utils_TrimLeft(b *testing.B) {
 	var res string
-	for n := 0; n < b.N; n++ {
-		res = strings.Trim(str, "/")
-	}
-	if res != "LoNg_DeMo_StRiNg" {
-		b.Fatalf("Invalid result: %s", res)
-	}
+
+	b.Run("fiber TrimLeft", func(b *testing.B) {
+		for n := 0; n < b.N; n++ {
+			res = TrimLeft("  foobar", ' ')
+		}
+		AssertEqual(b, "foobar", res)
+	})
+	b.Run("strings.TrimLeft", func(b *testing.B) {
+		for n := 0; n < b.N; n++ {
+			res = strings.TrimLeft("  foobar", " ")
+		}
+		AssertEqual(b, "foobar", res)
+	})
+}
+func Benchmark_Utils_TrimRight(b *testing.B) {
+	var res string
+
+	b.Run("fiber TrimRight", func(b *testing.B) {
+		for n := 0; n < b.N; n++ {
+			res = TrimRight("foobar  ", ' ')
+		}
+		AssertEqual(b, "foobar", res)
+	})
+	b.Run("strings.TrimRight", func(b *testing.B) {
+		for n := 0; n < b.N; n++ {
+			res = strings.TrimRight("foobar  ", " ")
+		}
+		AssertEqual(b, "foobar", res)
+	})
 }
