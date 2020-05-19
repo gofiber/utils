@@ -107,11 +107,13 @@ func EqualsFold(b, s []byte) (equals bool) {
 	return
 }
 
+// #nosec G103
 // GetString returns a string pointer without allocation
 func GetString(b []byte) string {
 	return *(*string)(unsafe.Pointer(&b))
 }
 
+// #nosec G103
 // GetBytes returns a byte pointer without allocation
 func GetBytes(s string) []byte {
 	sh := (*reflect.StringHeader)(unsafe.Pointer(&s))
@@ -151,8 +153,12 @@ func AssertEqual(t testing.TB, a interface{}, b interface{}, description ...stri
 		fmt.Fprintf(w, "\nDescription:\t%s", description[0])
 	}
 
-	w.Flush()
-	t.Fatal(buf.String())
+	err := w.Flush()
+	if err != nil {
+		t.Fatal(err)
+	} else {
+		t.Fatal(buf.String())
+	}
 }
 
 const MIMEOctetStream = "application/octet-stream"
