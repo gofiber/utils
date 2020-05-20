@@ -88,24 +88,6 @@ func Test_Utils_Trim(t *testing.T) {
 	AssertEqual(t, "test", res)
 }
 
-func Test_Utils_GetMIME(t *testing.T) {
-	t.Parallel()
-	res := GetMIME(".json")
-	AssertEqual(t, "application/json", res)
-
-	res = GetMIME(".xml")
-	AssertEqual(t, "application/xml", res)
-
-	res = GetMIME("xml")
-	AssertEqual(t, "application/xml", res)
-
-	res = GetMIME("unknown")
-	AssertEqual(t, MIMEOctetStream, res)
-	// empty case
-	res = GetMIME("")
-	AssertEqual(t, "", res)
-}
-
 // func Test_Utils_getArgument(t *testing.T) {
 // 	// TODO
 // }
@@ -152,17 +134,38 @@ func Test_Utils_GetBytes(t *testing.T) {
 	AssertEqual(t, []byte("Hello, World!"), res)
 }
 
-func Test_Utils_extensionMIME(t *testing.T) {
+func Test_Utils_GetMIME(t *testing.T) {
 	t.Parallel()
-	res := GetMIME(".html")
-	AssertEqual(t, "text/html", res)
+	res := GetMIME(".json")
+	AssertEqual(t, "application/json", res)
 
-	res = GetMIME("html")
-	AssertEqual(t, "text/html", res)
+	res = GetMIME(".xml")
+	AssertEqual(t, "application/xml", res)
 
-	res = GetMIME(".msp")
-	AssertEqual(t, "application/octet-stream", res)
+	res = GetMIME("xml")
+	AssertEqual(t, "application/xml", res)
 
-	res = GetMIME("msp")
-	AssertEqual(t, "application/octet-stream", res)
+	res = GetMIME("unknown")
+	AssertEqual(t, MIMEOctetStream, res)
+	// empty case
+	res = GetMIME("")
+	AssertEqual(t, "", res)
+}
+
+func Test_Utils_StatusMessage(t *testing.T) {
+	t.Parallel()
+	res := StatusMessage(204)
+	AssertEqual(t, "No Content", res)
+
+	res = StatusMessage(404)
+	AssertEqual(t, "Not Found", res)
+
+	res = StatusMessage(426)
+	AssertEqual(t, "Upgrade Required", res)
+
+	res = StatusMessage(511)
+	AssertEqual(t, "Network Authentication Required", res)
+
+	res = StatusMessage(1337)
+	AssertEqual(t, "", res)
 }
