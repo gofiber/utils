@@ -169,3 +169,9 @@ func Test_Utils_StatusMessage(t *testing.T) {
 	res = StatusMessage(1337)
 	AssertEqual(t, "", res)
 }
+
+func Test_Utils_AssertEqual(t *testing.T) {
+	t.Parallel()
+	AssertEqual(nil, []string{}, []string{})
+	AssertEqual(t, []string{}, []string{})
+}
