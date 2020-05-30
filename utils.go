@@ -117,13 +117,14 @@ func GetString(b []byte) string {
 // #nosec G103
 // GetBytes returns a byte pointer without allocation
 func GetBytes(s string) []byte {
+	b := make([]byte, 0, 0)
 	sh := (*reflect.StringHeader)(unsafe.Pointer(&s))
-	bh := reflect.SliceHeader{
-		Data: sh.Data,
-		Len:  sh.Len,
-		Cap:  sh.Len,
-	}
-	return *(*[]byte)(unsafe.Pointer(&bh))
+	bh := (*reflect.SliceHeader)(unsafe.Pointer(&b))
+	bh.Data = sh.Data
+	bh.Cap = sh.Len
+	bh.Len = sh.Len
+	runtime.KeepAlive(s)
+	return b
 }
 
 // AssertEqual checks if values are equal
