@@ -117,7 +117,7 @@ func GetString(b []byte) string {
 // #nosec G103
 // GetBytes returns a byte pointer without allocation
 func GetBytes(s string) []byte {
-	b := make([]byte, 0, 0)
+	b := make([]byte, 0)
 	sh := (*reflect.StringHeader)(unsafe.Pointer(&s))
 	bh := (*reflect.SliceHeader)(unsafe.Pointer(&b))
 	bh.Data = sh.Data
