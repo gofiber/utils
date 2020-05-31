@@ -125,6 +125,11 @@ func GetBytes(s string) (b []byte) {
 	return b
 }
 
+// ImmutableString returns a immutable string with allocation
+func ImmutableString(s string) string {
+	return string(GetBytes(s))
+}
+
 // AssertEqual checks if values are equal
 func AssertEqual(t testing.TB, a interface{}, b interface{}, description ...string) {
 	if reflect.DeepEqual(a, b) {

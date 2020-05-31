@@ -134,6 +134,12 @@ func Test_Utils_GetBytes(t *testing.T) {
 	AssertEqual(t, []byte("Hello, World!"), res)
 }
 
+func Test_Utils_ImmutableString(t *testing.T) {
+	t.Parallel()
+	res := ImmutableString("Hello, World!")
+	AssertEqual(t, "Hello, World!", res)
+}
+
 func Test_Utils_GetMIME(t *testing.T) {
 	t.Parallel()
 	res := GetMIME(".json")
