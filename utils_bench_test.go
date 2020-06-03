@@ -6,9 +6,30 @@ package utils
 
 import (
 	"bytes"
+	"mime"
 	"strings"
 	"testing"
+
+	stduuid "github.com/google/uuid"
 )
+
+// go test -v -run=^$ -bench=Benchmark_UUID -benchmem -count=2
+
+func Benchmark_UUID(b *testing.B) {
+	var res string
+	b.Run("fiber", func(b *testing.B) {
+		for n := 0; n < b.N; n++ {
+			res = UUID()
+		}
+		AssertEqual(b, 36, len(res))
+	})
+	b.Run("default", func(b *testing.B) {
+		for n := 0; n < b.N; n++ {
+			res = stduuid.New().String()
+		}
+		AssertEqual(b, 36, len(res))
+	})
+}
 
 // go test -v -run=^$ -bench=GetString -benchmem -count=2
 
@@ -48,15 +69,30 @@ func Benchmark_GetBytes(b *testing.B) {
 	})
 }
 
+// go test -v -run=^$ -bench=Benchmark_GetMIME -benchmem -count=2
+
 func Benchmark_GetMIME(b *testing.B) {
 	var res string
-	for n := 0; n < b.N; n++ {
-		res = GetMIME(".json")
-		res = GetMIME(".xml")
-		res = GetMIME("xml")
-		res = GetMIME("json")
-	}
-	AssertEqual(b, "application/json", res)
+	b.Run("fiber", func(b *testing.B) {
+		for n := 0; n < b.N; n++ {
+			res = GetMIME(".xml")
+			res = GetMIME(".txt")
+			res = GetMIME(".png")
+			res = GetMIME(".exe")
+			res = GetMIME(".json")
+		}
+		AssertEqual(b, "application/json", res)
+	})
+	b.Run("default", func(b *testing.B) {
+		for n := 0; n < b.N; n++ {
+			res = mime.TypeByExtension(".xml")
+			res = mime.TypeByExtension(".txt")
+			res = mime.TypeByExtension(".png")
+			res = mime.TypeByExtension(".exe")
+			res = mime.TypeByExtension(".json")
+		}
+		AssertEqual(b, "application/json", res)
+	})
 }
 
 func Benchmark_ToLower(b *testing.B) {
