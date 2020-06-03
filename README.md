@@ -6,7 +6,7 @@
 [![Security](https://github.com/gofiber/utils/workflows/Security/badge.svg)](https://github.com/gofiber/utils/actions?query=workflow%3ASecurity)
 [![Linter](https://github.com/gofiber/utils/workflows/Linter/badge.svg)](https://github.com/gofiber/utils/actions?query=workflow%3ALinter)
 
-A collection of common functions but with better performance and less allocations created for [Fiber](https://github.com/gofiber/fiber).
+A collection of common functions but with better performance, less allocations and no dependencies created for [Fiber](https://github.com/gofiber/fiber).
 
 
 ```go
@@ -51,8 +51,6 @@ Benchmark_Trim/fiber                  207314002               5.85 ns/op        
 Benchmark_Trim/fiber                  207386125               5.78 ns/op             0 B/op          0 allocs/op
 Benchmark_Trim/default                16506302                68.5 ns/op            32 B/op          1 allocs/op
 Benchmark_Trim/default                16669119                68.9 ns/op            32 B/op          1 allocs/op
-Benchmark_Trim/default.trimspace      165073046               7.27 ns/op             0 B/op          0 allocs/op
-Benchmark_Trim/default.trimspace      165796213               7.32 ns/op             0 B/op          0 allocs/op
 
 Benchmark_TrimLeft/fiber              343254828               3.47 ns/op             0 B/op          0 allocs/op
 Benchmark_TrimLeft/fiber              344407171               3.45 ns/op             0 B/op          0 allocs/op
