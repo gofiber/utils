@@ -9,6 +9,12 @@ import (
 	"testing"
 )
 
+func Test_Utils_UUID(t *testing.T) {
+	t.Parallel()
+	res := UUID()
+	AssertEqual(t, 36, len(res))
+}
+
 func Test_Utils_ToUpper(t *testing.T) {
 	t.Parallel()
 	res := ToUpper("/my/name/is/:param/*")
