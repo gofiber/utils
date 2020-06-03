@@ -50,7 +50,7 @@ func Benchmark_GetString(b *testing.B) {
 	})
 }
 
-// go test -v -run=^$ -bench=GetBytes -benchmem -count=2
+// go test -v -cpu 2 -run=^$ -bench=GetBytes -benchmem -count=4
 
 func Benchmark_GetBytes(b *testing.B) {
 	var hello = "Hello, World!"

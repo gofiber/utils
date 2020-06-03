@@ -160,13 +160,13 @@ func GetString(b []byte) string {
 
 // #nosec G103
 // GetBytes returns a byte pointer without allocation
-func GetBytes(s string) (b []byte) {
-	bh := (*reflect.SliceHeader)(unsafe.Pointer(&b))
-	sh := *(*reflect.StringHeader)(unsafe.Pointer(&s))
+func GetBytes(s string) (bs []byte) {
+	sh := (*reflect.StringHeader)(unsafe.Pointer(&s))
+	bh := (*reflect.SliceHeader)(unsafe.Pointer(&bs))
 	bh.Data = sh.Data
 	bh.Len = sh.Len
 	bh.Cap = sh.Len
-	return b
+	return
 }
 
 // ImmutableString returns a immutable string with allocation
