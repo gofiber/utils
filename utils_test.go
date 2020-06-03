@@ -9,6 +9,12 @@ import (
 	"testing"
 )
 
+func Test_Utils_UUID(t *testing.T) {
+	t.Parallel()
+	res := UUID()
+	AssertEqual(t, 36, len(res))
+}
+
 func Test_Utils_ToUpper(t *testing.T) {
 	t.Parallel()
 	res := ToUpper("/my/name/is/:param/*")
@@ -132,6 +138,12 @@ func Test_Utils_GetBytes(t *testing.T) {
 	t.Parallel()
 	res := GetBytes("Hello, World!")
 	AssertEqual(t, []byte("Hello, World!"), res)
+}
+
+func Test_Utils_ImmutableString(t *testing.T) {
+	t.Parallel()
+	res := ImmutableString("Hello, World!")
+	AssertEqual(t, "Hello, World!", res)
 }
 
 func Test_Utils_GetMIME(t *testing.T) {

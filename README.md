@@ -1,10 +1,10 @@
 # Utils
 
-![Release](https://img.shields.io/github/release/gofiber/utils.svg)
-[![Discord](https://img.shields.io/badge/discord-join%20channel-7289DA)](https://gofiber.io/discord)
-![Test](https://github.com/gofiber/utils/workflows/Test/badge.svg)
-![Security](https://github.com/gofiber/utils/workflows/Security/badge.svg)
-![Linter](https://github.com/gofiber/utils/workflows/Linter/badge.svg)
+[![Release](https://img.shields.io/github/release/gofiber/utils.svg)](https://github.com/gofiber/utils/releases)
+[![Discord](https://img.shields.io/discord/704680098577514527?label=Discord&logo=discord&logoColor=white&color=7289DA)](https://gofiber.io/discord)
+[![Test](https://github.com/gofiber/utils/workflows/Test/badge.svg)](https://github.com/gofiber/utils/actions?query=workflow%3ATest)
+[![Security](https://github.com/gofiber/utils/workflows/Security/badge.svg)](https://github.com/gofiber/utils/actions?query=workflow%3ASecurity)
+[![Linter](https://github.com/gofiber/utils/workflows/Linter/badge.svg)](https://github.com/gofiber/utils/actions?query=workflow%3ALinter)
 
 A collection of common functions but with better performance and less allocations created for [Fiber](https://github.com/gofiber/fiber).
 
@@ -12,8 +12,15 @@ A collection of common functions but with better performance and less allocation
 ```go
 // go test -v -benchmem -run=^$ -bench=Benchmark_ -count=2
 
-Benchmark_GetMIME                     23092065                49.1 ns/op             0 B/op          0 allocs/op
-Benchmark_GetMIME                     23079230                48.7 ns/op             0 B/op          0 allocs/op
+Benchmark_GetMIME/fiber               14287550                84.2 ns/op             0 B/op          0 allocs/op
+Benchmark_GetMIME/fiber               14819698                78.3 ns/op             0 B/op          0 allocs/op
+Benchmark_GetMIME/default              6459128                 184 ns/op             0 B/op          0 allocs/op
+Benchmark_GetMIME/default              6385042                 184 ns/op             0 B/op          0 allocs/op
+
+Benchmark_UUID/fiber                  17652744                59.1 ns/op            48 B/op          1 allocs/op
+Benchmark_UUID/fiber                  19361145                58.5 ns/op            48 B/op          1 allocs/op
+Benchmark_UUID/default                 4271024                 281 ns/op            64 B/op          2 allocs/op
+Benchmark_UUID/default                 4435306                 278 ns/op            64 B/op          2 allocs/op
 
 Benchmark_ToLower/fiber               22987184                48.2 ns/op            48 B/op          1 allocs/op
 Benchmark_ToLower/fiber               24491794                49.6 ns/op            48 B/op          1 allocs/op
