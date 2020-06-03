@@ -6,7 +6,7 @@
 [![Security](https://github.com/gofiber/utils/workflows/Security/badge.svg)](https://github.com/gofiber/utils/actions?query=workflow%3ASecurity)
 [![Linter](https://github.com/gofiber/utils/workflows/Linter/badge.svg)](https://github.com/gofiber/utils/actions?query=workflow%3ALinter)
 
-A collection of common functions but with better performance and less allocations created for [Fiber](https://github.com/gofiber/fiber).
+A collection of common functions but with better performance, less allocations and no dependencies created for [Fiber](https://github.com/gofiber/fiber).
 
 
 ```go
