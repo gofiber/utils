@@ -6,11 +6,11 @@ package utils
 
 import (
 	"bytes"
+	"crypto/rand"
+	"fmt"
 	"mime"
 	"strings"
 	"testing"
-
-	stduuid "github.com/google/uuid"
 )
 
 // go test -v -run=^$ -bench=Benchmark_UUID -benchmem -count=2
@@ -24,8 +24,10 @@ func Benchmark_UUID(b *testing.B) {
 		AssertEqual(b, 36, len(res))
 	})
 	b.Run("default", func(b *testing.B) {
+		rnd := make([]byte, 16)
+		_, _ = rand.Read(rnd)
 		for n := 0; n < b.N; n++ {
-			res = stduuid.New().String()
+			res = fmt.Sprintf("%x-%x-%x-%x-%x", rnd[0:4], rnd[4:6], rnd[6:8], rnd[8:10], rnd[10:])
 		}
 		AssertEqual(b, 36, len(res))
 	})
