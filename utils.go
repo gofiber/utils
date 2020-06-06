@@ -65,6 +65,11 @@ func UUID() string {
 	return GetString(b)
 }
 
+// Returns function name
+func FunctionName(fn interface{}) string {
+	return runtime.FuncForPC(reflect.ValueOf(fn).Pointer()).Name()
+}
+
 // ToLower is the equivalent of strings.ToLower
 func ToLower(b string) string {
 	var res = make([]byte, len(b))
