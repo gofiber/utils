@@ -9,6 +9,11 @@ import (
 	"testing"
 )
 
+func Test_Utils_FunctionName(t *testing.T) {
+	t.Parallel()
+	AssertEqual(t, "github.com/gofiber/utils.Test_Utils_UUID", FunctionName(Test_Utils_UUID))
+}
+
 func Test_Utils_UUID(t *testing.T) {
 	t.Parallel()
 	res := UUID()
