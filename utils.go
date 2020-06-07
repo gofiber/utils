@@ -67,7 +67,11 @@ func UUID() string {
 
 // Returns function name
 func FunctionName(fn interface{}) string {
-	return runtime.FuncForPC(reflect.ValueOf(fn).Pointer()).Name()
+	t := reflect.ValueOf(fn).Type()
+	if t.Kind() == reflect.Func {
+		return runtime.FuncForPC(reflect.ValueOf(fn).Pointer()).Name()
+	}
+	return t.String()
 }
 
 // ToLower is the equivalent of strings.ToLower
