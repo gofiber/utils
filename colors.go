@@ -4,76 +4,90 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/mattn/go-colorable"
+	colorable "github.com/mattn/go-colorable"
 )
 
-type Painter struct {
-	base string
 
+const (
+	colorBlack   = "\u001b[90m"
+	colorRed     = "\u001b[91m"
+	colorGreen   = "\u001b[92m"
+	colorYellow  = "\u001b[93m"
+	colorBlue    = "\u001b[94m"
+	colorMagenta = "\u001b[95m"
+	colorCyan    = "\u001b[96m"
+	colorWhite   = "\u001b[97m"
+	colorReset   = "\u001b[0m"
+)
+
+type Colors struct {
+	base   string
 	Output io.Writer
-	Color  Color
 }
 
-type Color struct {
-	Black   string
-	Red     string
-	Green   string
-	Yellow  string
-	Blue    string
-	Magenta string
-	Cyan    string
-	White   string
-	Reset   string
-}
-
-func Paint() *Painter {
-	return &Painter{
+func Colors() *Colors {
+	return &Colors{
+		base:   colorReset,
 		Output: colorable.NewColorableStdout(),
-		Color: Color{
-			Black:   "\u001b[90m",
-			Red:     "\u001b[91m",
-			Green:   "\u001b[92m",
-			Yellow:  "\u001b[93m",
-			Blue:    "\u001b[94m",
-			Magenta: "\u001b[95m",
-			Cyan:    "\u001b[96m",
-			White:   "\u001b[97m",
-			Reset:   "\u001b[0m",
-		},
 	}
 }
 
 func (p *Painter) Default(color ...string) {
 	if len(color) > 0 {
 		p.base = color[0]
-	} else {
-		p.base = "\u001b[0m"
 	}
 }
-func (p *Painter) Black(v interface{}) string {
-	return fmt.Sprintf("%s%v%s", p.Color.Black, v, p.base)
+func (p *Painter) Black(v ...interface{}) string {
+	if len(v) > 0 {
+		return fmt.Sprintf("%s%v%s", colorBlack, v[0], p.base)
+	}
+	return colorBlack
 }
-func (p *Painter) Red(v interface{}) string {
-	return fmt.Sprintf("%s%v%s", p.Color.Red, v, p.base)
+func (p *Painter) Red(v ...interface{}) string {
+	if len(v) > 0 {
+		return fmt.Sprintf("%s%v%s", colorRed v[0], p.base)
+	}
+	return colorRed
 }
-func (p *Painter) Green(v interface{}) string {
-	return fmt.Sprintf("%s%v%s", p.Color.Green, v, p.base)
+func (p *Painter) Green(v ...interface{}) string {
+	if len(v) > 0 {
+		return fmt.Sprintf("%s%v%s", colorGreen, v[0], p.base)
+	}
+	return colorGreen
 }
-func (p *Painter) Yellow(v interface{}) string {
-	return fmt.Sprintf("%s%v%s", p.Color.Yellow, v, p.base)
+func (p *Painter) Yellow(v ...interface{}) string {
+	if len(v) > 0 {
+		return fmt.Sprintf("%s%v%s", colorYellow, v[0], p.base)
+	}
+	return colorYellow
 }
-func (p *Painter) Blue(v interface{}) string {
-	return fmt.Sprintf("%s%v%s", p.Color.Blue, v, p.base)
+func (p *Painter) Blue(v ...interface{}) string {
+	if len(v) > 0 {
+		return fmt.Sprintf("%s%v%s", colorBlue, v[0], p.base)
+	}
+	return colorBlue
 }
-func (p *Painter) Magenta(v interface{}) string {
-	return fmt.Sprintf("%s%v%s", p.Color.Magenta, v, p.base)
+func (p *Painter) Magenta(v ...interface{}) string {
+	if len(v) > 0 {
+		return fmt.Sprintf("%s%v%s", colorMagenta, v[0], p.base)
+	}
+	return colorMagenta
 }
-func (p *Painter) Cyan(v interface{}) string {
-	return fmt.Sprintf("%s%v%s", p.Color.Cyan, v, p.base)
+func (p *Painter) Cyan(v ...interface{}) string {
+	if len(v) > 0 {
+		return fmt.Sprintf("%s%v%s", colorCyan, v[0], p.base)
+	}
+	return colorCyan
 }
-func (p *Painter) White(v interface{}) string {
-	return fmt.Sprintf("%s%v%s", p.Color.White, v, p.base)
+func (p *Painter) White(v ...interface{}) string {
+	if len(v) > 0 {
+		return fmt.Sprintf("%s%v%s", colorWhite, v[0], p.base)
+	}
+	return colorWhite
 }
-func (p *Painter) Reset(v interface{}) string {
-	return p.Color.Reset
+func (p *Painter) Reset(v ...interface{}) string {
+	if len(v) > 0 {
+		return fmt.Sprintf("%s%v%s", colorReset, v[0], p.base)
+	}
+	return colorReset
 }
