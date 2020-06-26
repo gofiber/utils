@@ -270,7 +270,7 @@ func (c *Color) Sprintf(format string, a ...interface{}) string {
 // colorized with color.Fprint().
 func (c *Color) FprintFunc() func(w io.Writer, a ...interface{}) {
 	return func(w io.Writer, a ...interface{}) {
-		c.Fprint(w, a...)
+		_, _ = c.Fprint(w, a...)
 	}
 }
 
@@ -278,7 +278,7 @@ func (c *Color) FprintFunc() func(w io.Writer, a ...interface{}) {
 // colorized with color.Print().
 func (c *Color) PrintFunc() func(a ...interface{}) {
 	return func(a ...interface{}) {
-		c.Print(a...)
+		_, _ = c.Print(a...)
 	}
 }
 
@@ -286,7 +286,7 @@ func (c *Color) PrintFunc() func(a ...interface{}) {
 // colorized with color.Fprintf().
 func (c *Color) FprintfFunc() func(w io.Writer, format string, a ...interface{}) {
 	return func(w io.Writer, format string, a ...interface{}) {
-		c.Fprintf(w, format, a...)
+		_, _ = c.Fprintf(w, format, a...)
 	}
 }
 
@@ -294,7 +294,7 @@ func (c *Color) FprintfFunc() func(w io.Writer, format string, a ...interface{})
 // colorized with color.Printf().
 func (c *Color) PrintfFunc() func(format string, a ...interface{}) {
 	return func(format string, a ...interface{}) {
-		c.Printf(format, a...)
+		_, _ = c.Printf(format, a...)
 	}
 }
 
@@ -446,9 +446,9 @@ func colorPrint(format string, p Attribute, a ...interface{}) {
 	}
 
 	if len(a) == 0 {
-		c.Print(format)
+		_, _ = c.Print(format)
 	} else {
-		c.Printf(format, a...)
+		_, _ = c.Printf(format, a...)
 	}
 }
 
