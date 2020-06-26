@@ -25,17 +25,19 @@ type Colors struct {
 	Output io.Writer
 }
 
-func Colors() *Colors {
-	return &Colors{
+func Colors(base ...string) *Colors {
+	c := &Colors{
 		base:   colorReset,
 		Output: colorable.NewColorableStdout(),
 	}
+	if len(base) > 0 {
+		c.base = base
+	}
+	return c
 }
 
-func (p *Painter) Default(color ...string) {
-	if len(color) > 0 {
-		p.base = color[0]
-	}
+func (p *Painter) Default(color string) {
+	p.base = color[0]
 }
 func (p *Painter) Black(v ...interface{}) string {
 	if len(v) > 0 {
