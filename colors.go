@@ -46,6 +46,8 @@ func Paint() *Painter {
 func (p *Painter) Default(color ...string) {
 	if len(color) > 0 {
 		p.base = color[0]
+	} else {
+		p.base = "\u001b[0m"
 	}
 }
 func (p *Painter) Black(v interface{}) string {
