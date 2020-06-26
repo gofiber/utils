@@ -1,3 +1,7 @@
+// The MIT License (MIT)
+// Copyright (c) 2013 Fatih Arslan
+// https://github.com/fatih/color
+
 package color
 
 import (
