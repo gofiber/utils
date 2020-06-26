@@ -8,10 +8,10 @@ import (
 )
 
 type Painter struct {
-	base   string
-	output io.Writer
+	base string
 
-	Color Color
+	Output io.Writer
+	Color  Color
 }
 
 type Color struct {
@@ -28,7 +28,7 @@ type Color struct {
 
 func Colors() *Painter {
 	return &Painter{
-		output: colorable.NewColorableStdout(),
+		Output: colorable.NewColorableStdout(),
 		Color: Color{
 			Black:   "\u001b[90m",
 			Red:     "\u001b[91m",
