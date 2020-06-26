@@ -26,7 +26,7 @@ type Color struct {
 	Reset   string
 }
 
-func Colors() *Painter {
+func Paint() *Painter {
 	return &Painter{
 		Output: colorable.NewColorableStdout(),
 		Color: Color{
