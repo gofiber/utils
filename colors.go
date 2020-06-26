@@ -43,8 +43,10 @@ func Colors() *Painter {
 	}
 }
 
-func (p *Painter) Default(color string) {
-	p.base = color
+func (p *Painter) Default(color ...string) {
+	if len(color) > 0 {
+		p.base = color[0]
+	}
 }
 func (p *Painter) Black(v interface{}) string {
 	return fmt.Sprintf("%s%v%s", p.Color.Black, v, p.base)
