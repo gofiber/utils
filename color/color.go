@@ -306,7 +306,7 @@ func (c *Color) PrintfFunc() func(format string, a ...interface{}) {
 // colorized with color.Fprintln().
 func (c *Color) FprintlnFunc() func(w io.Writer, a ...interface{}) {
 	return func(w io.Writer, a ...interface{}) {
-		c.Fprintln(w, a...)
+		_, _ = c.Fprintln(w, a...)
 	}
 }
 
@@ -314,7 +314,7 @@ func (c *Color) FprintlnFunc() func(w io.Writer, a ...interface{}) {
 // colorized with color.Println().
 func (c *Color) PrintlnFunc() func(a ...interface{}) {
 	return func(a ...interface{}) {
-		c.Println(a...)
+		_, _ = c.Println(a...)
 	}
 }
 
