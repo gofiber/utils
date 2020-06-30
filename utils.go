@@ -28,6 +28,10 @@ import (
 const toLowerTable = "\x00\x01\x02\x03\x04\x05\x06\a\b\t\n\v\f\r\x0e\x0f\x10\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1a\x1b\x1c\x1d\x1e\x1f !\"#$%&'()*+,-./0123456789:;<=>?@abcdefghijklmnopqrstuvwxyz[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~\u007f\x80\x81\x82\x83\x84\x85\x86\x87\x88\x89\x8a\x8b\x8c\x8d\x8e\x8f\x90\x91\x92\x93\x94\x95\x96\x97\x98\x99\x9a\x9b\x9c\x9d\x9e\x9f\xa0\xa1\xa2\xa3\xa4\xa5\xa6\xa7\xa8\xa9\xaa\xab\xac\xad\xae\xaf\xb0\xb1\xb2\xb3\xb4\xb5\xb6\xb7\xb8\xb9\xba\xbb\xbc\xbd\xbe\xbf\xc0\xc1\xc2\xc3\xc4\xc5\xc6\xc7\xc8\xc9\xca\xcb\xcc\xcd\xce\xcf\xd0\xd1\xd2\xd3\xd4\xd5\xd6\xd7\xd8\xd9\xda\xdb\xdc\xdd\xde\xdf\xe0\xe1\xe2\xe3\xe4\xe5\xe6\xe7\xe8\xe9\xea\xeb\xec\xed\xee\xef\xf0\xf1\xf2\xf3\xf4\xf5\xf6\xf7\xf8\xf9\xfa\xfb\xfc\xfd\xfe\xff"
 const toUpperTable = "\x00\x01\x02\x03\x04\x05\x06\a\b\t\n\v\f\r\x0e\x0f\x10\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1a\x1b\x1c\x1d\x1e\x1f !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`ABCDEFGHIJKLMNOPQRSTUVWXYZ{|}~\u007f\x80\x81\x82\x83\x84\x85\x86\x87\x88\x89\x8a\x8b\x8c\x8d\x8e\x8f\x90\x91\x92\x93\x94\x95\x96\x97\x98\x99\x9a\x9b\x9c\x9d\x9e\x9f\xa0\xa1\xa2\xa3\xa4\xa5\xa6\xa7\xa8\xa9\xaa\xab\xac\xad\xae\xaf\xb0\xb1\xb2\xb3\xb4\xb5\xb6\xb7\xb8\xb9\xba\xbb\xbc\xbd\xbe\xbf\xc0\xc1\xc2\xc3\xc4\xc5\xc6\xc7\xc8\xc9\xca\xcb\xcc\xcd\xce\xcf\xd0\xd1\xd2\xd3\xd4\xd5\xd6\xd7\xd8\xd9\xda\xdb\xdc\xdd\xde\xdf\xe0\xe1\xe2\xe3\xe4\xe5\xe6\xe7\xe8\xe9\xea\xeb\xec\xed\xee\xef\xf0\xf1\xf2\xf3\xf4\xf5\xf6\xf7\xf8\xf9\xfa\xfb\xfc\xfd\xfe\xff"
 
+func init() {
+	initStatusMessage()
+}
+
 // Returns total memory in bytes
 func MemoryTotal() uint64 {
 	return memory.TotalMemory()
@@ -346,73 +350,80 @@ func GetArgument(arg string) bool {
 
 // StatusMessage ...
 func StatusMessage(status int) string {
+	if status > statusMessageLimit {
+		return ""
+	}
 	return statusMessage[status]
 }
 
 // HTTP status codes were copied from net/http.
-var statusMessage = map[int]string{
-	100: "Continue",
-	101: "Switching Protocols",
-	102: "Processing",
-	103: "Early Hints",
-	200: "OK",
-	201: "Created",
-	202: "Accepted",
-	203: "Non-Authoritative Information",
-	204: "No Content",
-	205: "Reset Content",
-	206: "Partial Content",
-	207: "Multi-Status",
-	208: "Already Reported",
-	226: "IM Used",
-	300: "Multiple Choices",
-	301: "Moved Permanently",
-	302: "Found",
-	303: "See Other",
-	304: "Not Modified",
-	305: "Use Proxy",
-	306: "Switch Proxy",
-	307: "Temporary Redirect",
-	308: "Permanent Redirect",
-	400: "Bad Request",
-	401: "Unauthorized",
-	402: "Payment Required",
-	403: "Forbidden",
-	404: "Not Found",
-	405: "Method Not Allowed",
-	406: "Not Acceptable",
-	407: "Proxy Authentication Required",
-	408: "Request Timeout",
-	409: "Conflict",
-	410: "Gone",
-	411: "Length Required",
-	412: "Precondition Failed",
-	413: "Request Entity Too Large",
-	414: "Request URI Too Long",
-	415: "Unsupported Media Type",
-	416: "Requested Range Not Satisfiable",
-	417: "Expectation Failed",
-	418: "I'm a teapot",
-	421: "Misdirected Request",
-	422: "Unprocessable Entity",
-	423: "Locked",
-	424: "Failed Dependency",
-	426: "Upgrade Required",
-	428: "Precondition Required",
-	429: "Too Many Requests",
-	431: "Request Header Fields Too Large",
-	451: "Unavailable For Legal Reasons",
-	500: "Internal Server Error",
-	501: "Not Implemented",
-	502: "Bad Gateway",
-	503: "Service Unavailable",
-	504: "Gateway Timeout",
-	505: "HTTP Version Not Supported",
-	506: "Variant Also Negotiates",
-	507: "Insufficient Storage",
-	508: "Loop Detected",
-	510: "Not Extended",
-	511: "Network Authentication Required",
+const statusMessageLimit = 600
+
+var statusMessage = make([]string, statusMessageLimit)
+
+func initStatusMessage() {
+	statusMessage[100] = "Continue"
+	statusMessage[101] = "Switching Protocols"
+	statusMessage[102] = "Processing"
+	statusMessage[103] = "Early Hints"
+	statusMessage[200] = "OK"
+	statusMessage[201] = "Created"
+	statusMessage[202] = "Accepted"
+	statusMessage[203] = "Non-Authoritative Information"
+	statusMessage[204] = "No Content"
+	statusMessage[205] = "Reset Content"
+	statusMessage[206] = "Partial Content"
+	statusMessage[207] = "Multi-Status"
+	statusMessage[208] = "Already Reported"
+	statusMessage[226] = "IM Used"
+	statusMessage[300] = "Multiple Choices"
+	statusMessage[301] = "Moved Permanently"
+	statusMessage[302] = "Found"
+	statusMessage[303] = "See Other"
+	statusMessage[304] = "Not Modified"
+	statusMessage[305] = "Use Proxy"
+	statusMessage[306] = "Switch Proxy"
+	statusMessage[307] = "Temporary Redirect"
+	statusMessage[308] = "Permanent Redirect"
+	statusMessage[400] = "Bad Request"
+	statusMessage[401] = "Unauthorized"
+	statusMessage[402] = "Payment Required"
+	statusMessage[403] = "Forbidden"
+	statusMessage[404] = "Not Found"
+	statusMessage[405] = "Method Not Allowed"
+	statusMessage[406] = "Not Acceptable"
+	statusMessage[407] = "Proxy Authentication Required"
+	statusMessage[408] = "Request Timeout"
+	statusMessage[409] = "Conflict"
+	statusMessage[410] = "Gone"
+	statusMessage[411] = "Length Required"
+	statusMessage[412] = "Precondition Failed"
+	statusMessage[413] = "Request Entity Too Large"
+	statusMessage[414] = "Request URI Too Long"
+	statusMessage[415] = "Unsupported Media Type"
+	statusMessage[416] = "Requested Range Not Satisfiable"
+	statusMessage[417] = "Expectation Failed"
+	statusMessage[418] = "I'm a teapot"
+	statusMessage[421] = "Misdirected Request"
+	statusMessage[422] = "Unprocessable Entity"
+	statusMessage[423] = "Locked"
+	statusMessage[424] = "Failed Dependency"
+	statusMessage[426] = "Upgrade Required"
+	statusMessage[428] = "Precondition Required"
+	statusMessage[429] = "Too Many Requests"
+	statusMessage[431] = "Request Header Fields Too Large"
+	statusMessage[451] = "Unavailable For Legal Reasons"
+	statusMessage[500] = "Internal Server Error"
+	statusMessage[501] = "Not Implemented"
+	statusMessage[502] = "Bad Gateway"
+	statusMessage[503] = "Service Unavailable"
+	statusMessage[504] = "Gateway Timeout"
+	statusMessage[505] = "HTTP Version Not Supported"
+	statusMessage[506] = "Variant Also Negotiates"
+	statusMessage[507] = "Insufficient Storage"
+	statusMessage[508] = "Loop Detected"
+	statusMessage[510] = "Not Extended"
+	statusMessage[511] = "Network Authentication Required"
 }
 
 // MIME types were copied from https://github.com/nginx/nginx/blob/master/conf/mime.types
