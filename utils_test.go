@@ -190,6 +190,15 @@ func Test_Utils_StatusMessage(t *testing.T) {
 
 	res = StatusMessage(1337)
 	AssertEqual(t, "", res)
+
+	res = StatusMessage(-1)
+	AssertEqual(t, "", res)
+
+	res = StatusMessage(0)
+	AssertEqual(t, "", res)
+
+	res = StatusMessage(600)
+	AssertEqual(t, "", res)
 }
 
 func Test_Utils_AssertEqual(t *testing.T) {

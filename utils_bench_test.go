@@ -9,6 +9,7 @@ import (
 	"crypto/rand"
 	"fmt"
 	"mime"
+	"net/http"
 	"strings"
 	"testing"
 )
@@ -72,7 +73,6 @@ func Benchmark_GetBytes(b *testing.B) {
 }
 
 // go test -v -run=^$ -bench=Benchmark_GetMIME -benchmem -count=2
-
 func Benchmark_GetMIME(b *testing.B) {
 	var res string
 	b.Run("fiber", func(b *testing.B) {
@@ -95,6 +95,15 @@ func Benchmark_GetMIME(b *testing.B) {
 		}
 		AssertEqual(b, "application/json", res)
 	})
+}
+
+// go test -v -run=^$ -bench=Benchmark_StatusMessage -benchmem -count=2
+func Benchmark_StatusMessage(b *testing.B) {
+	var res string
+	for n := 0; n < b.N; n++ {
+		res = StatusMessage(http.StatusNotFound)
+	}
+	AssertEqual(b, "Not Found", res)
 }
 
 func Benchmark_ToLower(b *testing.B) {
