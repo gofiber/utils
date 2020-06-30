@@ -179,6 +179,12 @@ func Test_Utils_StatusMessage(t *testing.T) {
 	res := StatusMessage(204)
 	AssertEqual(t, "No Content", res)
 
+	res = StatusMessage(-1)
+	AssertEqual(t, "", res)
+
+	res = StatusMessage(0)
+	AssertEqual(t, "", res)
+
 	res = StatusMessage(404)
 	AssertEqual(t, "Not Found", res)
 

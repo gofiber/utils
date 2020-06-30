@@ -350,7 +350,7 @@ func GetArgument(arg string) bool {
 
 // StatusMessage ...
 func StatusMessage(status int) string {
-	if status > statusMessageLimit {
+	if status < 0 || status > statusMessageLimit {
 		return ""
 	}
 	return statusMessage[status]
