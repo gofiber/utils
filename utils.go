@@ -350,15 +350,16 @@ func GetArgument(arg string) bool {
 
 // StatusMessage ...
 func StatusMessage(status int) string {
-	if status < 0 || status > statusMessageLimit {
+	if status < 0 || status >= statusMessageLimit {
 		return ""
 	}
 	return statusMessage[status]
 }
 
-// HTTP status codes were copied from net/http.
+// limit for the access
 const statusMessageLimit = 600
 
+// HTTP status codes were copied from net/http.
 var statusMessage = make([]string, statusMessageLimit)
 
 func initStatusMessage() {
