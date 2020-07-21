@@ -237,17 +237,17 @@ func ImmutableString(s string) string {
 }
 
 // AssertEqual checks if values are equal
-func AssertEqual(t testing.TB, a interface{}, b interface{}, description ...string) {
-	if reflect.DeepEqual(a, b) {
+func AssertEqual(t testing.TB, expected interface{}, actual interface{}, description ...string) {
+	if reflect.DeepEqual(expected, actual) {
 		return
 	}
 	var aType = "<nil>"
 	var bType = "<nil>"
-	if reflect.ValueOf(a).IsValid() {
-		aType = reflect.TypeOf(a).Name()
+	if reflect.ValueOf(expected).IsValid() {
+		aType = reflect.TypeOf(expected).Name()
 	}
-	if reflect.ValueOf(b).IsValid() {
-		bType = reflect.TypeOf(b).Name()
+	if reflect.ValueOf(actual).IsValid() {
+		bType = reflect.TypeOf(actual).Name()
 	}
 
 	testName := "AssertEqual"
@@ -262,8 +262,8 @@ func AssertEqual(t testing.TB, a interface{}, b interface{}, description ...stri
 	fmt.Fprintf(w, "\nTest:\t%s", testName)
 	fmt.Fprintf(w, "\nTrace:\t%s:%d", filepath.Base(file), line)
 	fmt.Fprintf(w, "\nError:\tNot equal")
-	fmt.Fprintf(w, "\nExpect:\t%v\t[%s]", a, aType)
-	fmt.Fprintf(w, "\nResult:\t%v\t[%s]", b, bType)
+	fmt.Fprintf(w, "\nExpect:\t%v\t[%s]", expected, aType)
+	fmt.Fprintf(w, "\nResult:\t%v\t[%s]", actual, bType)
 
 	if len(description) > 0 {
 		fmt.Fprintf(w, "\nDescription:\t%s", description[0])
