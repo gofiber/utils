@@ -97,13 +97,13 @@ func Benchmark_GetMIME(b *testing.B) {
 	})
 }
 
-// go test -v -run=^$ -bench=Benchmark_StatusMessage -benchmem -count=2
+// go test -v -run=^$ -bench=Benchmark_StatusMessage -benchmem -count=4
 func Benchmark_StatusMessage(b *testing.B) {
 	var res string
 	for n := 0; n < b.N; n++ {
-		res = StatusMessage(http.StatusNotFound)
+		res = StatusMessage(http.StatusNotExtended)
 	}
-	AssertEqual(b, "Not Found", res)
+	AssertEqual(b, "Not Extended", res)
 }
 
 func Benchmark_ToLower(b *testing.B) {
