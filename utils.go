@@ -424,8 +424,6 @@ var statusMessage = []string{
 	511: "Network Authentication Required",
 }
 
-var fmMimeExtensions *fastStrMap = NewFastMap(mimeExtensions)
-
 // MIME types were copied from https://github.com/nginx/nginx/blob/master/conf/mime.types
 var mimeExtensions = map[string]string{
 	"html":    "text/html",
@@ -534,3 +532,4 @@ var mimeExtensions = map[string]string{
 	"wmv":     "video/x-ms-wmv",
 	"avi":     "video/x-msvideo",
 }
+var fmMimeExtensions *fastStrMap = NewFastMap(mimeExtensions)
