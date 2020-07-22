@@ -290,9 +290,9 @@ func GetMIME(extension string) (mime string) {
 		return mime
 	}
 	if extension[0] == '.' {
-		mime = mimeExtensions[extension[1:]]
+		mime = fmMimeExtensions.Get(extension[1:])
 	} else {
-		mime = mimeExtensions[extension]
+		mime = fmMimeExtensions.Get(extension)
 	}
 	if len(mime) == 0 {
 		return MIMEOctetStream
@@ -423,6 +423,8 @@ var statusMessage = []string{
 	510: "Not Extended",
 	511: "Network Authentication Required",
 }
+
+var fmMimeExtensions *fastStrMap = NewFastMap(mimeExtensions)
 
 // MIME types were copied from https://github.com/nginx/nginx/blob/master/conf/mime.types
 var mimeExtensions = map[string]string{
