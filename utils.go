@@ -174,6 +174,15 @@ func TrimRight(s string, cutset byte) string {
 	return s[:lenStr]
 }
 
+// TrimRightBytes is the equivalent of bytes.TrimRight
+func TrimRightBytes(b []byte, cutset byte) []byte {
+	lenStr := len(b)
+	for lenStr > 0 && b[lenStr-1] == cutset {
+		lenStr--
+	}
+	return b[:lenStr]
+}
+
 // TrimLeft is the equivalent of strings.TrimLeft
 func TrimLeft(s string, cutset byte) string {
 	lenStr, start := len(s), 0
@@ -181,6 +190,15 @@ func TrimLeft(s string, cutset byte) string {
 		start++
 	}
 	return s[start:]
+}
+
+// TrimLeftBytes is the equivalent of bytes.TrimLeft
+func TrimLeftBytes(b []byte, cutset byte) []byte {
+	lenStr, start := len(b), 0
+	for start < lenStr && b[start] == cutset {
+		start++
+	}
+	return b[start:]
 }
 
 // Trim is the equivalent of strings.Trim
@@ -198,6 +216,23 @@ func Trim(s string, cutset byte) string {
 	}
 
 	return s[i : j+1]
+}
+
+// TrimBytes is the equivalent of bytes.Trim
+func TrimBytes(b []byte, cutset byte) []byte {
+	i, j := 0, len(b)-1
+	for ; i < j; i++ {
+		if b[i] != cutset {
+			break
+		}
+	}
+	for ; i < j; j-- {
+		if b[j] != cutset {
+			break
+		}
+	}
+
+	return b[i : j+1]
 }
 
 // EqualFold the equivalent of bytes.EqualFold

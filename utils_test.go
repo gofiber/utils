@@ -104,6 +104,35 @@ func Test_Utils_Trim(t *testing.T) {
 	AssertEqual(t, "test", res)
 }
 
+func Test_Utils_TrimRightBytes(t *testing.T) {
+	t.Parallel()
+	res := TrimRightBytes([]byte("/test//////"), '/')
+	AssertEqual(t, []byte("/test"), res)
+
+	res = TrimRightBytes([]byte("/test"), '/')
+	AssertEqual(t, []byte("/test"), res)
+}
+
+func Test_Utils_TrimLeftBytes(t *testing.T) {
+	t.Parallel()
+	res := TrimLeftBytes([]byte("////test/"), '/')
+	AssertEqual(t, []byte("test/"), res)
+
+	res = TrimLeftBytes([]byte("test/"), '/')
+	AssertEqual(t, []byte("test/"), res)
+}
+func Test_Utils_TrimBytes(t *testing.T) {
+	t.Parallel()
+	res := TrimBytes([]byte("   test  "), ' ')
+	AssertEqual(t, []byte("test"), res)
+
+	res = TrimBytes([]byte("test"), ' ')
+	AssertEqual(t, []byte("test"), res)
+
+	res = TrimBytes([]byte(".test"), '.')
+	AssertEqual(t, []byte("test"), res)
+}
+
 // func Test_Utils_getArgument(t *testing.T) {
 // 	// TODO
 // }

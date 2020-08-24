@@ -217,6 +217,24 @@ func Benchmark_Trim(b *testing.B) {
 		AssertEqual(b, "foobar", res)
 	})
 }
+
+func Benchmark_TrimBytes(b *testing.B) {
+	var res []byte
+
+	b.Run("fiber", func(b *testing.B) {
+		for n := 0; n < b.N; n++ {
+			res = TrimBytes([]byte("  foobar   "), ' ')
+		}
+		AssertEqual(b, []byte("foobar"), res)
+	})
+	b.Run("default", func(b *testing.B) {
+		for n := 0; n < b.N; n++ {
+			res = bytes.Trim([]byte("  foobar   "), " ")
+		}
+		AssertEqual(b, []byte("foobar"), res)
+	})
+}
+
 func Benchmark_TrimLeft(b *testing.B) {
 	var res string
 
@@ -233,6 +251,24 @@ func Benchmark_TrimLeft(b *testing.B) {
 		AssertEqual(b, "foobar", res)
 	})
 }
+
+func Benchmark_TrimLeftBytes(b *testing.B) {
+	var res []byte
+
+	b.Run("fiber", func(b *testing.B) {
+		for n := 0; n < b.N; n++ {
+			res = TrimLeftBytes([]byte("  foobar"), ' ')
+		}
+		AssertEqual(b, []byte("foobar"), res)
+	})
+	b.Run("default", func(b *testing.B) {
+		for n := 0; n < b.N; n++ {
+			res = bytes.TrimLeft([]byte("  foobar"), " ")
+		}
+		AssertEqual(b, []byte("foobar"), res)
+	})
+}
+
 func Benchmark_TrimRight(b *testing.B) {
 	var res string
 
@@ -247,5 +283,22 @@ func Benchmark_TrimRight(b *testing.B) {
 			res = strings.TrimRight("foobar  ", " ")
 		}
 		AssertEqual(b, "foobar", res)
+	})
+}
+
+func Benchmark_TrimRightBytes(b *testing.B) {
+	var res []byte
+
+	b.Run("fiber", func(b *testing.B) {
+		for n := 0; n < b.N; n++ {
+			res = TrimRightBytes([]byte("foobar  "), ' ')
+		}
+		AssertEqual(b, []byte("foobar"), res)
+	})
+	b.Run("default", func(b *testing.B) {
+		for n := 0; n < b.N; n++ {
+			res = bytes.TrimRight([]byte("foobar  "), " ")
+		}
+		AssertEqual(b, []byte("foobar"), res)
 	})
 }
