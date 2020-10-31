@@ -14,7 +14,7 @@ func Test_Utils_FunctionName(t *testing.T) {
 	t.Parallel()
 	AssertEqual(t, "_/home/runner/work/utils/utils.Test_Utils_UUID", FunctionName(Test_Utils_UUID))
 
-	AssertEqual(t, "_/home/runner/work/utils/v2/utils.Test_Utils_FunctionName.func1", FunctionName(func() {}))
+	AssertEqual(t, "_/home/runner/work/utils/utils.Test_Utils_FunctionName.func1", FunctionName(func() {}))
 
 	var dummyint = 20
 	AssertEqual(t, "int", FunctionName(dummyint))
