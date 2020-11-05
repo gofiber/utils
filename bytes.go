@@ -68,3 +68,11 @@ func EqualsFold(b, s []byte) (equals bool) {
 	}
 	return
 }
+
+// DefaultBytes returns the provided fallback value if []byte is empty
+func DefaultBytes(value []byte, defaultValue []byte) []byte {
+	if len(value) <= 0 {
+		return defaultValue
+	}
+	return value
+}

@@ -61,8 +61,8 @@ func TrimRight(s string, cutset byte) string {
 	return s[:lenStr]
 }
 
-// Default returns the provided fallback value if string is empty
-func Default(value string, defaultValue string) string {
+// DefaultString returns the provided fallback value if string is empty
+func DefaultString(value string, defaultValue string) string {
 	if len(value) <= 0 {
 		return defaultValue
 	}
