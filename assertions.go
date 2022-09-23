@@ -16,22 +16,28 @@ import (
 )
 
 // AssertEqual checks if values are equal
-func AssertEqual(t testing.TB, expected interface{}, actual interface{}, description ...string) {
+func AssertEqual(tb testing.TB, expected, actual interface{}, description ...string) {
+	if tb != nil {
+		tb.Helper()
+	}
+
 	if reflect.DeepEqual(expected, actual) {
 		return
 	}
-	var aType = "<nil>"
-	var bType = "<nil>"
-	if reflect.ValueOf(expected).IsValid() {
-		aType = reflect.TypeOf(expected).Name()
+
+	aType := "<nil>"
+	bType := "<nil>"
+
+	if expected != nil {
+		aType = reflect.TypeOf(expected).String()
 	}
-	if reflect.ValueOf(actual).IsValid() {
-		bType = reflect.TypeOf(actual).Name()
+	if actual != nil {
+		bType = reflect.TypeOf(actual).String()
 	}
 
 	testName := "AssertEqual"
-	if t != nil {
-		testName = t.Name()
+	if tb != nil {
+		testName = tb.Name()
 	}
 
 	_, file, line, _ := runtime.Caller(1)
@@ -40,13 +46,11 @@ func AssertEqual(t testing.TB, expected interface{}, actual interface{}, descrip
 	w := tabwriter.NewWriter(&buf, 0, 0, 5, ' ', 0)
 	fmt.Fprintf(w, "\nTest:\t%s", testName)
 	fmt.Fprintf(w, "\nTrace:\t%s:%d", filepath.Base(file), line)
-	fmt.Fprintf(w, "\nError:\tNot equal")
-	fmt.Fprintf(w, "\nExpect:\t%v\t[%s]", expected, aType)
-	fmt.Fprintf(w, "\nResult:\t%v\t[%s]", actual, bType)
-
 	if len(description) > 0 {
 		fmt.Fprintf(w, "\nDescription:\t%s", description[0])
 	}
+	fmt.Fprintf(w, "\nExpect:\t%v\t(%s)", expected, aType)
+	fmt.Fprintf(w, "\nResult:\t%v\t(%s)", actual, bType)
 
 	result := ""
 	if err := w.Flush(); err != nil {
@@ -54,8 +58,9 @@ func AssertEqual(t testing.TB, expected interface{}, actual interface{}, descrip
 	} else {
 		result = buf.String()
 	}
-	if t != nil {
-		t.Fatal(result)
+
+	if tb != nil {
+		tb.Fatal(result)
 	} else {
 		log.Fatal(result)
 	}
