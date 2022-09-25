@@ -61,10 +61,10 @@ func Test_EqualFold(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
-		res := EqualFold[string](tc.S1, tc.S2)
+		res := EqualFold(tc.S1, tc.S2)
 		require.Equal(t, tc.Expected, res, "string")
 
-		res = EqualFold[[]byte]([]byte(tc.S1), []byte(tc.S2))
+		res = EqualFold([]byte(tc.S1), []byte(tc.S2))
 		require.Equal(t, tc.Expected, res, "bytes")
 	}
 }
