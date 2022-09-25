@@ -59,3 +59,20 @@ func Test_DefaultXMLEncoder(t *testing.T) {
 
 	require.Equal(t, string(raw), xmlString)
 }
+
+func Test_DefaultXMLDecoder(t *testing.T) {
+	t.Parallel()
+
+	var (
+		ss         serversXMLStructure
+		xmlBytes                = []byte(xmlString)
+		xmlDecoder XMLUnmarshal = xml.Unmarshal
+	)
+
+	err := xmlDecoder(xmlBytes, &ss)
+	require.Nil(t, err)
+	require.Equal(t, 2, len(ss.Servers))
+	require.Equal(t, "1", ss.Version)
+	require.Equal(t, "fiber one", ss.Servers[0].Name)
+	require.Equal(t, "fiber two", ss.Servers[1].Name)
+}
