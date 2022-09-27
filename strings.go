@@ -28,6 +28,7 @@ func ToUpper(b string) string {
 	return UnsafeString(res)
 }
 
+// NormalizeSpaces removes unnecessary spaces from string
 func NormalizeSpaces(b string) string {
 	res := strings.Join(strings.Fields(b), " ")
 
