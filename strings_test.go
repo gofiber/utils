@@ -17,9 +17,11 @@ func Test_ToUpper(t *testing.T) {
 }
 
 const (
-	largeStr = "/RePos/GoFiBer/FibEr/iSsues/187643/CoMmEnts/RePos/GoFiBer/FibEr/iSsues/CoMmEnts"
-	upperStr = "/REPOS/GOFIBER/FIBER/ISSUES/187643/COMMENTS/REPOS/GOFIBER/FIBER/ISSUES/COMMENTS"
-	lowerStr = "/repos/gofiber/fiber/issues/187643/comments/repos/gofiber/fiber/issues/comments"
+	largeStr             = "/RePos/GoFiBer/FibEr/iSsues/187643/CoMmEnts/RePos/GoFiBer/FibEr/iSsues/CoMmEnts"
+	upperStr             = "/REPOS/GOFIBER/FIBER/ISSUES/187643/COMMENTS/REPOS/GOFIBER/FIBER/ISSUES/COMMENTS"
+	lowerStr             = "/repos/gofiber/fiber/issues/187643/comments/repos/gofiber/fiber/issues/comments"
+	unnecessarySpacesStr = " /repos/gofiber/fiber/issues/187643/comments/repos/gofiber/fiber/issues/comments  "
+	normSpacesStr        = "/repos/gofiber/fiber/issues/187643/comments/repos/gofiber/fiber/issues/comments"
 )
 
 func Benchmark_ToUpper(b *testing.B) {
@@ -60,5 +62,27 @@ func Benchmark_ToLower(b *testing.B) {
 			res = strings.ToLower(largeStr)
 		}
 		require.Equal(b, lowerStr, res)
+	})
+}
+
+func Test_NormalizeSpaces(t *testing.T) {
+	t.Parallel()
+	require.Equal(t, "/MY/NAME/IS/: PARAM/*", NormalizeSpaces(" /MY/NAME/IS/: PARAM/*  "))
+	require.Equal(t, "/MY /NAME/IS/: PARAM/*", NormalizeSpaces("  /MY /NAME/IS/: PARAM/*"))
+}
+
+func Benchmark_NormalizeSpaces(b *testing.B) {
+	var res string
+	b.Run("fiber", func(b *testing.B) {
+		for n := 0; n < b.N; n++ {
+			res = NormalizeSpaces(unnecessarySpacesStr)
+		}
+		require.Equal(b, normSpacesStr, res)
+	})
+	b.Run("default", func(b *testing.B) {
+		for n := 0; n < b.N; n++ {
+			res = strings.Join(strings.Fields(unnecessarySpacesStr), " ")
+		}
+		require.Equal(b, normSpacesStr, res)
 	})
 }

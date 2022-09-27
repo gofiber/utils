@@ -4,6 +4,8 @@
 
 package utils
 
+import "strings"
+
 // ToLower converts ascii string to lower-case
 func ToLower(b string) string {
 	res := make([]byte, len(b))
@@ -24,4 +26,10 @@ func ToUpper(b string) string {
 	}
 
 	return UnsafeString(res)
+}
+
+func NormalizeSpaces(b string) string {
+	res := strings.Join(strings.Fields(b), " ")
+
+	return UnsafeString([]byte(res))
 }
