@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1666035088044,
+  "lastUpdate": 1666035193375,
   "repoUrl": "https://github.com/gofiber/utils",
   "entries": {
     "Benchmark": [
@@ -1620,6 +1620,186 @@ window.BENCHMARK_DATA = {
             "value": 251.4,
             "unit": "ns/op\t      80 B/op\t       1 allocs/op",
             "extra": "4731067 times\n2 procs"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "efectn@protonmail.com",
+            "name": "Muhammed Efe Çetin",
+            "username": "efectn"
+          },
+          "committer": {
+            "email": "efectn@protonmail.com",
+            "name": "Muhammed Efe Çetin",
+            "username": "efectn"
+          },
+          "distinct": true,
+          "id": "77200dae849839af700047d7ef712379ee656628",
+          "message": ":sparkles: http: update mime type of js (https://github.com/gofiber/fiber/commit/9a6002056c4c1e76a44f0c68a0d7c27c39e09507\\#diff-7f1417e0dd9749e9228a9aa79d64d8080e662f106d9c491bd8a669a50dd3940a)",
+          "timestamp": "2022-10-17T22:32:03+03:00",
+          "tree_id": "778db26f9ed234520b24329272fe9ea8dc427888",
+          "url": "https://github.com/gofiber/utils/commit/77200dae849839af700047d7ef712379ee656628"
+        },
+        "date": 1666035192865,
+        "tool": "go",
+        "benches": [
+          {
+            "name": "Benchmark_ToLowerBytes/fiber",
+            "value": 56.18,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "21787359 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerBytes/default",
+            "value": 156.6,
+            "unit": "ns/op\t      80 B/op\t       1 allocs/op",
+            "extra": "7117555 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_ToUpperBytes/fiber",
+            "value": 71.7,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "16776342 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_ToUpperBytes/default",
+            "value": 172.7,
+            "unit": "ns/op\t      80 B/op\t       1 allocs/op",
+            "extra": "7014139 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_EqualFoldBytes/fiber",
+            "value": 72.18,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "16247488 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_EqualFoldBytes/default",
+            "value": 341.8,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "3445705 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_EqualFold/fiber",
+            "value": 74.32,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "14270066 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_EqualFold/default",
+            "value": 292.4,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "3941223 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_UUID/fiber",
+            "value": 79.32,
+            "unit": "ns/op\t      48 B/op\t       1 allocs/op",
+            "extra": "15290523 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_UUID/default",
+            "value": 539.1,
+            "unit": "ns/op\t     168 B/op\t       6 allocs/op",
+            "extra": "2219472 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_ConvertToBytes/fiber",
+            "value": 36.18,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "31911806 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_UnsafeString/unsafe",
+            "value": 0.8755,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "1000000000 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_UnsafeString/default",
+            "value": 29.39,
+            "unit": "ns/op\t      16 B/op\t       1 allocs/op",
+            "extra": "37365487 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_UnsafeBytes/unsafe",
+            "value": 4.033,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "300541257 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_UnsafeBytes/default",
+            "value": 34.43,
+            "unit": "ns/op\t      16 B/op\t       1 allocs/op",
+            "extra": "31246909 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_ToString",
+            "value": 80.26,
+            "unit": "ns/op\t      40 B/op\t       2 allocs/op",
+            "extra": "14665153 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_GetMIME/fiber",
+            "value": 93.09,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "12695732 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_GetMIME/default",
+            "value": 176.9,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "6605978 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_ParseVendorSpecificContentType/vendorContentType",
+            "value": 79.04,
+            "unit": "ns/op\t      16 B/op\t       1 allocs/op",
+            "extra": "14519412 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_ParseVendorSpecificContentType/defaultContentType",
+            "value": 8.871,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "136970218 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_StatusMessage/fiber",
+            "value": 1.374,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "886959278 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_StatusMessage/default",
+            "value": 4.348,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "266567185 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_ToUpper/fiber",
+            "value": 97.65,
+            "unit": "ns/op\t      80 B/op\t       1 allocs/op",
+            "extra": "12141001 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_ToUpper/default",
+            "value": 292,
+            "unit": "ns/op\t      80 B/op\t       1 allocs/op",
+            "extra": "4096370 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_ToLower/fiber",
+            "value": 107.5,
+            "unit": "ns/op\t      80 B/op\t       1 allocs/op",
+            "extra": "10950343 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_ToLower/default",
+            "value": 294.9,
+            "unit": "ns/op\t      80 B/op\t       1 allocs/op",
+            "extra": "4036696 times\n2 procs"
           }
         ]
       }
