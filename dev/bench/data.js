@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1666164095081,
+  "lastUpdate": 1666164425195,
   "repoUrl": "https://github.com/gofiber/utils",
   "entries": {
     "Benchmark": [
@@ -2652,6 +2652,222 @@ window.BENCHMARK_DATA = {
             "value": 53.4,
             "unit": "ns/op\t       0 B/op\t       0 allocs/op",
             "extra": "22419747 times\n2 procs"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "rene@gofiber.io",
+            "name": "RW",
+            "username": "ReneWerner87"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "b802ab8fe427d589a83ccc9407e66dcea36d8259",
+          "message": "Merge pull request #33 from gofiber/add_timestamp_calculator\n\nAdd timestamp calculation functionality",
+          "timestamp": "2022-10-19T09:25:58+02:00",
+          "tree_id": "3bc7756cb51e79106a27b5bd930696bc9e6cba25",
+          "url": "https://github.com/gofiber/utils/commit/b802ab8fe427d589a83ccc9407e66dcea36d8259"
+        },
+        "date": 1666164424632,
+        "tool": "go",
+        "benches": [
+          {
+            "name": "Benchmark_ToLowerBytes/fiber",
+            "value": 61.36,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "19478707 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerBytes/default",
+            "value": 133.6,
+            "unit": "ns/op\t      80 B/op\t       1 allocs/op",
+            "extra": "9294303 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_ToUpperBytes/fiber",
+            "value": 51.64,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "23269221 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_ToUpperBytes/default",
+            "value": 143.9,
+            "unit": "ns/op\t      80 B/op\t       1 allocs/op",
+            "extra": "8165335 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_EqualFoldBytes/fiber",
+            "value": 64.27,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "18600465 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_EqualFoldBytes/default",
+            "value": 294,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "4075800 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_EqualFold/fiber",
+            "value": 63.19,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "18966458 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_EqualFold/default",
+            "value": 251.6,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "4768768 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_UUID/fiber",
+            "value": 65.4,
+            "unit": "ns/op\t      48 B/op\t       1 allocs/op",
+            "extra": "17767620 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_UUID/default",
+            "value": 454.1,
+            "unit": "ns/op\t     168 B/op\t       6 allocs/op",
+            "extra": "2549032 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_ConvertToBytes/fiber",
+            "value": 31.86,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "37351856 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_UnsafeString/unsafe",
+            "value": 0.7539,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "1000000000 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_UnsafeString/default",
+            "value": 25.06,
+            "unit": "ns/op\t      16 B/op\t       1 allocs/op",
+            "extra": "43223984 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_UnsafeBytes/unsafe",
+            "value": 3.35,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "357460388 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_UnsafeBytes/default",
+            "value": 29.27,
+            "unit": "ns/op\t      16 B/op\t       1 allocs/op",
+            "extra": "38070214 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_ToString",
+            "value": 70.29,
+            "unit": "ns/op\t      40 B/op\t       2 allocs/op",
+            "extra": "16803764 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_GetMIME/fiber",
+            "value": 80.59,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "14899438 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_GetMIME/default",
+            "value": 150.4,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "7976533 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_ParseVendorSpecificContentType/vendorContentType",
+            "value": 64.92,
+            "unit": "ns/op\t      16 B/op\t       1 allocs/op",
+            "extra": "17578916 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_ParseVendorSpecificContentType/defaultContentType",
+            "value": 7.723,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "155356402 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_StatusMessage/fiber",
+            "value": 1.173,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "1000000000 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_StatusMessage/default",
+            "value": 3.682,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "325925680 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_IsIPv4/fiber",
+            "value": 25.2,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "47734399 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_IsIPv4/default",
+            "value": 62.24,
+            "unit": "ns/op\t      16 B/op\t       1 allocs/op",
+            "extra": "18502516 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_IsIPv6/fiber",
+            "value": 83.69,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "14353524 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_IsIPv6/default",
+            "value": 134.3,
+            "unit": "ns/op\t      16 B/op\t       1 allocs/op",
+            "extra": "8824191 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_ToUpper/fiber",
+            "value": 82.17,
+            "unit": "ns/op\t      80 B/op\t       1 allocs/op",
+            "extra": "14442058 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_ToUpper/default",
+            "value": 249.1,
+            "unit": "ns/op\t      80 B/op\t       1 allocs/op",
+            "extra": "4438894 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_ToLower/fiber",
+            "value": 91.44,
+            "unit": "ns/op\t      80 B/op\t       1 allocs/op",
+            "extra": "11619141 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_ToLower/default",
+            "value": 248.3,
+            "unit": "ns/op\t      80 B/op\t       1 allocs/op",
+            "extra": "4808232 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_CalculateTimestamp/fiber",
+            "value": 0.3714,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "1000000000 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_CalculateTimestamp/default",
+            "value": 53.49,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "22426952 times\n2 procs"
           }
         ]
       }
