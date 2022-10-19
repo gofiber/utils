@@ -9,6 +9,7 @@ import (
 var (
 	timestampTimer sync.Once
 	// Timestamp please start the timer function before you use this value
+	// please load the value with atomic `atomic.LoadUint32(&utils.Timestamp)`
 	Timestamp uint32
 )
 
