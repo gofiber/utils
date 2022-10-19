@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -18,13 +19,13 @@ func Test_TimeStampUpdater(t *testing.T) {
 	StartTimeStampUpdater()
 
 	now := uint32(time.Now().Unix())
-	checkTimeStamp(t, now, Timestamp.Load())
+	checkTimeStamp(t, now, atomic.LoadUint32(&Timestamp))
 	// one second later
 	time.Sleep(1 * time.Second)
-	checkTimeStamp(t, now+1, Timestamp.Load())
+	checkTimeStamp(t, now+1, atomic.LoadUint32(&Timestamp))
 	// two seconds later
 	time.Sleep(1 * time.Second)
-	checkTimeStamp(t, now+2, Timestamp.Load())
+	checkTimeStamp(t, now+2, atomic.LoadUint32(&Timestamp))
 }
 
 func Benchmark_CalculateTimestamp(b *testing.B) {
@@ -33,7 +34,7 @@ func Benchmark_CalculateTimestamp(b *testing.B) {
 	var res uint32
 	b.Run("fiber", func(b *testing.B) {
 		for n := 0; n < b.N; n++ {
-			res = Timestamp.Load()
+			res = atomic.LoadUint32(&Timestamp)
 		}
 		checkTimeStamp(b, uint32(time.Now().Unix()), res)
 	})
