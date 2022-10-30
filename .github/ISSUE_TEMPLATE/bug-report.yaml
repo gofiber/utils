@@ -60,7 +60,7 @@ body:
       value: |
         package main
 
-        import "github.com/gofiber/utils"
+        import "github.com/gofiber/utils/v2"
 
         func main() {
           // Steps to reproduce
