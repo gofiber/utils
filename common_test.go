@@ -14,9 +14,9 @@ import (
 
 func Test_FunctionName(t *testing.T) {
 	t.Parallel()
-	require.Equal(t, "github.com/gofiber/utils.Test_UUID", FunctionName(Test_UUID))
+	require.Equal(t, "github.com/gofiber/utils/v2.Test_UUID", FunctionName(Test_UUID))
 
-	require.Equal(t, "github.com/gofiber/utils.Test_FunctionName.func1", FunctionName(func() {}))
+	require.Equal(t, "github.com/gofiber/utils/v2.Test_FunctionName.func1", FunctionName(func() {}))
 
 	dummyint := 20
 	require.Equal(t, "int", FunctionName(dummyint))
