@@ -27,6 +27,12 @@ func Test_IsIPv4(t *testing.T) {
 	require.Equal(t, false, IsIPv4(""))
 	require.Equal(t, false, IsIPv4("2345:0425:2CA1::0567:5673:23b5"))
 	require.Equal(t, false, IsIPv4("invalid"))
+	require.Equal(t, false, IsIPv4("189.12.34.260"))
+	require.Equal(t, false, IsIPv4("189.12.260.260"))
+	require.Equal(t, false, IsIPv4("189.260.260.260"))
+	require.Equal(t, false, IsIPv4("999.999.999.999"))
+	require.Equal(t, false, IsIPv4("9999.9999.9999.9999"))
+
 }
 
 // go test -v -run=^$ -bench=UnsafeString -benchmem -count=2

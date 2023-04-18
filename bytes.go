@@ -4,7 +4,7 @@
 
 package utils
 
-// ToLowerBytes converts ascii slice to lower-case in-place.
+// ToLowerBytes converts ascii slice to lower-case
 func ToLowerBytes(b []byte) []byte {
 	for i := 0; i < len(b); i++ {
 		b[i] = toLowerTable[b[i]]
@@ -12,7 +12,7 @@ func ToLowerBytes(b []byte) []byte {
 	return b
 }
 
-// ToUpperBytes converts ascii slice to upper-case in-place.
+// ToUpperBytes converts ascii slice to upper-case
 func ToUpperBytes(b []byte) []byte {
 	for i := 0; i < len(b); i++ {
 		b[i] = toUpperTable[b[i]]

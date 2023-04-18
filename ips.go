@@ -26,7 +26,7 @@ func IsIPv4(s string) bool {
 			}
 		}
 
-		if ci == 0 || n > 0xFF || (ci > 1 && s[0] == '0') {
+		if ci == 0 || (ci > 1 && s[0] == '0') {
 			return false
 		}
 

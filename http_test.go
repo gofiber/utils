@@ -25,9 +25,18 @@ func Test_GetMIME(t *testing.T) {
 
 	res = GetMIME("unknown")
 	require.Equal(t, MIMEOctetStream, res)
+
 	// empty case
 	res = GetMIME("")
 	require.Equal(t, "", res)
+
+	err := mime.AddExtensionType(".mjs", "application/javascript")
+	if err == nil {
+		res = GetMIME(".mjs")
+		require.Equal(t, "application/javascript", res)
+	}
+	require.NoError(t, err)
+
 }
 
 // go test -v -run=^$ -bench=Benchmark_GetMIME -benchmem -count=2
