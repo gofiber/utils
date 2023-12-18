@@ -4,6 +4,7 @@ import (
 	"io/fs"
 	"net/http"
 	"os"
+	"runtime"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -15,7 +16,13 @@ func Test_ReadFile(t *testing.T) {
 	testFS := http.FS(os.DirFS(".github/tests"))
 	file, err := ReadFile("john.txt", testFS)
 
-	require.Equal(t, string(file), "doe\n")
+	switch runtime.GOOS {
+	case "windows":
+		require.Equal(t, string(file), "doe\r\n")
+	default:
+		require.Equal(t, string(file), "doe\n")
+	}
+
 	require.NoError(t, err)
 }
 
