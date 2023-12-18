@@ -21,9 +21,6 @@ jobs:
     env:
       GO111MODULE: on
     steps:
-      - name: Fetch Repository
-        uses: actions/checkout@v4
-
       - name: Install Go
         uses: actions/setup-go@v5
         with:
@@ -33,6 +30,9 @@ jobs:
 
       - name: Install Govulncheck
         run: go install golang.org/x/vuln/cmd/govulncheck@latest
+
+      - name: Fetch Repository
+        uses: actions/checkout@v4
 
       - name: Run Govulncheck
         run: govulncheck ./...
