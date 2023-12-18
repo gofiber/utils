@@ -1,19 +1,38 @@
-on: [push, pull_request_target]
 name: Vulnerability Check
+
+on:
+  push:
+    branches:
+      - master
+      - main
+    paths:
+      - "**"
+      - "!docs/**"
+      - "!**.md"
+  pull_request:
+    paths:
+      - "**"
+      - "!docs/**"
+      - "!**.md"
+
 jobs:
-  Security:
+  govulncheck-check:
     runs-on: ubuntu-latest
+    env:
+      GO111MODULE: on
     steps:
-    - name: Install Go
-      uses: actions/setup-go@v5
-      with:
-        go-version: 1.19.x
-    - name: Fetch Repository
-      uses: actions/checkout@v3
-    - name: Install Govulncheck
-      run: |
-          export GO111MODULE=on
-          export PATH=${PATH}:`go env GOPATH`/bin
-          go install golang.org/x/vuln/cmd/govulncheck@latest
-    - name: Run Govulncheck
-      run: "`go env GOPATH`/bin/govulncheck ./..."
+      - name: Fetch Repository
+        uses: actions/checkout@v4
+
+      - name: Install Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "stable"
+          check-latest: true
+          cache: false
+
+      - name: Install Govulncheck
+        run: go install golang.org/x/vuln/cmd/govulncheck@latest
+
+      - name: Run Govulncheck
+        run: govulncheck ./...
