@@ -92,8 +92,7 @@ func ByteSize(bytes uint64) string {
 
 // ToString Change arg to string
 func ToString(arg any, timeFormat ...string) string {
-	var tmp = reflect.Indirect(reflect.ValueOf(arg)).Interface()
-	switch v := tmp.(type) {
+	switch v := arg.(type) {
 	case int:
 		return strconv.Itoa(v)
 	case int8:
@@ -134,6 +133,12 @@ func ToString(arg any, timeFormat ...string) string {
 	case fmt.Stringer:
 		return v.String()
 	default:
+		// Check if the type is a pointer by using reflection
+		rv := reflect.ValueOf(arg)
+		if rv.Kind() == reflect.Ptr && !rv.IsNil() {
+			// Dereference the pointer and recursively call ToString
+			return ToString(rv.Elem().Interface(), timeFormat...)
+		}
 		return ""
 	}
 }
