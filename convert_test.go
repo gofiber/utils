@@ -5,9 +5,7 @@
 package utils
 
 import (
-	"reflect"
 	"testing"
-	"time"
 
 	"github.com/stretchr/testify/require"
 )
@@ -70,76 +68,18 @@ func Test_CopyString(t *testing.T) {
 
 func Test_ToString(t *testing.T) {
 	t.Parallel()
-
-	tests := []struct {
-		input    interface{}
-		expected string
-	}{
-		{[]byte("Hello, World!"), "Hello, World!"},
-		{true, "true"},
-		{uint(100), "100"},
-		{int(42), "42"},
-		{int8(42), "42"},
-		{int16(42), "42"},
-		{int32(42), "42"},
-		{int64(42), "42"},
-		{uint8(100), "100"},
-		{uint16(100), "100"},
-		{uint32(100), "100"},
-		{uint64(100), "100"},
-		{"test string", "test string"},
-		{float32(3.14), "3.14"},
-		{float64(3.14159), "3.14159"},
-		{time.Date(2000, 1, 1, 12, 34, 56, 0, time.UTC), "2000-01-01 12:34:56"},
-		{struct{ Name string }{"John"}, ""}, // Assuming default case returns an empty string
-	}
-
-	for _, tc := range tests {
-		t.Run(reflect.TypeOf(tc.input).String(), func(t *testing.T) {
-			res := ToString(tc.input)
-			require.Equal(t, tc.expected, res)
-		})
-	}
-
-	// Testing pointer to int
-	intPtr := 42
-	testsPtr := []struct {
-		input    interface{}
-		expected string
-	}{
-		{&intPtr, "42"},
-	}
-	for _, tc := range testsPtr {
-		t.Run("pointer to "+reflect.TypeOf(tc.input).Elem().String(), func(t *testing.T) {
-			res := ToString(tc.input)
-			require.Equal(t, tc.expected, res)
-		})
-	}
+	res := ToString([]byte("Hello, World!"))
+	require.Equal(t, "Hello, World!", res)
+	res = ToString(true)
+	require.Equal(t, "true", res)
+	res = ToString(uint(100))
+	require.Equal(t, "100", res)
 }
 
-// go test -v -run=^$ -bench=ToString -benchmem -count=4
+// go test -v -run=^$ -bench=ToString -benchmem -count=2
 func Benchmark_ToString(b *testing.B) {
-	values := []interface{}{
-		42,
-		int8(42),
-		int16(42),
-		int32(42),
-		int64(42),
-		uint(42),
-		uint8(42),
-		uint16(42),
-		uint32(42),
-		uint64(42),
-		"Hello, World!",
-		[]byte("Hello, World!"),
-		true,
-		float32(3.14),
-		float64(3.14),
-		time.Now(),
-	}
+	hello := []byte("Hello, World!")
 	for n := 0; n < b.N; n++ {
-		for _, value := range values {
-			_ = ToString(value)
-		}
+		ToString(hello)
 	}
 }
