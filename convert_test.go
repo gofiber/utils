@@ -91,7 +91,7 @@ func Test_ToString(t *testing.T) {
 		{float32(3.14), "3.14"},
 		{float64(3.14159), "3.14159"},
 		{time.Date(2000, 1, 1, 12, 34, 56, 0, time.UTC), "2000-01-01 12:34:56"},
-		{struct{ Name string }{"John"}, "{John}"}, // Assuming default case returns an empty string
+		{struct{ Name string }{"John"}, "{John}"},
 	}
 
 	for _, tc := range tests {
