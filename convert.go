@@ -138,7 +138,20 @@ func ToString(arg any, timeFormat ...string) string {
 		if rv.Kind() == reflect.Ptr && !rv.IsNil() {
 			// Dereference the pointer and recursively call ToString
 			return ToString(rv.Elem().Interface(), timeFormat...)
+		} else if rv.Kind() == reflect.Slice || rv.Kind() == reflect.Array {
+			// handle slices
+			var buf strings.Builder
+			buf.WriteString("[")
+			for i := 0; i < rv.Len(); i++ {
+				if i > 0 {
+					buf.WriteString(" ")
+				}
+				buf.WriteString(ToString(rv.Index(i).Interface()))
+			}
+			buf.WriteString("]")
+			return buf.String()
 		}
+
 		// For types not explicitly handled, use fmt.Sprint to generate a string representation
 		return fmt.Sprint(arg)
 	}
