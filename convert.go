@@ -139,6 +139,7 @@ func ToString(arg any, timeFormat ...string) string {
 			// Dereference the pointer and recursively call ToString
 			return ToString(rv.Elem().Interface(), timeFormat...)
 		}
-		return ""
+		// For types not explicitly handled, use fmt.Sprint to generate a string representation
+		return fmt.Sprint(arg)
 	}
 }
