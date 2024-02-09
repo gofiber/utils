@@ -12,6 +12,33 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+var dataTypeExamples []interface{}
+
+func init() {
+	dataTypeExamples = []interface{}{
+		42,
+		int8(42),
+		int16(42),
+		int32(42),
+		int64(42),
+		uint(42),
+		uint8(42),
+		uint16(42),
+		uint32(42),
+		uint64(42),
+		"Hello, World!",
+		[]byte("Hello, World!"),
+		true,
+		float32(3.14),
+		float64(3.14),
+		time.Now(),
+		[]string{"Hello", "World"},
+		[]int{42, 21},
+		[2]int{42, 21},
+		[]interface{}{[]int{42, 21}, 42, "Hello", true, []string{"Hello", "World"}},
+	}
+}
+
 func Test_UnsafeString(t *testing.T) {
 	t.Parallel()
 	res := UnsafeString([]byte("Hello, World!"))
@@ -127,31 +154,23 @@ func Test_ToString(t *testing.T) {
 
 // go test -v -run=^$ -bench=ToString -benchmem -count=4
 func Benchmark_ToString(b *testing.B) {
-	values := []interface{}{
-		42,
-		int8(42),
-		int16(42),
-		int32(42),
-		int64(42),
-		uint(42),
-		uint8(42),
-		uint16(42),
-		uint32(42),
-		uint64(42),
-		"Hello, World!",
-		[]byte("Hello, World!"),
-		true,
-		float32(3.14),
-		float64(3.14),
-		time.Now(),
-		[]string{"Hello", "World"},
-		[]int{42, 21},
-		[2]int{42, 21},
-		[]interface{}{[]int{42, 21}, 42, "Hello", true, []string{"Hello", "World"}},
-	}
-	for _, value := range values {
+	for _, value := range dataTypeExamples {
 		b.Run(reflect.TypeOf(value).String(), func(b *testing.B) {
 			b.ReportAllocs()
+			b.ResetTimer()
+			for i := 0; i < b.N; i++ {
+				_ = ToString(value)
+			}
+		})
+	}
+}
+
+// go test -v -run=^$ -bench=ToString_concurrency -benchmem -count=4
+func Benchmark_ToString_concurrency(b *testing.B) {
+	for _, value := range dataTypeExamples {
+		b.Run(reflect.TypeOf(value).String(), func(b *testing.B) {
+			b.ReportAllocs()
+			b.ResetTimer()
 			b.RunParallel(func(pb *testing.PB) {
 				for pb.Next() {
 					_ = ToString(value)
