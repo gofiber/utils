@@ -3,7 +3,7 @@ module github.com/gofiber/utils/v2
 go 1.19
 
 require (
-	github.com/google/uuid v1.5.0
+	github.com/google/uuid v1.6.0
 	github.com/stretchr/testify v1.8.4
 )
 
