@@ -23,7 +23,6 @@ func UnsafeString(b []byte) string {
 
 // #nosec G103
 // UnsafeBytes returns a byte pointer without allocation.
-// String length shouldn't be more than 2147418112.
 func UnsafeBytes(s string) []byte {
 	return unsafe.Slice(unsafe.StringData(s), len(s))
 }
