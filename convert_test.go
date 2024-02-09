@@ -92,10 +92,12 @@ func Test_ToString(t *testing.T) {
 		{float64(3.14159), "3.14159"},
 		{time.Date(2000, 1, 1, 12, 34, 56, 0, time.UTC), "2000-01-01 12:34:56"},
 		{struct{ Name string }{"John"}, "{John}"},
+		{[]string{"Hello", "World"}, "[Hello World]"},
 	}
 
 	for _, tc := range tests {
 		t.Run(reflect.TypeOf(tc.input).String(), func(t *testing.T) {
+			t.Parallel()
 			res := ToString(tc.input)
 			require.Equal(t, tc.expected, res)
 		})
@@ -111,6 +113,7 @@ func Test_ToString(t *testing.T) {
 	}
 	for _, tc := range testsPtr {
 		t.Run("pointer to "+reflect.TypeOf(tc.input).Elem().String(), func(t *testing.T) {
+			t.Parallel()
 			res := ToString(tc.input)
 			require.Equal(t, tc.expected, res)
 		})
@@ -136,10 +139,16 @@ func Benchmark_ToString(b *testing.B) {
 		float32(3.14),
 		float64(3.14),
 		time.Now(),
+		[]string{"Hello", "World"},
 	}
-	for n := 0; n < b.N; n++ {
-		for _, value := range values {
-			_ = ToString(value)
-		}
+	for _, value := range values {
+		b.Run(reflect.TypeOf(value).String(), func(b *testing.B) {
+			b.ReportAllocs()
+			b.RunParallel(func(pb *testing.PB) {
+				for pb.Next() {
+					_ = ToString(value)
+				}
+			})
+		})
 	}
 }
