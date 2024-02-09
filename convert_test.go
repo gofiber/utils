@@ -93,9 +93,13 @@ func Test_ToString(t *testing.T) {
 		{time.Date(2000, 1, 1, 12, 34, 56, 0, time.UTC), "2000-01-01 12:34:56"},
 		{struct{ Name string }{"John"}, "{John}"},
 		{[]string{"Hello", "World"}, "[Hello World]"},
+		{[]int{42, 21}, "[42 21]"},
+		{[2]int{42, 21}, "[42 21]"},
+		{[]interface{}{[]int{42, 21}, 42, "Hello", true, []string{"Hello", "World"}}, "[[42 21] 42 Hello true [Hello World]]"},
 	}
 
 	for _, tc := range tests {
+		tc := tc
 		t.Run(reflect.TypeOf(tc.input).String(), func(t *testing.T) {
 			t.Parallel()
 			res := ToString(tc.input)
@@ -112,6 +116,7 @@ func Test_ToString(t *testing.T) {
 		{&intPtr, "42"},
 	}
 	for _, tc := range testsPtr {
+		tc := tc
 		t.Run("pointer to "+reflect.TypeOf(tc.input).Elem().String(), func(t *testing.T) {
 			t.Parallel()
 			res := ToString(tc.input)
@@ -140,6 +145,9 @@ func Benchmark_ToString(b *testing.B) {
 		float64(3.14),
 		time.Now(),
 		[]string{"Hello", "World"},
+		[]int{42, 21},
+		[2]int{42, 21},
+		[]interface{}{[]int{42, 21}, 42, "Hello", true, []string{"Hello", "World"}},
 	}
 	for _, value := range values {
 		b.Run(reflect.TypeOf(value).String(), func(b *testing.B) {
