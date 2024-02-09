@@ -12,6 +12,34 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+var dataTypeExamples []interface{}
+
+func init() {
+	dataTypeExamples = []interface{}{
+		42,
+		int8(42),
+		int16(42),
+		int32(42),
+		int64(42),
+		uint(42),
+		uint8(42),
+		uint16(42),
+		uint32(42),
+		uint64(42),
+		"Hello, World!",
+		[]byte("Hello, World!"),
+		true,
+		float32(3.14),
+		float64(3.14),
+		time.Now(),
+		[]string{"Hello", "World"},
+		[]int{42, 21},
+		[2]int{42, 21},
+		[][]int{{42, 21}, {42, 21}},
+		[]interface{}{[]int{42, 21}, 42, "Hello", true, []string{"Hello", "World"}},
+	}
+}
+
 func Test_UnsafeString(t *testing.T) {
 	t.Parallel()
 	res := UnsafeString([]byte("Hello, World!"))
@@ -92,10 +120,17 @@ func Test_ToString(t *testing.T) {
 		{float64(3.14159), "3.14159"},
 		{time.Date(2000, 1, 1, 12, 34, 56, 0, time.UTC), "2000-01-01 12:34:56"},
 		{struct{ Name string }{"John"}, "{John}"},
+		{[]string{"Hello", "World"}, "[Hello World]"},
+		{[]int{42, 21}, "[42 21]"},
+		{[2]int{42, 21}, "[42 21]"},
+		{[][]int{{42, 21}, {42, 21}}, "[[42 21] [42 21]]"},
+		{[]interface{}{[]int{42, 21}, 42, "Hello", true, []string{"Hello", "World"}}, "[[42 21] 42 Hello true [Hello World]]"},
 	}
 
 	for _, tc := range tests {
+		tc := tc
 		t.Run(reflect.TypeOf(tc.input).String(), func(t *testing.T) {
+			t.Parallel()
 			res := ToString(tc.input)
 			require.Equal(t, tc.expected, res)
 		})
@@ -110,7 +145,9 @@ func Test_ToString(t *testing.T) {
 		{&intPtr, "42"},
 	}
 	for _, tc := range testsPtr {
+		tc := tc
 		t.Run("pointer to "+reflect.TypeOf(tc.input).Elem().String(), func(t *testing.T) {
+			t.Parallel()
 			res := ToString(tc.input)
 			require.Equal(t, tc.expected, res)
 		})
@@ -119,27 +156,28 @@ func Test_ToString(t *testing.T) {
 
 // go test -v -run=^$ -bench=ToString -benchmem -count=4
 func Benchmark_ToString(b *testing.B) {
-	values := []interface{}{
-		42,
-		int8(42),
-		int16(42),
-		int32(42),
-		int64(42),
-		uint(42),
-		uint8(42),
-		uint16(42),
-		uint32(42),
-		uint64(42),
-		"Hello, World!",
-		[]byte("Hello, World!"),
-		true,
-		float32(3.14),
-		float64(3.14),
-		time.Now(),
+	for _, value := range dataTypeExamples {
+		b.Run(reflect.TypeOf(value).String(), func(b *testing.B) {
+			b.ReportAllocs()
+			b.ResetTimer()
+			for i := 0; i < b.N; i++ {
+				_ = ToString(value)
+			}
+		})
 	}
-	for n := 0; n < b.N; n++ {
-		for _, value := range values {
-			_ = ToString(value)
-		}
+}
+
+// go test -v -run=^$ -bench=ToString_concurrency -benchmem -count=4
+func Benchmark_ToString_concurrency(b *testing.B) {
+	for _, value := range dataTypeExamples {
+		b.Run(reflect.TypeOf(value).String(), func(b *testing.B) {
+			b.ReportAllocs()
+			b.ResetTimer()
+			b.RunParallel(func(pb *testing.PB) {
+				for pb.Next() {
+					_ = ToString(value)
+				}
+			})
+		})
 	}
 }
