@@ -35,6 +35,7 @@ func init() {
 		[]string{"Hello", "World"},
 		[]int{42, 21},
 		[2]int{42, 21},
+		[][]int{{42, 21}, {42, 21}},
 		[]interface{}{[]int{42, 21}, 42, "Hello", true, []string{"Hello", "World"}},
 	}
 }
@@ -122,6 +123,7 @@ func Test_ToString(t *testing.T) {
 		{[]string{"Hello", "World"}, "[Hello World]"},
 		{[]int{42, 21}, "[42 21]"},
 		{[2]int{42, 21}, "[42 21]"},
+		{[][]int{{42, 21}, {42, 21}}, "[[42 21] [42 21]]"},
 		{[]interface{}{[]int{42, 21}, 42, "Hello", true, []string{"Hello", "World"}}, "[[42 21] 42 Hello true [Hello World]]"},
 	}
 
