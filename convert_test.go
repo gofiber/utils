@@ -57,12 +57,18 @@ func Benchmark_UnsafeString(b *testing.B) {
 		}
 		require.Equal(b, "Hello, World!", res)
 	})
-	b.Run("default", func(b *testing.B) {
+	b.Run("unsafe_old", func(b *testing.B) {
 		for n := 0; n < b.N; n++ {
-			res = string(hello)
+			res = UnsafeString_old(hello)
 		}
 		require.Equal(b, "Hello, World!", res)
 	})
+	//b.Run("default", func(b *testing.B) {
+	//	for n := 0; n < b.N; n++ {
+	//		res = string(hello)
+	//	}
+	//	require.Equal(b, "Hello, World!", res)
+	//})
 }
 
 func Test_UnsafeBytes(t *testing.T) {
@@ -82,12 +88,18 @@ func Benchmark_UnsafeBytes(b *testing.B) {
 		}
 		require.Equal(b, []byte("Hello, World!"), res)
 	})
-	b.Run("default", func(b *testing.B) {
+	b.Run("unsafe_old", func(b *testing.B) {
 		for n := 0; n < b.N; n++ {
-			res = []byte(hello)
+			res = UnsafeBytes_old(hello)
 		}
 		require.Equal(b, []byte("Hello, World!"), res)
 	})
+	//b.Run("default", func(b *testing.B) {
+	//	for n := 0; n < b.N; n++ {
+	//		res = []byte(hello)
+	//	}
+	//	require.Equal(b, []byte("Hello, World!"), res)
+	//})
 }
 
 func Test_CopyString(t *testing.T) {
