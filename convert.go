@@ -17,7 +17,7 @@ import (
 // UnsafeString returns a string pointer without allocation
 func UnsafeString(b []byte) string {
 	// the new way is slower `return unsafe.String(unsafe.SliceData(b), len(b))`
-	// unsafe.Pointer variant: 0.5410 ns/op vs unsafe.String variant: 0.3538 ns/op
+	// unsafe.Pointer variant: 0.3538 ns/op vs unsafe.String variant: 0.5410 ns/op
 	return *(*string)(unsafe.Pointer(&b))
 }
 
