@@ -21,7 +21,6 @@ func Walk(fs http.FileSystem, root string, walkFn filepath.WalkFunc) error {
 	return walk(fs, root, info, walkFn)
 }
 
-// #nosec G304
 // ReadFile returns the raw content of a file
 func ReadFile(path string, fs http.FileSystem) ([]byte, error) {
 	if fs != nil {
@@ -32,7 +31,7 @@ func ReadFile(path string, fs http.FileSystem) ([]byte, error) {
 		defer file.Close()
 		return io.ReadAll(file)
 	}
-	return os.ReadFile(path)
+	return os.ReadFile(path) // #nosec G304
 }
 
 // readDirNames reads the directory named by dirname and returns
