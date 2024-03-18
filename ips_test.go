@@ -14,6 +14,7 @@ import (
 func Test_IsIPv4(t *testing.T) {
 	t.Parallel()
 
+	require.Equal(t, true, IsIPv4("255.255.255.255"))
 	require.Equal(t, true, IsIPv4("174.23.33.100"))
 	require.Equal(t, true, IsIPv4("127.0.0.1"))
 	require.Equal(t, true, IsIPv4("0.0.0.0"))
@@ -30,6 +31,7 @@ func Test_IsIPv4(t *testing.T) {
 	require.Equal(t, false, IsIPv4("189.12.34.260"))
 	require.Equal(t, false, IsIPv4("189.12.260.260"))
 	require.Equal(t, false, IsIPv4("189.260.260.260"))
+	require.Equal(t, false, IsIPv4("255.255.255.256"))
 	require.Equal(t, false, IsIPv4("999.999.999.999"))
 	require.Equal(t, false, IsIPv4("9999.9999.9999.9999"))
 
