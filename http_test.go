@@ -26,6 +26,12 @@ func Test_GetMIME(t *testing.T) {
 	res = GetMIME("unknown")
 	require.Equal(t, MIMEOctetStream, res)
 
+	res := GetMIME(".zst")
+	require.Equal(t, "application/zstd", res)
+
+	res := GetMIME("zst")
+	require.Equal(t, "application/zstd", res)
+
 	// empty case
 	res = GetMIME("")
 	require.Equal(t, "", res)

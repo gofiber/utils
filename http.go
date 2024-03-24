@@ -232,6 +232,7 @@ var mimeExtensions = map[string]string{
 	"xhtml":   "application/xhtml+xml",
 	"xspf":    "application/xspf+xml",
 	"zip":     "application/zip",
+	"zst":     "application/zstd",
 	"bin":     "application/octet-stream",
 	"exe":     "application/octet-stream",
 	"dll":     "application/octet-stream",
