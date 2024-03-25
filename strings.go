@@ -46,13 +46,7 @@ func IfToLower(s string) string {
 	if !hasUpper {
 		return s
 	}
-	res := make([]byte, len(s))
-	copy(res, s)
-	for i := 0; i < len(res); i++ {
-		res[i] = toLowerTable[res[i]]
-	}
-
-	return UnsafeString(res)
+	return ToLower(s)
 }
 
 // IfToUpper returns an uppercase version of the input ASCII string.
@@ -75,11 +69,5 @@ func IfToUpper(s string) string {
 	if !hasLower {
 		return s
 	}
-	res := make([]byte, len(s))
-	copy(res, s)
-	for i := 0; i < len(res); i++ {
-		res[i] = toUpperTable[res[i]]
-	}
-
-	return UnsafeString(res)
+	return ToUpper(s)
 }
