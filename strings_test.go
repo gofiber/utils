@@ -25,6 +25,18 @@ func Benchmark_ToUpper(b *testing.B) {
 		}
 		AssertEqual(b, "/REPOS/GOFIBER/FIBER/ISSUES/187643/COMMENTS", res)
 	})
+	b.Run("IfToUpper-Upper", func(b *testing.B) {
+		for n := 0; n < b.N; n++ {
+			res = IfToUpper(upperStr)
+		}
+		require.Equal(b, upperStr, res)
+	})
+	b.Run("IfToUpper-Mixed", func(b *testing.B) {
+		for n := 0; n < b.N; n++ {
+			res = IfToUpper(largeStr)
+		}
+		require.Equal(b, upperStr, res)
+	})
 	b.Run("default", func(b *testing.B) {
 		for n := 0; n < b.N; n++ {
 			res = strings.ToUpper(path)
@@ -55,6 +67,18 @@ func Benchmark_ToLower(b *testing.B) {
 			res = ToLower(path)
 		}
 		AssertEqual(b, "/repos/gofiber/fiber/issues/187643/comments", res)
+	})
+	b.Run("IfToLower-Lower", func(b *testing.B) {
+		for n := 0; n < b.N; n++ {
+			res = IfToLower(lowerStr)
+		}
+		require.Equal(b, lowerStr, res)
+	})
+	b.Run("IfToLower-Mixed", func(b *testing.B) {
+		for n := 0; n < b.N; n++ {
+			res = IfToLower(largeStr)
+		}
+		require.Equal(b, lowerStr, res)
 	})
 	b.Run("default", func(b *testing.B) {
 		for n := 0; n < b.N; n++ {
@@ -145,5 +169,44 @@ func Benchmark_Trim(b *testing.B) {
 			res = strings.TrimSpace("  foobar   ")
 		}
 		AssertEqual(b, "foobar", res)
+	})
+}
+
+func Test_IfToUpper(t *testing.T) {
+	t.Parallel()
+	require.Equal(t, "MYNAMEISPARAM", IfToUpper("MYNAMEISPARAM")) // already uppercase
+	require.Equal(t, "MYNAMEISPARAM", IfToUpper("mynameisparam")) // lowercase to uppercase
+	require.Equal(t, "MYNAMEISPARAM", IfToUpper("MyNameIsParam")) // mixed case
+}
+
+func Test_IfToLower(t *testing.T) {
+	t.Parallel()
+	require.Equal(t, "mynameisparam", IfToLower("mynameisparam"))           // already lowercase
+	require.Equal(t, "mynameisparam", IfToLower("myNameIsParam"))           // mixed case
+	require.Equal(t, "https://gofiber.io", IfToLower("https://gofiber.io")) // Origin Header Type URL
+	require.Equal(t, "mynameisparam", IfToLower("MYNAMEISPARAM"))           // uppercase to lowercase
+}
+
+// Benchmark_IfToLower_HeadersOrigin benchmarks the IfToLower function with an origin header type URL.
+// These headers are typically lowercase, so the function should return the input string without modification.
+func Benchmark_IfToToLower_HeadersOrigin(b *testing.B) {
+	var res string
+	b.Run("fiber", func(b *testing.B) {
+		for n := 0; n < b.N; n++ {
+			res = ToLower("https://gofiber.io")
+		}
+		require.Equal(b, "https://gofiber.io", res)
+	})
+	b.Run("IfToLower-Lower", func(b *testing.B) {
+		for n := 0; n < b.N; n++ {
+			res = IfToLower("https://gofiber.io")
+		}
+		require.Equal(b, "https://gofiber.io", res)
+	})
+	b.Run("default", func(b *testing.B) {
+		for n := 0; n < b.N; n++ {
+			res = strings.ToLower("https://gofiber.io")
+		}
+		require.Equal(b, "https://gofiber.io", res)
 	})
 }
