@@ -69,7 +69,7 @@ func DefaultString(value string, defaultValue string) string {
 	return value
 }
 
-// IfToUpper returns an lowercase version of the input ASCII string.
+// IfToLower returns an lowercase version of the input ASCII string.
 //
 // It first checks if the string contains any uppercase characters before converting it.
 //
