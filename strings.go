@@ -25,3 +25,49 @@ func ToUpper(b string) string {
 
 	return UnsafeString(res)
 }
+
+// IfToUpper returns an lowercase version of the input ASCII string.
+//
+// It first checks if the string contains any uppercase characters before converting it.
+//
+// For strings that are already lowercase,this function will be faster than `ToLower`.
+//
+// In the case of mixed-case or uppercase strings, this function will be slightly slower than `ToLower`.
+func IfToLower(s string) string {
+	hasUpper := false
+	for i := 0; i < len(s); i++ {
+		c := s[i]
+		if toLowerTable[c] != c {
+			hasUpper = true
+			break
+		}
+	}
+
+	if !hasUpper {
+		return s
+	}
+	return ToLower(s)
+}
+
+// IfToUpper returns an uppercase version of the input ASCII string.
+//
+// It first checks if the string contains any lowercase characters before converting it.
+//
+// For strings that are already uppercase,this function will be faster than `ToUpper`.
+//
+// In the case of mixed-case or lowercase strings, this function will be slightly slower than `ToUpper`.
+func IfToUpper(s string) string {
+	hasLower := false
+	for i := 0; i < len(s); i++ {
+		c := s[i]
+		if toUpperTable[c] != c {
+			hasLower = true
+			break
+		}
+	}
+
+	if !hasLower {
+		return s
+	}
+	return ToUpper(s)
+}
