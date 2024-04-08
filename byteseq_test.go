@@ -8,6 +8,32 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+func Test_EqualFold(t *testing.T) {
+	t.Parallel()
+	testCases := []struct {
+		Expected bool
+		S1       string
+		S2       string
+	}{
+		{Expected: true, S1: "/MY/NAME/IS/:PARAM/*", S2: "/my/name/is/:param/*"},
+		{Expected: true, S1: "/MY/NAME/IS/:PARAM/*", S2: "/my/name/is/:param/*"},
+		{Expected: true, S1: "/MY1/NAME/IS/:PARAM/*", S2: "/MY1/NAME/IS/:PARAM/*"},
+		{Expected: false, S1: "/my2/name/is/:param/*", S2: "/my2/name"},
+		{Expected: false, S1: "/dddddd", S2: "eeeeee"},
+		{Expected: false, S1: "\na", S2: "*A"},
+		{Expected: true, S1: "/MY3/NAME/IS/:PARAM/*", S2: "/my3/name/is/:param/*"},
+		{Expected: true, S1: "/MY4/NAME/IS/:PARAM/*", S2: "/my4/nAME/IS/:param/*"},
+	}
+
+	for _, tc := range testCases {
+		res := EqualFold(tc.S1, tc.S2)
+		require.Equal(t, tc.Expected, res, "string")
+
+		res = EqualFold([]byte(tc.S1), []byte(tc.S2))
+		require.Equal(t, tc.Expected, res, "bytes")
+	}
+}
+
 func Benchmark_EqualFoldBytes(b *testing.B) {
 	left := []byte(upperStr)
 	right := []byte(lowerStr)
@@ -41,30 +67,4 @@ func Benchmark_EqualFold(b *testing.B) {
 		}
 		require.True(b, res)
 	})
-}
-
-func Test_EqualFold(t *testing.T) {
-	t.Parallel()
-	testCases := []struct {
-		Expected bool
-		S1       string
-		S2       string
-	}{
-		{Expected: true, S1: "/MY/NAME/IS/:PARAM/*", S2: "/my/name/is/:param/*"},
-		{Expected: true, S1: "/MY/NAME/IS/:PARAM/*", S2: "/my/name/is/:param/*"},
-		{Expected: true, S1: "/MY1/NAME/IS/:PARAM/*", S2: "/MY1/NAME/IS/:PARAM/*"},
-		{Expected: false, S1: "/my2/name/is/:param/*", S2: "/my2/name"},
-		{Expected: false, S1: "/dddddd", S2: "eeeeee"},
-		{Expected: false, S1: "\na", S2: "*A"},
-		{Expected: true, S1: "/MY3/NAME/IS/:PARAM/*", S2: "/my3/name/is/:param/*"},
-		{Expected: true, S1: "/MY4/NAME/IS/:PARAM/*", S2: "/my4/nAME/IS/:param/*"},
-	}
-
-	for _, tc := range testCases {
-		res := EqualFold(tc.S1, tc.S2)
-		require.Equal(t, tc.Expected, res, "string")
-
-		res = EqualFold([]byte(tc.S1), []byte(tc.S2))
-		require.Equal(t, tc.Expected, res, "bytes")
-	}
 }

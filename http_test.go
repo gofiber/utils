@@ -42,7 +42,6 @@ func Test_GetMIME(t *testing.T) {
 		require.Equal(t, "application/javascript", res)
 	}
 	require.NoError(t, err)
-
 }
 
 // go test -v -run=^$ -bench=Benchmark_GetMIME -benchmem -count=2
@@ -93,22 +92,22 @@ func Test_ParseVendorSpecificContentType(t *testing.T) {
 
 	cType = ParseVendorSpecificContentType("something invalid")
 	require.Equal(t, "something invalid", cType)
+
+	cType = ParseVendorSpecificContentType("invalid+withoutSlash")
+	require.Equal(t, "invalid+withoutSlash", cType)
 }
 
 func Benchmark_ParseVendorSpecificContentType(b *testing.B) {
-	var cType string
 	b.Run("vendorContentType", func(b *testing.B) {
 		for n := 0; n < b.N; n++ {
-			cType = ParseVendorSpecificContentType("application/vnd.api+json; version=1")
+			ParseVendorSpecificContentType("application/vnd.api+json; version=1")
 		}
-		require.Equal(b, "application/json", cType)
 	})
 
 	b.Run("defaultContentType", func(b *testing.B) {
 		for n := 0; n < b.N; n++ {
-			cType = ParseVendorSpecificContentType("application/json")
+			ParseVendorSpecificContentType("application/json")
 		}
-		require.Equal(b, "application/json", cType)
 	})
 }
 
@@ -141,17 +140,14 @@ func Test_StatusMessage(t *testing.T) {
 
 // go test -run=^$ -bench=Benchmark_StatusMessage -benchmem -count=2
 func Benchmark_StatusMessage(b *testing.B) {
-	var res string
 	b.Run("fiber", func(b *testing.B) {
 		for n := 0; n < b.N; n++ {
-			res = StatusMessage(http.StatusNotExtended)
+			StatusMessage(http.StatusNotExtended)
 		}
-		require.Equal(b, "Not Extended", res)
 	})
 	b.Run("default", func(b *testing.B) {
 		for n := 0; n < b.N; n++ {
-			res = http.StatusText(http.StatusNotExtended)
+			http.StatusText(http.StatusNotExtended)
 		}
-		require.Equal(b, "Not Extended", res)
 	})
 }

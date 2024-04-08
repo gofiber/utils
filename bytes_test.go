@@ -21,24 +21,6 @@ func Test_ToLowerBytes(t *testing.T) {
 	require.Equal(t, []byte("/my4/name/is/:param/*"), ToLowerBytes([]byte("/MY4/NAME/IS/:PARAM/*")))
 }
 
-func Benchmark_ToLowerBytes(b *testing.B) {
-	path := []byte(largeStr)
-	want := []byte(lowerStr)
-	var res []byte
-	b.Run("fiber", func(b *testing.B) {
-		for n := 0; n < b.N; n++ {
-			res = ToLowerBytes(path)
-		}
-		require.Equal(b, bytes.Equal(want, res), true)
-	})
-	b.Run("default", func(b *testing.B) {
-		for n := 0; n < b.N; n++ {
-			res = bytes.ToLower(path)
-		}
-		require.Equal(b, bytes.Equal(want, res), true)
-	})
-}
-
 func Test_ToUpperBytes(t *testing.T) {
 	t.Parallel()
 
@@ -47,6 +29,25 @@ func Test_ToUpperBytes(t *testing.T) {
 	require.Equal(t, []byte("/MY2/NAME/IS/:PARAM/*"), ToUpperBytes([]byte("/my2/name/is/:param/*")))
 	require.Equal(t, []byte("/MY3/NAME/IS/:PARAM/*"), ToUpperBytes([]byte("/my3/name/is/:param/*")))
 	require.Equal(t, []byte("/MY4/NAME/IS/:PARAM/*"), ToUpperBytes([]byte("/my4/name/is/:param/*")))
+}
+
+func Benchmark_ToLowerBytes(b *testing.B) {
+	path := []byte(largeStr)
+	want := []byte(lowerStr)
+	var res []byte
+
+	b.Run("fiber", func(b *testing.B) {
+		for n := 0; n < b.N; n++ {
+			res = ToLowerBytes(path)
+		}
+		require.True(b, bytes.Equal(want, res))
+	})
+	b.Run("default", func(b *testing.B) {
+		for n := 0; n < b.N; n++ {
+			res = bytes.ToLower(path)
+		}
+		require.True(b, bytes.Equal(want, res))
+	})
 }
 
 func Benchmark_ToUpperBytes(b *testing.B) {

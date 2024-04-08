@@ -52,25 +52,25 @@ func UUID() string {
 	}
 	// first 8 bytes differ, taking a slice of the first 16 bytes
 	x := atomic.AddUint64(&uuidCounter, 1)
-	uuid := uuidSeed
-	binary.LittleEndian.PutUint64(uuid[:8], x)
-	uuid[6], uuid[9] = uuid[9], uuid[6]
+	_uuid := uuidSeed
+	binary.LittleEndian.PutUint64(_uuid[:8], x)
+	_uuid[6], _uuid[9] = _uuid[9], _uuid[6]
 
 	// RFC4122 v4
-	uuid[6] = (uuid[6] & 0x0f) | 0x40
-	uuid[8] = uuid[8]&0x3f | 0x80
+	_uuid[6] = (_uuid[6] & 0x0f) | 0x40
+	_uuid[8] = _uuid[8]&0x3f | 0x80
 
 	// create UUID representation of the first 128 bits
 	b := make([]byte, 36)
-	hex.Encode(b[0:8], uuid[0:4])
+	hex.Encode(b[0:8], _uuid[0:4])
 	b[8] = '-'
-	hex.Encode(b[9:13], uuid[4:6])
+	hex.Encode(b[9:13], _uuid[4:6])
 	b[13] = '-'
-	hex.Encode(b[14:18], uuid[6:8])
+	hex.Encode(b[14:18], _uuid[6:8])
 	b[18] = '-'
-	hex.Encode(b[19:23], uuid[8:10])
+	hex.Encode(b[19:23], _uuid[8:10])
 	b[23] = '-'
-	hex.Encode(b[24:], uuid[10:16])
+	hex.Encode(b[24:], _uuid[10:16])
 
 	return UnsafeString(b)
 }
@@ -133,9 +133,6 @@ func ConvertToBytes(humanReadableString string) int {
 		}
 	}
 
-	if lastNumberPos < 0 {
-		return 0
-	}
 	// fetch the number part and parse it to float
 	size, err := strconv.ParseFloat(humanReadableString[:lastNumberPos+1], 64)
 	if err != nil {

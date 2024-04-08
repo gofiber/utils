@@ -18,8 +18,8 @@ jobs:
   Build:
     strategy:
       matrix:
-        go-version: [1.20.x, 1.21.x, 1.22.x]
-        platform: [ubuntu-latest, windows-latest, macos-latest]
+        go-version: [1.21.x, 1.22.x]
+        platform: [ubuntu-latest, windows-latest, macos-latest, macos-14]
     runs-on: ${{ matrix.platform }}
     steps:
       - name: Fetch Repository
@@ -30,9 +30,20 @@ jobs:
         with:
           go-version: ${{ matrix.go-version }}
 
-      - name: Run Test
-        uses: nick-fields/retry@v3
+      - name: Install gotestsum
+        run: go install gotest.tools/gotestsum@latest
+
+      - name: Test
+        run: gotestsum -f testname -- ./... -race -count=1 -shuffle=on
+
+      - name: Test
+        run: gotestsum -f testname -- ./... -race -count=1 -coverprofile=coverage.txt -covermode=atomic -shuffle=on
+
+      - name: Upload coverage reports to Codecov
+        if: ${{ matrix.platform == 'ubuntu-latest' && matrix.go-version == '1.22.x' }}
+        uses: codecov/codecov-action@v4.1.1
         with:
-          max_attempts: 3
-          timeout_minutes: 15
-          command: go test ./... -v -race -count=1
+          token: ${{ secrets.CODECOV_TOKEN }}
+          file: ./coverage.txt
+          flags: unittests
+          slug: gofiber/utils
