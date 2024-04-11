@@ -1,6 +1,8 @@
 package utils
 
-import "net"
+import (
+	"net"
+)
 
 // IsIPv4 works the same way as net.ParseIP,
 // but without check for IPv6 case and without returning net.IP slice, whereby IsIPv4 makes no allocations.

@@ -56,7 +56,6 @@ func Test_DefaultXMLEncoder(t *testing.T) {
 
 	raw, err := xmlEncoder(ss)
 	require.NoError(t, err)
-
 	require.Equal(t, string(raw), xmlString)
 }
 
@@ -70,9 +69,70 @@ func Test_DefaultXMLDecoder(t *testing.T) {
 	)
 
 	err := xmlDecoder(xmlBytes, &ss)
-	require.Nil(t, err)
-	require.Equal(t, 2, len(ss.Servers))
+	require.NoError(t, err)
+	require.Len(t, ss.Servers, 2)
 	require.Equal(t, "1", ss.Version)
 	require.Equal(t, "fiber one", ss.Servers[0].Name)
 	require.Equal(t, "fiber two", ss.Servers[1].Name)
+}
+
+func Benchmark_GolangXMLEncoder(b *testing.B) {
+	var (
+		ss = &serversXMLStructure{
+			Version: "1",
+			Servers: []serverXMLStructure{
+				{Name: "fiber one"},
+				{Name: "fiber two"},
+			},
+		}
+		xmlEncoder XMLMarshal = xml.Marshal
+	)
+
+	b.ReportAllocs()
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		_, err := xmlEncoder(ss)
+		if err != nil {
+			b.Fatal(err)
+		}
+	}
+}
+
+func Benchmark_DefaultXMLEncoder(b *testing.B) {
+	var (
+		ss = &serversXMLStructure{
+			Version: "1",
+			Servers: []serverXMLStructure{
+				{Name: "fiber one"},
+				{Name: "fiber two"},
+			},
+		}
+		xmlEncoder XMLMarshal = xml.Marshal
+	)
+
+	b.ReportAllocs()
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		_, err := xmlEncoder(ss)
+		if err != nil {
+			b.Fatal(err)
+		}
+	}
+}
+
+func Benchmark_DefaultXMLDecoder(b *testing.B) {
+	var (
+		ss         serversXMLStructure
+		xmlBytes                = []byte(xmlString)
+		xmlDecoder XMLUnmarshal = xml.Unmarshal
+	)
+
+	b.ReportAllocs()
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		err := xmlDecoder(xmlBytes, &ss)
+		if err != nil {
+			b.Fatal(err)
+		}
+	}
 }

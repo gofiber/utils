@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"errors"
 	"io"
 	"net/http"
 	"os"
@@ -18,7 +19,7 @@ func Walk(fs http.FileSystem, root string, walkFn filepath.WalkFunc) error {
 	if err != nil {
 		return walkFn(root, nil, err)
 	}
-	return walk(fs, root, info, walkFn)
+	return walkInternal(fs, root, info, walkFn)
 }
 
 // ReadFile returns the raw content of a file
@@ -28,7 +29,7 @@ func ReadFile(path string, fs http.FileSystem) ([]byte, error) {
 		if err != nil {
 			return nil, err
 		}
-		defer file.Close()
+		defer file.Close() //nolint: errcheck // No need to check error
 		return io.ReadAll(file)
 	}
 	return os.ReadFile(path) // #nosec G304
@@ -49,11 +50,11 @@ func readDirNames(fs http.FileSystem, dirname string) ([]string, error) {
 	return names, nil
 }
 
-// walk recursively descends path, calling walkFn.
-func walk(fs http.FileSystem, path string, info os.FileInfo, walkFn filepath.WalkFunc) error {
+// walkInternal recursively descends path, calling walkFn.
+func walkInternal(fs http.FileSystem, path string, info os.FileInfo, walkFn filepath.WalkFunc) error {
 	err := walkFn(path, info, nil)
 	if err != nil {
-		if info.IsDir() && err == filepath.SkipDir {
+		if info.IsDir() && errors.Is(err, filepath.SkipDir) {
 			return nil
 		}
 		return err
@@ -72,13 +73,13 @@ func walk(fs http.FileSystem, path string, info os.FileInfo, walkFn filepath.Wal
 		filename := pathpkg.Join(path, name)
 		fileInfo, err := stat(fs, filename)
 		if err != nil {
-			if err := walkFn(filename, fileInfo, err); err != nil && err != filepath.SkipDir {
+			if err := walkFn(filename, fileInfo, err); err != nil && !errors.Is(err, filepath.SkipDir) {
 				return err
 			}
 		} else {
-			err = walk(fs, filename, fileInfo, walkFn)
+			err = walkInternal(fs, filename, fileInfo, walkFn)
 			if err != nil {
-				if !fileInfo.IsDir() || err != filepath.SkipDir {
+				if !fileInfo.IsDir() || !errors.Is(err, filepath.SkipDir) {
 					return err
 				}
 			}
@@ -94,7 +95,7 @@ func readDir(fs http.FileSystem, name string) ([]os.FileInfo, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer f.Close()
+	defer f.Close() //nolint: errcheck // No need to check error
 	return f.Readdir(0)
 }
 
@@ -104,6 +105,6 @@ func stat(fs http.FileSystem, name string) (os.FileInfo, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer f.Close()
+	defer f.Close() //nolint: errcheck // No need to check error
 	return f.Stat()
 }

@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"fmt"
 	"io/fs"
 	"net/http"
 	"os"
@@ -18,9 +19,9 @@ func Test_ReadFile(t *testing.T) {
 
 	switch runtime.GOOS {
 	case "windows":
-		require.Equal(t, string(file), "doe\r\n")
+		require.Equal(t, "doe\r\n", string(file))
 	default:
-		require.Equal(t, string(file), "doe\n")
+		require.Equal(t, "doe\n", string(file))
 	}
 
 	require.NoError(t, err)
@@ -36,7 +37,7 @@ func Test_Walk(t *testing.T) {
 	}
 	var files []file
 
-	neededResults := []file{
+	expectedResults := []file{
 		{
 			path:  "example",
 			name:  "example",
@@ -55,7 +56,7 @@ func Test_Walk(t *testing.T) {
 	}
 
 	testFS := http.FS(os.DirFS(".github/tests"))
-	err := Walk(testFS, ".", func(path string, info fs.FileInfo, err error) error {
+	err := Walk(testFS, ".", func(path string, info fs.FileInfo, _ error) error {
 		if path != "." {
 			files = append(files, file{
 				path:  path,
@@ -68,5 +69,29 @@ func Test_Walk(t *testing.T) {
 	})
 
 	require.NoError(t, err)
-	require.Equal(t, files, neededResults)
+	require.Equal(t, expectedResults, files)
+}
+
+func Test_Walk_Error(t *testing.T) {
+	t.Parallel()
+
+	testFS := http.FS(os.DirFS(".github/tests"))
+	err := Walk(testFS, "nonexistent", func(path string, _ fs.FileInfo, _ error) error {
+		return fmt.Errorf("file not found: %s", path)
+	})
+
+	require.Error(t, err)
+}
+
+func Test_ReadFile_Error(t *testing.T) {
+	t.Parallel()
+
+	// Test error when file does not exist
+	testFS := http.FS(os.DirFS(".github/tests"))
+	_, err := ReadFile("nonexistent.txt", testFS)
+	require.Error(t, err)
+
+	// Test error when file does not exist and fs is nil
+	_, err = ReadFile("nonexistent.txt", nil)
+	require.Error(t, err)
 }
