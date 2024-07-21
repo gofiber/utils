@@ -60,18 +60,18 @@ Benchmark_UnsafeBytes/default-12               52615048        22.33 ns/op      
 Benchmark_ToString-12                          22981430        51.72 ns/op      40 B/op       2 allocs/op
 Benchmark_ToString-12                          22956476        52.93 ns/op      40 B/op       2 allocs/op
 
-Benchmark_ItoA/fiber             (pos_num)-12  190428255        6.13 ns/op       0 B/op       0 allocs/op
-Benchmark_ItoA/fiber             (pos_num)-12  196626811        6.08 ns/op       0 B/op       0 allocs/op
-Benchmark_ItoA/strconv.Itoa      (pos_num)-12   80716807       14.33 ns/op       4 B/op       1 allocs/op
-Benchmark_ItoA/strconv.Itoa      (pos_num)-12   80445802       14.30 ns/op       4 B/op       1 allocs/op
-Benchmark_ItoA/strconv.FormatInt_(pos_num)-12   81137728       14.30 ns/op       4 B/op       1 allocs/op
-Benchmark_ItoA/strconv.FormatInt_(pos_num)-12   81345360       14.49 ns/op       4 B/op       1 allocs/op
-Benchmark_ItoA/fiber             (neg_num)-12  151121002        7.81 ns/op       0 B/op       0 allocs/op
-Benchmark_ItoA/fiber             (neg_num)-12  153566410        7.70 ns/op       0 B/op       0 allocs/op
-Benchmark_ItoA/strconv.Itoa      (neg_num)-12   84505304       13.75 ns/op       5 B/op       1 allocs/op
-Benchmark_ItoA/strconv.Itoa      (neg_num)-12   82524801       13.76 ns/op       5 B/op       1 allocs/op
-Benchmark_ItoA/strconv.FormatInt (neg_num)-12   84884136       13.88 ns/op       5 B/op       1 allocs/op
-Benchmark_ItoA/strconv.FormatInt (neg_num)-12   85829492       13.76 ns/op       5 B/op       1 allocs/op
+Benchmark_ItoA/fiber             (pos_num)-12  186969812        6.25 ns/op       0 B/op       0 allocs/op
+Benchmark_ItoA/fiber             (pos_num)-12  193965686        6.16 ns/op       0 B/op       0 allocs/op
+Benchmark_ItoA/strconv.Itoa      (pos_num)-12   80716807       14.42 ns/op       4 B/op       1 allocs/op
+Benchmark_ItoA/strconv.Itoa      (pos_num)-12   80445802       14.85 ns/op       4 B/op       1 allocs/op
+Benchmark_ItoA/strconv.FormatInt_(pos_num)-12   81137728       14.52 ns/op       4 B/op       1 allocs/op
+Benchmark_ItoA/strconv.FormatInt_(pos_num)-12   81345360       14.51 ns/op       4 B/op       1 allocs/op
+Benchmark_ItoA/fiber             (neg_num)-12  192902048        6.18 ns/op       0 B/op       0 allocs/op
+Benchmark_ItoA/fiber             (neg_num)-12  194245189        6.14 ns/op       0 B/op       0 allocs/op
+Benchmark_ItoA/strconv.Itoa      (neg_num)-12   84505304       13.55 ns/op       5 B/op       1 allocs/op
+Benchmark_ItoA/strconv.Itoa      (neg_num)-12   82524801       13.54 ns/op       5 B/op       1 allocs/op
+Benchmark_ItoA/strconv.FormatInt (neg_num)-12   84884136       13.63 ns/op       5 B/op       1 allocs/op
+Benchmark_ItoA/strconv.FormatInt (neg_num)-12   85829492       13.63 ns/op       5 B/op       1 allocs/op
 
 Benchmark_GetMIME/fiber-12                     15782622        74.99 ns/op       0 B/op       0 allocs/op
 Benchmark_GetMIME/fiber-12                     13992375        93.13 ns/op       0 B/op       0 allocs/op
