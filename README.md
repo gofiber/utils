@@ -17,7 +17,7 @@ pkg: github.com/gofiber/utils
 cpu: Intel(R) Core(TM) i7-9750H CPU @ 2.60GHz
 
 ```go
-// go test -benchmem -run=^$ -bench=Benchmark  -count=2
+// go test -benchmem -run=^$ -bench=Benchmark_  -count=2
 
 Benchmark_ToLowerBytes/fiber-12                29715831        36.44 ns/op       0 B/op       0 allocs/op
 Benchmark_ToLowerBytes/fiber-12                33316479        36.28 ns/op       0 B/op       0 allocs/op
