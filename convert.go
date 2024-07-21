@@ -11,6 +11,8 @@ import (
 	"strings"
 	"time"
 	"unsafe"
+
+	"github.com/valyala/fasthttp"
 )
 
 // UnsafeString returns a string pointer without allocation
@@ -150,4 +152,20 @@ func ToString(arg any, timeFormat ...string) string {
 		// For types not explicitly handled, use fmt.Sprint to generate a string representation
 		return fmt.Sprint(arg)
 	}
+}
+
+// AppendInt appends the string representation of the int n to dst and returns the extended buffer.
+func AppendInt(dst []byte, n int) []byte {
+	if n < 0 {
+		// Convert the number to positive
+		n = -n
+		dst = fasthttp.AppendUint(dst, n)
+		// add '-' in front of the number
+		dst = append(dst[:1], dst...)
+		dst[0] = '-'
+
+		return dst
+	}
+
+	return fasthttp.AppendUint(dst, n)
 }

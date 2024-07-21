@@ -17,7 +17,7 @@ pkg: github.com/gofiber/utils
 cpu: Intel(R) Core(TM) i7-9750H CPU @ 2.60GHz
 
 ```go
-// go test -benchmem -run=^$ -bench=Benchmark_ -count=2
+// go test -benchmem -run=^$ -bench=Benchmark  -count=2
 
 Benchmark_ToLowerBytes/fiber-12                29715831        36.44 ns/op       0 B/op       0 allocs/op
 Benchmark_ToLowerBytes/fiber-12                33316479        36.28 ns/op       0 B/op       0 allocs/op
@@ -60,6 +60,19 @@ Benchmark_UnsafeBytes/default-12               52615048        22.33 ns/op      
 Benchmark_ToString-12                          22981430        51.72 ns/op      40 B/op       2 allocs/op
 Benchmark_ToString-12                          22956476        52.93 ns/op      40 B/op       2 allocs/op
 
+Benchmark_ItoA/fiber             (pos_num)-12  190428255        6.13 ns/op       0 B/op       0 allocs/op
+Benchmark_ItoA/fiber             (pos_num)-12  196626811        6.08 ns/op       0 B/op       0 allocs/op
+Benchmark_ItoA/strconv.Itoa      (pos_num)-12   80716807       14.33 ns/op       4 B/op       1 allocs/op
+Benchmark_ItoA/strconv.Itoa      (pos_num)-12   80445802       14.30 ns/op       4 B/op       1 allocs/op
+Benchmark_ItoA/strconv.FormatInt_(pos_num)-12   81137728       14.30 ns/op       4 B/op       1 allocs/op
+Benchmark_ItoA/strconv.FormatInt_(pos_num)-12   81345360       14.49 ns/op       4 B/op       1 allocs/op
+Benchmark_ItoA/fiber             (neg_num)-12  151121002        7.81 ns/op       0 B/op       0 allocs/op
+Benchmark_ItoA/fiber             (neg_num)-12  153566410        7.70 ns/op       0 B/op       0 allocs/op
+Benchmark_ItoA/strconv.Itoa      (neg_num)-12   84505304       13.75 ns/op       5 B/op       1 allocs/op
+Benchmark_ItoA/strconv.Itoa      (neg_num)-12   82524801       13.76 ns/op       5 B/op       1 allocs/op
+Benchmark_ItoA/strconv.FormatInt (neg_num)-12   84884136       13.88 ns/op       5 B/op       1 allocs/op
+Benchmark_ItoA/strconv.FormatInt (neg_num)-12   85829492       13.76 ns/op       5 B/op       1 allocs/op
+
 Benchmark_GetMIME/fiber-12                     15782622        74.99 ns/op       0 B/op       0 allocs/op
 Benchmark_GetMIME/fiber-12                     13992375        93.13 ns/op       0 B/op       0 allocs/op
 Benchmark_GetMIME/default-12                    6825952        147.0 ns/op       0 B/op       0 allocs/op
@@ -100,6 +113,7 @@ Benchmark_CalculateTimestamp/fiber-12        1000000000       0.2634 ns/op      
 Benchmark_CalculateTimestamp/fiber-12        1000000000       0.2935 ns/op       0 B/op       0 allocs/op
 Benchmark_CalculateTimestamp/default-12        15740576        73.79 ns/op       0 B/op       0 allocs/op
 Benchmark_CalculateTimestamp/default-12        15789036        71.12 ns/op       0 B/op       0 allocs/op
+
 ```
 
 See all the benchmarks under https://gofiber.github.io/utils/
