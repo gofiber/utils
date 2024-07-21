@@ -259,19 +259,6 @@ func Benchmark_ToString(b *testing.B) {
 	}
 }
 
-func Benchmark_ToString_string(b *testing.B) {
-	res := ""
-	expectedRes := "4242"
-	b.ReportAllocs()
-	b.ResetTimer()
-
-	for i := 0; i < b.N; i++ {
-		res = ToString(4242)
-	}
-
-	require.Equal(b, expectedRes, res)
-}
-
 // go test -v -run=^$ -bench=ToString_concurrency -benchmem -count=4
 func Benchmark_ToString_concurrency(b *testing.B) {
 	for _, value := range dataTypeExamples {
