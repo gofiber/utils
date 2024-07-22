@@ -5,6 +5,7 @@
 package utils
 
 import (
+	"math"
 	"reflect"
 	"strconv"
 	"testing"
@@ -244,6 +245,8 @@ func Test_AppendInt(t *testing.T) {
 	require.Equal(t, []byte("-1"), AppendInt(dst, -1))
 	require.Equal(t, []byte("-2"), AppendInt(dst, -2))
 	require.Equal(t, []byte("-4500"), AppendInt(dst, -4500))
+	require.Equal(t, []byte(strconv.Itoa(math.MaxInt)), AppendInt(dst, math.MaxInt))
+	//require.Equal(t, []byte("-4500"), AppendInt(dst, math.MinInt+1))
 }
 
 // go test -v -run=^$ -bench=ToString -benchmem -count=4
@@ -312,16 +315,16 @@ func Benchmark_UnsafeString(b *testing.B) {
 
 // go test -v -run=^$ -bench=ItoA -benchmem -count=4
 func Benchmark_ItoA(b *testing.B) {
-	number := 4242
+	number := 2
 	number64 := int64(number)
-	numberString := "4242"
-	numberN := -4242
+	numberString := "2"
+	numberN := -2
 	number64N := int64(numberN)
-	numberNString := "-4242"
+	numberNString := "-2"
 
 	var resB []byte
 	var resS string
-	b.Run("fiber (positiv number)", func(b *testing.B) {
+	b.Run("fiber (pos num)", func(b *testing.B) {
 		b.ReportAllocs()
 		b.ResetTimer()
 
@@ -331,7 +334,17 @@ func Benchmark_ItoA(b *testing.B) {
 		require.Equal(b, []byte(numberString), resB)
 	})
 
-	b.Run("default - strconv.Itoa (positiv number)", func(b *testing.B) {
+	b.Run("default - strconv.AppendInt (pos num)", func(b *testing.B) {
+		b.ReportAllocs()
+		b.ResetTimer()
+
+		for n := 0; n < b.N; n++ {
+			resB = strconv.AppendInt(resB[:0], number64, 10)
+		}
+		require.Equal(b, []byte(numberString), resB)
+	})
+
+	b.Run("default - strconv.Itoa (pos num)", func(b *testing.B) {
 		b.ReportAllocs()
 		b.ResetTimer()
 		for n := 0; n < b.N; n++ {
@@ -340,7 +353,7 @@ func Benchmark_ItoA(b *testing.B) {
 		require.Equal(b, numberString, resS)
 	})
 
-	b.Run("default - strconv.FormatInt (positiv number)", func(b *testing.B) {
+	b.Run("default - strconv.FormatInt (pos num)", func(b *testing.B) {
 		b.ReportAllocs()
 		b.ResetTimer()
 		for n := 0; n < b.N; n++ {
@@ -349,7 +362,7 @@ func Benchmark_ItoA(b *testing.B) {
 		require.Equal(b, numberString, resS)
 	})
 
-	b.Run("fiber (negative number)", func(b *testing.B) {
+	b.Run("fiber (neg num)", func(b *testing.B) {
 		b.ReportAllocs()
 		b.ResetTimer()
 		for n := 0; n < b.N; n++ {
@@ -358,7 +371,17 @@ func Benchmark_ItoA(b *testing.B) {
 		require.Equal(b, []byte(numberNString), resB)
 	})
 
-	b.Run("default - strconv.Itoa (negative number)", func(b *testing.B) {
+	b.Run("default - strconv.AppendInt (neg num)", func(b *testing.B) {
+		b.ReportAllocs()
+		b.ResetTimer()
+
+		for n := 0; n < b.N; n++ {
+			resB = strconv.AppendInt(resB[:0], number64N, 10)
+		}
+		require.Equal(b, []byte(numberNString), resB)
+	})
+
+	b.Run("default - strconv.Itoa (neg num)", func(b *testing.B) {
 		b.ReportAllocs()
 		b.ResetTimer()
 		for n := 0; n < b.N; n++ {
@@ -367,7 +390,7 @@ func Benchmark_ItoA(b *testing.B) {
 		require.Equal(b, numberNString, resS)
 	})
 
-	b.Run("default - strconv.FormatInt (negative number)", func(b *testing.B) {
+	b.Run("default - strconv.FormatInt (neg num)", func(b *testing.B) {
 		b.ReportAllocs()
 		b.ResetTimer()
 		for n := 0; n < b.N; n++ {

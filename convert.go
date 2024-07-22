@@ -177,7 +177,6 @@ func AppendInt(dst []byte, n int) []byte {
 		// add '-' in front of the number
 		dst = append(dst, '-')
 	}
-
 	dst = append(dst, buf[i:]...)
 
 	return dst
