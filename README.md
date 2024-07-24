@@ -29,6 +29,40 @@ Benchmark_ToUpperBytes/fiber-12                25859680        46.43 ns/op      
 Benchmark_ToUpperBytes/default-12              10015346        117.2 ns/op      80 B/op       1 allocs/op
 Benchmark_ToUpperBytes/default-12              10185375        117.8 ns/op      80 B/op       1 allocs/op
 
+Benchmark_TrimRight/fiber-12                  522399795        2.138 ns/op       0 B/op       0 allocs/op
+Benchmark_TrimRight/fiber-12                  578245326        2.084 ns/op       0 B/op       0 allocs/op
+Benchmark_TrimRight/default-12                345155300        3.380 ns/op       0 B/op       0 allocs/op
+Benchmark_TrimRight/default-12                366972850        3.328 ns/op       0 B/op       0 allocs/op
+
+Benchmark_TrimRightBytes/fiber-12             586471208        2.099 ns/op       0 B/op       0 allocs/op
+Benchmark_TrimRightBytes/fiber-12             576055069        2.087 ns/op       0 B/op       0 allocs/op
+Benchmark_TrimRightBytes/default-12           348849292        3.316 ns/op       0 B/op       0 allocs/op
+Benchmark_TrimRightBytes/default-12           359904445        3.384 ns/op       0 B/op       0 allocs/op
+
+Benchmark_TrimLeft/fiber-12                   578044544        2.122 ns/op       0 B/op       0 allocs/op
+Benchmark_TrimLeft/fiber-12                   585290433        2.074 ns/op       0 B/op       0 allocs/op
+Benchmark_TrimLeft/default-12                 351906888        3.667 ns/op       0 B/op       0 allocs/op
+Benchmark_TrimLeft/default-12                 330852666        3.448 ns/op       0 B/op       0 allocs/op
+
+Benchmark_TrimLeftBytes/fiber-12              545400109        2.239 ns/op       0 B/op       0 allocs/op
+Benchmark_TrimLeftBytes/fiber-12              544800061        2.270 ns/op       0 B/op       0 allocs/op
+Benchmark_TrimLeftBytes/default-12            329749006        3.521 ns/op       0 B/op       0 allocs/op
+Benchmark_TrimLeftBytes/default-12            344199560        3.452 ns/op       0 B/op       0 allocs/op
+
+Benchmark_Trim/fiber-12                       280692232        4.128 ns/op       0 B/op       0 allocs/op
+Benchmark_Trim/fiber-12                       297070083        3.961 ns/op       0 B/op       0 allocs/op
+Benchmark_Trim/default-12                     232522952        5.163 ns/op       0 B/op       0 allocs/op
+Benchmark_Trim/default-12                     230659057        5.172 ns/op       0 B/op       0 allocs/op
+Benchmark_Trim/default.trimspace-12           227328967        5.245 ns/op       0 B/op       0 allocs/op
+Benchmark_Trim/default.trimspace-12           227340775        5.253 ns/op       0 B/op       0 allocs/op
+
+Benchmark_TrimBytes/fiber-12                  275612090        4.280 ns/op       0 B/op       0 allocs/op
+Benchmark_TrimBytes/fiber-12                  284892168        4.302 ns/op       0 B/op       0 allocs/op
+Benchmark_TrimBytes/default-12                224021550        5.163 ns/op       0 B/op       0 allocs/op
+Benchmark_TrimBytes/default-12                239689282        4.922 ns/op       0 B/op       0 allocs/op
+Benchmark_TrimBytes/default.trimspace-12      216809300        5.514 ns/op       0 B/op       0 allocs/op
+Benchmark_TrimBytes/default.trimspace-12      218177734        5.603 ns/op       0 B/op       0 allocs/op
+
 Benchmark_EqualFoldBytes/fiber-12              22944849        47.14 ns/op       0 B/op       0 allocs/op
 Benchmark_EqualFoldBytes/fiber-12              26006342        46.82 ns/op       0 B/op       0 allocs/op
 Benchmark_EqualFoldBytes/default-12             5222006        222.5 ns/op       0 B/op       0 allocs/op
@@ -100,6 +134,7 @@ Benchmark_CalculateTimestamp/fiber-12        1000000000       0.2634 ns/op      
 Benchmark_CalculateTimestamp/fiber-12        1000000000       0.2935 ns/op       0 B/op       0 allocs/op
 Benchmark_CalculateTimestamp/default-12        15740576        73.79 ns/op       0 B/op       0 allocs/op
 Benchmark_CalculateTimestamp/default-12        15789036        71.12 ns/op       0 B/op       0 allocs/op
+
 ```
 
 See all the benchmarks under https://gofiber.github.io/utils/
