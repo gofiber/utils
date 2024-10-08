@@ -95,6 +95,7 @@ linters-settings:
   gosec:
     excludes:
       - G104 # TODO: Enable this again. Mostly provided by errcheck
+      - G115
     config:
       global:
         # show-ignored: true # TODO: Enable this
@@ -289,7 +290,6 @@ linters:
     - exhaustive
     # - exhaustivestruct
     # - exhaustruct
-    - exportloopref
     - forbidigo
     - forcetypeassert
     # - funlen

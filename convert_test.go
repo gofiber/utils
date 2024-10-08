@@ -191,7 +191,7 @@ func TestCopyBytes(t *testing.T) {
 	t.Run("nil slice", func(t *testing.T) {
 		copied := CopyBytes(nil)
 		require.NotNil(t, copied)
-		require.Empty(t, len(copied))
+		require.Empty(t, copied)
 		require.Equal(t, 0, cap(copied))
 	})
 }

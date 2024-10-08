@@ -137,4 +137,4 @@ Benchmark_CalculateTimestamp/default-12        15789036        71.12 ns/op      
 
 ```
 
-See all the benchmarks under https://gofiber.github.io/utils/
+See all the benchmarks under <https://gofiber.github.io/utils/>
