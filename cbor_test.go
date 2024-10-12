@@ -22,19 +22,22 @@ func Test_DefaultCBOREncoder(t *testing.T) {
 	raw, err := cborEncoder(ss)
 	require.NoError(t, err)
 
-	require.Equal(t, hex.EncodeToString([]byte(raw)), importantString)
+	require.Equal(t, hex.EncodeToString(raw), importantString)
 }
 
 func Test_DefaultCBORDecoder(t *testing.T) {
 	t.Parallel()
 
 	var (
-		ss                 sampleStructure
-		importantString, _               = hex.DecodeString("a170696d706f7274616e745f737472696e676b48656c6c6f20576f726c64")
-		cborDecoder        CBORUnmarshal = cbor.Unmarshal
+		ss                   sampleStructure
+		importantString, err               = hex.DecodeString("a170696d706f7274616e745f737472696e676b48656c6c6f20576f726c64")
+		cborDecoder          CBORUnmarshal = cbor.Unmarshal
 	)
+	if err != nil {
+		t.Error("Failed to decode hex string")
+	}
 
-	err := cborDecoder(importantString, &ss)
+	err = cborDecoder(importantString, &ss)
 	require.NoError(t, err)
 	require.Equal(t, "Hello World", ss.ImportantString)
 }
