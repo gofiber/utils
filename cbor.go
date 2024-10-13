@@ -5,5 +5,5 @@ type CBORMarshal func(v any) ([]byte, error)
 
 // CBORUnmarshal parses the CBOR-encoded data and stores the result
 // in the value pointed to by v. If v is nil or not a pointer,
-// Unmarshal returns an InvalidUnmarshalError.
+// Unmarshal returns an error.
 type CBORUnmarshal func(data []byte, v any) error
