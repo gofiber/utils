@@ -96,6 +96,7 @@ func Test_DefaultCBORDecoderWithUnitializedStruct(t *testing.T) {
 
 	var (
 		ss                   sampleStructure
+		emptySs              sampleStructure
 		importantString, err               = hex.DecodeString("a170696d706f7274616e745f737472696e6760")
 		cborDecoder          CBORUnmarshal = cbor.Unmarshal
 	)
@@ -105,5 +106,5 @@ func Test_DefaultCBORDecoderWithUnitializedStruct(t *testing.T) {
 
 	err = cborDecoder(importantString, &ss)
 	require.NoError(t, err)
-	require.Equal(t, ss, ss)
+	require.Equal(t, emptySs, ss)
 }
