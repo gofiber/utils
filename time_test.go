@@ -14,8 +14,6 @@ func checkTimeStamp(tb testing.TB, expectedCurrent, actualCurrent uint32) {
 }
 
 func Test_TimeStampUpdater(t *testing.T) {
-	t.Parallel()
-
 	StartTimeStampUpdater()
 
 	now := uint32(time.Now().Unix())
@@ -31,8 +29,6 @@ func Test_TimeStampUpdater(t *testing.T) {
 }
 
 func Test_StopTimeStampUpdater(t *testing.T) {
-	t.Parallel()
-
 	// Start the timestamp updater
 	StartTimeStampUpdater()
 
@@ -50,7 +46,7 @@ func Test_StopTimeStampUpdater(t *testing.T) {
 	stoppedTime := Timestamp()
 
 	// Wait again to see if it updates
-	time.Sleep(2 * time.Second)
+	time.Sleep(3 * time.Second)
 
 	// It should not have changed since we've stopped the updater
 	require.Equal(t, stoppedTime, Timestamp(), "timestamp should not change after stopping updater")

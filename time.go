@@ -24,8 +24,10 @@ func StartTimeStampUpdater() {
 	timestampTimer.Do(func() {
 		atomic.StoreUint32(&timestamp, uint32(time.Now().Unix()))
 
-		stopChan = make(chan struct{})
-		go func(sleep time.Duration) {
+		c := make(chan struct{})
+		stopChan = c
+
+		go func(localChan chan struct{}, sleep time.Duration) {
 			ticker := time.NewTicker(sleep)
 			defer ticker.Stop()
 
@@ -33,17 +35,15 @@ func StartTimeStampUpdater() {
 				select {
 				case t := <-ticker.C:
 					atomic.StoreUint32(&timestamp, uint32(t.Unix()))
-				case <-stopChan:
-					// Stop signal received, break the loop and exit goroutine
+				case <-localChan:
 					return
 				}
 			}
-		}(1 * time.Second) // duration
+		}(c, 1*time.Second)
 	})
 }
 
-// StopTimeStampUpdater stops the currently running timestamp updater goroutine.
-// This prevents leaking a goroutine if the updater is no longer needed.
+// StopTimeStampUpdater stops the timestamp updater
 func StopTimeStampUpdater() {
 	if stopChan != nil {
 		close(stopChan)
