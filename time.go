@@ -44,6 +44,7 @@ func StartTimeStampUpdater() {
 }
 
 // StopTimeStampUpdater stops the timestamp updater
+// WARNING: Make sure to call this function before the program exits, otherwise it will leak goroutines
 func StopTimeStampUpdater() {
 	if stopChan != nil {
 		close(stopChan)
