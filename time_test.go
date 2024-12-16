@@ -30,6 +30,32 @@ func Test_TimeStampUpdater(t *testing.T) {
 	checkTimeStamp(t, now+2, Timestamp())
 }
 
+func Test_StopTimeStampUpdater(t *testing.T) {
+	t.Parallel()
+
+	// Start the timestamp updater
+	StartTimeStampUpdater()
+
+	now := uint32(time.Now().Unix())
+	checkTimeStamp(t, now, Timestamp())
+
+	// Wait for an increment
+	time.Sleep(1 * time.Second)
+	checkTimeStamp(t, now+1, Timestamp())
+
+	// Stop the updater
+	StopTimeStampUpdater()
+
+	// Capture the timestamp after stopping
+	stoppedTime := Timestamp()
+
+	// Wait again to see if it updates
+	time.Sleep(2 * time.Second)
+
+	// It should not have changed since we've stopped the updater
+	require.Equal(t, stoppedTime, Timestamp(), "timestamp should not change after stopping updater")
+}
+
 func Benchmark_CalculateTimestamp(b *testing.B) {
 	var res uint32
 	StartTimeStampUpdater()
