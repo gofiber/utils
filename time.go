@@ -9,6 +9,7 @@ import (
 var (
 	timestampTimer sync.Once
 	timestamp      uint32
+	stopChan       chan struct{}
 )
 
 // Timestamp returns the current time.
@@ -21,16 +22,32 @@ func Timestamp() uint32 {
 // which is much better for performance than determining it at runtime each time
 func StartTimeStampUpdater() {
 	timestampTimer.Do(func() {
-		// set initial value
 		atomic.StoreUint32(&timestamp, uint32(time.Now().Unix()))
-		go func(sleep time.Duration) {
+
+		c := make(chan struct{})
+		stopChan = c
+
+		go func(localChan chan struct{}, sleep time.Duration) {
 			ticker := time.NewTicker(sleep)
 			defer ticker.Stop()
 
-			for t := range ticker.C {
-				// update timestamp
-				atomic.StoreUint32(&timestamp, uint32(t.Unix()))
+			for {
+				select {
+				case t := <-ticker.C:
+					atomic.StoreUint32(&timestamp, uint32(t.Unix()))
+				case <-localChan:
+					return
+				}
 			}
-		}(1 * time.Second) // duration
+		}(c, 1*time.Second)
 	})
+}
+
+// StopTimeStampUpdater stops the timestamp updater
+// WARNING: Make sure to call this function before the program exits, otherwise it will leak goroutines
+func StopTimeStampUpdater() {
+	if stopChan != nil {
+		close(stopChan)
+		stopChan = nil
+	}
 }
