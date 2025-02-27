@@ -10,12 +10,13 @@ permissions:
   pull-requests: write
   statuses: write
   checks: write
+
 jobs:
-    labeler:
-        runs-on: ubuntu-latest
-        steps:
-            -   name: Check Labels
-                id: labeler
-                uses: fuxingloh/multi-labeler@v4
-                with:
-                    github-token: ${{secrets.GITHUB_TOKEN}}
+  labeler:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check Labels
+        id: labeler
+        uses: fuxingloh/multi-labeler@v4
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
