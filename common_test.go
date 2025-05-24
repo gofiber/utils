@@ -75,13 +75,26 @@ func Test_UUIDv4_Concurrency(t *testing.T) {
 
 func Test_ConvertToBytes(t *testing.T) {
 	t.Parallel()
+	// initial assertions
 	require.Equal(t, 0, ConvertToBytes(""))
 	require.Equal(t, 42, ConvertToBytes("42"))
+
+	// Test empty string
+	require.Equal(t, 0, ConvertToBytes(""))
+
+	// Test basic numbers (digit detection optimization)
+	require.Equal(t, 42, ConvertToBytes("42"))
+	require.Equal(t, 0, ConvertToBytes("0"))
+	require.Equal(t, 1, ConvertToBytes("1"))
+	require.Equal(t, 999, ConvertToBytes("999"))
+
+	// Test with 'b' and 'B' suffixes
 	require.Equal(t, 42, ConvertToBytes("42b"))
 	require.Equal(t, 42, ConvertToBytes("42B"))
 	require.Equal(t, 42, ConvertToBytes("42 b"))
 	require.Equal(t, 42, ConvertToBytes("42 B"))
 
+	// Test sizeMultipliers array usage (k/K - 1e3)
 	require.Equal(t, 42*1000, ConvertToBytes("42k"))
 	require.Equal(t, 42*1000, ConvertToBytes("42K"))
 	require.Equal(t, 42*1000, ConvertToBytes("42kb"))
@@ -89,12 +102,70 @@ func Test_ConvertToBytes(t *testing.T) {
 	require.Equal(t, 42*1000, ConvertToBytes("42 kb"))
 	require.Equal(t, 42*1000, ConvertToBytes("42 KB"))
 
+	// Test sizeMultipliers array usage (m/M - 1e6)
 	require.Equal(t, 42*1000000, ConvertToBytes("42M"))
+	require.Equal(t, 42*1000000, ConvertToBytes("42m"))
+	require.Equal(t, 42*1000000, ConvertToBytes("42MB"))
+	require.Equal(t, 42*1000000, ConvertToBytes("42mb"))
 	require.Equal(t, int(42.5*1000000), ConvertToBytes("42.5MB"))
-	require.Equal(t, 42*1000000000, ConvertToBytes("42G"))
 
+	// Test sizeMultipliers array usage (g/G - 1e9)
+	require.Equal(t, 42*1000000000, ConvertToBytes("42G"))
+	require.Equal(t, 42*1000000000, ConvertToBytes("42g"))
+	require.Equal(t, 42*1000000000, ConvertToBytes("42GB"))
+	require.Equal(t, 42*1000000000, ConvertToBytes("42gb"))
+
+	// Test sizeMultipliers array usage (t/T - 1e12)
+	require.Equal(t, 42*1000000000000, ConvertToBytes("42T"))
+	require.Equal(t, 42*1000000000000, ConvertToBytes("42t"))
+	require.Equal(t, 42*1000000000000, ConvertToBytes("42TB"))
+	require.Equal(t, 42*1000000000000, ConvertToBytes("42tb"))
+
+	// Test sizeMultipliers array usage (p/P - 1e15)
+	require.Equal(t, 42*1000000000000000, ConvertToBytes("42P"))
+	require.Equal(t, 42*1000000000000000, ConvertToBytes("42p"))
+	require.Equal(t, 42*1000000000000000, ConvertToBytes("42PB"))
+	require.Equal(t, 42*1000000000000000, ConvertToBytes("42pb"))
+
+	// Test edge cases and error conditions
 	require.Equal(t, 0, ConvertToBytes("string"))
 	require.Equal(t, 0, ConvertToBytes("MB"))
+	require.Equal(t, 0, ConvertToBytes("invalidunit"))
+	require.Equal(t, 0, ConvertToBytes("42X"))     // invalid unit
+	require.Equal(t, 0, ConvertToBytes("42.5.5MB")) // invalid format
+
+	// Test decimal numbers with various units
+	require.Equal(t, int(1.5*1000), ConvertToBytes("1.5k"))
+	require.Equal(t, int(2.25*1000000), ConvertToBytes("2.25m"))
+	require.Equal(t, int(0.5*1000000000), ConvertToBytes("0.5g"))
+
+	// Test space handling
+	require.Equal(t, 100*1000, ConvertToBytes("100 k"))
+	require.Equal(t, 100*1000, ConvertToBytes("100  k"))   // multiple spaces
+	require.Equal(t, 100*1000, ConvertToBytes(" 100 k "))  // leading/trailing spaces
+}
+
+func Test_ConvertToBytes_DigitDetection(t *testing.T) {
+	t.Parallel()
+	// Test the new direct byte comparison digit detection
+	testCases := []struct {
+		input    string
+		expected int
+		desc     string
+	}{
+		{"0", 0, "digit 0"},
+		{"1", 1, "digit 1"},
+		{"9", 9, "digit 9"},
+		{"123", 123, "multiple digits"},
+		{"123k", 123000, "digits with unit"},
+		{"a123", 0, "non-digit start"},
+		{"12a3", 12, "non-digit in middle stops parsing"},
+	}
+	for _, tc := range testCases {
+		t.Run(tc.desc, func(t *testing.T) {
+			require.Equal(t, tc.expected, ConvertToBytes(tc.input), "input: %s", tc.input)
+		})
+	}
 }
 
 func Test_GetArgument(t *testing.T) {

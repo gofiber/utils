@@ -75,6 +75,44 @@ func Test_ParseVendorSpecificContentType(t *testing.T) {
 	cType := ParseVendorSpecificContentType("application/json")
 	require.Equal(t, "application/json", cType)
 
+	// Test with parameters (semicolon IndexByte optimization)
+	cType = ParseVendorSpecificContentType("multipart/form-data; boundary=abc123")
+	require.Equal(t, "multipart/form-data", cType)
+
+	// Test vendor-specific content types (plus IndexByte optimization)
+	cType = ParseVendorSpecificContentType("application/vnd.api+json; version=1")
+	require.Equal(t, "application/json", cType)
+	cType = ParseVendorSpecificContentType("application/vnd.dummy+x-www-form-urlencoded")
+	require.Equal(t, "application/x-www-form-urlencoded", cType)
+
+	// Test invalid cases (slash IndexByte optimization)
+	cType = ParseVendorSpecificContentType("something invalid")
+	require.Equal(t, "something invalid", cType)
+
+	// Additional edge cases for IndexByte optimization
+	cType = ParseVendorSpecificContentType("application/vnd.custom+xml; charset=utf-8")
+	require.Equal(t, "application/xml", cType)
+
+	cType = ParseVendorSpecificContentType("text/vnd.example+plain")
+	require.Equal(t, "text/plain", cType)
+
+	cType = ParseVendorSpecificContentType("application/vnd.test+json;boundary=test")
+	require.Equal(t, "application/json", cType)
+
+	// Edge cases with multiple special characters
+	cType = ParseVendorSpecificContentType("application/vnd.api+json+extra; param=value")
+	require.Equal(t, "application/json+extra", cType)
+
+	// Semicolon before plus
+	cType = ParseVendorSpecificContentType("application/json; charset=utf-8+extra")
+	require.Equal(t, "application/json", cType)
+
+	// Empty and single-character inputs
+	require.Equal(t, "", ParseVendorSpecificContentType(""))
+	require.Equal(t, "+", ParseVendorSpecificContentType("+"))
+	require.Equal(t, ";", ParseVendorSpecificContentType(";"))
+	require.Equal(t, "/", ParseVendorSpecificContentType("/"))
+
 	cType = ParseVendorSpecificContentType("multipart/form-data; boundary=dart-http-boundary-ZnVy.ICWq+7HOdsHqWxCFa8g3D.KAhy+Y0sYJ_lBADypu8po3_X")
 	require.Equal(t, "multipart/form-data", cType)
 
@@ -95,6 +133,30 @@ func Test_ParseVendorSpecificContentType(t *testing.T) {
 
 	cType = ParseVendorSpecificContentType("invalid+withoutSlash")
 	require.Equal(t, "invalid+withoutSlash", cType)
+}
+
+func Test_ParseVendorSpecificContentType_IndexByteOptimization(t *testing.T) {
+	t.Parallel()
+	testCases := []struct {
+		input    string
+		expected string
+		desc     string
+	}{
+		{"application/vnd.api+json", "application/json", "plus in middle"},
+		{"+json", "+json", "plus at start, no slash"},
+		{"application/+json", "application/json", "plus after slash"},
+		{"application/json;charset=utf-8", "application/json", "semicolon after content type"},
+		{";charset=utf-8", ";charset=utf-8", "semicolon at start"},
+		{"application/vnd.api+json;version=1", "application/json", "plus before semicolon"},
+		{"application/json", "application/json", "normal content type with slash"},
+		{"applicationjson", "applicationjson", "no slash in content type"},
+		{"app/vnd.test+data/extra", "app/data/extra", "multiple slashes"},
+	}
+	for _, tc := range testCases {
+		t.Run(tc.desc, func(t *testing.T) {
+			require.Equal(t, tc.expected, ParseVendorSpecificContentType(tc.input), "input: %s", tc.input)
+		})
+	}
 }
 
 func Benchmark_ParseVendorSpecificContentType(b *testing.B) {
