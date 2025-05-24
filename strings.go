@@ -11,8 +11,9 @@ func ToLower(b string) string {
 	}
 
 	res := make([]byte, len(b))
-	for i := 0; i < len(b); i++ {
-		res[i] = toLowerTable[b[i]]
+	copy(res, b)
+	for i := 0; i < len(res); i++ {
+		res[i] = toLowerTable[res[i]]
 	}
 
 	return UnsafeString(res)
@@ -25,8 +26,9 @@ func ToUpper(b string) string {
 	}
 
 	res := make([]byte, len(b))
-	for i := 0; i < len(b); i++ {
-		res[i] = toUpperTable[b[i]]
+	copy(res, b)
+	for i := 0; i < len(res); i++ {
+		res[i] = toUpperTable[res[i]]
 	}
 
 	return UnsafeString(res)
