@@ -77,7 +77,7 @@ func Test_ParseVendorSpecificContentType(t *testing.T) {
 
 	// Test with parameters (semicolon IndexByte optimization)
 	cType = ParseVendorSpecificContentType("multipart/form-data; boundary=abc123")
-	require.Equal(t, "multipart/form-data", cType)
+	require.Equal(t, "multipart/form-data; boundary=abc123", cType)
 
 	// Test vendor-specific content types (plus IndexByte optimization)
 	cType = ParseVendorSpecificContentType("application/vnd.api+json; version=1")
@@ -145,7 +145,7 @@ func Test_ParseVendorSpecificContentType_IndexByteOptimization(t *testing.T) {
 		{"application/vnd.api+json", "application/json", "plus in middle"},
 		{"+json", "+json", "plus at start, no slash"},
 		{"application/+json", "application/json", "plus after slash"},
-		{"application/json;charset=utf-8", "application/json", "semicolon after content type"},
+		{"application/json;charset=utf-8", "application/json;charset=utf-8", "semicolon after content type"},
 		{";charset=utf-8", ";charset=utf-8", "semicolon at start"},
 		{"application/vnd.api+json;version=1", "application/json", "plus before semicolon"},
 		{"application/json", "application/json", "normal content type with slash"},

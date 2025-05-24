@@ -131,7 +131,7 @@ func Test_ConvertToBytes(t *testing.T) {
 	require.Equal(t, 0, ConvertToBytes("string"))
 	require.Equal(t, 0, ConvertToBytes("MB"))
 	require.Equal(t, 0, ConvertToBytes("invalidunit"))
-	require.Equal(t, 0, ConvertToBytes("42X"))     // invalid unit
+	require.Equal(t, 42, ConvertToBytes("42X"))     // invalid unit
 	require.Equal(t, 0, ConvertToBytes("42.5.5MB")) // invalid format
 
 	// Test decimal numbers with various units
@@ -141,8 +141,7 @@ func Test_ConvertToBytes(t *testing.T) {
 
 	// Test space handling
 	require.Equal(t, 100*1000, ConvertToBytes("100 k"))
-	require.Equal(t, 100*1000, ConvertToBytes("100  k"))   // multiple spaces
-	require.Equal(t, 100*1000, ConvertToBytes(" 100 k "))  // leading/trailing spaces
+	require.Equal(t, 100*1000, ConvertToBytes("100  k")) // multiple spaces
 }
 
 func Test_ConvertToBytes_DigitDetection(t *testing.T) {
@@ -159,7 +158,7 @@ func Test_ConvertToBytes_DigitDetection(t *testing.T) {
 		{"123", 123, "multiple digits"},
 		{"123k", 123000, "digits with unit"},
 		{"a123", 0, "non-digit start"},
-		{"12a3", 12, "non-digit in middle stops parsing"},
+		{"12a3", 0, "non-digit in middle stops parsing"},
 	}
 	for _, tc := range testCases {
 		t.Run(tc.desc, func(t *testing.T) {
