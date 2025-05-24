@@ -154,6 +154,8 @@ func Test_ParseVendorSpecificContentType_IndexByteOptimization(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.desc, func(t *testing.T) {
+			t.Parallel()
+
 			require.Equal(t, tc.expected, ParseVendorSpecificContentType(tc.input), "input: %s", tc.input)
 		})
 	}

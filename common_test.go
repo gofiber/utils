@@ -162,6 +162,8 @@ func Test_ConvertToBytes_DigitDetection(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.desc, func(t *testing.T) {
+			t.Parallel()
+
 			require.Equal(t, tc.expected, ConvertToBytes(tc.input), "input: %s", tc.input)
 		})
 	}
