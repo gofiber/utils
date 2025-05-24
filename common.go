@@ -9,7 +9,6 @@ import (
 	"crypto/rand"
 	"encoding/binary"
 	"encoding/hex"
-	"math"
 	"net"
 	"os"
 	"reflect"
@@ -17,7 +16,6 @@ import (
 	"strconv"
 	"sync"
 	"sync/atomic"
-	"unicode"
 
 	"github.com/google/uuid"
 )
@@ -32,10 +30,11 @@ const (
 // All rights reserved.
 
 var (
-	uuidSeed    [24]byte
-	uuidCounter uint64
-	uuidSetup   sync.Once
-	unitsSlice  = []byte("kmgtp")
+	uuidSeed        [24]byte
+	uuidCounter     uint64
+	uuidSetup       sync.Once
+	unitsSlice      = []byte("kmgtp")
+	sizeMultipliers = [...]float64{1e3, 1e6, 1e9, 1e12, 1e15}
 )
 
 // UUID generates an universally unique identifier (UUID)
@@ -125,10 +124,11 @@ func ConvertToBytes(humanReadableString string) int {
 	// loop the string
 	for i := strLen - 1; i >= 0; i-- {
 		// check if the char is a number
-		if unicode.IsDigit(rune(humanReadableString[i])) {
+		c := humanReadableString[i]
+		if c >= '0' && c <= '9' {
 			lastNumberPos = i
 			break
-		} else if humanReadableString[i] != ' ' {
+		} else if c != ' ' {
 			unitPrefixPos = i
 		}
 	}
@@ -144,7 +144,7 @@ func ConvertToBytes(humanReadableString string) int {
 		// convert multiplier char to lowercase and check if exists in units slice
 		index := bytes.IndexByte(unitsSlice, toLowerTable[humanReadableString[unitPrefixPos]])
 		if index != -1 {
-			size *= math.Pow(1000, float64(index+1))
+			size *= sizeMultipliers[index]
 		}
 	}
 
