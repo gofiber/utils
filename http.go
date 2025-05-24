@@ -41,14 +41,14 @@ func GetMIME(extension string) string {
 // if it is parsable to any known types. If its not vendor specific then returns
 // the original content type.
 func ParseVendorSpecificContentType(cType string) string {
-	plusIndex := strings.Index(cType, "+")
+	plusIndex := strings.IndexByte(cType, '+')
 
 	if plusIndex == -1 {
 		return cType
 	}
 
 	var parsableType string
-	if semiColonIndex := strings.Index(cType, ";"); semiColonIndex == -1 {
+	if semiColonIndex := strings.IndexByte(cType, ';'); semiColonIndex == -1 {
 		parsableType = cType[plusIndex+1:]
 	} else if plusIndex < semiColonIndex {
 		parsableType = cType[plusIndex+1 : semiColonIndex]
@@ -56,7 +56,7 @@ func ParseVendorSpecificContentType(cType string) string {
 		return cType[:semiColonIndex]
 	}
 
-	slashIndex := strings.Index(cType, "/")
+	slashIndex := strings.IndexByte(cType, '/')
 
 	if slashIndex == -1 {
 		return cType
