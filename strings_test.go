@@ -13,6 +13,8 @@ import (
 
 func Test_ToUpper(t *testing.T) {
 	t.Parallel()
+	// Test empty string early return optimization
+	require.Equal(t, "", ToUpper(""))
 	require.Equal(t, "/MY/NAME/IS/:PARAM/*", ToUpper("/my/name/is/:param/*"))
 }
 
@@ -52,11 +54,18 @@ func Benchmark_ToUpper(b *testing.B) {
 
 func Test_ToLower(t *testing.T) {
 	t.Parallel()
+	// Test empty string early return optimization
+	require.Equal(t, "", ToLower(""))
 	require.Equal(t, "/my/name/is/:param/*", ToLower("/MY/NAME/IS/:PARAM/*"))
 	require.Equal(t, "/my1/name/is/:param/*", ToLower("/MY1/NAME/IS/:PARAM/*"))
 	require.Equal(t, "/my2/name/is/:param/*", ToLower("/MY2/NAME/IS/:PARAM/*"))
 	require.Equal(t, "/my3/name/is/:param/*", ToLower("/MY3/NAME/IS/:PARAM/*"))
 	require.Equal(t, "/my4/name/is/:param/*", ToLower("/MY4/NAME/IS/:PARAM/*"))
+	// Test single character optimizations
+	require.Equal(t, "a", ToLower("A"))
+	require.Equal(t, "z", ToLower("Z"))
+	require.Equal(t, "1", ToLower("1")) // non-letter should remain unchanged
+	require.Equal(t, "!", ToLower("!")) // special character should remain unchanged
 }
 
 func Benchmark_ToLower(b *testing.B) {
@@ -124,4 +133,48 @@ func Benchmark_IfToToLower_HeadersOrigin(b *testing.B) {
 		}
 		require.Equal(b, "https://gofiber.io", res)
 	})
+}
+
+func Test_ToLower_DirectByteIteration(t *testing.T) {
+	t.Parallel()
+	// Test various ASCII characters to ensure direct byte iteration works correctly
+	testCases := []struct {
+		input    string
+		expected string
+	}{
+		{"ABC123!@#", "abc123!@#"},
+		{"MiXeD cAsE", "mixed case"},
+		{"ALLUPPERCASE", "alluppercase"},
+		{"alllowercase", "alllowercase"},
+		{"Numbers123AndSymbols!@#", "numbers123andsymbols!@#"},
+	}
+	for _, tc := range testCases {
+		t.Run(tc.input, func(t *testing.T) {
+			t.Parallel()
+
+			require.Equal(t, tc.expected, ToLower(tc.input))
+		})
+	}
+}
+
+func Test_ToUpper_DirectByteIteration(t *testing.T) {
+	t.Parallel()
+	// Test various ASCII characters to ensure direct byte iteration works correctly
+	testCases := []struct {
+		input    string
+		expected string
+	}{
+		{"abc123!@#", "ABC123!@#"},
+		{"MiXeD cAsE", "MIXED CASE"},
+		{"ALLUPPERCASE", "ALLUPPERCASE"},
+		{"alllowercase", "ALLLOWERCASE"},
+		{"Numbers123AndSymbols!@#", "NUMBERS123ANDSYMBOLS!@#"},
+	}
+	for _, tc := range testCases {
+		t.Run(tc.input, func(t *testing.T) {
+			t.Parallel()
+
+			require.Equal(t, tc.expected, ToUpper(tc.input))
+		})
+	}
 }

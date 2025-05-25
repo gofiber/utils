@@ -6,6 +6,10 @@ package utils
 
 // ToLower converts ascii string to lower-case
 func ToLower(b string) string {
+	if len(b) == 0 {
+		return b
+	}
+
 	res := make([]byte, len(b))
 	copy(res, b)
 	for i := 0; i < len(res); i++ {
@@ -17,6 +21,10 @@ func ToLower(b string) string {
 
 // ToUpper converts ascii string to upper-case
 func ToUpper(b string) string {
+	if len(b) == 0 {
+		return b
+	}
+
 	res := make([]byte, len(b))
 	copy(res, b)
 	for i := 0; i < len(res); i++ {
