@@ -139,7 +139,7 @@ func Test_walkInternal_SkipDir(t *testing.T) {
 	require.NoError(t, err)
 
 	var visited []string
-	err = walkInternal(testFS, ".", info, func(path string, info fs.FileInfo, err error) error {
+	err = walkInternal(testFS, ".", info, func(path string, _ fs.FileInfo, _ error) error {
 		visited = append(visited, path)
 		return filepath.SkipDir
 	})
@@ -154,7 +154,7 @@ func Test_walkInternal_Error(t *testing.T) {
 	require.NoError(t, err)
 
 	testErr := errors.New("walk error")
-	err = walkInternal(testFS, ".", info, func(path string, info fs.FileInfo, err error) error {
+	err = walkInternal(testFS, ".", info, func(path string, _ fs.FileInfo, _ error) error {
 		if path != "." {
 			return testErr
 		}
@@ -176,7 +176,7 @@ func Test_walkInternal_StatError(t *testing.T) {
 	info, err := stat(testFS, ".")
 	require.NoError(t, err)
 
-	err = walkInternal(testFS, ".", info, func(path string, info fs.FileInfo, err error) error {
+	err = walkInternal(testFS, ".", info, func(_ string, _ fs.FileInfo, _ error) error {
 		return nil
 	})
 	require.NoError(t, err)
@@ -189,7 +189,7 @@ func Test_walkInternal_StatErrorPropagate(t *testing.T) {
 	require.NoError(t, err)
 
 	testErr := errors.New("stat failed")
-	err = walkInternal(testFS, ".", info, func(path string, _ fs.FileInfo, err error) error {
+	err = walkInternal(testFS, ".", info, func(_ string, _ fs.FileInfo, err error) error {
 		if err != nil {
 			return testErr
 		}
