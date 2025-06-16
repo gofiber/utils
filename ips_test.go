@@ -76,6 +76,22 @@ func Test_IsIPv6(t *testing.T) {
 	require.False(t, IsIPv6("invalid"))
 }
 
+func Test_IsIPv6_EdgeCases(t *testing.T) {
+	t.Parallel()
+
+	// hex group larger than 4 digits
+	require.False(t, IsIPv6("1:2:3:4:5:6:7:12345"))
+
+	// IPv4 part at wrong position
+	require.False(t, IsIPv6("1:2:3:4:1.2.3.4"))
+
+	// IPv4 part would exceed length
+	require.False(t, IsIPv6("1:2:3:4:5:6:7:1.2.3.4"))
+
+	// ellipsis present but no zero group
+	require.False(t, IsIPv6("1::2:3:4:5:6:7:8"))
+}
+
 // go test -v -run=^$ -bench=UnsafeString -benchmem -count=2
 func Benchmark_IsIPv4(b *testing.B) {
 	ip := "174.23.33.100"
