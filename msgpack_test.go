@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-type sampleStructure2 struct {
+type sampleMsgPackStructure struct {
 	ImportantString string `msgpack:"important_string"`
 }
 
@@ -34,7 +34,7 @@ func Test_MsgpackDecoder(t *testing.T) {
 	t.Parallel()
 
 	var (
-		ss = &sampleStructure{
+		ss = &sampleMsgPackStructure{
 			ImportantString: "Hello World",
 		}
 		msgpackEncoder = msgpack.Marshal
@@ -44,7 +44,7 @@ func Test_MsgpackDecoder(t *testing.T) {
 	raw, err := msgpackEncoder(ss)
 	require.NoError(t, err)
 
-	var decoded sampleStructure
+	var decoded sampleMsgPackStructure
 	err = msgpackDecoder(raw, &decoded)
 	require.NoError(t, err)
 	require.Equal(t, "Hello World", decoded.ImportantString)
