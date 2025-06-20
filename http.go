@@ -188,7 +188,7 @@ var mimeExtensions = map[string]string{
 	"war":     "application/java-archive",
 	"ear":     "application/java-archive",
 	"json":    "application/json",
-	"msgpack": "application/msgpack",
+	"msgpack": "application/vnd.msgpack",
 	"hqx":     "application/mac-binhex40",
 	"doc":     "application/msword",
 	"pdf":     "application/pdf",
