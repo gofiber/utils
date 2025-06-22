@@ -10,13 +10,20 @@ func ToLower(b string) string {
 		return b
 	}
 
-	res := make([]byte, len(b))
-	copy(res, b)
-	for i := 0; i < len(res); i++ {
-		res[i] = toLowerTable[res[i]]
+	for i := 0; i < len(b); i++ {
+		c := b[i]
+		low := toLowerTable[c]
+		if low != c {
+			res := make([]byte, len(b))
+			copy(res, b[:i])
+			res[i] = low
+			for j := i + 1; j < len(b); j++ {
+				res[j] = toLowerTable[b[j]]
+			}
+			return UnsafeString(res)
+		}
 	}
-
-	return UnsafeString(res)
+	return b
 }
 
 // ToUpper converts ascii string to upper-case
@@ -25,13 +32,21 @@ func ToUpper(b string) string {
 		return b
 	}
 
-	res := make([]byte, len(b))
-	copy(res, b)
-	for i := 0; i < len(res); i++ {
-		res[i] = toUpperTable[res[i]]
+	for i := 0; i < len(b); i++ {
+		c := b[i]
+		up := toUpperTable[c]
+		if up != c {
+			res := make([]byte, len(b))
+			copy(res, b[:i])
+			res[i] = up
+			for j := i + 1; j < len(b); j++ {
+				res[j] = toUpperTable[b[j]]
+			}
+			return UnsafeString(res)
+		}
 	}
 
-	return UnsafeString(res)
+	return b
 }
 
 // IfToLower returns an lowercase version of the input ASCII string.
