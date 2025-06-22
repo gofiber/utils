@@ -7,6 +7,7 @@ package utils
 import (
 	"strings"
 	"testing"
+	"unsafe"
 
 	"github.com/stretchr/testify/require"
 )
@@ -16,6 +17,11 @@ func Test_ToUpper(t *testing.T) {
 	// Test empty string early return optimization
 	require.Equal(t, "", ToUpper(""))
 	require.Equal(t, "/MY/NAME/IS/:PARAM/*", ToUpper("/my/name/is/:param/*"))
+	// Already upper-case string should be returned as-is without allocation
+	in := "ALREADYUPPER"
+	out := ToUpper(in)
+	require.Equal(t, in, out)
+	require.Equal(t, unsafe.StringData(in), unsafe.StringData(out))
 }
 
 const (
@@ -29,6 +35,12 @@ func Benchmark_ToUpper(b *testing.B) {
 	b.Run("fiber", func(b *testing.B) {
 		for n := 0; n < b.N; n++ {
 			res = ToUpper(largeStr)
+		}
+		require.Equal(b, upperStr, res)
+	})
+	b.Run("fiber-upper", func(b *testing.B) {
+		for n := 0; n < b.N; n++ {
+			res = ToUpper(upperStr)
 		}
 		require.Equal(b, upperStr, res)
 	})
@@ -66,6 +78,11 @@ func Test_ToLower(t *testing.T) {
 	require.Equal(t, "z", ToLower("Z"))
 	require.Equal(t, "1", ToLower("1")) // non-letter should remain unchanged
 	require.Equal(t, "!", ToLower("!")) // special character should remain unchanged
+	// Already lower-case string should be returned as-is without allocation
+	in := "alreadylower"
+	out := ToLower(in)
+	require.Equal(t, in, out)
+	require.Equal(t, unsafe.StringData(in), unsafe.StringData(out))
 }
 
 func Benchmark_ToLower(b *testing.B) {
@@ -73,6 +90,12 @@ func Benchmark_ToLower(b *testing.B) {
 	b.Run("fiber", func(b *testing.B) {
 		for n := 0; n < b.N; n++ {
 			res = ToLower(largeStr)
+		}
+		require.Equal(b, lowerStr, res)
+	})
+	b.Run("fiber-lower", func(b *testing.B) {
+		for n := 0; n < b.N; n++ {
+			res = ToLower(lowerStr)
 		}
 		require.Equal(b, lowerStr, res)
 	})
