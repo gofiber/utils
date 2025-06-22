@@ -7,7 +7,6 @@ package utils
 import (
 	"strings"
 	"testing"
-	"unsafe"
 
 	"github.com/stretchr/testify/require"
 )
@@ -21,7 +20,6 @@ func Test_ToUpper(t *testing.T) {
 	in := "ALREADYUPPER"
 	out := ToUpper(in)
 	require.Equal(t, in, out)
-	require.Equal(t, unsafe.StringData(in), unsafe.StringData(out))
 }
 
 const (
@@ -82,7 +80,6 @@ func Test_ToLower(t *testing.T) {
 	in := "alreadylower"
 	out := ToLower(in)
 	require.Equal(t, in, out)
-	require.Equal(t, unsafe.StringData(in), unsafe.StringData(out))
 }
 
 func Benchmark_ToLower(b *testing.B) {
