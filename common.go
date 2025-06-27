@@ -95,8 +95,8 @@ func FunctionName(fn any) string {
 
 // GetArgument check if key is in arguments
 func GetArgument(arg string) bool {
-	for i := range os.Args[1:] {
-		if os.Args[1:][i] == arg {
+	for _, a := range os.Args[1:] {
+		if a == arg {
 			return true
 		}
 	}

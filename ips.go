@@ -7,8 +7,12 @@ import (
 // IsIPv4 works the same way as net.ParseIP,
 // but without check for IPv6 case and without returning net.IP slice, whereby IsIPv4 makes no allocations.
 func IsIPv4(s string) bool {
+	l := len(s)
+	if l < 7 || l > 15 {
+		return false
+	}
 	for i := 0; i < net.IPv4len; i++ {
-		if len(s) == 0 {
+		if l == 0 {
 			return false
 		}
 
@@ -17,11 +21,12 @@ func IsIPv4(s string) bool {
 				return false
 			}
 			s = s[1:]
+			l--
 		}
 
 		n, ci := 0, 0
 
-		for ci = 0; ci < len(s) && '0' <= s[ci] && s[ci] <= '9'; ci++ {
+		for ci = 0; ci < l && '0' <= s[ci] && s[ci] <= '9'; ci++ {
 			n = n*10 + int(s[ci]-'0')
 			if n > 0xFF {
 				return false
@@ -33,22 +38,28 @@ func IsIPv4(s string) bool {
 		}
 
 		s = s[ci:]
+		l -= ci
 	}
 
-	return len(s) == 0
+	return l == 0
 }
 
 // IsIPv6 works the same way as net.ParseIP,
 // but without check for IPv4 case and without returning net.IP slice, whereby IsIPv6 makes no allocations.
 func IsIPv6(s string) bool {
+	l := len(s)
+	if l < 2 || l > 39 {
+		return false
+	}
 	ellipsis := -1 // position of ellipsis in ip
 
 	// Might have leading ellipsis
-	if len(s) >= 2 && s[0] == ':' && s[1] == ':' {
+	if l >= 2 && s[0] == ':' && s[1] == ':' {
 		ellipsis = 0
 		s = s[2:]
+		l -= 2
 		// Might be only ellipsis
-		if len(s) == 0 {
+		if l == 0 {
 			return true
 		}
 	}
@@ -59,7 +70,7 @@ func IsIPv6(s string) bool {
 		// Hex number.
 		n, ci := 0, 0
 
-		for ci = 0; ci < len(s); ci++ {
+		for ci = 0; ci < l; ci++ {
 			if '0' <= s[ci] && s[ci] <= '9' {
 				n *= 16
 				n += int(s[ci] - '0')
@@ -80,7 +91,7 @@ func IsIPv6(s string) bool {
 			return false
 		}
 
-		if ci < len(s) && s[ci] == '.' {
+		if ci < l && s[ci] == '.' {
 			if ellipsis < 0 && i != net.IPv6len-net.IPv4len {
 				return false
 			}
@@ -93,6 +104,7 @@ func IsIPv6(s string) bool {
 			}
 
 			s = ""
+			l = 0
 			i += net.IPv4len
 			break
 		}
@@ -102,15 +114,17 @@ func IsIPv6(s string) bool {
 
 		// Stop at end of string.
 		s = s[ci:]
-		if len(s) == 0 {
+		l -= ci
+		if l == 0 {
 			break
 		}
 
 		// Otherwise must be followed by colon and more.
-		if s[0] != ':' || len(s) == 1 {
+		if s[0] != ':' || l == 1 {
 			return false
 		}
 		s = s[1:]
+		l--
 
 		// Look for ellipsis.
 		if s[0] == ':' {
@@ -119,14 +133,15 @@ func IsIPv6(s string) bool {
 			}
 			ellipsis = i
 			s = s[1:]
-			if len(s) == 0 { // can be at end
+			l--
+			if l == 0 { // can be at end
 				break
 			}
 		}
 	}
 
 	// Must have used entire string.
-	if len(s) != 0 {
+	if l != 0 {
 		return false
 	}
 

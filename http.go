@@ -16,6 +16,7 @@ func GetMIME(extension string) string {
 	if len(extension) == 0 {
 		return ""
 	}
+	extension = ToLower(extension)
 	var foundMime string
 	if extension[0] == '.' {
 		foundMime = mimeExtensions[extension[1:]]
