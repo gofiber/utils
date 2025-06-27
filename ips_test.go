@@ -38,6 +38,9 @@ func Test_IsIPv4(t *testing.T) {
 	require.False(t, IsIPv4("192168.1.1"))
 	require.False(t, IsIPv4("192.1681.1"))
 	require.False(t, IsIPv4("192a168.1.1"))
+	// invalid by length
+	require.False(t, IsIPv4("1.1.1.1.1.1"))
+	require.False(t, IsIPv4("255.255.255.2555"))
 }
 
 func Test_IsIPv6(t *testing.T) {
@@ -74,6 +77,9 @@ func Test_IsIPv6(t *testing.T) {
 	require.False(t, IsIPv6("1:2:3:4:5:6:"))
 	require.False(t, IsIPv6(""))
 	require.False(t, IsIPv6("invalid"))
+	// invalid by length
+	require.False(t, IsIPv6(":"))
+	require.False(t, IsIPv6("ffff:ffff:ffff:ffff:ffff:ffff:ffff:fffff"))
 }
 
 func Test_IsIPv6_EdgeCases(t *testing.T) {
