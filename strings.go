@@ -10,7 +10,7 @@ func ToLower(b string) string {
 		return b
 	}
 
-	for i := range b {
+	for i := 0; i < len(b); i++ {
 		c := b[i]
 		low := toLowerTable[c]
 		if low != c {
@@ -32,7 +32,7 @@ func ToUpper(b string) string {
 		return b
 	}
 
-	for i := range b {
+	for i := 0; i < len(b); i++ {
 		c := b[i]
 		up := toUpperTable[c]
 		if up != c {
@@ -58,7 +58,7 @@ func ToUpper(b string) string {
 // In the case of mixed-case or uppercase strings, this function will be slightly slower than `ToLower`.
 func IfToLower(s string) string {
 	hasUpper := false
-	for i := range s {
+	for i := 0; i < len(s); i++ {
 		c := s[i]
 		if toLowerTable[c] != c {
 			hasUpper = true
@@ -81,7 +81,7 @@ func IfToLower(s string) string {
 // In the case of mixed-case or lowercase strings, this function will be slightly slower than `ToUpper`.
 func IfToUpper(s string) string {
 	hasLower := false
-	for i := range s {
+	for i := 0; i < len(s); i++ {
 		c := s[i]
 		if toUpperTable[c] != c {
 			hasLower = true
