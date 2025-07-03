@@ -11,6 +11,12 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+const (
+	largeStr = "/RePos/GoFiBer/FibEr/iSsues/187643/CoMmEnts/RePos/GoFiBer/FibEr/iSsues/CoMmEnts"
+	upperStr = "/REPOS/GOFIBER/FIBER/ISSUES/187643/COMMENTS/REPOS/GOFIBER/FIBER/ISSUES/COMMENTS"
+	lowerStr = "/repos/gofiber/fiber/issues/187643/comments/repos/gofiber/fiber/issues/comments"
+)
+
 func Test_ToLowerBytes(t *testing.T) {
 	t.Parallel()
 
