@@ -157,10 +157,17 @@ var testCases = []TestCase{
 func Test_ToUpper(t *testing.T) {
 	t.Parallel()
 	for _, tc := range testCases {
+		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 			result := ToUpper(tc.input)
 			require.Equal(t, tc.upper, result, "ToUpper failed for %s", tc.name)
+			if tc.upperNoConv {
+				allocs := testing.AllocsPerRun(100, func() {
+					_ = ToUpper(tc.input)
+				})
+				require.Zero(t, allocs, "ToUpper should not allocate for %s", tc.name)
+			}
 		})
 	}
 }
@@ -168,10 +175,17 @@ func Test_ToUpper(t *testing.T) {
 func Test_ToLower(t *testing.T) {
 	t.Parallel()
 	for _, tc := range testCases {
+		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 			result := ToLower(tc.input)
 			require.Equal(t, tc.lower, result, "ToLower failed for %s", tc.name)
+			if tc.lowerNoConv {
+				allocs := testing.AllocsPerRun(100, func() {
+					_ = ToLower(tc.input)
+				})
+				require.Zero(t, allocs, "ToLower should not allocate for %s", tc.name)
+			}
 		})
 	}
 }
@@ -204,12 +218,16 @@ func Test_NonASCII_Unchanged(t *testing.T) {
 func Benchmark_ToUpper(b *testing.B) {
 	for _, tc := range testCases {
 		b.Run(tc.name, func(b *testing.B) {
+			var allocsPerRun float64
 			b.ReportAllocs()
 			var res string
-			for n := 0; n < b.N; n++ {
+			allocsPerRun = testing.AllocsPerRun(100, func() {
 				res = ToUpper(tc.input)
-			}
+			})
 			require.Equal(b, tc.upper, res)
+			if tc.upperNoConv {
+				require.Zerof(b, allocsPerRun, "ToUpper should not allocate for %s", tc.name)
+			}
 		})
 	}
 }
@@ -217,12 +235,16 @@ func Benchmark_ToUpper(b *testing.B) {
 func Benchmark_ToLower(b *testing.B) {
 	for _, tc := range testCases {
 		b.Run(tc.name, func(b *testing.B) {
+			var allocsPerRun float64
 			b.ReportAllocs()
 			var res string
-			for n := 0; n < b.N; n++ {
+			allocsPerRun = testing.AllocsPerRun(100, func() {
 				res = ToLower(tc.input)
-			}
+			})
 			require.Equal(b, tc.lower, res)
+			if tc.lowerNoConv {
+				require.Zerof(b, allocsPerRun, "ToLower should not allocate for %s", tc.name)
+			}
 		})
 	}
 }
