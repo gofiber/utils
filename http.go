@@ -153,6 +153,7 @@ var statusMessage = []string{
 // MIME types were copied from https://github.com/nginx/nginx/blob/67d2a9541826ecd5db97d604f23460210fd3e517/conf/mime.types with the following updates:
 // - Use "application/xml" instead of "text/xml" as recommended per https://datatracker.ietf.org/doc/html/rfc7303#section-4.1
 // - Use "text/javascript" instead of "application/javascript" as recommended per https://www.rfc-editor.org/rfc/rfc9239#name-text-javascript
+// - Use "application/vnd.msgpack" from https://www.iana.org/assignments/media-types/application/vnd.msgpack
 var mimeExtensions = map[string]string{
 	"html":    "text/html",
 	"htm":     "text/html",
@@ -187,6 +188,7 @@ var mimeExtensions = map[string]string{
 	"war":     "application/java-archive",
 	"ear":     "application/java-archive",
 	"json":    "application/json",
+	"msgpack": "application/vnd.msgpack",
 	"hqx":     "application/mac-binhex40",
 	"doc":     "application/msword",
 	"pdf":     "application/pdf",
