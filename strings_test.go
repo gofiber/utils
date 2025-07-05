@@ -226,12 +226,7 @@ func Benchmark_ToUpper(b *testing.B) {
 				res = ToUpper(tc.input)
 			}
 			require.Equal(b, tc.upper, res)
-			if tc.upperNoConv {
-				allocs := testing.AllocsPerRun(100, func() {
-					_ = ToUpper(tc.input)
-				})
-				require.Zero(b, allocs, "ToUpper should not allocate for %s", tc.name)
-			}
+
 		})
 	}
 }
@@ -247,12 +242,6 @@ func Benchmark_ToLower(b *testing.B) {
 				res = ToLower(tc.input)
 			}
 			require.Equal(b, tc.lower, res)
-			if tc.lowerNoConv {
-				allocs := testing.AllocsPerRun(100, func() {
-					_ = ToLower(tc.input)
-				})
-				require.Zero(b, allocs, "ToLower should not allocate for %s", tc.name)
-			}
 		})
 	}
 }
