@@ -220,6 +220,7 @@ func Benchmark_ToUpper(b *testing.B) {
 		b.Run(tc.name, func(b *testing.B) {
 			b.ReportAllocs()
 			b.SetBytes(int64(len(tc.input)))
+			b.ResetTimer()
 			var res string
 			for n := 0; n < b.N; n++ {
 				res = ToUpper(tc.input)
@@ -240,6 +241,7 @@ func Benchmark_ToLower(b *testing.B) {
 		b.Run(tc.name, func(b *testing.B) {
 			b.ReportAllocs()
 			b.SetBytes(int64(len(tc.input)))
+			b.ResetTimer()
 			var res string
 			for n := 0; n < b.N; n++ {
 				res = ToLower(tc.input)
@@ -260,6 +262,7 @@ func Benchmark_StdToUpper(b *testing.B) {
 		b.Run(tc.name, func(b *testing.B) {
 			b.ReportAllocs()
 			b.SetBytes(int64(len(tc.input)))
+			b.ResetTimer()
 			var res string
 			for n := 0; n < b.N; n++ {
 				res = strings.ToUpper(tc.input)
@@ -274,6 +277,7 @@ func Benchmark_StdToLower(b *testing.B) {
 		b.Run(tc.name, func(b *testing.B) {
 			b.ReportAllocs()
 			b.SetBytes(int64(len(tc.input)))
+			b.ResetTimer()
 			var res string
 			for n := 0; n < b.N; n++ {
 				res = strings.ToLower(tc.input)
