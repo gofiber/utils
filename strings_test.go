@@ -226,7 +226,6 @@ func Benchmark_ToUpper(b *testing.B) {
 				res = ToUpper(tc.input)
 			}
 			require.Equal(b, tc.upper, res)
-
 		})
 	}
 }
