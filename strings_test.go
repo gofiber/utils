@@ -218,15 +218,18 @@ func Test_NonASCII_Unchanged(t *testing.T) {
 func Benchmark_ToUpper(b *testing.B) {
 	for _, tc := range testCases {
 		b.Run(tc.name, func(b *testing.B) {
-			var allocsPerRun float64
 			b.ReportAllocs()
+			b.SetBytes(int64(len(tc.input)))
 			var res string
-			allocsPerRun = testing.AllocsPerRun(100, func() {
+			for n := 0; n < b.N; n++ {
 				res = ToUpper(tc.input)
-			})
+			}
 			require.Equal(b, tc.upper, res)
 			if tc.upperNoConv {
-				require.Zerof(b, allocsPerRun, "ToUpper should not allocate for %s", tc.name)
+				allocs := testing.AllocsPerRun(100, func() {
+					_ = ToUpper(tc.input)
+				})
+				require.Zero(b, allocs, "ToUpper should not allocate for %s", tc.name)
 			}
 		})
 	}
@@ -235,15 +238,18 @@ func Benchmark_ToUpper(b *testing.B) {
 func Benchmark_ToLower(b *testing.B) {
 	for _, tc := range testCases {
 		b.Run(tc.name, func(b *testing.B) {
-			var allocsPerRun float64
 			b.ReportAllocs()
+			b.SetBytes(int64(len(tc.input)))
 			var res string
-			allocsPerRun = testing.AllocsPerRun(100, func() {
+			for n := 0; n < b.N; n++ {
 				res = ToLower(tc.input)
-			})
+			}
 			require.Equal(b, tc.lower, res)
 			if tc.lowerNoConv {
-				require.Zerof(b, allocsPerRun, "ToLower should not allocate for %s", tc.name)
+				allocs := testing.AllocsPerRun(100, func() {
+					_ = ToLower(tc.input)
+				})
+				require.Zero(b, allocs, "ToLower should not allocate for %s", tc.name)
 			}
 		})
 	}
@@ -253,6 +259,7 @@ func Benchmark_StdToUpper(b *testing.B) {
 	for _, tc := range testCases {
 		b.Run(tc.name, func(b *testing.B) {
 			b.ReportAllocs()
+			b.SetBytes(int64(len(tc.input)))
 			var res string
 			for n := 0; n < b.N; n++ {
 				res = strings.ToUpper(tc.input)
@@ -266,6 +273,7 @@ func Benchmark_StdToLower(b *testing.B) {
 	for _, tc := range testCases {
 		b.Run(tc.name, func(b *testing.B) {
 			b.ReportAllocs()
+			b.SetBytes(int64(len(tc.input)))
 			var res string
 			for n := 0; n < b.N; n++ {
 				res = strings.ToLower(tc.input)
