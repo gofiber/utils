@@ -10,7 +10,7 @@ import (
 func checkTimeStamp(tb testing.TB, expectedCurrent, actualCurrent uint32) {
 	tb.Helper()
 	// test with some buffer in front and back of the expectedCurrent time -> because of the timing on the work machine
-require.True(tb, actualCurrent >= expectedCurrent-1 && actualCurrent <= expectedCurrent+1)
+	require.True(tb, actualCurrent >= expectedCurrent-1 && actualCurrent <= expectedCurrent+1)
 }
 
 func Test_TimeStampUpdater(t *testing.T) {
