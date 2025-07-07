@@ -24,11 +24,11 @@ func Test_TimeStampUpdater(t *testing.T) {
 	checkTimeStamp(t, now, Timestamp())
 
 	// one second later
-	time.Sleep(1 * time.Second)
+	<-time.After(1 * time.Second)
 	checkTimeStamp(t, now+1, Timestamp())
 
 	// two seconds later
-	time.Sleep(1 * time.Second)
+	<-time.After(1 * time.Second)
 	checkTimeStamp(t, now+2, Timestamp())
 }
 
@@ -43,7 +43,7 @@ func Test_StopTimeStampUpdater(t *testing.T) {
 	stoppedTime := Timestamp()
 
 	// Wait before checking the timestamp
-	time.Sleep(5 * time.Second)
+	<-time.After(5 * time.Second)
 	// It should not have changed since we've stopped the updater
 	require.Equal(t, stoppedTime, Timestamp(), "timestamp should not change after stopping updater")
 }
