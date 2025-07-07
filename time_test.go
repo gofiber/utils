@@ -16,6 +16,9 @@ func checkTimeStamp(tb testing.TB, expectedCurrent, actualCurrent uint32) {
 func Test_TimeStampUpdater(t *testing.T) {
 	StartTimeStampUpdater()
 
+	// Allow time for the background goroutine to initialize
+	time.Sleep(10 * time.Millisecond)
+
 	now := uint32(time.Now().Unix())
 	checkTimeStamp(t, now, Timestamp())
 
