@@ -45,7 +45,6 @@ func Test_StopTimeStampUpdater(t *testing.T) {
 }
 
 func Benchmark_CalculateTimestamp(b *testing.B) {
-	var res uint32
 	StartTimeStampUpdater()
 
 	b.Run("fiber", func(bb *testing.B) {
@@ -55,6 +54,7 @@ func Benchmark_CalculateTimestamp(b *testing.B) {
 			_ = Timestamp()
 		}
 	})
+
 	b.Run("default", func(bb *testing.B) {
 		bb.ReportAllocs()
 		bb.ResetTimer()
@@ -67,16 +67,32 @@ func Benchmark_CalculateTimestamp(b *testing.B) {
 		bb.ReportAllocs()
 		bb.ResetTimer()
 		for n := 0; n < bb.N; n++ {
-			res = Timestamp()
+			// Only time the actual function call
+			res := Timestamp()
+
+			// Stop timer while validating
+			bb.StopTimer()
 			checkTimeStamp(bb, uint32(time.Now().Unix()), res)
+			bb.StartTimer()
 		}
 	})
+
 	b.Run("default_asserted", func(bb *testing.B) {
 		bb.ReportAllocs()
 		bb.ResetTimer()
 		for n := 0; n < bb.N; n++ {
-			res = uint32(time.Now().Unix())
-			checkTimeStamp(bb, uint32(time.Now().Unix()), res)
+			// Capture expected time before starting timing
+			bb.StopTimer()
+			expected := uint32(time.Now().Unix())
+			bb.StartTimer()
+
+			// Only time the actual function call
+			res := uint32(time.Now().Unix())
+
+			// Stop timer while validating
+			bb.StopTimer()
+			checkTimeStamp(bb, expected, res)
+			bb.StartTimer()
 		}
 	})
 }
