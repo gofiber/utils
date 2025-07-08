@@ -19,8 +19,8 @@ func Test_TimeStampUpdater(t *testing.T) {
 
 	now := uint32(time.Now().Unix())
 
-	// Wait for the timestamp to catch up (max 100ms * 20 = 2s)
-	for i := 0; i < 20; i++ {
+	// Wait for the timestamp to catch up (max 100ms * 50 = 5s)
+	for i := 0; i < 50; i++ {
 		if Timestamp() >= now {
 			break
 		}

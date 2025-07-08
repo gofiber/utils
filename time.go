@@ -28,6 +28,7 @@ func StartTimeStampUpdater() {
 		stopChan = c
 
 		go func(localChan chan struct{}) {
+			atomic.StoreUint32(&timestamp, uint32(time.Now().Unix()))
 			ticker := time.NewTicker(1 * time.Second)
 			defer ticker.Stop()
 			for {
