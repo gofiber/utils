@@ -40,29 +40,37 @@ func GetMIME(extension string) string {
 // ParseVendorSpecificContentType check if content type is vendor specific and
 // if it is parsable to any known types. If its not vendor specific then returns
 // the original content type.
-func ParseVendorSpecificContentType(cType string) string {
-	plusIndex := strings.IndexByte(cType, '+')
+func ParseVendorSpecificContentType(cType string, caseInsensitive ...bool) string {
+	useLower := len(caseInsensitive) > 0 && caseInsensitive[0]
+
+	working := cType
+	if useLower {
+		// Content types are case-insensitive. Normalize if requested using the
+		// utils.ToLower function to avoid allocations when possible.
+		working = ToLower(cType)
+	}
+	plusIndex := strings.IndexByte(working, '+')
 
 	if plusIndex == -1 {
 		return cType
 	}
 
 	var parsableType string
-	if semiColonIndex := strings.IndexByte(cType, ';'); semiColonIndex == -1 {
-		parsableType = cType[plusIndex+1:]
+	if semiColonIndex := strings.IndexByte(working, ';'); semiColonIndex == -1 {
+		parsableType = working[plusIndex+1:]
 	} else if plusIndex < semiColonIndex {
-		parsableType = cType[plusIndex+1 : semiColonIndex]
+		parsableType = working[plusIndex+1 : semiColonIndex]
 	} else {
 		return cType[:semiColonIndex]
 	}
 
-	slashIndex := strings.IndexByte(cType, '/')
+	slashIndex := strings.IndexByte(working, '/')
 
 	if slashIndex == -1 {
 		return cType
 	}
 
-	return cType[0:slashIndex+1] + parsableType
+	return working[0:slashIndex+1] + parsableType
 }
 
 // limits for HTTP statuscodes
