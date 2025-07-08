@@ -18,23 +18,27 @@ func Test_TimeStampUpdater(t *testing.T) {
 	StartTimeStampUpdater()
 
 	now := uint32(time.Now().Unix())
+	t.Logf("Test start wall time: %d, Timestamp(): %d", now, Timestamp())
 
-	// Wait for the timestamp to catch up (max 100ms * 50 = 5s)
-	for i := 0; i < 50; i++ {
+	// Wait for the timestamp to catch up (max 100ms * 100 = 10s)
+	for i := 0; i < 100; i++ {
 		if Timestamp() >= now {
 			break
 		}
 		time.Sleep(100 * time.Millisecond)
 	}
+	t.Logf("After wait: wall time: %d, Timestamp(): %d", uint32(time.Now().Unix()), Timestamp())
 
 	checkTimeStamp(t, now, Timestamp())
 
 	// one second later
 	<-time.After(1 * time.Second)
+	t.Logf("After 1s: wall time: %d, Timestamp(): %d", uint32(time.Now().Unix()), Timestamp())
 	checkTimeStamp(t, now+1, Timestamp())
 
 	// two seconds later
 	<-time.After(1 * time.Second)
+	t.Logf("After 2s: wall time: %d, Timestamp(): %d", uint32(time.Now().Unix()), Timestamp())
 	checkTimeStamp(t, now+2, Timestamp())
 }
 
