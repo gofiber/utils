@@ -60,4 +60,6 @@ func StopTimeStampUpdater() {
 		<-updaterDone
 		updaterDone = nil
 	}
+	// Reset the sync.Once so StartTimeStampUpdater can be called again
+	updaterOnce = sync.Once{}
 }
