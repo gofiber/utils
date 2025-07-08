@@ -91,14 +91,14 @@ func Benchmark_CalculateTimestamp(b *testing.B) {
 		}
 	})
 
+	// Simplified asserted benchmarks - measure the realistic cost including validation
 	b.Run("fiber_asserted", func(bb *testing.B) {
 		bb.ReportAllocs()
 		bb.ResetTimer()
 		for n := 0; n < bb.N; n++ {
 			res := Timestamp()
-			bb.StopTimer()
-			checkTimeStamp(bb, uint32(time.Now().Unix()), res)
-			bb.StartTimer()
+			expected := uint32(time.Now().Unix())
+			checkTimeStamp(bb, expected, res)
 		}
 	})
 
@@ -106,13 +106,9 @@ func Benchmark_CalculateTimestamp(b *testing.B) {
 		bb.ReportAllocs()
 		bb.ResetTimer()
 		for n := 0; n < bb.N; n++ {
-			bb.StopTimer()
 			expected := uint32(time.Now().Unix())
-			bb.StartTimer()
 			res := uint32(time.Now().Unix())
-			bb.StopTimer()
 			checkTimeStamp(bb, expected, res)
-			bb.StartTimer()
 		}
 	})
 }
