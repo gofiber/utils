@@ -125,6 +125,14 @@ func Test_ParseVendorSpecificContentType(t *testing.T) {
 	cType = ParseVendorSpecificContentType("application/vnd.api+json")
 	require.Equal(t, "application/json", cType)
 
+	// Uppercase vendor specific type should only be parsed when case-insensitive
+	// matching is enabled
+	cType = ParseVendorSpecificContentType("APPLICATION/VND.API+JSON")
+	require.Equal(t, "APPLICATION/JSON", cType)
+
+	cType = ParseVendorSpecificContentType("APPLICATION/VND.API+JSON", true)
+	require.Equal(t, "application/json", cType)
+
 	cType = ParseVendorSpecificContentType("application/vnd.dummy+x-www-form-urlencoded")
 	require.Equal(t, "application/x-www-form-urlencoded", cType)
 
