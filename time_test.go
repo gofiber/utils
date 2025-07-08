@@ -1,11 +1,14 @@
 package utils
 
 import (
+	"sync"
 	"testing"
 	"time"
 
 	"github.com/stretchr/testify/require"
 )
+
+var timerTestMu sync.Mutex
 
 func checkTimeStamp(tb testing.TB, expectedCurrent, actualCurrent uint32) {
 	tb.Helper()
@@ -15,15 +18,17 @@ func checkTimeStamp(tb testing.TB, expectedCurrent, actualCurrent uint32) {
 }
 
 func Test_TimeStampUpdater(t *testing.T) {
+	timerTestMu.Lock()
+	defer timerTestMu.Unlock()
 	StartTimeStampUpdater()
 
 	now := uint32(time.Now().Unix())
 	t.Logf("Test start wall time: %d, Timestamp(): %d", now, Timestamp())
 
-	// Wait up to 20s (100ms * 200) for the timestamp updater goroutine to update the timestamp
+	// Wait up to 5s (100ms * 50) for the timestamp updater goroutine to update the timestamp
 	// at least once. This loop helps avoid flakiness in CI or slow environments by ensuring
 	// the timestamp is current before assertions are made.
-	for i := 0; i < 200; i++ {
+	for i := 0; i < 50; i++ {
 		if Timestamp() >= now {
 			break
 		}
@@ -45,22 +50,24 @@ func Test_TimeStampUpdater(t *testing.T) {
 }
 
 func Test_StopTimeStampUpdater(t *testing.T) {
-	// Start the timestamp updater
+	timerTestMu.Lock()
+	defer timerTestMu.Unlock()
 	StartTimeStampUpdater()
 
-	// Stop the updater
 	StopTimeStampUpdater()
 
-	// Capture the timestamp after stopping
+	// Wait a short moment to ensure the updater goroutine has exited
+	time.Sleep(50 * time.Millisecond)
+
 	stoppedTime := Timestamp()
 
-	// Wait before checking the timestamp
 	<-time.After(5 * time.Second)
-	// It should not have changed since we've stopped the updater
 	require.Equal(t, stoppedTime, Timestamp(), "timestamp should not change after stopping updater")
 }
 
 func Benchmark_CalculateTimestamp(b *testing.B) {
+	timerTestMu.Lock()
+	defer timerTestMu.Unlock()
 	StartTimeStampUpdater()
 
 	b.Run("fiber", func(bb *testing.B) {
@@ -83,10 +90,7 @@ func Benchmark_CalculateTimestamp(b *testing.B) {
 		bb.ReportAllocs()
 		bb.ResetTimer()
 		for n := 0; n < bb.N; n++ {
-			// Only time the actual function call
 			res := Timestamp()
-
-			// Stop timer while validating
 			bb.StopTimer()
 			checkTimeStamp(bb, uint32(time.Now().Unix()), res)
 			bb.StartTimer()
@@ -97,15 +101,10 @@ func Benchmark_CalculateTimestamp(b *testing.B) {
 		bb.ReportAllocs()
 		bb.ResetTimer()
 		for n := 0; n < bb.N; n++ {
-			// Capture expected time before starting timing
 			bb.StopTimer()
 			expected := uint32(time.Now().Unix())
 			bb.StartTimer()
-
-			// Only time the actual function call
 			res := uint32(time.Now().Unix())
-
-			// Stop timer while validating
 			bb.StopTimer()
 			checkTimeStamp(bb, expected, res)
 			bb.StartTimer()
