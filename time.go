@@ -27,17 +27,18 @@ func StartTimeStampUpdater() {
 		c := make(chan struct{})
 		stopChan = c
 
-		go func(localChan chan struct{}, sleep time.Duration) {
+		go func(localChan chan struct{}) {
+			ticker := time.NewTicker(1 * time.Second)
+			defer ticker.Stop()
 			for {
-				atomic.StoreUint32(&timestamp, uint32(time.Now().Unix()))
 				select {
-				case <-time.After(sleep):
-					continue
+				case <-ticker.C:
+					atomic.StoreUint32(&timestamp, uint32(time.Now().Unix()))
 				case <-localChan:
 					return
 				}
 			}
-		}(c, 1*time.Second)
+		}(c)
 	})
 }
 
