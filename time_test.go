@@ -25,17 +25,24 @@ func Test_TimeStampUpdater(t *testing.T) {
 	now := uint32(time.Now().Unix())
 	t.Logf("Test start wall time: %d, Timestamp(): %d", now, Timestamp())
 
-	// Wait up to 5s (100ms * 50) for the timestamp updater goroutine to update the timestamp
-	// at least once. This loop helps avoid flakiness in CI or slow environments by ensuring
-	// the timestamp is current before assertions are made.
-	for i := 0; i < 50; i++ {
-		if Timestamp() >= now {
-			break
+	// Wait up to 10s for the timestamp to catch up
+	timeout := time.After(10 * time.Second)
+	tick := time.Tick(100 * time.Millisecond)
+waitLoop:
+	for {
+		select {
+		case <-timeout:
+			t.Fatalf("Timeout waiting for timestamp to catch up: now=%d, Timestamp()=%d", now, Timestamp())
+		case <-tick:
+			if Timestamp() >= now {
+				break waitLoop
+			}
 		}
-		time.Sleep(100 * time.Millisecond)
+		if Timestamp() >= now {
+			break waitLoop
+		}
 	}
 	t.Logf("After wait: wall time: %d, Timestamp(): %d", uint32(time.Now().Unix()), Timestamp())
-
 	checkTimeStamp(t, now, Timestamp())
 
 	// one second later
