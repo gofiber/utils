@@ -70,10 +70,7 @@ func ParseVendorSpecificContentType(cType string, caseInsensitive ...bool) strin
 		return cType
 	}
 
-	if useLower {
-		return working[0:slashIndex+1] + parsableType
-	}
-	return cType[0:slashIndex+1] + parsableType
+	return working[0:slashIndex+1] + parsableType
 }
 
 // limits for HTTP statuscodes
