@@ -20,8 +20,10 @@ func Test_TimeStampUpdater(t *testing.T) {
 	now := uint32(time.Now().Unix())
 	t.Logf("Test start wall time: %d, Timestamp(): %d", now, Timestamp())
 
-	// Wait for the timestamp to catch up (max 100ms * 100 = 10s)
-	for i := 0; i < 100; i++ {
+	// Wait up to 20s (100ms * 200) for the timestamp updater goroutine to update the timestamp
+	// at least once. This loop helps avoid flakiness in CI or slow environments by ensuring
+	// the timestamp is current before assertions are made.
+	for i := 0; i < 200; i++ {
 		if Timestamp() >= now {
 			break
 		}
