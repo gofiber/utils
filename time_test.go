@@ -1,52 +1,79 @@
 package utils
 
 import (
+	"sync"
 	"testing"
 	"time"
 
 	"github.com/stretchr/testify/require"
 )
 
+var timerTestMu sync.Mutex
+
 func checkTimeStamp(tb testing.TB, expectedCurrent, actualCurrent uint32) {
 	tb.Helper()
-	// test with some buffer in front and back of the expectedCurrent time -> because of the timing on the work machine
-	require.True(tb, true, actualCurrent >= expectedCurrent-1 || actualCurrent <= expectedCurrent+1)
+	// Test with buffer of ±2 seconds for CI environment tolerance
+	require.True(tb, actualCurrent >= expectedCurrent-2 && actualCurrent <= expectedCurrent+2,
+		"Expected timestamp %d (±2s), got %d (diff: %d)", expectedCurrent, actualCurrent, int64(actualCurrent)-int64(expectedCurrent))
 }
 
 func Test_TimeStampUpdater(t *testing.T) {
+	timerTestMu.Lock()
+	defer timerTestMu.Unlock()
+
 	StartTimeStampUpdater()
+	defer StopTimeStampUpdater()
 
 	now := uint32(time.Now().Unix())
-	checkTimeStamp(t, now, Timestamp())
 
-	// one second later
-	time.Sleep(1 * time.Second)
-	checkTimeStamp(t, now+1, Timestamp())
+	// Give it a moment to initialize
+	time.Sleep(100 * time.Millisecond)
 
-	// two seconds later
-	time.Sleep(1 * time.Second)
-	checkTimeStamp(t, now+2, Timestamp())
+	ts := Timestamp()
+	require.True(t, ts >= now-1 && ts <= now+1,
+		"Initial timestamp should be within ±1 second of current time. Expected: %d±1, got: %d (diff: %d)",
+		now, ts, int64(ts)-int64(now))
+
+	// Wait for next update
+	time.Sleep(1100 * time.Millisecond)
+
+	ts2 := Timestamp()
+	require.Greater(t, ts2, ts,
+		"Timestamp should have updated after 1+ seconds. Initial: %d, after 1s: %d",
+		ts, ts2)
+
+	currentTime := uint32(time.Now().Unix())
+	require.True(t, ts2 >= now && ts2 <= currentTime+1,
+		"Updated timestamp should be between test start (%d) and current time (%d), got: %d",
+		now, currentTime, ts2)
 }
 
 func Test_StopTimeStampUpdater(t *testing.T) {
-	// Start the timestamp updater
+	timerTestMu.Lock()
+	defer timerTestMu.Unlock()
+
 	StartTimeStampUpdater()
 
-	// Stop the updater
+	// Get initial timestamp
+	time.Sleep(100 * time.Millisecond)
+	initial := Timestamp()
+
 	StopTimeStampUpdater()
 
-	// Capture the timestamp after stopping
-	stoppedTime := Timestamp()
-
-	// Wait before checking the timestamp
-	time.Sleep(5 * time.Second)
-	// It should not have changed since we've stopped the updater
-	require.Equal(t, stoppedTime, Timestamp(), "timestamp should not change after stopping updater")
+	// Verify it stops updating
+	time.Sleep(2 * time.Second)
+	final := Timestamp()
+	currentTime := uint32(time.Now().Unix())
+	require.Equal(t, initial, final,
+		"Timestamp should not change after stopping updater. Stopped at: %d, checked at: %d (wall time: %d)",
+		initial, final, currentTime)
 }
 
 func Benchmark_CalculateTimestamp(b *testing.B) {
-	var res uint32
+	timerTestMu.Lock()
+	defer timerTestMu.Unlock()
 	StartTimeStampUpdater()
+	defer StopTimeStampUpdater()
 
 	b.Run("fiber", func(bb *testing.B) {
 		bb.ReportAllocs()
@@ -55,6 +82,7 @@ func Benchmark_CalculateTimestamp(b *testing.B) {
 			_ = Timestamp()
 		}
 	})
+
 	b.Run("default", func(bb *testing.B) {
 		bb.ReportAllocs()
 		bb.ResetTimer()
@@ -63,20 +91,24 @@ func Benchmark_CalculateTimestamp(b *testing.B) {
 		}
 	})
 
+	// Simplified asserted benchmarks - measure the realistic cost including validation
 	b.Run("fiber_asserted", func(bb *testing.B) {
 		bb.ReportAllocs()
 		bb.ResetTimer()
 		for n := 0; n < bb.N; n++ {
-			res = Timestamp()
-			checkTimeStamp(bb, uint32(time.Now().Unix()), res)
+			res := Timestamp()
+			expected := uint32(time.Now().Unix())
+			checkTimeStamp(bb, expected, res)
 		}
 	})
+
 	b.Run("default_asserted", func(bb *testing.B) {
 		bb.ReportAllocs()
 		bb.ResetTimer()
 		for n := 0; n < bb.N; n++ {
-			res = uint32(time.Now().Unix())
-			checkTimeStamp(bb, uint32(time.Now().Unix()), res)
+			expected := uint32(time.Now().Unix())
+			res := uint32(time.Now().Unix())
+			checkTimeStamp(bb, expected, res)
 		}
 	})
 }
