@@ -5,7 +5,6 @@
 package utils
 
 import (
-	"bytes"
 	"crypto/rand"
 	"encoding/binary"
 	"encoding/hex"
@@ -14,6 +13,7 @@ import (
 	"reflect"
 	"runtime"
 	"strconv"
+	"strings"
 	"sync"
 	"sync/atomic"
 
@@ -120,31 +120,48 @@ func ConvertToBytes(humanReadableString string) int {
 	if strLen == 0 {
 		return 0
 	}
+
 	var unitPrefixPos, lastNumberPos int
-	// loop the string
+	// loop backwards to find the last numeric character and the unit prefix
 	for i := strLen - 1; i >= 0; i-- {
-		// check if the char is a number
 		c := humanReadableString[i]
 		if c >= '0' && c <= '9' {
 			lastNumberPos = i
 			break
-		} else if c != ' ' {
+		}
+		if c != ' ' {
 			unitPrefixPos = i
 		}
 	}
 
-	// fetch the number part and parse it to float
-	size, err := strconv.ParseFloat(humanReadableString[:lastNumberPos+1], 64)
-	if err != nil {
-		return 0
+	numPart := humanReadableString[:lastNumberPos+1]
+	var size float64
+	if strings.IndexByte(numPart, '.') >= 0 {
+		var err error
+		size, err = strconv.ParseFloat(numPart, 64)
+		if err != nil {
+			return 0
+		}
+	} else {
+		i64, err := strconv.ParseUint(numPart, 10, 64)
+		if err != nil {
+			return 0
+		}
+		size = float64(i64)
 	}
 
-	// check the multiplier from the string and use it
 	if unitPrefixPos > 0 {
-		// convert multiplier char to lowercase and check if exists in units slice
-		index := bytes.IndexByte(unitsSlice, toLowerTable[humanReadableString[unitPrefixPos]])
-		if index != -1 {
-			size *= sizeMultipliers[index]
+		switch toLowerTable[humanReadableString[unitPrefixPos]] {
+		case 'k':
+			size *= 1e3
+		case 'm':
+			size *= 1e6
+		case 'g':
+			size *= 1e9
+		case 't':
+			size *= 1e12
+		case 'p':
+			size *= 1e15
 		}
 	}
 
