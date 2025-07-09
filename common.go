@@ -142,7 +142,7 @@ func ConvertToBytes(humanReadableString string) int {
 		}
 	} else {
 		i64, err := strconv.ParseUint(numPart, 10, 64)
-		if err != nil {
+		if err != nil || i64 > uint64(^0) {
 			return 0
 		}
 		size = float64(i64)
