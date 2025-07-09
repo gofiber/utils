@@ -127,7 +127,7 @@ func ConvertToBytes(humanReadableString string) int {
 			lastNumberPos = i
 			break
 		}
-		if c != ' ' {
+		if c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z' {
 			unitPrefixPos = i
 		}
 	}
@@ -142,23 +142,23 @@ func ConvertToBytes(humanReadableString string) int {
 		}
 	} else {
 		i64, err := strconv.ParseUint(numPart, 10, 64)
-		if err != nil || i64 > uint64(^0) {
+		if err != nil {
 			return 0
 		}
 		size = float64(i64)
 	}
 
 	if unitPrefixPos > 0 {
-		switch toLowerTable[humanReadableString[unitPrefixPos]] {
-		case 'k':
+		switch humanReadableString[unitPrefixPos] {
+		case 'k', 'K':
 			size *= 1e3
-		case 'm':
+		case 'm', 'M':
 			size *= 1e6
-		case 'g':
+		case 'g', 'G':
 			size *= 1e9
-		case 't':
+		case 't', 'T':
 			size *= 1e12
-		case 'p':
+		case 'p', 'P':
 			size *= 1e15
 		}
 	}
