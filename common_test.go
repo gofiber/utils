@@ -132,6 +132,7 @@ func Test_ConvertToBytes(t *testing.T) {
 	require.Equal(t, 0, ConvertToBytes("MB"))
 	require.Equal(t, 0, ConvertToBytes("invalidunit"))
 	require.Equal(t, 42, ConvertToBytes("42X"))     // invalid unit
+	require.Equal(t, 123, ConvertToBytes("123a k")) // invalid unit
 	require.Equal(t, 0, ConvertToBytes("42.5.5MB")) // invalid format
 
 	// Test decimal numbers with various units

@@ -5,15 +5,16 @@
 package utils
 
 import (
-	"bytes"
 	"crypto/rand"
 	"encoding/binary"
 	"encoding/hex"
+	"math"
 	"net"
 	"os"
 	"reflect"
 	"runtime"
 	"strconv"
+	"strings"
 	"sync"
 	"sync/atomic"
 
@@ -30,11 +31,9 @@ const (
 // All rights reserved.
 
 var (
-	uuidSeed        [24]byte
-	uuidCounter     uint64
-	uuidSetup       sync.Once
-	unitsSlice      = []byte("kmgtp")
-	sizeMultipliers = [...]float64{1e3, 1e6, 1e9, 1e12, 1e15}
+	uuidSeed    [24]byte
+	uuidCounter uint64
+	uuidSetup   sync.Once
 )
 
 // UUID generates an universally unique identifier (UUID)
@@ -120,36 +119,54 @@ func ConvertToBytes(humanReadableString string) int {
 	if strLen == 0 {
 		return 0
 	}
+
 	var unitPrefixPos, lastNumberPos int
-	// loop the string
+	// loop backwards to find the last numeric character and the unit prefix
 	for i := strLen - 1; i >= 0; i-- {
-		// check if the char is a number
 		c := humanReadableString[i]
 		if c >= '0' && c <= '9' {
 			lastNumberPos = i
 			break
-		} else if c != ' ' {
+		}
+		if c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z' {
 			unitPrefixPos = i
 		}
 	}
 
-	// fetch the number part and parse it to float
-	size, err := strconv.ParseFloat(humanReadableString[:lastNumberPos+1], 64)
-	if err != nil {
-		return 0
+	numPart := humanReadableString[:lastNumberPos+1]
+	var size float64
+	if strings.IndexByte(numPart, '.') >= 0 {
+		var err error
+		size, err = strconv.ParseFloat(numPart, 64)
+		if err != nil {
+			return 0
+		}
+	} else {
+		i64, err := strconv.ParseUint(numPart, 10, 64)
+		if err != nil {
+			return 0
+		}
+		size = float64(i64)
 	}
 
-	// check the multiplier from the string and use it
 	if unitPrefixPos > 0 {
-		// convert multiplier char to lowercase and check if exists in units slice
-		index := bytes.IndexByte(unitsSlice, toLowerTable[humanReadableString[unitPrefixPos]])
-		if index != -1 {
-			size *= sizeMultipliers[index]
+		switch humanReadableString[unitPrefixPos] {
+		case 'k', 'K':
+			size *= 1e3
+		case 'm', 'M':
+			size *= 1e6
+		case 'g', 'G':
+			size *= 1e9
+		case 't', 'T':
+			size *= 1e12
+		case 'p', 'P':
+			size *= 1e15
 		}
 	}
 
-	if size > float64(^uint(0)>>1) {
-		return int(^uint(0) >> 1)
+	if size > float64(math.MaxInt) {
+		return math.MaxInt
 	}
+
 	return int(size)
 }
