@@ -30,11 +30,9 @@ const (
 // All rights reserved.
 
 var (
-	uuidSeed        [24]byte
-	uuidCounter     uint64
-	uuidSetup       sync.Once
-	unitsSlice      = []byte("kmgtp")
-	sizeMultipliers = [...]float64{1e3, 1e6, 1e9, 1e12, 1e15}
+	uuidSeed    [24]byte
+	uuidCounter uint64
+	uuidSetup   sync.Once
 )
 
 // UUID generates an universally unique identifier (UUID)
