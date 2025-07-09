@@ -8,6 +8,7 @@ import (
 	"crypto/rand"
 	"encoding/binary"
 	"encoding/hex"
+	"math"
 	"net"
 	"os"
 	"reflect"
@@ -163,8 +164,9 @@ func ConvertToBytes(humanReadableString string) int {
 		}
 	}
 
-	if size > float64(^uint(0)>>1) {
-		return int(^uint(0) >> 1)
+	if size > float64(math.MaxInt) {
+		return math.MaxInt
 	}
+
 	return int(size)
 }
