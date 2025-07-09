@@ -163,5 +163,8 @@ func ConvertToBytes(humanReadableString string) int {
 		}
 	}
 
+	if size > float64(^uint(0)>>1) {
+		return int(^uint(0) >> 1)
+	}
 	return int(size)
 }
