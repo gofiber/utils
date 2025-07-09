@@ -197,3 +197,12 @@ func Test_walkInternal_StatErrorPropagate(t *testing.T) {
 	})
 	require.ErrorIs(t, err, testErr)
 }
+
+// Test reading a file directly from the OS when no filesystem is provided
+func Test_ReadFile_NoFS(t *testing.T) {
+	t.Parallel()
+
+	data, err := ReadFile(".github/tests/john.txt", nil)
+	require.NoError(t, err)
+	require.Contains(t, string(data), "doe")
+}
