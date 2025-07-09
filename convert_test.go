@@ -5,6 +5,8 @@
 package utils
 
 import (
+	"fmt"
+	"math"
 	"reflect"
 	"testing"
 	"time"
@@ -230,6 +232,13 @@ func TestByteSize(t *testing.T) {
 			require.Equal(t, tt.expected, result)
 		})
 	}
+}
+
+// Ensure ConvertToBytes caps values exceeding math.MaxInt
+func Test_ConvertToBytes_MaxInt(t *testing.T) {
+	t.Parallel()
+	big := fmt.Sprintf("%dT", int64(math.MaxInt/1000+1))
+	require.Equal(t, math.MaxInt, ConvertToBytes(big))
 }
 
 // go test -v -run=^$ -bench=ToString -benchmem -count=4

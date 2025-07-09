@@ -206,6 +206,28 @@ func Test_IncrementIPRange(t *testing.T) {
 	}
 }
 
+// Additional coverage for IncrementIPRange using IPv6 addresses
+func Test_IncrementIPRange_IPv6(t *testing.T) {
+	t.Parallel()
+
+	cases := []struct {
+		input    net.IP
+		expected net.IP
+	}{
+		{net.IP{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, net.IP{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1}},
+		{net.IP{0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff}, net.IP{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}},
+	}
+
+	for _, c := range cases {
+		c := c
+		t.Run(c.input.String(), func(t *testing.T) {
+			t.Parallel()
+			IncrementIPRange(c.input)
+			require.Equal(t, c.expected, c.input)
+		})
+	}
+}
+
 // go test -v -run=^$ -bench=Benchmark_ConvertToBytes -benchmem -count=2
 func Benchmark_ConvertToBytes(b *testing.B) {
 	var res int
