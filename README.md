@@ -134,6 +134,10 @@ Benchmark_CalculateTimestamp/fiber-12        1000000000       0.2634 ns/op      
 Benchmark_CalculateTimestamp/fiber-12        1000000000       0.2935 ns/op       0 B/op       0 allocs/op
 Benchmark_CalculateTimestamp/default-12        15740576        73.79 ns/op       0 B/op       0 allocs/op
 Benchmark_CalculateTimestamp/default-12        15789036        71.12 ns/op       0 B/op       0 allocs/op
+Benchmark_ParseUint-5           64891596                18.20 ns/op            0 B/op          0 allocs/op
+Benchmark_ParseUint-5           68725321                17.72 ns/op            0 B/op          0 allocs/op
+Benchmark_StdParseUint-5        43620374                28.53 ns/op            0 B/op          0 allocs/op
+Benchmark_StdParseUint-5        42279746                30.02 ns/op            0 B/op          0 allocs/op
 
 ```
 
