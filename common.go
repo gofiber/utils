@@ -90,7 +90,15 @@ func FunctionName(fn any) string {
 	}
 	v := reflect.ValueOf(fn)
 	if v.Kind() == reflect.Func {
-		return runtime.FuncForPC(v.Pointer()).Name()
+		if v.IsNil() {
+			return ""
+		}
+		pc := v.Pointer()
+		f := runtime.FuncForPC(pc)
+		if f == nil {
+			return ""
+		}
+		return f.Name()
 	}
 	return v.Type().String()
 }
