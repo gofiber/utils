@@ -85,11 +85,22 @@ func UUIDv4() string {
 
 // FunctionName returns function name
 func FunctionName(fn any) string {
-	t := reflect.ValueOf(fn).Type()
-	if t.Kind() == reflect.Func {
-		return runtime.FuncForPC(reflect.ValueOf(fn).Pointer()).Name()
+	if fn == nil {
+		return ""
 	}
-	return t.String()
+	v := reflect.ValueOf(fn)
+	if v.Kind() == reflect.Func {
+		if v.IsNil() {
+			return ""
+		}
+		pc := v.Pointer()
+		f := runtime.FuncForPC(pc)
+		if f == nil {
+			return ""
+		}
+		return f.Name()
+	}
+	return v.Type().String()
 }
 
 // GetArgument check if key is in arguments

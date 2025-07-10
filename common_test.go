@@ -21,6 +21,32 @@ func Test_FunctionName(t *testing.T) {
 
 	dummyint := 20
 	require.Equal(t, "int", FunctionName(dummyint))
+
+	// nil interface should return empty string
+	require.Equal(t, "", FunctionName(nil))
+
+	// typed nil function should also return empty string
+	var nilFunc func()
+	require.Equal(t, "", FunctionName(nilFunc))
+
+	// typed nil custom func should return empty string
+	type myFunc func()
+	var mf myFunc
+	require.Equal(t, "", FunctionName(mf))
+
+	// typed nil function inside interface should return empty string
+	var iface any = mf
+	require.Equal(t, "", FunctionName(iface))
+
+	// typed nil pointer should return its type name
+	var ptr *int
+	require.Equal(t, "*int", FunctionName(ptr))
+
+	// struct and pointer types should include package name
+	type sampleStruct struct{}
+	var s sampleStruct
+	require.Equal(t, "utils.sampleStruct", FunctionName(s))
+	require.Equal(t, "*utils.sampleStruct", FunctionName(&s))
 }
 
 func Test_UUID(t *testing.T) {
