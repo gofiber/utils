@@ -91,11 +91,9 @@ func ByteSize(bytes uint64) string {
 		return UnsafeString(buf)
 	}
 
+	// Fix: cap bytes to maxSafe for overflow, but format as fractional
 	if bytes > maxSafe {
-		// Guard: return capped value for overflow
-		buf = strconv.AppendUint(buf, maxSafe, 10)
-		buf = append(buf, unit...)
-		return UnsafeString(buf)
+		bytes = maxSafe
 	}
 
 	scaled := (bytes/div)*10 + ((bytes%div)*10+div/2)/div
