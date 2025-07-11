@@ -88,7 +88,7 @@ func ByteSize(bytes uint64) string {
 		return UnsafeString(buf)
 	}
 
-	scaled := (bytes*10 + div/2) / div
+	scaled := (bytes/div)*10 + ((bytes%div)*10+div/2)/div
 	integer := scaled / 10
 	fractional := scaled % 10
 
