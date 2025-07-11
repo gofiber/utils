@@ -59,30 +59,37 @@ func parseSigned[S byteSeq, T Signed](s S, min, max T) (T, bool) {
 		return 0, false
 	}
 
-	maxCutoff := max / 10
-	maxRem := max - maxCutoff*10
-	minCutoff := min / 10
-	minRem := -(min - minCutoff*10)
-
-	var n T
-	for ; i < len(s); i++ {
-		c := s[i]
-		if c < '0' || c > '9' {
-			return 0, false
-		}
-		d := T(c - '0')
-
-		if !neg {
-			if n > maxCutoff || (n == maxCutoff && d > maxRem) {
+	if !neg {
+		cutoff := max / 10
+		rem := max - cutoff*10
+		var n T
+		for ; i < len(s); i++ {
+			c := s[i] - '0'
+			if c > 9 {
+				return 0, false
+			}
+			d := T(c)
+			if n > cutoff || (n == cutoff && d > rem) {
 				return 0, false
 			}
 			n = n*10 + d
-		} else {
-			if n < minCutoff || (n == minCutoff && d > minRem) {
-				return 0, false
-			}
-			n = n*10 - d
 		}
+		return n, true
+	}
+
+	cutoff := min / 10
+	rem := -(min - cutoff*10)
+	var n T
+	for ; i < len(s); i++ {
+		c := s[i] - '0'
+		if c > 9 {
+			return 0, false
+		}
+		d := T(c)
+		if n < cutoff || (n == cutoff && d > rem) {
+			return 0, false
+		}
+		n = n*10 - d
 	}
 	return n, true
 }
@@ -91,16 +98,18 @@ func parseUnsigned[S byteSeq, T Unsigned](s S, max T) (T, bool) {
 	if len(s) == 0 {
 		return 0, false
 	}
+
+	i := 0
 	cutoff := max / 10
-	maxRem := max - cutoff*10
+	rem := max - cutoff*10
 	var n T
-	for i := 0; i < len(s); i++ {
-		c := s[i]
-		if c < '0' || c > '9' {
+	for ; i < len(s); i++ {
+		c := s[i] - '0'
+		if c > 9 {
 			return 0, false
 		}
-		d := T(c - '0')
-		if n > cutoff || (n == cutoff && d > maxRem) {
+		d := T(c)
+		if n > cutoff || (n == cutoff && d > rem) {
 			return 0, false
 		}
 		n = n*10 + d
