@@ -37,15 +37,6 @@ func Test_ParseUint(t *testing.T) {
 func Benchmark_ParseUint(b *testing.B) {
 	input := "123456789"
 
-	b.Run("default", func(b *testing.B) {
-		b.ReportAllocs()
-		for n := 0; n < b.N; n++ {
-			_, err := strconv.ParseUint(input, 10, 64)
-			if err != nil {
-				b.Fatal(err)
-			}
-		}
-	})
 	b.Run("fiber", func(b *testing.B) {
 		b.ReportAllocs()
 		for n := 0; n < b.N; n++ {
@@ -61,6 +52,15 @@ func Benchmark_ParseUint(b *testing.B) {
 			_, ok := ParseUint([]byte(input))
 			if !ok {
 				b.Fatal("failed to parse uint from bytes")
+			}
+		}
+	})
+	b.Run("default", func(b *testing.B) {
+		b.ReportAllocs()
+		for n := 0; n < b.N; n++ {
+			_, err := strconv.ParseUint(input, 10, 64)
+			if err != nil {
+				b.Fatal(err)
 			}
 		}
 	})
@@ -98,15 +98,6 @@ func Test_ParseInt(t *testing.T) {
 func Benchmark_ParseInt(b *testing.B) {
 	input := "123456789"
 
-	b.Run("default", func(b *testing.B) {
-		b.ReportAllocs()
-		for n := 0; n < b.N; n++ {
-			_, err := strconv.ParseInt(input, 10, 64)
-			if err != nil {
-				b.Fatal(err)
-			}
-		}
-	})
 	b.Run("fiber", func(b *testing.B) {
 		b.ReportAllocs()
 		for n := 0; n < b.N; n++ {
@@ -122,6 +113,15 @@ func Benchmark_ParseInt(b *testing.B) {
 			_, ok := ParseInt([]byte(input))
 			if !ok {
 				b.Fatal("failed to parse int from bytes")
+			}
+		}
+	})
+	b.Run("default", func(b *testing.B) {
+		b.ReportAllocs()
+		for n := 0; n < b.N; n++ {
+			_, err := strconv.ParseInt(input, 10, 64)
+			if err != nil {
+				b.Fatal(err)
 			}
 		}
 	})
@@ -158,15 +158,6 @@ func Test_ParseInt32(t *testing.T) {
 func Benchmark_ParseInt32(b *testing.B) {
 	input := "123456789"
 
-	b.Run("default", func(b *testing.B) {
-		b.ReportAllocs()
-		for n := 0; n < b.N; n++ {
-			_, err := strconv.ParseInt(input, 10, 32)
-			if err != nil {
-				b.Fatal(err)
-			}
-		}
-	})
 	b.Run("fiber", func(b *testing.B) {
 		b.ReportAllocs()
 		for n := 0; n < b.N; n++ {
@@ -182,6 +173,15 @@ func Benchmark_ParseInt32(b *testing.B) {
 			_, ok := ParseInt32([]byte(input))
 			if !ok {
 				b.Fatal("failed to parse int32 from bytes")
+			}
+		}
+	})
+	b.Run("default", func(b *testing.B) {
+		b.ReportAllocs()
+		for n := 0; n < b.N; n++ {
+			_, err := strconv.ParseInt(input, 10, 32)
+			if err != nil {
+				b.Fatal(err)
 			}
 		}
 	})
@@ -218,15 +218,6 @@ func Test_ParseInt8(t *testing.T) {
 func Benchmark_ParseInt8(b *testing.B) {
 	input := "127"
 
-	b.Run("default", func(b *testing.B) {
-		b.ReportAllocs()
-		for n := 0; n < b.N; n++ {
-			_, err := strconv.ParseInt(input, 10, 8)
-			if err != nil {
-				b.Fatal(err)
-			}
-		}
-	})
 	b.Run("fiber", func(b *testing.B) {
 		b.ReportAllocs()
 		for n := 0; n < b.N; n++ {
@@ -242,6 +233,15 @@ func Benchmark_ParseInt8(b *testing.B) {
 			_, ok := ParseInt8([]byte(input))
 			if !ok {
 				b.Fatal("failed to parse int8 from bytes")
+			}
+		}
+	})
+	b.Run("default", func(b *testing.B) {
+		b.ReportAllocs()
+		for n := 0; n < b.N; n++ {
+			_, err := strconv.ParseInt(input, 10, 8)
+			if err != nil {
+				b.Fatal(err)
 			}
 		}
 	})
@@ -277,15 +277,6 @@ func Test_ParseUint32(t *testing.T) {
 func Benchmark_ParseUint32(b *testing.B) {
 	input := "123456789"
 
-	b.Run("default", func(b *testing.B) {
-		b.ReportAllocs()
-		for n := 0; n < b.N; n++ {
-			_, err := strconv.ParseUint(input, 10, 32)
-			if err != nil {
-				b.Fatal(err)
-			}
-		}
-	})
 	b.Run("fiber", func(b *testing.B) {
 		b.ReportAllocs()
 		for n := 0; n < b.N; n++ {
@@ -301,6 +292,15 @@ func Benchmark_ParseUint32(b *testing.B) {
 			_, ok := ParseUint32([]byte(input))
 			if !ok {
 				b.Fatal("failed to parse uint32 from bytes")
+			}
+		}
+	})
+	b.Run("default", func(b *testing.B) {
+		b.ReportAllocs()
+		for n := 0; n < b.N; n++ {
+			_, err := strconv.ParseUint(input, 10, 32)
+			if err != nil {
+				b.Fatal(err)
 			}
 		}
 	})
@@ -336,15 +336,6 @@ func Test_ParseUint8(t *testing.T) {
 func Benchmark_ParseUint8(b *testing.B) {
 	input := "255"
 
-	b.Run("default", func(b *testing.B) {
-		b.ReportAllocs()
-		for n := 0; n < b.N; n++ {
-			_, err := strconv.ParseUint(input, 10, 8)
-			if err != nil {
-				b.Fatal(err)
-			}
-		}
-	})
 	b.Run("fiber", func(b *testing.B) {
 		b.ReportAllocs()
 		for n := 0; n < b.N; n++ {
@@ -360,6 +351,15 @@ func Benchmark_ParseUint8(b *testing.B) {
 			_, ok := ParseUint8([]byte(input))
 			if !ok {
 				b.Fatal("failed to parse uint8 from bytes")
+			}
+		}
+	})
+	b.Run("default", func(b *testing.B) {
+		b.ReportAllocs()
+		for n := 0; n < b.N; n++ {
+			_, err := strconv.ParseUint(input, 10, 8)
+			if err != nil {
+				b.Fatal(err)
 			}
 		}
 	})

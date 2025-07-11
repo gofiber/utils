@@ -42,6 +42,26 @@ func ParseUint8[S byteSeq](s S) (uint8, bool) {
 	return parseUnsigned[S, uint8](s, uint8(math.MaxUint8))
 }
 
+// parseDigits parses a sequence of digits and returns the uint64 value and success.
+// Returns (0, false) if any non-digit is encountered or overflow happens.
+func parseDigits[S byteSeq](s S, i int) (uint64, bool) {
+	var n uint64
+	for ; i < len(s); i++ {
+		c := s[i] - '0'
+		if c > 9 {
+			return 0, false
+		}
+		nn := n*10 + uint64(c)
+		if nn < n {
+			return 0, false
+		}
+		n = nn
+	}
+	return n, true
+}
+
+// parseSigned parses a decimal ASCII string or byte slice into a signed integer type T.
+// It supports optional '+' or '-' prefix, checks for overflow and underflow, and returns (0, false) on error.
 func parseSigned[S byteSeq, T Signed](s S, min, max T) (T, bool) {
 	if len(s) == 0 {
 		return 0, false
@@ -60,26 +80,21 @@ func parseSigned[S byteSeq, T Signed](s S, min, max T) (T, bool) {
 		return 0, false
 	}
 
-	var n uint64
-	for ; i < len(s); i++ {
-		c := s[i] - '0'
-		if c > 9 {
-			return 0, false
-		}
-		nn := n*10 + uint64(c)
-		if nn < n {
-			return 0, false
-		}
-		n = nn
+	// Parse digits
+	n, ok := parseDigits(s, i)
+	if !ok {
+		return 0, false
 	}
 
 	if !neg {
+		// Check for overflow
 		if n > uint64(int64(max)) {
 			return 0, false
 		}
 		return T(n), true
 	}
 
+	// Check for underflow
 	minAbs := uint64(-int64(min))
 	if n > minAbs {
 		return 0, false
@@ -88,6 +103,8 @@ func parseSigned[S byteSeq, T Signed](s S, min, max T) (T, bool) {
 	return T(-int64(n)), true
 }
 
+// parseUnsigned parses a decimal ASCII string or byte slice into an unsigned integer type T.
+// It does not support sign prefixes, checks for overflow, and returns (0, false) on error.
 func parseUnsigned[S byteSeq, T Unsigned](s S, max T) (T, bool) {
 	if len(s) == 0 {
 		return 0, false
@@ -95,22 +112,11 @@ func parseUnsigned[S byteSeq, T Unsigned](s S, max T) (T, bool) {
 
 	i := 0
 
-	var n uint64
-	for ; i < len(s); i++ {
-		c := s[i] - '0'
-		if c > 9 {
-			return 0, false
-		}
-		nn := n*10 + uint64(c)
-		if nn < n {
-			return 0, false
-		}
-		n = nn
-	}
-
-	if n > uint64(max) {
+	// Parse digits
+	n, ok := parseDigits(s, i)
+	// Check for overflow
+	if !ok || n > uint64(max) {
 		return 0, false
 	}
-
 	return T(n), true
 }
