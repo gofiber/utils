@@ -59,6 +59,11 @@ func parseSigned[S byteSeq, T Signed](s S, min, max T) (T, bool) {
 		return 0, false
 	}
 
+	maxCutoff := max / 10
+	maxRem := max - maxCutoff*10
+	minCutoff := min / 10
+	minRem := -(min - minCutoff*10)
+
 	var n T
 	for ; i < len(s); i++ {
 		c := s[i]
@@ -68,19 +73,16 @@ func parseSigned[S byteSeq, T Signed](s S, min, max T) (T, bool) {
 		d := T(c - '0')
 
 		if !neg {
-			if n > (max-d)/10 {
+			if n > maxCutoff || (n == maxCutoff && d > maxRem) {
 				return 0, false
 			}
 			n = n*10 + d
 		} else {
-			if n < (min+d)/10 {
+			if n < minCutoff || (n == minCutoff && d > minRem) {
 				return 0, false
 			}
 			n = n*10 - d
 		}
-	}
-	if n < min || n > max {
-		return 0, false
 	}
 	return n, true
 }
@@ -89,6 +91,8 @@ func parseUnsigned[S byteSeq, T Unsigned](s S, max T) (T, bool) {
 	if len(s) == 0 {
 		return 0, false
 	}
+	cutoff := max / 10
+	maxRem := max - cutoff*10
 	var n T
 	for i := 0; i < len(s); i++ {
 		c := s[i]
@@ -96,8 +100,7 @@ func parseUnsigned[S byteSeq, T Unsigned](s S, max T) (T, bool) {
 			return 0, false
 		}
 		d := T(c - '0')
-		// Overflow check before multiplication and addition
-		if n > (max-d)/10 {
+		if n > cutoff || (n == cutoff && d > maxRem) {
 			return 0, false
 		}
 		n = n*10 + d
