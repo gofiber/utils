@@ -216,61 +216,49 @@ func Test_NonASCII_Unchanged(t *testing.T) {
 }
 
 func Benchmark_ToUpper(b *testing.B) {
-	for _, tc := range testCases {
-		b.Run(tc.name, func(b *testing.B) {
-			b.ReportAllocs()
-			b.SetBytes(int64(len(tc.input)))
-			b.ResetTimer()
-			var res string
-			for n := 0; n < b.N; n++ {
-				res = ToUpper(tc.input)
-			}
-			require.Equal(b, tc.upper, res)
-		})
-	}
+	input := "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+-=[]{}|;:',.<>/?`~"
+	expected := strings.ToUpper(input)
+
+	b.Run("fiber", func(b *testing.B) {
+		b.ReportAllocs()
+		b.ResetTimer()
+		var res string
+		for n := 0; n < b.N; n++ {
+			res = ToUpper(input)
+		}
+		require.Equal(b, expected, res)
+	})
+	b.Run("default", func(b *testing.B) {
+		b.ReportAllocs()
+		b.ResetTimer()
+		var res string
+		for n := 0; n < b.N; n++ {
+			res = strings.ToUpper(input)
+		}
+		require.Equal(b, expected, res)
+	})
 }
 
 func Benchmark_ToLower(b *testing.B) {
-	for _, tc := range testCases {
-		b.Run(tc.name, func(b *testing.B) {
-			b.ReportAllocs()
-			b.SetBytes(int64(len(tc.input)))
-			b.ResetTimer()
-			var res string
-			for n := 0; n < b.N; n++ {
-				res = ToLower(tc.input)
-			}
-			require.Equal(b, tc.lower, res)
-		})
-	}
-}
+	input := "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+-=[]{}|;:',.<>/?`~"
+	expected := strings.ToLower(input)
 
-func Benchmark_StdToUpper(b *testing.B) {
-	for _, tc := range testCases {
-		b.Run(tc.name, func(b *testing.B) {
-			b.ReportAllocs()
-			b.SetBytes(int64(len(tc.input)))
-			b.ResetTimer()
-			var res string
-			for n := 0; n < b.N; n++ {
-				res = strings.ToUpper(tc.input)
-			}
-			require.Equal(b, tc.upper, res)
-		})
-	}
-}
-
-func Benchmark_StdToLower(b *testing.B) {
-	for _, tc := range testCases {
-		b.Run(tc.name, func(b *testing.B) {
-			b.ReportAllocs()
-			b.SetBytes(int64(len(tc.input)))
-			b.ResetTimer()
-			var res string
-			for n := 0; n < b.N; n++ {
-				res = strings.ToLower(tc.input)
-			}
-			require.Equal(b, tc.lower, res)
-		})
-	}
+	b.Run("fiber", func(b *testing.B) {
+		b.ReportAllocs()
+		b.ResetTimer()
+		var res string
+		for n := 0; n < b.N; n++ {
+			res = ToLower(input)
+		}
+		require.Equal(b, expected, res)
+	})
+	b.Run("default", func(b *testing.B) {
+		b.ReportAllocs()
+		b.ResetTimer()
+		var res string
+		for n := 0; n < b.N; n++ {
+			res = strings.ToLower(input)
+		}
+		require.Equal(b, expected, res)
+	})
 }

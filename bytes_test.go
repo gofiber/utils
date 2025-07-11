@@ -38,38 +38,39 @@ func Test_ToUpperBytes(t *testing.T) {
 }
 
 func Benchmark_ToLowerBytes(b *testing.B) {
-	path := []byte(largeStr)
-	want := []byte(lowerStr)
+	input := []byte("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+-=[]{}|;:',.<>/?`~")
+	expected := bytes.ToLower(input)
 	var res []byte
 
 	b.Run("fiber", func(b *testing.B) {
 		for n := 0; n < b.N; n++ {
-			res = ToLowerBytes(path)
+			res = ToLowerBytes(input)
 		}
-		require.True(b, bytes.Equal(want, res))
+		require.True(b, bytes.Equal(expected, res))
 	})
 	b.Run("default", func(b *testing.B) {
 		for n := 0; n < b.N; n++ {
-			res = bytes.ToLower(path)
+			res = bytes.ToLower(input)
 		}
-		require.True(b, bytes.Equal(want, res))
+		require.True(b, bytes.Equal(expected, res))
 	})
 }
 
 func Benchmark_ToUpperBytes(b *testing.B) {
-	path := []byte(largeStr)
-	want := []byte(upperStr)
+	input := []byte("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+-=[]{}|;:',.<>/?`~")
+	expected := bytes.ToUpper(input)
 	var res []byte
+
 	b.Run("fiber", func(b *testing.B) {
 		for n := 0; n < b.N; n++ {
-			res = ToUpperBytes(path)
+			res = ToUpperBytes(input)
 		}
-		require.Equal(b, want, res)
+		require.Equal(b, expected, res)
 	})
 	b.Run("default", func(b *testing.B) {
 		for n := 0; n < b.N; n++ {
-			res = bytes.ToUpper(path)
+			res = bytes.ToUpper(input)
 		}
-		require.Equal(b, want, res)
+		require.Equal(b, expected, res)
 	})
 }
