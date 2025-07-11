@@ -21,6 +21,32 @@ func Test_FunctionName(t *testing.T) {
 
 	dummyint := 20
 	require.Equal(t, "int", FunctionName(dummyint))
+
+	// nil interface should return empty string
+	require.Equal(t, "", FunctionName(nil))
+
+	// typed nil function should also return empty string
+	var nilFunc func()
+	require.Equal(t, "", FunctionName(nilFunc))
+
+	// typed nil custom func should return empty string
+	type myFunc func()
+	var mf myFunc
+	require.Equal(t, "", FunctionName(mf))
+
+	// typed nil function inside interface should return empty string
+	var iface any = mf
+	require.Equal(t, "", FunctionName(iface))
+
+	// typed nil pointer should return its type name
+	var ptr *int
+	require.Equal(t, "*int", FunctionName(ptr))
+
+	// struct and pointer types should include package name
+	type sampleStruct struct{}
+	var s sampleStruct
+	require.Equal(t, "utils.sampleStruct", FunctionName(s))
+	require.Equal(t, "*utils.sampleStruct", FunctionName(&s))
 }
 
 func Test_UUID(t *testing.T) {
@@ -132,6 +158,7 @@ func Test_ConvertToBytes(t *testing.T) {
 	require.Equal(t, 0, ConvertToBytes("MB"))
 	require.Equal(t, 0, ConvertToBytes("invalidunit"))
 	require.Equal(t, 42, ConvertToBytes("42X"))     // invalid unit
+	require.Equal(t, 123, ConvertToBytes("123a k")) // invalid unit
 	require.Equal(t, 0, ConvertToBytes("42.5.5MB")) // invalid format
 
 	// Test decimal numbers with various units
@@ -193,6 +220,28 @@ func Test_IncrementIPRange(t *testing.T) {
 		{net.IP{192, 168, 1, 254}, net.IP{192, 168, 1, 255}},
 		{net.IP{192, 168, 1, 255}, net.IP{192, 168, 2, 0}},
 		{net.IP{255, 255, 255, 255}, net.IP{0, 0, 0, 0}},
+	}
+
+	for _, c := range cases {
+		c := c
+		t.Run(c.input.String(), func(t *testing.T) {
+			t.Parallel()
+			IncrementIPRange(c.input)
+			require.Equal(t, c.expected, c.input)
+		})
+	}
+}
+
+// Additional coverage for IncrementIPRange using IPv6 addresses
+func Test_IncrementIPRange_IPv6(t *testing.T) {
+	t.Parallel()
+
+	cases := []struct {
+		input    net.IP
+		expected net.IP
+	}{
+		{net.IP{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, net.IP{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1}},
+		{net.IP{0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff}, net.IP{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}},
 	}
 
 	for _, c := range cases {
