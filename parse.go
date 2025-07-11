@@ -94,19 +94,23 @@ func parseUnsigned[S byteSeq, T Unsigned](s S, max T) (T, bool) {
 	}
 
 	i := 0
-	cutoff := max / 10
-	rem := max - cutoff*10
-	var n T
+
+	var n uint64
 	for ; i < len(s); i++ {
 		c := s[i] - '0'
 		if c > 9 {
 			return 0, false
 		}
-		d := T(c)
-		if n > cutoff || (n == cutoff && d > rem) {
+		nn := n*10 + uint64(c)
+		if nn < n {
 			return 0, false
 		}
-		n = n*10 + d
+		n = nn
 	}
-	return n, true
+
+	if n > uint64(max) {
+		return 0, false
+	}
+
+	return T(n), true
 }
