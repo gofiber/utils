@@ -55,34 +55,50 @@ const (
 // The unit that results in the smallest number greater than or equal to 1 is always chosen.
 func ByteSize(bytes uint64) string {
 	unit := ""
-	value := float64(bytes)
+	div := uint64(1)
 	switch {
 	case bytes >= uExabyte:
 		unit = "EB"
-		value /= uExabyte
+		div = uExabyte
 	case bytes >= uPetabyte:
 		unit = "PB"
-		value /= uPetabyte
+		div = uPetabyte
 	case bytes >= uTerabyte:
 		unit = "TB"
-		value /= uTerabyte
+		div = uTerabyte
 	case bytes >= uGigabyte:
 		unit = "GB"
-		value /= uGigabyte
+		div = uGigabyte
 	case bytes >= uMegabyte:
 		unit = "MB"
-		value /= uMegabyte
+		div = uMegabyte
 	case bytes >= uKilobyte:
 		unit = "KB"
-		value /= uKilobyte
+		div = uKilobyte
 	case bytes >= uByte:
 		unit = "B"
 	default:
 		return "0B"
 	}
-	result := strconv.FormatFloat(value, 'f', 1, 64)
-	result = strings.TrimSuffix(result, ".0")
-	return result + unit
+
+	buf := make([]byte, 0, 16)
+	if div == 1 {
+		buf = strconv.AppendUint(buf, bytes, 10)
+		buf = append(buf, unit...)
+		return UnsafeString(buf)
+	}
+
+	scaled := (bytes*10 + div/2) / div
+	integer := scaled / 10
+	fractional := scaled % 10
+
+	buf = strconv.AppendUint(buf, integer, 10)
+	if fractional > 0 {
+		buf = append(buf, '.')
+		buf = strconv.AppendUint(buf, fractional, 10)
+	}
+	buf = append(buf, unit...)
+	return UnsafeString(buf)
 }
 
 // ToString Change arg to string

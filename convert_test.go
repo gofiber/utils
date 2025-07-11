@@ -6,6 +6,7 @@ package utils
 
 import (
 	"reflect"
+	"strconv"
 	"testing"
 	"time"
 
@@ -294,4 +295,34 @@ func Benchmark_UnsafeString(b *testing.B) {
 		}
 		require.Equal(b, "Hello, World!", res)
 	})
+}
+
+// go test -v -run=^$ -bench=ByteSize -benchmem -count=4
+func Benchmark_ByteSize(b *testing.B) {
+	testCases := []uint64{
+		0,
+		1,
+		500,
+		1024,
+		1126,
+		1024 * 1024,
+		1126 * 1024,
+		1024 * 1024 * 1024,
+		1126 * 1024 * 1024,
+		1024 * 1024 * 1024 * 1024,
+		1126 * 1024 * 1024 * 1024,
+		1024 * 1024 * 1024 * 1024 * 1024,
+		1126 * 1024 * 1024 * 1024 * 1024,
+		1024 * 1024 * 1024 * 1024 * 1024 * 1024,
+		1126 * 1024 * 1024 * 1024 * 1024 * 1024,
+	}
+	for _, bytes := range testCases {
+		b.Run(strconv.FormatUint(bytes, 10), func(b *testing.B) {
+			b.ResetTimer()
+			b.ReportAllocs()
+			for i := 0; i < b.N; i++ {
+				_ = ByteSize(bytes)
+			}
+		})
+	}
 }
