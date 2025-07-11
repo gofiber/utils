@@ -6,6 +6,7 @@ package utils
 
 import (
 	"fmt"
+	"math"
 	"reflect"
 	"strconv"
 	"strings"
@@ -53,7 +54,9 @@ const (
 
 // ByteSize returns a human-readable byte string of the form 10M, 12.5K, and so forth.
 // The unit that results in the smallest number greater than or equal to 1 is always chosen.
+// Maximum supported input is math.MaxUint64 / 10 (≈ 1844674407370955161).
 func ByteSize(bytes uint64) string {
+	const maxSafe = math.MaxUint64 / 10
 	unit := ""
 	div := uint64(1)
 	switch {
@@ -84,6 +87,13 @@ func ByteSize(bytes uint64) string {
 	buf := make([]byte, 0, 16)
 	if div == 1 {
 		buf = strconv.AppendUint(buf, bytes, 10)
+		buf = append(buf, unit...)
+		return UnsafeString(buf)
+	}
+
+	if bytes > maxSafe {
+		// Guard: return capped value for overflow
+		buf = strconv.AppendUint(buf, maxSafe, 10)
 		buf = append(buf, unit...)
 		return UnsafeString(buf)
 	}

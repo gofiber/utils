@@ -5,6 +5,7 @@
 package utils
 
 import (
+	"math"
 	"reflect"
 	"strconv"
 	"testing"
@@ -231,6 +232,18 @@ func TestByteSize(t *testing.T) {
 			require.Equal(t, tt.expected, result)
 		})
 	}
+
+	const maxSafe = math.MaxUint64 / 10
+	t.Run("MaxSafe", func(t *testing.T) {
+		result := ByteSize(maxSafe)
+		require.Contains(t, result, "B")
+	})
+
+	t.Run("Overflow", func(t *testing.T) {
+		result := ByteSize(maxSafe + 1)
+		require.Contains(t, result, "B")
+		require.Equal(t, ByteSize(maxSafe), result)
+	})
 }
 
 // go test -v -run=^$ -bench=ToString -benchmem -count=4
