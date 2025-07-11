@@ -1,6 +1,8 @@
 package utils
 
-import "math"
+import (
+	"math"
+)
 
 type Signed interface {
 	~int | ~int8 | ~int16 | ~int32 | ~int64
@@ -62,7 +64,7 @@ func parseDigits[S byteSeq](s S, i int) (uint64, bool) {
 
 // parseSigned parses a decimal ASCII string or byte slice into a signed integer type T.
 // It supports optional '+' or '-' prefix, checks for overflow and underflow, and returns (0, false) on error.
-func parseSigned[S byteSeq, T Signed](s S, min, max T) (T, bool) {
+func parseSigned[S byteSeq, T Signed](s S, minRange, maxRange T) (T, bool) {
 	if len(s) == 0 {
 		return 0, false
 	}
@@ -88,14 +90,14 @@ func parseSigned[S byteSeq, T Signed](s S, min, max T) (T, bool) {
 
 	if !neg {
 		// Check for overflow
-		if n > uint64(int64(max)) {
+		if n > uint64(int64(maxRange)) {
 			return 0, false
 		}
 		return T(n), true
 	}
 
 	// Check for underflow
-	minAbs := uint64(-int64(min))
+	minAbs := uint64(-int64(minRange))
 	if n > minAbs {
 		return 0, false
 	}
@@ -105,7 +107,7 @@ func parseSigned[S byteSeq, T Signed](s S, min, max T) (T, bool) {
 
 // parseUnsigned parses a decimal ASCII string or byte slice into an unsigned integer type T.
 // It does not support sign prefixes, checks for overflow, and returns (0, false) on error.
-func parseUnsigned[S byteSeq, T Unsigned](s S, max T) (T, bool) {
+func parseUnsigned[S byteSeq, T Unsigned](s S, maxRange T) (T, bool) {
 	if len(s) == 0 {
 		return 0, false
 	}
@@ -115,7 +117,7 @@ func parseUnsigned[S byteSeq, T Unsigned](s S, max T) (T, bool) {
 	// Parse digits
 	n, ok := parseDigits(s, i)
 	// Check for overflow
-	if !ok || n > uint64(max) {
+	if !ok || n > uint64(maxRange) {
 		return 0, false
 	}
 	return T(n), true

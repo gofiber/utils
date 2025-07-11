@@ -95,6 +95,32 @@ func Test_ParseInt(t *testing.T) {
 	}
 }
 
+func Test_ParseInt_SignOnly(t *testing.T) {
+	t.Parallel()
+
+	tests := []string{"+", "-"}
+	for _, in := range tests {
+		v, ok := ParseInt(in)
+		require.False(t, ok)
+		require.Equal(t, int64(0), v)
+		b, ok := ParseInt([]byte(in))
+		require.False(t, ok)
+		require.Equal(t, int64(0), b)
+	}
+}
+
+func Test_ParseUnsigned_SignOnly(t *testing.T) {
+	t.Parallel()
+
+	in := "+"
+	v, ok := ParseUint(in)
+	require.False(t, ok)
+	require.Equal(t, uint64(0), v)
+	b, ok := ParseUint([]byte(in))
+	require.False(t, ok)
+	require.Equal(t, uint64(0), b)
+}
+
 func Benchmark_ParseInt(b *testing.B) {
 	input := "123456789"
 
