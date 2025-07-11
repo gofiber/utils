@@ -135,6 +135,47 @@ Benchmark_CalculateTimestamp/fiber-12        1000000000       0.2935 ns/op      
 Benchmark_CalculateTimestamp/default-12        15740576        73.79 ns/op       0 B/op       0 allocs/op
 Benchmark_CalculateTimestamp/default-12        15789036        71.12 ns/op       0 B/op       0 allocs/op
 
+Benchmark_ParseUint/fiber-12                  190390941	       6.292 ns/op       0 B/op       0 allocs/op
+Benchmark_ParseUint/fiber-12                  187968758	       6.400 ns/op       0 B/op       0 allocs/op
+Benchmark_ParseUint/fiber_bytes-12            181957326	       6.809 ns/op       0 B/op       0 allocs/op
+Benchmark_ParseUint/fiber_bytes-12            182275550	       6.558 ns/op       0 B/op       0 allocs/op
+Benchmark_ParseUint/default-12                 88281543	       13.52 ns/op       0 B/op       0 allocs/op
+Benchmark_ParseUint/default-12                 88967146	       13.41 ns/op       0 B/op       0 allocs/op
+
+Benchmark_ParseInt/fiber-12                   181353142	       6.723 ns/op       0 B/op       0 allocs/op
+Benchmark_ParseInt/fiber-12                   180631305	       6.578 ns/op       0 B/op       0 allocs/op
+Benchmark_ParseInt/fiber_bytes-12             175220041	       6.892 ns/op       0 B/op       0 allocs/op
+Benchmark_ParseInt/fiber_bytes-12             171838354	       7.020 ns/op       0 B/op       0 allocs/op
+Benchmark_ParseInt/default-12                  76055068	       15.77 ns/op       0 B/op       0 allocs/op
+Benchmark_ParseInt/default-12                  75963992	       15.55 ns/op       0 B/op       0 allocs/op
+
+Benchmark_ParseInt32/fiber-12                 179962680	       6.631 ns/op       0 B/op       0 allocs/op
+Benchmark_ParseInt32/fiber-12                 181285437	       6.570 ns/op       0 B/op       0 allocs/op
+Benchmark_ParseInt32/fiber_bytes-12           173786900	       6.901 ns/op       0 B/op       0 allocs/op
+Benchmark_ParseInt32/fiber_bytes-12           171283489	       7.069 ns/op       0 B/op       0 allocs/op
+Benchmark_ParseInt32/default-12                69845103	       15.75 ns/op       0 B/op       0 allocs/op
+Benchmark_ParseInt32/default-12                76438194	       15.66 ns/op       0 B/op       0 allocs/op
+
+Benchmark_ParseInt8/fiber-12                  286492362	       4.148 ns/op       0 B/op       0 allocs/op
+Benchmark_ParseInt8/fiber-12                  282957276	       4.147 ns/op       0 B/op       0 allocs/op
+Benchmark_ParseInt8/fiber_bytes-12            270179119	       4.481 ns/op       0 B/op       0 allocs/op
+Benchmark_ParseInt8/fiber_bytes-12            258238294	       4.522 ns/op       0 B/op       0 allocs/op
+Benchmark_ParseInt8/default-12                135063286	       8.831 ns/op       0 B/op       0 allocs/op
+Benchmark_ParseInt8/default-12                140703313	       8.528 ns/op       0 B/op       0 allocs/op
+
+Benchmark_ParseUint32/fiber-12                184411585	       6.568 ns/op       0 B/op       0 allocs/op
+Benchmark_ParseUint32/fiber-12                184338627	       6.543 ns/op       0 B/op       0 allocs/op
+Benchmark_ParseUint32/fiber_bytes-12          178475793	       6.759 ns/op       0 B/op       0 allocs/op
+Benchmark_ParseUint32/fiber_bytes-12          178517788	       7.052 ns/op       0 B/op       0 allocs/op
+Benchmark_ParseUint32/default-12               83775481	       13.41 ns/op       0 B/op       0 allocs/op
+Benchmark_ParseUint32/default-12               88117585	       13.51 ns/op       0 B/op       0 allocs/op
+
+Benchmark_ParseUint8/fiber-12                 401799110	       3.046 ns/op       0 B/op       0 allocs/op
+Benchmark_ParseUint8/fiber-12                 380578648	       3.036 ns/op       0 B/op       0 allocs/op
+Benchmark_ParseUint8/fiber_bytes-12           363442573	       3.344 ns/op       0 B/op       0 allocs/op
+Benchmark_ParseUint8/fiber_bytes-12           357869246	       3.346 ns/op       0 B/op       0 allocs/op
+Benchmark_ParseUint8/default-12               184238403	       6.788 ns/op       0 B/op       0 allocs/op
+Benchmark_ParseUint8/default-12               186525054	       6.454 ns/op       0 B/op       0 allocs/op
 ```
 
 See all the benchmarks under <https://gofiber.github.io/utils/>
