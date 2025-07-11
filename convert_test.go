@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"math"
 	"reflect"
+	"strconv"
 	"testing"
 	"time"
 
@@ -232,6 +233,18 @@ func TestByteSize(t *testing.T) {
 			require.Equal(t, tt.expected, result)
 		})
 	}
+
+	const maxSafe = math.MaxUint64 / 10
+	t.Run("MaxSafe", func(t *testing.T) {
+		result := ByteSize(maxSafe)
+		require.Contains(t, result, "B")
+	})
+
+	t.Run("Overflow", func(t *testing.T) {
+		result := ByteSize(maxSafe + 1)
+		require.Contains(t, result, "B")
+		require.Equal(t, ByteSize(maxSafe), result)
+	})
 }
 
 // Ensure ConvertToBytes caps values exceeding math.MaxInt
@@ -303,4 +316,34 @@ func Benchmark_UnsafeString(b *testing.B) {
 		}
 		require.Equal(b, "Hello, World!", res)
 	})
+}
+
+// go test -v -run=^$ -bench=ByteSize -benchmem -count=4
+func Benchmark_ByteSize(b *testing.B) {
+	testCases := []uint64{
+		0,
+		1,
+		500,
+		uKilobyte,
+		1126,
+		uMegabyte,
+		1126 * uKilobyte,
+		uGigabyte,
+		1126 * uMegabyte,
+		uTerabyte,
+		1126 * uGigabyte,
+		uPetabyte,
+		1126 * uTerabyte,
+		uExabyte,
+		1126 * uPetabyte,
+	}
+	for _, bytes := range testCases {
+		b.Run(strconv.FormatUint(bytes, 10), func(b *testing.B) {
+			b.ResetTimer()
+			b.ReportAllocs()
+			for i := 0; i < b.N; i++ {
+				_ = ByteSize(bytes)
+			}
+		})
+	}
 }
