@@ -135,6 +135,7 @@ func Test_ParseInt32(t *testing.T) {
 		success bool
 	}{
 		{"0", 0, true},
+		{"42", 42, true},
 		{"2147483647", 2147483647, true},
 		{"-2147483648", -2147483648, true},
 		{"2147483648", 0, false},
@@ -194,6 +195,7 @@ func Test_ParseInt8(t *testing.T) {
 		success bool
 	}{
 		{"0", 0, true},
+		{"42", 42, true},
 		{"127", 127, true},
 		{"-128", -128, true},
 		{"128", 0, false},
@@ -253,6 +255,7 @@ func Test_ParseUint32(t *testing.T) {
 		success bool
 	}{
 		{"0", 0, true},
+		{"42", 42, true},
 		{"4294967295", 4294967295, true},
 		{"4294967296", 0, false},
 		{"-1", 0, false},
@@ -311,6 +314,7 @@ func Test_ParseUint8(t *testing.T) {
 		success bool
 	}{
 		{"0", 0, true},
+		{"42", 42, true},
 		{"255", 255, true},
 		{"256", 0, false},
 		{"-1", 0, false},
