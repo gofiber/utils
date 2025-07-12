@@ -122,3 +122,109 @@ func parseUnsigned[S byteSeq, T Unsigned](s S, maxRange T) (T, bool) {
 	}
 	return T(n), true
 }
+
+// ParseFloat parses a decimal ASCII string or byte slice into a float64.
+// Supports optional sign, fractional part and exponent. Returns (0, false) on error or overflow.
+func ParseFloat[S byteSeq](s S) (float64, bool) {
+	if len(s) == 0 {
+		return 0, false
+	}
+	i := 0
+	neg := false
+	switch s[0] {
+	case '-':
+		neg = true
+		i++
+	case '+':
+		i++
+	}
+	if i == len(s) {
+		return 0, false
+	}
+
+	var intPart uint64
+	for i < len(s) {
+		c := s[i] - '0'
+		if c > 9 {
+			break
+		}
+		nn := intPart*10 + uint64(c)
+		if nn < intPart {
+			return 0, false
+		}
+		intPart = nn
+		i++
+	}
+
+	var fracPart uint64
+	var fracDiv uint64 = 1
+	if i < len(s) && s[i] == '.' {
+		i++
+		if i == len(s) {
+			return 0, false
+		}
+		for i < len(s) {
+			c := s[i] - '0'
+			if c > 9 {
+				break
+			}
+			if fracDiv < 1e16 {
+				fracPart = fracPart*10 + uint64(c)
+				fracDiv *= 10
+			}
+			i++
+		}
+	}
+
+	var expSign bool
+	var exp int64
+	if i < len(s) && (s[i] == 'e' || s[i] == 'E') {
+		i++
+		if i == len(s) {
+			return 0, false
+		}
+		switch s[i] {
+		case '-':
+			expSign = true
+			i++
+		case '+':
+			i++
+		}
+		if i == len(s) {
+			return 0, false
+		}
+		for i < len(s) {
+			c := s[i] - '0'
+			if c > 9 {
+				return 0, false
+			}
+			exp = exp*10 + int64(c)
+			if exp > 308 {
+				exp = 309
+			}
+			i++
+		}
+	}
+
+	if i != len(s) {
+		return 0, false
+	}
+	if expSign {
+		exp = -exp
+	}
+
+	f := float64(intPart)
+	if fracPart > 0 {
+		f += float64(fracPart) / float64(fracDiv)
+	}
+	if exp != 0 {
+		f *= math.Pow10(int(exp))
+	}
+	if neg {
+		f = -f
+	}
+	if math.IsInf(f, 0) || math.IsNaN(f) {
+		return 0, false
+	}
+	return f, true
+}

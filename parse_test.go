@@ -390,3 +390,73 @@ func Benchmark_ParseUint8(b *testing.B) {
 		}
 	})
 }
+
+func Test_ParseFloat(t *testing.T) {
+	t.Parallel()
+	tests := []struct {
+		in      string
+		val     float64
+		success bool
+	}{
+		{"0", 0, true},
+		{"42.5", 42.5, true},
+		{"-3.14", -3.14, true},
+		{"1e2", 100, true},
+		{"-1.2e3", -1200, true},
+		{"1e309", 0, false},
+		{"", 0, false},
+		{"abc", 0, false},
+	}
+	for _, tt := range tests {
+		v, ok := ParseFloat(tt.in)
+		require.Equal(t, tt.success, ok)
+		if ok {
+			if tt.val == 0 {
+				require.Equal(t, tt.val, v)
+			} else {
+				require.InEpsilon(t, tt.val, v, 1e-9)
+			}
+		}
+		bts, ok := ParseFloat([]byte(tt.in))
+		require.Equal(t, tt.success, ok)
+		if ok {
+			if tt.val == 0 {
+				require.Equal(t, tt.val, bts)
+			} else {
+				require.InEpsilon(t, tt.val, bts, 1e-9)
+			}
+		}
+	}
+}
+
+func Benchmark_ParseFloat(b *testing.B) {
+	input := "12345.6789"
+
+	b.Run("fiber", func(b *testing.B) {
+		b.ReportAllocs()
+		for n := 0; n < b.N; n++ {
+			_, ok := ParseFloat(input)
+			if !ok {
+				b.Fatal("failed to parse float")
+			}
+		}
+	})
+	b.Run("fiber_bytes", func(b *testing.B) {
+		b.ReportAllocs()
+		for n := 0; n < b.N; n++ {
+			_, ok := ParseFloat([]byte(input))
+			if !ok {
+				b.Fatal("failed to parse float from bytes")
+			}
+		}
+	})
+	b.Run("default", func(b *testing.B) {
+		b.ReportAllocs()
+		for n := 0; n < b.N; n++ {
+			_, err := strconv.ParseFloat(input, 64)
+			if err != nil {
+				b.Fatal(err)
+			}
+		}
+	})
+}
