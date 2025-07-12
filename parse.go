@@ -160,9 +160,6 @@ func ParseFloat[S byteSeq](s S) (float64, bool) {
 	var fracDiv uint64 = 1
 	if i < len(s) && s[i] == '.' {
 		i++
-		if i == len(s) {
-			return 0, false
-		}
 		for i < len(s) {
 			c := s[i] - '0'
 			if c > 9 {

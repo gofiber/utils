@@ -403,13 +403,19 @@ func Test_ParseFloat(t *testing.T) {
 		{"-3.14", -3.14, true},
 		{"1e2", 100, true},
 		{"-1.2e3", -1200, true},
+		{"1.", 1, true},
+		{".5", 0.5, true},
+		{"1234567891234567891234567", 1234567891234567891234567, true},
+		{"1.2345678912345678", 1.2345678912345678, true}, // large number
+		{"1.2.3", 0, false},
+		{"1e1.0", 0, false},
 		{"1e309", 0, false},
 		{"", 0, false},
 		{"abc", 0, false},
 	}
 	for _, tt := range tests {
 		v, ok := ParseFloat(tt.in)
-		require.Equal(t, tt.success, ok)
+		require.Equal(t, tt.success, ok, "input: %s", tt.in)
 		if ok {
 			if tt.val == 0 {
 				require.Equal(t, tt.val, v)
