@@ -10,17 +10,17 @@ import (
 
 func main() {
 	if err := formatBenchmarks("README.md"); err != nil {
-		fmt.Fprintln(os.Stderr, err)
+		_, _ = fmt.Fprintln(os.Stderr, err) //nolint:errcheck // printing error only
 		os.Exit(1)
 	}
 }
 
 func formatBenchmarks(path string) error {
-	file, err := os.Open(path)
+	file, err := os.Open(path) // #nosec G304
 	if err != nil {
 		return err
 	}
-	defer file.Close()
+	defer file.Close() //nolint:errcheck // No need to check close error
 
 	lines := []string{}
 	scanner := bufio.NewScanner(file)
@@ -120,7 +120,7 @@ func formatBenchmarks(path string) error {
 	if !strings.HasSuffix(out, "\n") {
 		out += "\n"
 	}
-	return os.WriteFile(path, []byte(out), 0o644)
+	return os.WriteFile(path, []byte(out), 0o644) // #nosec G306
 }
 
 func columnWidths(entries [][]string) []int {
