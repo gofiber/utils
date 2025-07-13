@@ -2,11 +2,8 @@
 // 🤖 Github Repository: https://github.com/gofiber/fiber
 // 📌 API Documentation: https://docs.gofiber.io
 //
-// Package utils contains ASCII-optimized string conversion functions for Fiber.
-// This test suite verifies ToUpper and ToLower for correctness and performance,
-// covering HTTP methods, headers, URLs, and string patterns (lowercase, uppercase,
-// camelCase, kebab-case, snake_case, mixed). It ensures no allocations for
-// no-conversion cases and tests SWAR optimization thresholds (15–24 bytes).
+// Package utils provides ASCII-optimized string case conversion functions for Fiber.
+// The test suite verifies ToUpper and ToLower for correctness, performance, and allocation behavior.
 
 package utils
 
@@ -36,14 +33,14 @@ var testCases = []TestCase{
 	{name: "single-lower", input: "a", upper: "A", lower: "a", lowerNoConv: true},
 	{name: "single-upper", input: "A", upper: "A", lower: "a", upperNoConv: true},
 
-	// Conversion Range
+	// ASCII letter conversion tests
 	{name: "lowercase", input: "abcdefghijklmnopqrstuvwxyz", upper: "ABCDEFGHIJKLMNOPQRSTUVWXYZ", lower: "abcdefghijklmnopqrstuvwxyz"},
 	{name: "uppercase", input: "ABCDEFGHIJKLMNOPQRSTUVWXYZ", upper: "ABCDEFGHIJKLMNOPQRSTUVWXYZ", lower: "abcdefghijklmnopqrstuvwxyz"},
 	{name: "mixed-case", input: "aBcDeFgHiJkLmNoPqRsTuVwXyZ", upper: "ABCDEFGHIJKLMNOPQRSTUVWXYZ", lower: "abcdefghijklmnopqrstuvwxyz"},
 
 	// Non-ASCII characters should not be converted
 	{name: "non-ascii", input: "µßäöü", upper: "µßäöü", lower: "µßäöü", upperNoConv: true, lowerNoConv: true},
-	{name: "ascii-mixed-nonascii", input: "Goµ", upper: "GOµ", lower: "goµ"},
+	{name: "mixed-ascii-non-ascii", input: "Goµ", upper: "GOµ", lower: "goµ"},
 }
 
 var benchmarkCases = []TestCase{
