@@ -29,32 +29,32 @@ func ParseInt[S byteSeq](s S) (int64, error) {
 
 // ParseInt32 parses a decimal ASCII string or byte slice into an int32.
 func ParseInt32[S byteSeq](s S) (int32, error) {
-	return parseSigned[S, int32]("ParseInt", s, math.MinInt32, math.MaxInt32)
+	return parseSigned[S, int32]("ParseInt32", s, math.MinInt32, math.MaxInt32)
 }
 
 // ParseInt16 parses a decimal ASCII string or byte slice into an int16.
 func ParseInt16[S byteSeq](s S) (int16, error) {
-	return parseSigned[S, int16]("ParseInt", s, math.MinInt16, math.MaxInt16)
+	return parseSigned[S, int16]("ParseInt16", s, math.MinInt16, math.MaxInt16)
 }
 
 // ParseInt8 parses a decimal ASCII string or byte slice into an int8.
 func ParseInt8[S byteSeq](s S) (int8, error) {
-	return parseSigned[S, int8]("ParseInt", s, math.MinInt8, math.MaxInt8)
+	return parseSigned[S, int8]("ParseInt8", s, math.MinInt8, math.MaxInt8)
 }
 
 // ParseUint32 parses a decimal ASCII string or byte slice into a uint32.
 func ParseUint32[S byteSeq](s S) (uint32, error) {
-	return parseUnsigned[S, uint32]("ParseUint", s, uint32(math.MaxUint32))
+	return parseUnsigned[S, uint32]("ParseUint32", s, uint32(math.MaxUint32))
 }
 
 // ParseUint16 parses a decimal ASCII string or byte slice into a uint16.
 func ParseUint16[S byteSeq](s S) (uint16, error) {
-	return parseUnsigned[S, uint16]("ParseUint", s, uint16(math.MaxUint16))
+	return parseUnsigned[S, uint16]("ParseUint16", s, uint16(math.MaxUint16))
 }
 
 // ParseUint8 parses a decimal ASCII string or byte slice into a uint8.
 func ParseUint8[S byteSeq](s S) (uint8, error) {
-	return parseUnsigned[S, uint8]("ParseUint", s, uint8(math.MaxUint8))
+	return parseUnsigned[S, uint8]("ParseUint8", s, uint8(math.MaxUint8))
 }
 
 // parseDigits parses a sequence of digits and returns the uint64 value.
@@ -252,18 +252,18 @@ func parseFloat[S byteSeq](fn string, s S) (float64, error) {
 // ParseFloat64 parses a decimal ASCII string or byte slice into a float64. It
 // delegates the actual parsing to parseFloat.
 func ParseFloat64[S byteSeq](s S) (float64, error) {
-	return parseFloat[S]("ParseFloat", s)
+	return parseFloat[S]("ParseFloat64", s)
 }
 
 // ParseFloat32 parses a decimal ASCII string or byte slice into a float32. It
 // returns (0, false) on error or if the parsed value overflows float32.
 func ParseFloat32[S byteSeq](s S) (float32, error) {
-	f, err := parseFloat[S]("ParseFloat", s)
+	f, err := parseFloat[S]("ParseFloat32", s)
 	if err != nil {
 		return 0, err
 	}
 	if f > math.MaxFloat32 || f < -math.MaxFloat32 {
-		return 0, &strconv.NumError{Func: "ParseFloat", Num: string(s), Err: strconv.ErrRange}
+		return 0, &strconv.NumError{Func: "ParseFloat32", Num: string(s), Err: strconv.ErrRange}
 	}
 	return float32(f), nil
 }
