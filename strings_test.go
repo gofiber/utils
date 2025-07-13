@@ -49,6 +49,8 @@ var testCases = []TestCase{
 var benchmarkCases = []TestCase{
 	// Benchmark cases for performance testing
 	{name: "empty", input: "", upper: "", lower: "", upperNoConv: true, lowerNoConv: true},
+	{name: "single-lower", input: "a", upper: "A", lower: "a", lowerNoConv: true},
+	{name: "single-upper", input: "A", upper: "A", lower: "a", upperNoConv: true},
 	{name: "numbers", input: "1234567890", upper: "1234567890", lower: "1234567890", upperNoConv: true, lowerNoConv: true},
 	{name: "http-get", input: "get", upper: "GET", lower: "get", lowerNoConv: true},
 	{name: "http-get-upper", input: "GET", upper: "GET", lower: "get", upperNoConv: true},
@@ -120,14 +122,15 @@ func Test_ASCII_EdgeCases(t *testing.T) {
 	// This ensures that all basic ASCII characters are handled correctly.
 	t.Parallel()
 	for i := 0; i < 128; i++ {
-		c := byte(i)
+		idx := i
+		c := byte(idx)
 		s := string(c)
 		upperExpected := strings.ToUpper(s)
 		lowerExpected := strings.ToLower(s)
-		t.Run(fmt.Sprintf("char-%03d", i), func(t *testing.T) {
+		t.Run(fmt.Sprintf("char-%03d", idx), func(t *testing.T) {
 			t.Parallel()
-			require.Equal(t, upperExpected, ToUpper(s), "ToUpper failed for ASCII %d", i)
-			require.Equal(t, lowerExpected, ToLower(s), "ToLower failed for ASCII %d", i)
+			require.Equal(t, upperExpected, ToUpper(s), "ToUpper failed for ASCII %d", idx)
+			require.Equal(t, lowerExpected, ToLower(s), "ToLower failed for ASCII %d", idx)
 		})
 	}
 }
