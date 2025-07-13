@@ -4,6 +4,8 @@ import (
 	"math"
 )
 
+const maxFracDigits = 16
+
 type Signed interface {
 	~int | ~int8 | ~int16 | ~int32 | ~int64
 }
@@ -121,4 +123,133 @@ func parseUnsigned[S byteSeq, T Unsigned](s S, maxRange T) (T, bool) {
 		return 0, false
 	}
 	return T(n), true
+}
+
+// parseFloat parses a decimal ASCII string or byte slice into a float64.
+// It supports optional sign, fractional part and exponent. It returns (0, false)
+// on error or overflow.
+func parseFloat[S byteSeq](s S) (float64, bool) {
+	if len(s) == 0 {
+		return 0, false
+	}
+	i := 0
+	neg := false
+	switch s[0] {
+	case '-':
+		neg = true
+		i++
+	case '+':
+		i++
+	}
+	if i == len(s) {
+		return 0, false
+	}
+
+	var intPart uint64
+	for i < len(s) {
+		c := s[i] - '0'
+		if c > 9 {
+			break
+		}
+		nn := intPart*10 + uint64(c)
+		if nn < intPart {
+			return 0, false
+		}
+		intPart = nn
+		i++
+	}
+
+	var fracPart uint64
+	var fracDiv uint64 = 1
+	var fracDigits int
+	if i < len(s) && s[i] == '.' {
+		i++
+		for i < len(s) {
+			c := s[i] - '0'
+			if c > 9 {
+				break
+			}
+			if fracDigits >= maxFracDigits {
+				return 0, false
+			}
+			fracPart = fracPart*10 + uint64(c)
+			fracDiv *= 10
+			fracDigits++
+			i++
+		}
+	}
+
+	var expSign bool
+	var exp int64
+	if i < len(s) && (s[i] == 'e' || s[i] == 'E') {
+		i++
+		if i == len(s) {
+			return 0, false
+		}
+		switch s[i] {
+		case '-':
+			expSign = true
+			i++
+		case '+':
+			i++
+		}
+		if i == len(s) {
+			return 0, false
+		}
+		for i < len(s) {
+			c := s[i] - '0'
+			if c > 9 {
+				return 0, false
+			}
+			exp = exp*10 + int64(c)
+			if !expSign && exp > 308 {
+				exp = 309
+			}
+			if expSign && exp > 324 {
+				exp = 325
+			}
+			i++
+		}
+	}
+
+	if i != len(s) {
+		return 0, false
+	}
+	if expSign {
+		exp = -exp
+	}
+
+	f := float64(intPart)
+	if fracPart > 0 {
+		f += float64(fracPart) / float64(fracDiv)
+	}
+	if exp != 0 {
+		f *= math.Pow10(int(exp))
+	}
+	if neg {
+		f = -f
+	}
+	if math.IsInf(f, 0) || math.IsNaN(f) {
+		return 0, false
+	}
+	return f, true
+}
+
+// ParseFloat64 parses a decimal ASCII string or byte slice into a float64. It
+// delegates the actual parsing to parseFloat.
+func ParseFloat64[S byteSeq](s S) (float64, bool) {
+	return parseFloat[S](s)
+}
+
+// ParseFloat32 parses a decimal ASCII string or byte slice into a float32. It
+// returns (0, false) on error or if the parsed value overflows float32.
+func ParseFloat32[S byteSeq](s S) (float32, bool) {
+	f, ok := parseFloat[S](s)
+	if !ok {
+		return 0, false
+	}
+	if f > math.MaxFloat32 || f < -math.MaxFloat32 {
+		return 0, false
+	}
+	return float32(f), true
 }
