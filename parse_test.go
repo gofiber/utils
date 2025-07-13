@@ -26,14 +26,14 @@ func Test_ParseUint(t *testing.T) {
 		{"12a", 0, false},
 	}
 	for _, tt := range tests {
-		v, ok := ParseUint(tt.in)
-		require.Equal(t, tt.success, ok)
-		if ok {
+		v, err := ParseUint(tt.in)
+		require.Equal(t, tt.success, err == nil)
+		if err == nil {
 			require.Equal(t, tt.val, v)
 		}
-		b, ok := ParseUint([]byte(tt.in))
-		require.Equal(t, tt.success, ok)
-		if ok {
+		b, err := ParseUint([]byte(tt.in))
+		require.Equal(t, tt.success, err == nil)
+		if err == nil {
 			require.Equal(t, tt.val, b)
 		}
 	}
@@ -42,8 +42,8 @@ func Test_ParseUint(t *testing.T) {
 func Test_ParseUint_Whitespace(t *testing.T) {
 	t.Parallel()
 
-	v, ok := ParseUint(" 123")
-	require.False(t, ok)
+	v, err := ParseUint(" 123")
+	require.Error(t, err)
 	require.Equal(t, uint64(0), v)
 }
 
@@ -53,8 +53,8 @@ func Benchmark_ParseUint(b *testing.B) {
 	b.Run("fiber", func(b *testing.B) {
 		b.ReportAllocs()
 		for n := 0; n < b.N; n++ {
-			_, ok := ParseUint(input)
-			if !ok {
+			_, err := ParseUint(input)
+			if err != nil {
 				b.Fatal("failed to parse uint")
 			}
 		}
@@ -62,8 +62,8 @@ func Benchmark_ParseUint(b *testing.B) {
 	b.Run("fiber_bytes", func(b *testing.B) {
 		b.ReportAllocs()
 		for n := 0; n < b.N; n++ {
-			_, ok := ParseUint([]byte(input))
-			if !ok {
+			_, err := ParseUint([]byte(input))
+			if err != nil {
 				b.Fatal("failed to parse uint from bytes")
 			}
 		}
@@ -100,14 +100,14 @@ func Test_ParseInt(t *testing.T) {
 		{"-", 0, false},
 	}
 	for _, tt := range tests {
-		v, ok := ParseInt(tt.in)
-		require.Equal(t, tt.success, ok)
-		if ok {
+		v, err := ParseInt(tt.in)
+		require.Equal(t, tt.success, err == nil)
+		if err == nil {
 			require.Equal(t, tt.val, v)
 		}
-		b, ok := ParseInt([]byte(tt.in))
-		require.Equal(t, tt.success, ok)
-		if ok {
+		b, err := ParseInt([]byte(tt.in))
+		require.Equal(t, tt.success, err == nil)
+		if err == nil {
 			require.Equal(t, tt.val, b)
 		}
 	}
@@ -118,11 +118,11 @@ func Test_ParseInt_SignOnly(t *testing.T) {
 
 	tests := []string{"+", "-"}
 	for _, in := range tests {
-		v, ok := ParseInt(in)
-		require.False(t, ok)
+		v, err := ParseInt(in)
+		require.Error(t, err)
 		require.Equal(t, int64(0), v)
-		b, ok := ParseInt([]byte(in))
-		require.False(t, ok)
+		b, err := ParseInt([]byte(in))
+		require.Error(t, err)
 		require.Equal(t, int64(0), b)
 	}
 }
@@ -130,8 +130,8 @@ func Test_ParseInt_SignOnly(t *testing.T) {
 func Test_ParseInt_Whitespace(t *testing.T) {
 	t.Parallel()
 
-	v, ok := ParseInt(" 42")
-	require.False(t, ok)
+	v, err := ParseInt(" 42")
+	require.Error(t, err)
 	require.Equal(t, int64(0), v)
 }
 
@@ -139,11 +139,11 @@ func Test_ParseUnsigned_SignOnly(t *testing.T) {
 	t.Parallel()
 
 	in := "+"
-	v, ok := ParseUint(in)
-	require.False(t, ok)
+	v, err := ParseUint(in)
+	require.Error(t, err)
 	require.Equal(t, uint64(0), v)
-	b, ok := ParseUint([]byte(in))
-	require.False(t, ok)
+	b, err := ParseUint([]byte(in))
+	require.Error(t, err)
 	require.Equal(t, uint64(0), b)
 }
 
@@ -153,8 +153,8 @@ func Benchmark_ParseInt(b *testing.B) {
 	b.Run("fiber", func(b *testing.B) {
 		b.ReportAllocs()
 		for n := 0; n < b.N; n++ {
-			_, ok := ParseInt(input)
-			if !ok {
+			_, err := ParseInt(input)
+			if err != nil {
 				b.Fatal("failed to parse int")
 			}
 		}
@@ -162,8 +162,8 @@ func Benchmark_ParseInt(b *testing.B) {
 	b.Run("fiber_bytes", func(b *testing.B) {
 		b.ReportAllocs()
 		for n := 0; n < b.N; n++ {
-			_, ok := ParseInt([]byte(input))
-			if !ok {
+			_, err := ParseInt([]byte(input))
+			if err != nil {
 				b.Fatal("failed to parse int from bytes")
 			}
 		}
@@ -194,14 +194,14 @@ func Test_ParseInt32(t *testing.T) {
 		{"-2147483649", 0, false},
 	}
 	for _, tt := range tests {
-		v, ok := ParseInt32(tt.in)
-		require.Equal(t, tt.success, ok)
-		if ok {
+		v, err := ParseInt32(tt.in)
+		require.Equal(t, tt.success, err == nil)
+		if err == nil {
 			require.Equal(t, tt.val, v)
 		}
-		b, ok := ParseInt32([]byte(tt.in))
-		require.Equal(t, tt.success, ok)
-		if ok {
+		b, err := ParseInt32([]byte(tt.in))
+		require.Equal(t, tt.success, err == nil)
+		if err == nil {
 			require.Equal(t, tt.val, b)
 		}
 	}
@@ -213,8 +213,8 @@ func Benchmark_ParseInt32(b *testing.B) {
 	b.Run("fiber", func(b *testing.B) {
 		b.ReportAllocs()
 		for n := 0; n < b.N; n++ {
-			_, ok := ParseInt32(input)
-			if !ok {
+			_, err := ParseInt32(input)
+			if err != nil {
 				b.Fatal("failed to parse int32")
 			}
 		}
@@ -222,8 +222,8 @@ func Benchmark_ParseInt32(b *testing.B) {
 	b.Run("fiber_bytes", func(b *testing.B) {
 		b.ReportAllocs()
 		for n := 0; n < b.N; n++ {
-			_, ok := ParseInt32([]byte(input))
-			if !ok {
+			_, err := ParseInt32([]byte(input))
+			if err != nil {
 				b.Fatal("failed to parse int32 from bytes")
 			}
 		}
@@ -254,14 +254,14 @@ func Test_ParseInt16(t *testing.T) {
 		{"-32769", 0, false},
 	}
 	for _, tt := range tests {
-		v, ok := ParseInt16(tt.in)
-		require.Equal(t, tt.success, ok)
-		if ok {
+		v, err := ParseInt16(tt.in)
+		require.Equal(t, tt.success, err == nil)
+		if err == nil {
 			require.Equal(t, tt.val, v)
 		}
-		bts, ok := ParseInt16([]byte(tt.in))
-		require.Equal(t, tt.success, ok)
-		if ok {
+		bts, err := ParseInt16([]byte(tt.in))
+		require.Equal(t, tt.success, err == nil)
+		if err == nil {
 			require.Equal(t, tt.val, bts)
 		}
 	}
@@ -273,8 +273,8 @@ func Benchmark_ParseInt16(b *testing.B) {
 	b.Run("fiber", func(b *testing.B) {
 		b.ReportAllocs()
 		for n := 0; n < b.N; n++ {
-			_, ok := ParseInt16(input)
-			if !ok {
+			_, err := ParseInt16(input)
+			if err != nil {
 				b.Fatal("failed to parse int16")
 			}
 		}
@@ -282,8 +282,8 @@ func Benchmark_ParseInt16(b *testing.B) {
 	b.Run("fiber_bytes", func(b *testing.B) {
 		b.ReportAllocs()
 		for n := 0; n < b.N; n++ {
-			_, ok := ParseInt16([]byte(input))
-			if !ok {
+			_, err := ParseInt16([]byte(input))
+			if err != nil {
 				b.Fatal("failed to parse int16 from bytes")
 			}
 		}
@@ -314,14 +314,14 @@ func Test_ParseInt8(t *testing.T) {
 		{"-129", 0, false},
 	}
 	for _, tt := range tests {
-		v, ok := ParseInt8(tt.in)
-		require.Equal(t, tt.success, ok)
-		if ok {
+		v, err := ParseInt8(tt.in)
+		require.Equal(t, tt.success, err == nil)
+		if err == nil {
 			require.Equal(t, tt.val, v)
 		}
-		b, ok := ParseInt8([]byte(tt.in))
-		require.Equal(t, tt.success, ok)
-		if ok {
+		b, err := ParseInt8([]byte(tt.in))
+		require.Equal(t, tt.success, err == nil)
+		if err == nil {
 			require.Equal(t, tt.val, b)
 		}
 	}
@@ -333,8 +333,8 @@ func Benchmark_ParseInt8(b *testing.B) {
 	b.Run("fiber", func(b *testing.B) {
 		b.ReportAllocs()
 		for n := 0; n < b.N; n++ {
-			_, ok := ParseInt8(input)
-			if !ok {
+			_, err := ParseInt8(input)
+			if err != nil {
 				b.Fatal("failed to parse int8")
 			}
 		}
@@ -342,8 +342,8 @@ func Benchmark_ParseInt8(b *testing.B) {
 	b.Run("fiber_bytes", func(b *testing.B) {
 		b.ReportAllocs()
 		for n := 0; n < b.N; n++ {
-			_, ok := ParseInt8([]byte(input))
-			if !ok {
+			_, err := ParseInt8([]byte(input))
+			if err != nil {
 				b.Fatal("failed to parse int8 from bytes")
 			}
 		}
@@ -373,14 +373,14 @@ func Test_ParseUint32(t *testing.T) {
 		{"-1", 0, false},
 	}
 	for _, tt := range tests {
-		v, ok := ParseUint32(tt.in)
-		require.Equal(t, tt.success, ok)
-		if ok {
+		v, err := ParseUint32(tt.in)
+		require.Equal(t, tt.success, err == nil)
+		if err == nil {
 			require.Equal(t, tt.val, v)
 		}
-		b, ok := ParseUint32([]byte(tt.in))
-		require.Equal(t, tt.success, ok)
-		if ok {
+		b, err := ParseUint32([]byte(tt.in))
+		require.Equal(t, tt.success, err == nil)
+		if err == nil {
 			require.Equal(t, tt.val, b)
 		}
 	}
@@ -392,8 +392,8 @@ func Benchmark_ParseUint32(b *testing.B) {
 	b.Run("fiber", func(b *testing.B) {
 		b.ReportAllocs()
 		for n := 0; n < b.N; n++ {
-			_, ok := ParseUint32(input)
-			if !ok {
+			_, err := ParseUint32(input)
+			if err != nil {
 				b.Fatal("failed to parse uint32")
 			}
 		}
@@ -401,8 +401,8 @@ func Benchmark_ParseUint32(b *testing.B) {
 	b.Run("fiber_bytes", func(b *testing.B) {
 		b.ReportAllocs()
 		for n := 0; n < b.N; n++ {
-			_, ok := ParseUint32([]byte(input))
-			if !ok {
+			_, err := ParseUint32([]byte(input))
+			if err != nil {
 				b.Fatal("failed to parse uint32 from bytes")
 			}
 		}
@@ -432,14 +432,14 @@ func Test_ParseUint16(t *testing.T) {
 		{"-1", 0, false},
 	}
 	for _, tt := range tests {
-		v, ok := ParseUint16(tt.in)
-		require.Equal(t, tt.success, ok)
-		if ok {
+		v, err := ParseUint16(tt.in)
+		require.Equal(t, tt.success, err == nil)
+		if err == nil {
 			require.Equal(t, tt.val, v)
 		}
-		bts, ok := ParseUint16([]byte(tt.in))
-		require.Equal(t, tt.success, ok)
-		if ok {
+		bts, err := ParseUint16([]byte(tt.in))
+		require.Equal(t, tt.success, err == nil)
+		if err == nil {
 			require.Equal(t, tt.val, bts)
 		}
 	}
@@ -451,8 +451,8 @@ func Benchmark_ParseUint16(b *testing.B) {
 	b.Run("fiber", func(b *testing.B) {
 		b.ReportAllocs()
 		for n := 0; n < b.N; n++ {
-			_, ok := ParseUint16(input)
-			if !ok {
+			_, err := ParseUint16(input)
+			if err != nil {
 				b.Fatal("failed to parse uint16")
 			}
 		}
@@ -460,8 +460,8 @@ func Benchmark_ParseUint16(b *testing.B) {
 	b.Run("fiber_bytes", func(b *testing.B) {
 		b.ReportAllocs()
 		for n := 0; n < b.N; n++ {
-			_, ok := ParseUint16([]byte(input))
-			if !ok {
+			_, err := ParseUint16([]byte(input))
+			if err != nil {
 				b.Fatal("failed to parse uint16 from bytes")
 			}
 		}
@@ -491,14 +491,14 @@ func Test_ParseUint8(t *testing.T) {
 		{"-1", 0, false},
 	}
 	for _, tt := range tests {
-		v, ok := ParseUint8(tt.in)
-		require.Equal(t, tt.success, ok)
-		if ok {
+		v, err := ParseUint8(tt.in)
+		require.Equal(t, tt.success, err == nil)
+		if err == nil {
 			require.Equal(t, tt.val, v)
 		}
-		b, ok := ParseUint8([]byte(tt.in))
-		require.Equal(t, tt.success, ok)
-		if ok {
+		b, err := ParseUint8([]byte(tt.in))
+		require.Equal(t, tt.success, err == nil)
+		if err == nil {
 			require.Equal(t, tt.val, b)
 		}
 	}
@@ -510,8 +510,8 @@ func Benchmark_ParseUint8(b *testing.B) {
 	b.Run("fiber", func(b *testing.B) {
 		b.ReportAllocs()
 		for n := 0; n < b.N; n++ {
-			_, ok := ParseUint8(input)
-			if !ok {
+			_, err := ParseUint8(input)
+			if err != nil {
 				b.Fatal("failed to parse uint8")
 			}
 		}
@@ -519,8 +519,8 @@ func Benchmark_ParseUint8(b *testing.B) {
 	b.Run("fiber_bytes", func(b *testing.B) {
 		b.ReportAllocs()
 		for n := 0; n < b.N; n++ {
-			_, ok := ParseUint8([]byte(input))
-			if !ok {
+			_, err := ParseUint8([]byte(input))
+			if err != nil {
 				b.Fatal("failed to parse uint8 from bytes")
 			}
 		}
@@ -578,18 +578,18 @@ func Test_ParseFloat64(t *testing.T) {
 		{"1.2.3", 0, false},
 	}
 	for _, tt := range tests {
-		v, ok := ParseFloat64(tt.in)
-		require.Equal(t, tt.success, ok, "input: %s", tt.in)
-		if ok {
+		v, err := ParseFloat64(tt.in)
+		require.Equal(t, tt.success, err == nil, "input: %s", tt.in)
+		if err == nil {
 			if tt.val == 0 {
 				require.InDelta(t, tt.val, v, 1e-9, "input: %s", tt.in)
 			} else {
 				require.InEpsilon(t, tt.val, v, 1e-9, "input: %s", tt.in)
 			}
 		}
-		bts, ok := ParseFloat64([]byte(tt.in))
-		require.Equal(t, tt.success, ok)
-		if ok {
+		bts, err := ParseFloat64([]byte(tt.in))
+		require.Equal(t, tt.success, err == nil)
+		if err == nil {
 			if tt.val == 0 {
 				require.InDelta(t, tt.val, bts, 1e-9, "input: %s", tt.in)
 			} else {
@@ -605,8 +605,8 @@ func Benchmark_ParseFloat64(b *testing.B) {
 	b.Run("fiber", func(b *testing.B) {
 		b.ReportAllocs()
 		for n := 0; n < b.N; n++ {
-			_, ok := ParseFloat64(input)
-			if !ok {
+			_, err := ParseFloat64(input)
+			if err != nil {
 				b.Fatal("failed to parse float")
 			}
 		}
@@ -614,8 +614,8 @@ func Benchmark_ParseFloat64(b *testing.B) {
 	b.Run("fiber_bytes", func(b *testing.B) {
 		b.ReportAllocs()
 		for n := 0; n < b.N; n++ {
-			_, ok := ParseFloat64([]byte(input))
-			if !ok {
+			_, err := ParseFloat64([]byte(input))
+			if err != nil {
 				b.Fatal("failed to parse float from bytes")
 			}
 		}
@@ -675,9 +675,9 @@ func Test_ParseFloat32(t *testing.T) {
 		{"1.2.3", 0, false, false},
 	}
 	for _, tt := range tests {
-		v, ok := ParseFloat32(tt.in)
-		require.Equal(t, tt.success, ok, "input: %s", tt.in)
-		if ok {
+		v, err := ParseFloat32(tt.in)
+		require.Equal(t, tt.success, err == nil, "input: %s", tt.in)
+		if err == nil {
 			if tt.negzero {
 				require.InDelta(t, float32(0), v, 1e-6, "input: %s", tt.in)
 				require.True(t, math.Signbit(float64(v)))
@@ -687,9 +687,9 @@ func Test_ParseFloat32(t *testing.T) {
 				require.InEpsilon(t, tt.val, v, 1e-6, "input: %s", tt.in)
 			}
 		}
-		bts, ok := ParseFloat32([]byte(tt.in))
-		require.Equal(t, tt.success, ok)
-		if ok {
+		bts, err := ParseFloat32([]byte(tt.in))
+		require.Equal(t, tt.success, err == nil)
+		if err == nil {
 			if tt.negzero {
 				require.InDelta(t, float32(0), bts, 1e-6, "input: %s", tt.in)
 				require.True(t, math.Signbit(float64(bts)))
@@ -708,8 +708,8 @@ func Benchmark_ParseFloat32(b *testing.B) {
 	b.Run("fiber", func(b *testing.B) {
 		b.ReportAllocs()
 		for n := 0; n < b.N; n++ {
-			_, ok := ParseFloat32(input)
-			if !ok {
+			_, err := ParseFloat32(input)
+			if err != nil {
 				b.Fatal("failed to parse float32")
 			}
 		}
@@ -717,8 +717,8 @@ func Benchmark_ParseFloat32(b *testing.B) {
 	b.Run("fiber_bytes", func(b *testing.B) {
 		b.ReportAllocs()
 		for n := 0; n < b.N; n++ {
-			_, ok := ParseFloat32([]byte(input))
-			if !ok {
+			_, err := ParseFloat32([]byte(input))
+			if err != nil {
 				b.Fatal("failed to parse float32 from bytes")
 			}
 		}
