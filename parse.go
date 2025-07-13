@@ -2,6 +2,7 @@ package utils
 
 import (
 	"math"
+	"strconv"
 )
 
 const maxFracDigits = 16
@@ -14,71 +15,71 @@ type Unsigned interface {
 }
 
 // ParseUint parses a decimal ASCII string or byte slice into a uint64.
-// It returns the parsed value and true on success.
-// If the input contains non-digit characters, it returns 0 and false.
-func ParseUint[S byteSeq](s S) (uint64, bool) {
-	return parseUnsigned[S, uint64](s, uint64(math.MaxUint64))
+// It returns the parsed value and nil on success.
+// If the input contains non-digit characters, it returns 0 and an error.
+func ParseUint[S byteSeq](s S) (uint64, error) {
+	return parseUnsigned[S, uint64]("ParseUint", s, uint64(math.MaxUint64))
 }
 
 // ParseInt parses a decimal ASCII string or byte slice into an int64.
-// Returns the parsed value and true on success, else 0 and false.
-func ParseInt[S byteSeq](s S) (int64, bool) {
-	return parseSigned[S, int64](s, math.MinInt64, math.MaxInt64)
+// Returns the parsed value and nil on success, else 0 and an error.
+func ParseInt[S byteSeq](s S) (int64, error) {
+	return parseSigned[S, int64]("ParseInt", s, math.MinInt64, math.MaxInt64)
 }
 
 // ParseInt32 parses a decimal ASCII string or byte slice into an int32.
-func ParseInt32[S byteSeq](s S) (int32, bool) {
-	return parseSigned[S, int32](s, math.MinInt32, math.MaxInt32)
+func ParseInt32[S byteSeq](s S) (int32, error) {
+	return parseSigned[S, int32]("ParseInt32", s, math.MinInt32, math.MaxInt32)
 }
 
 // ParseInt16 parses a decimal ASCII string or byte slice into an int16.
-func ParseInt16[S byteSeq](s S) (int16, bool) {
-	return parseSigned[S, int16](s, math.MinInt16, math.MaxInt16)
+func ParseInt16[S byteSeq](s S) (int16, error) {
+	return parseSigned[S, int16]("ParseInt16", s, math.MinInt16, math.MaxInt16)
 }
 
 // ParseInt8 parses a decimal ASCII string or byte slice into an int8.
-func ParseInt8[S byteSeq](s S) (int8, bool) {
-	return parseSigned[S, int8](s, math.MinInt8, math.MaxInt8)
+func ParseInt8[S byteSeq](s S) (int8, error) {
+	return parseSigned[S, int8]("ParseInt8", s, math.MinInt8, math.MaxInt8)
 }
 
 // ParseUint32 parses a decimal ASCII string or byte slice into a uint32.
-func ParseUint32[S byteSeq](s S) (uint32, bool) {
-	return parseUnsigned[S, uint32](s, uint32(math.MaxUint32))
+func ParseUint32[S byteSeq](s S) (uint32, error) {
+	return parseUnsigned[S, uint32]("ParseUint32", s, uint32(math.MaxUint32))
 }
 
 // ParseUint16 parses a decimal ASCII string or byte slice into a uint16.
-func ParseUint16[S byteSeq](s S) (uint16, bool) {
-	return parseUnsigned[S, uint16](s, uint16(math.MaxUint16))
+func ParseUint16[S byteSeq](s S) (uint16, error) {
+	return parseUnsigned[S, uint16]("ParseUint16", s, uint16(math.MaxUint16))
 }
 
 // ParseUint8 parses a decimal ASCII string or byte slice into a uint8.
-func ParseUint8[S byteSeq](s S) (uint8, bool) {
-	return parseUnsigned[S, uint8](s, uint8(math.MaxUint8))
+func ParseUint8[S byteSeq](s S) (uint8, error) {
+	return parseUnsigned[S, uint8]("ParseUint8", s, uint8(math.MaxUint8))
 }
 
-// parseDigits parses a sequence of digits and returns the uint64 value and success.
-// Returns (0, false) if any non-digit is encountered or overflow happens.
-func parseDigits[S byteSeq](s S, i int) (uint64, bool) {
+// parseDigits parses a sequence of digits and returns the uint64 value.
+// It returns an error if any non-digit is encountered or overflow happens.
+func parseDigits[S byteSeq](s S, i int) (uint64, error) {
 	var n uint64
 	for ; i < len(s); i++ {
 		c := s[i] - '0'
 		if c > 9 {
-			return 0, false
+			return 0, strconv.ErrSyntax
 		}
 		nn := n*10 + uint64(c)
 		if nn < n {
-			return 0, false
+			return 0, strconv.ErrRange
 		}
 		n = nn
 	}
-	return n, true
+	return n, nil
 }
 
 // parseSigned parses a decimal ASCII string or byte slice into a signed integer type T.
-// It supports optional '+' or '-' prefix, checks for overflow and underflow, and returns (0, false) on error.
-func parseSigned[S byteSeq, T Signed](s S, minRange, maxRange T) (T, bool) {
+// It supports optional '+' or '-' prefix, checks for overflow and underflow, and returns (0, error) on error.
+func parseSigned[S byteSeq, T Signed](fn string, s S, minRange, maxRange T) (T, error) {
 	if len(s) == 0 {
-		return 0, false
+		return 0, &strconv.NumError{Func: fn, Num: string(s), Err: strconv.ErrSyntax}
 	}
 
 	neg := false
@@ -91,56 +92,59 @@ func parseSigned[S byteSeq, T Signed](s S, minRange, maxRange T) (T, bool) {
 		i++
 	}
 	if i == len(s) {
-		return 0, false
+		return 0, &strconv.NumError{Func: fn, Num: string(s), Err: strconv.ErrSyntax}
 	}
 
 	// Parse digits
-	n, ok := parseDigits(s, i)
-	if !ok {
-		return 0, false
+	n, err := parseDigits(s, i)
+	if err != nil {
+		return 0, &strconv.NumError{Func: fn, Num: string(s), Err: err}
 	}
 
 	if !neg {
 		// Check for overflow
 		if n > uint64(int64(maxRange)) {
-			return 0, false
+			return 0, &strconv.NumError{Func: fn, Num: string(s), Err: strconv.ErrRange}
 		}
-		return T(n), true
+		return T(n), nil
 	}
 
 	// Check for underflow
 	minAbs := uint64(-int64(minRange))
 	if n > minAbs {
-		return 0, false
+		return 0, &strconv.NumError{Func: fn, Num: string(s), Err: strconv.ErrRange}
 	}
 
-	return T(-int64(n)), true
+	return T(-int64(n)), nil
 }
 
 // parseUnsigned parses a decimal ASCII string or byte slice into an unsigned integer type T.
-// It does not support sign prefixes, checks for overflow, and returns (0, false) on error.
-func parseUnsigned[S byteSeq, T Unsigned](s S, maxRange T) (T, bool) {
+// It does not support sign prefixes, checks for overflow, and returns (0, error) on error.
+func parseUnsigned[S byteSeq, T Unsigned](fn string, s S, maxRange T) (T, error) {
 	if len(s) == 0 {
-		return 0, false
+		return 0, &strconv.NumError{Func: fn, Num: string(s), Err: strconv.ErrSyntax}
 	}
 
 	i := 0
 
 	// Parse digits
-	n, ok := parseDigits(s, i)
+	n, err := parseDigits(s, i)
 	// Check for overflow
-	if !ok || n > uint64(maxRange) {
-		return 0, false
+	if err != nil {
+		return 0, &strconv.NumError{Func: fn, Num: string(s), Err: err}
 	}
-	return T(n), true
+	if n > uint64(maxRange) {
+		return 0, &strconv.NumError{Func: fn, Num: string(s), Err: strconv.ErrRange}
+	}
+	return T(n), nil
 }
 
 // parseFloat parses a decimal ASCII string or byte slice into a float64.
-// It supports optional sign, fractional part and exponent. It returns (0, false)
+// It supports optional sign, fractional part and exponent. It returns (0, error)
 // on error or overflow.
-func parseFloat[S byteSeq](s S) (float64, bool) {
+func parseFloat[S byteSeq](fn string, s S) (float64, error) {
 	if len(s) == 0 {
-		return 0, false
+		return 0, &strconv.NumError{Func: fn, Num: string(s), Err: strconv.ErrSyntax}
 	}
 	i := 0
 	neg := false
@@ -152,7 +156,7 @@ func parseFloat[S byteSeq](s S) (float64, bool) {
 		i++
 	}
 	if i == len(s) {
-		return 0, false
+		return 0, &strconv.NumError{Func: fn, Num: string(s), Err: strconv.ErrSyntax}
 	}
 
 	var intPart uint64
@@ -163,7 +167,7 @@ func parseFloat[S byteSeq](s S) (float64, bool) {
 		}
 		nn := intPart*10 + uint64(c)
 		if nn < intPart {
-			return 0, false
+			return 0, &strconv.NumError{Func: fn, Num: string(s), Err: strconv.ErrRange}
 		}
 		intPart = nn
 		i++
@@ -180,7 +184,7 @@ func parseFloat[S byteSeq](s S) (float64, bool) {
 				break
 			}
 			if fracDigits >= maxFracDigits {
-				return 0, false
+				return 0, &strconv.NumError{Func: fn, Num: string(s), Err: strconv.ErrRange}
 			}
 			fracPart = fracPart*10 + uint64(c)
 			fracDiv *= 10
@@ -194,7 +198,7 @@ func parseFloat[S byteSeq](s S) (float64, bool) {
 	if i < len(s) && (s[i] == 'e' || s[i] == 'E') {
 		i++
 		if i == len(s) {
-			return 0, false
+			return 0, &strconv.NumError{Func: fn, Num: string(s), Err: strconv.ErrSyntax}
 		}
 		switch s[i] {
 		case '-':
@@ -204,12 +208,12 @@ func parseFloat[S byteSeq](s S) (float64, bool) {
 			i++
 		}
 		if i == len(s) {
-			return 0, false
+			return 0, &strconv.NumError{Func: fn, Num: string(s), Err: strconv.ErrSyntax}
 		}
 		for i < len(s) {
 			c := s[i] - '0'
 			if c > 9 {
-				return 0, false
+				return 0, &strconv.NumError{Func: fn, Num: string(s), Err: strconv.ErrSyntax}
 			}
 			exp = exp*10 + int64(c)
 			if !expSign && exp > 308 {
@@ -223,7 +227,7 @@ func parseFloat[S byteSeq](s S) (float64, bool) {
 	}
 
 	if i != len(s) {
-		return 0, false
+		return 0, &strconv.NumError{Func: fn, Num: string(s), Err: strconv.ErrSyntax}
 	}
 	if expSign {
 		exp = -exp
@@ -240,26 +244,26 @@ func parseFloat[S byteSeq](s S) (float64, bool) {
 		f = -f
 	}
 	if math.IsInf(f, 0) || math.IsNaN(f) {
-		return 0, false
+		return 0, &strconv.NumError{Func: fn, Num: string(s), Err: strconv.ErrRange}
 	}
-	return f, true
+	return f, nil
 }
 
 // ParseFloat64 parses a decimal ASCII string or byte slice into a float64. It
 // delegates the actual parsing to parseFloat.
-func ParseFloat64[S byteSeq](s S) (float64, bool) {
-	return parseFloat[S](s)
+func ParseFloat64[S byteSeq](s S) (float64, error) {
+	return parseFloat[S]("ParseFloat64", s)
 }
 
 // ParseFloat32 parses a decimal ASCII string or byte slice into a float32. It
 // returns (0, false) on error or if the parsed value overflows float32.
-func ParseFloat32[S byteSeq](s S) (float32, bool) {
-	f, ok := parseFloat[S](s)
-	if !ok {
-		return 0, false
+func ParseFloat32[S byteSeq](s S) (float32, error) {
+	f, err := parseFloat[S]("ParseFloat32", s)
+	if err != nil {
+		return 0, err
 	}
 	if f > math.MaxFloat32 || f < -math.MaxFloat32 {
-		return 0, false
+		return 0, &strconv.NumError{Func: "ParseFloat32", Num: string(s), Err: strconv.ErrRange}
 	}
-	return float32(f), true
+	return float32(f), nil
 }
