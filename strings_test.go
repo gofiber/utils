@@ -119,14 +119,15 @@ func Test_ASCII_EdgeCases(t *testing.T) {
 	// This ensures that all basic ASCII characters are handled correctly.
 	t.Parallel()
 	for i := 0; i < 128; i++ {
-		c := byte(i)
-		t.Run(fmt.Sprintf("ASCII-char-%03d", i), func(t *testing.T) {
+		idx := i
+		c := byte(idx)
+		t.Run(fmt.Sprintf("ASCII-char-%03d", idx), func(t *testing.T) {
 			t.Parallel()
 			s := string(c)
 			upperExpected := strings.ToUpper(s)
 			lowerExpected := strings.ToLower(s)
-			require.Equal(t, upperExpected, ToUpper(s), "ToUpper failed for ASCII-char-%03d", i)
-			require.Equal(t, lowerExpected, ToLower(s), "ToLower failed for ASCII-char-%03d", i)
+			require.Equal(t, upperExpected, ToUpper(s), "ToUpper failed for ASCII-char-%03d", idx)
+			require.Equal(t, lowerExpected, ToLower(s), "ToLower failed for ASCII-char-%03d", idx)
 		})
 	}
 }
