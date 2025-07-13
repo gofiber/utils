@@ -214,6 +214,66 @@ func Benchmark_ParseInt32(b *testing.B) {
 	})
 }
 
+func Test_ParseInt16(t *testing.T) {
+	t.Parallel()
+	tests := []struct {
+		in      string
+		val     int16
+		success bool
+	}{
+		{"0", 0, true},
+		{"42", 42, true},
+		{"32767", 32767, true},
+		{"-32768", -32768, true},
+		{"32768", 0, false},
+		{"-32769", 0, false},
+	}
+	for _, tt := range tests {
+		v, ok := ParseInt16(tt.in)
+		require.Equal(t, tt.success, ok)
+		if ok {
+			require.Equal(t, tt.val, v)
+		}
+		bts, ok := ParseInt16([]byte(tt.in))
+		require.Equal(t, tt.success, ok)
+		if ok {
+			require.Equal(t, tt.val, bts)
+		}
+	}
+}
+
+func Benchmark_ParseInt16(b *testing.B) {
+	input := "12345"
+
+	b.Run("fiber", func(b *testing.B) {
+		b.ReportAllocs()
+		for n := 0; n < b.N; n++ {
+			_, ok := ParseInt16(input)
+			if !ok {
+				b.Fatal("failed to parse int16")
+			}
+		}
+	})
+	b.Run("fiber_bytes", func(b *testing.B) {
+		b.ReportAllocs()
+		for n := 0; n < b.N; n++ {
+			_, ok := ParseInt16([]byte(input))
+			if !ok {
+				b.Fatal("failed to parse int16 from bytes")
+			}
+		}
+	})
+	b.Run("default", func(b *testing.B) {
+		b.ReportAllocs()
+		for n := 0; n < b.N; n++ {
+			_, err := strconv.ParseInt(input, 10, 16)
+			if err != nil {
+				b.Fatal(err)
+			}
+		}
+	})
+}
+
 func Test_ParseInt8(t *testing.T) {
 	t.Parallel()
 	tests := []struct {
@@ -326,6 +386,65 @@ func Benchmark_ParseUint32(b *testing.B) {
 		b.ReportAllocs()
 		for n := 0; n < b.N; n++ {
 			_, err := strconv.ParseUint(input, 10, 32)
+			if err != nil {
+				b.Fatal(err)
+			}
+		}
+	})
+}
+
+func Test_ParseUint16(t *testing.T) {
+	t.Parallel()
+	tests := []struct {
+		in      string
+		val     uint16
+		success bool
+	}{
+		{"0", 0, true},
+		{"42", 42, true},
+		{"65535", 65535, true},
+		{"65536", 0, false},
+		{"-1", 0, false},
+	}
+	for _, tt := range tests {
+		v, ok := ParseUint16(tt.in)
+		require.Equal(t, tt.success, ok)
+		if ok {
+			require.Equal(t, tt.val, v)
+		}
+		bts, ok := ParseUint16([]byte(tt.in))
+		require.Equal(t, tt.success, ok)
+		if ok {
+			require.Equal(t, tt.val, bts)
+		}
+	}
+}
+
+func Benchmark_ParseUint16(b *testing.B) {
+	input := "65535"
+
+	b.Run("fiber", func(b *testing.B) {
+		b.ReportAllocs()
+		for n := 0; n < b.N; n++ {
+			_, ok := ParseUint16(input)
+			if !ok {
+				b.Fatal("failed to parse uint16")
+			}
+		}
+	})
+	b.Run("fiber_bytes", func(b *testing.B) {
+		b.ReportAllocs()
+		for n := 0; n < b.N; n++ {
+			_, ok := ParseUint16([]byte(input))
+			if !ok {
+				b.Fatal("failed to parse uint16 from bytes")
+			}
+		}
+	})
+	b.Run("default", func(b *testing.B) {
+		b.ReportAllocs()
+		for n := 0; n < b.N; n++ {
+			_, err := strconv.ParseUint(input, 10, 16)
 			if err != nil {
 				b.Fatal(err)
 			}

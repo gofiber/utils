@@ -31,6 +31,11 @@ func ParseInt32[S byteSeq](s S) (int32, bool) {
 	return parseSigned[S, int32](s, math.MinInt32, math.MaxInt32)
 }
 
+// ParseInt16 parses a decimal ASCII string or byte slice into an int16.
+func ParseInt16[S byteSeq](s S) (int16, bool) {
+	return parseSigned[S, int16](s, math.MinInt16, math.MaxInt16)
+}
+
 // ParseInt8 parses a decimal ASCII string or byte slice into an int8.
 func ParseInt8[S byteSeq](s S) (int8, bool) {
 	return parseSigned[S, int8](s, math.MinInt8, math.MaxInt8)
@@ -39,6 +44,11 @@ func ParseInt8[S byteSeq](s S) (int8, bool) {
 // ParseUint32 parses a decimal ASCII string or byte slice into a uint32.
 func ParseUint32[S byteSeq](s S) (uint32, bool) {
 	return parseUnsigned[S, uint32](s, uint32(math.MaxUint32))
+}
+
+// ParseUint16 parses a decimal ASCII string or byte slice into a uint16.
+func ParseUint16[S byteSeq](s S) (uint16, bool) {
+	return parseUnsigned[S, uint16](s, uint16(math.MaxUint16))
 }
 
 // ParseUint8 parses a decimal ASCII string or byte slice into a uint8.
