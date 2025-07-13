@@ -42,6 +42,9 @@ func Test_GetMIME(t *testing.T) {
 		require.Equal(t, "application/javascript", res)
 	}
 	require.NoError(t, err)
+
+	require.Equal(t, "application/json", GetMIME(".JSON"))
+	require.Equal(t, MIMEOctetStream, GetMIME("  .json"))
 }
 
 // go test -v -run=^$ -bench=Benchmark_GetMIME -benchmem -count=2
@@ -208,6 +211,12 @@ func Test_StatusMessage(t *testing.T) {
 
 	res = StatusMessage(600)
 	require.Equal(t, "", res)
+
+	res = StatusMessage(100)
+	require.Equal(t, "Continue", res)
+
+	res = StatusMessage(http.StatusTeapot)
+	require.Equal(t, "I'm a teapot", res)
 }
 
 // go test -run=^$ -bench=Benchmark_StatusMessage -benchmem -count=2

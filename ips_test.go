@@ -92,6 +92,15 @@ func Test_IsIPv6_EdgeCases(t *testing.T) {
 	require.False(t, IsIPv6("1::2:3:4:5:6:7:8"))
 }
 
+func Test_IPWhitespace(t *testing.T) {
+	t.Parallel()
+
+	require.False(t, IsIPv4(" 1.1.1.1"))
+	require.False(t, IsIPv4("1.1.1.1 "))
+	require.False(t, IsIPv6(" ::1"))
+	require.False(t, IsIPv6("::1 "))
+}
+
 // go test -v -run=^$ -bench=UnsafeString -benchmem -count=2
 func Benchmark_IsIPv4(b *testing.B) {
 	ip := "174.23.33.100"

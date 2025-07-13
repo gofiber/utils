@@ -73,3 +73,33 @@ func Benchmark_ToUpperBytes(b *testing.B) {
 		require.Equal(b, want, res)
 	})
 }
+
+func Test_ToLowerBytes_Edge(t *testing.T) {
+	t.Parallel()
+
+	cases := [][]byte{
+		{},
+		[]byte("123"),
+		[]byte("!@#"),
+	}
+	for _, c := range cases {
+		t.Run(string(c), func(t *testing.T) {
+			require.Equal(t, bytes.ToLower(c), ToLowerBytes(c))
+		})
+	}
+}
+
+func Test_ToUpperBytes_Edge(t *testing.T) {
+	t.Parallel()
+
+	cases := [][]byte{
+		{},
+		[]byte("123"),
+		[]byte("!@#"),
+	}
+	for _, c := range cases {
+		t.Run(string(c), func(t *testing.T) {
+			require.Equal(t, bytes.ToUpper(c), ToUpperBytes(c))
+		})
+	}
+}

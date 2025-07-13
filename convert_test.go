@@ -159,6 +159,11 @@ func Test_ToString(t *testing.T) {
 			require.Equal(t, tc.expected, res)
 		})
 	}
+
+	t.Run("nil", func(t *testing.T) {
+		t.Parallel()
+		require.Equal(t, "<nil>", ToString(nil))
+	})
 }
 
 func TestCopyBytes(t *testing.T) {

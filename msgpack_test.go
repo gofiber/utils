@@ -49,3 +49,11 @@ func Test_MsgpackDecoder(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, "Hello World", decoded.ImportantString)
 }
+
+func Test_MsgpackDecodeInvalid(t *testing.T) {
+	t.Parallel()
+
+	var decoded sampleMsgPackStructure
+	err := msgpack.Unmarshal([]byte{0xff, 0xff}, &decoded)
+	require.Error(t, err)
+}

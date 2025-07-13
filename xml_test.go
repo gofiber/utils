@@ -136,3 +136,11 @@ func Benchmark_DefaultXMLDecoder(b *testing.B) {
 		}
 	}
 }
+
+func Test_XMLDecodeInvalid(t *testing.T) {
+	t.Parallel()
+
+	var ss serversXMLStructure
+	err := xml.Unmarshal([]byte("<invalid>"), &ss)
+	require.Error(t, err)
+}

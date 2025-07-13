@@ -108,3 +108,12 @@ func Test_DefaultCBORDecoderWithUnitializedStruct(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, emptySs, ss)
 }
+
+func Test_CBORDecodeInvalid(t *testing.T) {
+	t.Parallel()
+
+	data := []byte{0xff, 0xff}
+	var ss sampleStructure
+	err := cbor.Unmarshal(data, &ss)
+	require.Error(t, err)
+}

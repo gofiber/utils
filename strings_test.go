@@ -213,6 +213,13 @@ func Test_NonASCII_Unchanged(t *testing.T) {
 		require.Equal(t, nonASCII, ToUpper(nonASCII), "ToUpper altered non-ASCII")
 		require.Equal(t, nonASCII, ToLower(nonASCII), "ToLower altered non-ASCII")
 	})
+
+	mixed := "Goµ"
+	t.Run("mixed", func(t *testing.T) {
+		t.Parallel()
+		require.Equal(t, "GOµ", ToUpper(mixed))
+		require.Equal(t, "goµ", ToLower(mixed))
+	})
 }
 
 func Benchmark_ToUpper(b *testing.B) {

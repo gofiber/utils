@@ -58,3 +58,11 @@ func Test_DefaultJSONDecoder(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, "Hello World", ss.ImportantString)
 }
+
+func Test_JSONDecodeInvalid(t *testing.T) {
+	t.Parallel()
+
+	var ss sampleStructure
+	err := json.Unmarshal([]byte("{invalid}"), &ss)
+	require.Error(t, err)
+}
