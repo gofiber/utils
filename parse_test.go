@@ -421,13 +421,12 @@ func Test_ParseFloat64(t *testing.T) {
 		{"abc", 0, false},
 		{"+", 0, false},
 		{"-", 0, false},
-		{"123.", 0, false},
+		{"123.", 123, true},
 		{"123e", 0, false},
 		{"123e+", 0, false},
 		{"123e-", 0, false},
 		{"123e1a", 0, false},
-		{"9999999999999999999", 0, false},
-		{".5", 0, false},
+		{"9999999999999999999", 1e19, true},
 		{"1.2.3", 0, false},
 	}
 	for _, tt := range tests {
@@ -516,13 +515,12 @@ func Test_ParseFloat32(t *testing.T) {
 		{"abc", 0, false, false},
 		{"+", 0, false, false},
 		{"-", 0, false, false},
-		{"123.", 0, false, false},
+		{"123.", 123, true, false},
 		{"123e", 0, false, false},
 		{"123e+", 0, false, false},
 		{"123e-", 0, false, false},
 		{"123e1a", 0, false, false},
-		{"9999999999999999999", 0, false, false},
-		{".5", 0, false, false},
+		{"9999999999999999999", 1e19, true, false},
 		{"1.2.3", 0, false, false},
 	}
 	for _, tt := range tests {

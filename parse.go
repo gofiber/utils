@@ -197,8 +197,11 @@ func parseFloat[S byteSeq](s S) (float64, bool) {
 				return 0, false
 			}
 			exp = exp*10 + int64(c)
-			if exp > 308 {
+			if !expSign && exp > 308 {
 				exp = 309
+			}
+			if expSign && exp > 324 {
+				exp = 325
 			}
 			i++
 		}
