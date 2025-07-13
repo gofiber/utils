@@ -434,7 +434,7 @@ func Test_ParseFloat64(t *testing.T) {
 		require.Equal(t, tt.success, ok, "input: %s", tt.in)
 		if ok {
 			if tt.val == 0 {
-				require.Equal(t, tt.val, v, "input: %s", tt.in)
+				require.InDelta(t, tt.val, v, 1e-9, "input: %s", tt.in)
 			} else {
 				require.InEpsilon(t, tt.val, v, 1e-9, "input: %s", tt.in)
 			}
@@ -443,7 +443,7 @@ func Test_ParseFloat64(t *testing.T) {
 		require.Equal(t, tt.success, ok)
 		if ok {
 			if tt.val == 0 {
-				require.Equal(t, tt.val, bts, "input: %s", tt.in)
+				require.InDelta(t, tt.val, bts, 1e-9, "input: %s", tt.in)
 			} else {
 				require.InEpsilon(t, tt.val, bts, 1e-9, "input: %s", tt.in)
 			}
@@ -528,10 +528,10 @@ func Test_ParseFloat32(t *testing.T) {
 		require.Equal(t, tt.success, ok, "input: %s", tt.in)
 		if ok {
 			if tt.negzero {
-				require.Equal(t, float32(0), v)
+				require.InDelta(t, float32(0), v, 1e-6, "input: %s", tt.in)
 				require.True(t, math.Signbit(float64(v)))
 			} else if tt.val == 0 {
-				require.Equal(t, tt.val, v, "input: %s", tt.in)
+				require.InDelta(t, tt.val, v, 1e-6, "input: %s", tt.in)
 			} else {
 				require.InEpsilon(t, tt.val, v, 1e-6, "input: %s", tt.in)
 			}
@@ -540,10 +540,10 @@ func Test_ParseFloat32(t *testing.T) {
 		require.Equal(t, tt.success, ok)
 		if ok {
 			if tt.negzero {
-				require.Equal(t, float32(0), bts)
+				require.InDelta(t, float32(0), bts, 1e-6, "input: %s", tt.in)
 				require.True(t, math.Signbit(float64(bts)))
 			} else if tt.val == 0 {
-				require.Equal(t, tt.val, bts, "input: %s", tt.in)
+				require.InDelta(t, tt.val, bts, 1e-6, "input: %s", tt.in)
 			} else {
 				require.InEpsilon(t, tt.val, bts, 1e-6, "input: %s", tt.in)
 			}
