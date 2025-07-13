@@ -124,7 +124,7 @@ func Test_ASCII_EdgeCases(t *testing.T) {
 		s := string(c)
 		upperExpected := strings.ToUpper(s)
 		lowerExpected := strings.ToLower(s)
-		t.Run(fmt.Sprintf("ASCII-%d", i), func(t *testing.T) {
+		t.Run(fmt.Sprintf("char-%03d", i), func(t *testing.T) {
 			t.Parallel()
 			require.Equal(t, upperExpected, ToUpper(s), "ToUpper failed for ASCII %d", i)
 			require.Equal(t, lowerExpected, ToLower(s), "ToLower failed for ASCII %d", i)
