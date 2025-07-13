@@ -297,6 +297,7 @@ func Test_Trim_Edge(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.input, func(t *testing.T) {
+			t.Parallel()
 			require.Equal(t, c.exp, Trim(c.input, c.cut))
 			require.Equal(t, []byte(c.exp), Trim([]byte(c.input), c.cut))
 		})

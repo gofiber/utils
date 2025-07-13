@@ -84,6 +84,7 @@ func Test_ToLowerBytes_Edge(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(string(c), func(t *testing.T) {
+			t.Parallel()
 			require.Equal(t, bytes.ToLower(c), ToLowerBytes(c))
 		})
 	}
@@ -99,6 +100,7 @@ func Test_ToUpperBytes_Edge(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(string(c), func(t *testing.T) {
+			t.Parallel()
 			require.Equal(t, bytes.ToUpper(c), ToUpperBytes(c))
 		})
 	}
