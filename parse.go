@@ -4,6 +4,8 @@ import (
 	"math"
 )
 
+const maxFracDigits = 16
+
 type Signed interface {
 	~int | ~int8 | ~int16 | ~int32 | ~int64
 }
@@ -159,6 +161,7 @@ func parseFloat[S byteSeq](s S) (float64, bool) {
 
 	var fracPart uint64
 	var fracDiv uint64 = 1
+	var fracDigits int
 	if i < len(s) && s[i] == '.' {
 		i++
 		for i < len(s) {
@@ -166,10 +169,12 @@ func parseFloat[S byteSeq](s S) (float64, bool) {
 			if c > 9 {
 				break
 			}
-			if fracDiv < 1e16 {
-				fracPart = fracPart*10 + uint64(c)
-				fracDiv *= 10
+			if fracDigits >= maxFracDigits {
+				return 0, false
 			}
+			fracPart = fracPart*10 + uint64(c)
+			fracDiv *= 10
+			fracDigits++
 			i++
 		}
 	}

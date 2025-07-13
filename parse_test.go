@@ -411,6 +411,7 @@ func Test_ParseFloat64(t *testing.T) {
 		{"1e-400", 0, true},
 		{"1234567891234567891234567", 0, false},
 		{"1.2345678912345678", 1.2345678912345678, true}, // large number
+		{"0.11111111111111119", 0, false},
 		{"1.2.3", 0, false},
 		{"1e1.0", 0, false},
 		{"1e309", 0, false},
@@ -506,6 +507,7 @@ func Test_ParseFloat32(t *testing.T) {
 		{"1e-", 0, false, false},
 		{"1234567891234567891234567", 0, false, false},
 		{"1.2345678912345678", 1.2345679, true, false},
+		{"0.11111111111111119", 0, false, false},
 		{"1.2.3", 0, false, false},
 		{"1e1.0", 0, false, false},
 		{"1e309", 0, false, false},
