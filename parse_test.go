@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"math"
 	"strconv"
 	"testing"
 
@@ -391,7 +392,7 @@ func Benchmark_ParseUint8(b *testing.B) {
 	})
 }
 
-func Test_ParseFloat(t *testing.T) {
+func Test_ParseFloat64(t *testing.T) {
 	t.Parallel()
 	tests := []struct {
 		in      string
@@ -405,43 +406,59 @@ func Test_ParseFloat(t *testing.T) {
 		{"-1.2e3", -1200, true},
 		{"1.", 1, true},
 		{".5", 0.5, true},
-		{"1234567891234567891234567", 1234567891234567891234567, true},
+		{"-0", -0, true},
+		{"+123.45", 123.45, true},
+		{"1e-400", 0, true},
+		{"1234567891234567891234567", 0, false},
 		{"1.2345678912345678", 1.2345678912345678, true}, // large number
 		{"1.2.3", 0, false},
 		{"1e1.0", 0, false},
 		{"1e309", 0, false},
+		{"1e", 0, false},
+		{"1e+", 0, false},
+		{"1e-", 0, false},
 		{"", 0, false},
 		{"abc", 0, false},
+		{"+", 0, false},
+		{"-", 0, false},
+		{"123.", 0, false},
+		{"123e", 0, false},
+		{"123e+", 0, false},
+		{"123e-", 0, false},
+		{"123e1a", 0, false},
+		{"9999999999999999999", 0, false},
+		{".5", 0, false},
+		{"1.2.3", 0, false},
 	}
 	for _, tt := range tests {
-		v, ok := ParseFloat(tt.in)
+		v, ok := ParseFloat64(tt.in)
 		require.Equal(t, tt.success, ok, "input: %s", tt.in)
 		if ok {
 			if tt.val == 0 {
-				require.Equal(t, tt.val, v)
+				require.Equal(t, tt.val, v, "input: %s", tt.in)
 			} else {
-				require.InEpsilon(t, tt.val, v, 1e-9)
+				require.InEpsilon(t, tt.val, v, 1e-9, "input: %s", tt.in)
 			}
 		}
-		bts, ok := ParseFloat([]byte(tt.in))
+		bts, ok := ParseFloat64([]byte(tt.in))
 		require.Equal(t, tt.success, ok)
 		if ok {
 			if tt.val == 0 {
-				require.Equal(t, tt.val, bts)
+				require.Equal(t, tt.val, bts, "input: %s", tt.in)
 			} else {
-				require.InEpsilon(t, tt.val, bts, 1e-9)
+				require.InEpsilon(t, tt.val, bts, 1e-9, "input: %s", tt.in)
 			}
 		}
 	}
 }
 
-func Benchmark_ParseFloat(b *testing.B) {
+func Benchmark_ParseFloat64(b *testing.B) {
 	input := "12345.6789"
 
 	b.Run("fiber", func(b *testing.B) {
 		b.ReportAllocs()
 		for n := 0; n < b.N; n++ {
-			_, ok := ParseFloat(input)
+			_, ok := ParseFloat64(input)
 			if !ok {
 				b.Fatal("failed to parse float")
 			}
@@ -450,7 +467,7 @@ func Benchmark_ParseFloat(b *testing.B) {
 	b.Run("fiber_bytes", func(b *testing.B) {
 		b.ReportAllocs()
 		for n := 0; n < b.N; n++ {
-			_, ok := ParseFloat([]byte(input))
+			_, ok := ParseFloat64([]byte(input))
 			if !ok {
 				b.Fatal("failed to parse float from bytes")
 			}
@@ -460,6 +477,107 @@ func Benchmark_ParseFloat(b *testing.B) {
 		b.ReportAllocs()
 		for n := 0; n < b.N; n++ {
 			_, err := strconv.ParseFloat(input, 64)
+			if err != nil {
+				b.Fatal(err)
+			}
+		}
+	})
+}
+
+func Test_ParseFloat32(t *testing.T) {
+	t.Parallel()
+	tests := []struct {
+		in      string
+		val     float32
+		success bool
+		negzero bool
+	}{
+		{"0", 0, true, false},
+		{"42.5", 42.5, true, false},
+		{"-3.14", -3.14, true, false},
+		{"1e2", 100, true, false},
+		{"-1.2e3", -1200, true, false},
+		{"1.", 1, true, false},
+		{".5", 0.5, true, false},
+		{"3.4028234e38", 3.4028234e38, true, false},
+		{"-0", -0, true, true},
+		{"1e39", 0, false, false},
+		{"1e", 0, false, false},
+		{"1e+", 0, false, false},
+		{"1e-", 0, false, false},
+		{"1234567891234567891234567", 0, false, false},
+		{"1.2345678912345678", 1.2345679, true, false},
+		{"1.2.3", 0, false, false},
+		{"1e1.0", 0, false, false},
+		{"1e309", 0, false, false},
+		{"+123.45", 123.45, true, false},
+		{"1e-400", 0, true, false},
+		{"", 0, false, false},
+		{"abc", 0, false, false},
+		{"+", 0, false, false},
+		{"-", 0, false, false},
+		{"123.", 0, false, false},
+		{"123e", 0, false, false},
+		{"123e+", 0, false, false},
+		{"123e-", 0, false, false},
+		{"123e1a", 0, false, false},
+		{"9999999999999999999", 0, false, false},
+		{".5", 0, false, false},
+		{"1.2.3", 0, false, false},
+	}
+	for _, tt := range tests {
+		v, ok := ParseFloat32(tt.in)
+		require.Equal(t, tt.success, ok, "input: %s", tt.in)
+		if ok {
+			if tt.negzero {
+				require.Equal(t, float32(0), v)
+				require.True(t, math.Signbit(float64(v)))
+			} else if tt.val == 0 {
+				require.Equal(t, tt.val, v, "input: %s", tt.in)
+			} else {
+				require.InEpsilon(t, tt.val, v, 1e-6, "input: %s", tt.in)
+			}
+		}
+		bts, ok := ParseFloat32([]byte(tt.in))
+		require.Equal(t, tt.success, ok)
+		if ok {
+			if tt.negzero {
+				require.Equal(t, float32(0), bts)
+				require.True(t, math.Signbit(float64(bts)))
+			} else if tt.val == 0 {
+				require.Equal(t, tt.val, bts, "input: %s", tt.in)
+			} else {
+				require.InEpsilon(t, tt.val, bts, 1e-6, "input: %s", tt.in)
+			}
+		}
+	}
+}
+
+func Benchmark_ParseFloat32(b *testing.B) {
+	input := "12345.6789"
+
+	b.Run("fiber", func(b *testing.B) {
+		b.ReportAllocs()
+		for n := 0; n < b.N; n++ {
+			_, ok := ParseFloat32(input)
+			if !ok {
+				b.Fatal("failed to parse float32")
+			}
+		}
+	})
+	b.Run("fiber_bytes", func(b *testing.B) {
+		b.ReportAllocs()
+		for n := 0; n < b.N; n++ {
+			_, ok := ParseFloat32([]byte(input))
+			if !ok {
+				b.Fatal("failed to parse float32 from bytes")
+			}
+		}
+	})
+	b.Run("default", func(b *testing.B) {
+		b.ReportAllocs()
+		for n := 0; n < b.N; n++ {
+			_, err := strconv.ParseFloat(input, 32)
 			if err != nil {
 				b.Fatal(err)
 			}

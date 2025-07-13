@@ -123,9 +123,10 @@ func parseUnsigned[S byteSeq, T Unsigned](s S, maxRange T) (T, bool) {
 	return T(n), true
 }
 
-// ParseFloat parses a decimal ASCII string or byte slice into a float64.
-// Supports optional sign, fractional part and exponent. Returns (0, false) on error or overflow.
-func ParseFloat[S byteSeq](s S) (float64, bool) {
+// parseFloat parses a decimal ASCII string or byte slice into a float64.
+// It supports optional sign, fractional part and exponent. It returns (0, false)
+// on error or overflow.
+func parseFloat[S byteSeq](s S) (float64, bool) {
 	if len(s) == 0 {
 		return 0, false
 	}
@@ -224,4 +225,23 @@ func ParseFloat[S byteSeq](s S) (float64, bool) {
 		return 0, false
 	}
 	return f, true
+}
+
+// ParseFloat64 parses a decimal ASCII string or byte slice into a float64. It
+// delegates the actual parsing to parseFloat.
+func ParseFloat64[S byteSeq](s S) (float64, bool) {
+	return parseFloat[S](s)
+}
+
+// ParseFloat32 parses a decimal ASCII string or byte slice into a float32. It
+// returns (0, false) on error or if the parsed value overflows float32.
+func ParseFloat32[S byteSeq](s S) (float32, bool) {
+	f, ok := parseFloat[S](s)
+	if !ok {
+		return 0, false
+	}
+	if f > math.MaxFloat32 || f < -math.MaxFloat32 {
+		return 0, false
+	}
+	return float32(f), true
 }

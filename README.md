@@ -177,12 +177,19 @@ Benchmark_ParseUint8/fiber_bytes-12           357869246        3.346 ns/op      
 Benchmark_ParseUint8/default-12               184238403        6.788 ns/op       0 B/op       0 allocs/op
 Benchmark_ParseUint8/default-12               186525054        6.454 ns/op       0 B/op       0 allocs/op
 
-Benchmark_ParseFloat/fiber-12                 100000000         11.18 ns/op      0 B/op       0 allocs/op
-Benchmark_ParseFloat/fiber-12                 100000000         10.98 ns/op      0 B/op       0 allocs/op
-Benchmark_ParseFloat/fiber_bytes-12           100000000         11.30 ns/op      0 B/op       0 allocs/op
-Benchmark_ParseFloat/fiber_bytes-12           100000000         11.33 ns/op      0 B/op       0 allocs/op
-Benchmark_ParseFloat/default-12                49387119         24.56 ns/op      0 B/op       0 allocs/op
-Benchmark_ParseFloat/default-12                50058313         24.14 ns/op      0 B/op       0 allocs/op
+Benchmark_ParseFloat64/fiber-12               100000000        10.54 ns/op       0 B/op       0 allocs/op
+Benchmark_ParseFloat64/fiber-12               100000000        10.53 ns/op       0 B/op       0 allocs/op
+Benchmark_ParseFloat64/fiber_bytes-12         100000000        10.73 ns/op       0 B/op       0 allocs/op
+Benchmark_ParseFloat64/fiber_bytes-12         100000000        10.70 ns/op       0 B/op       0 allocs/op
+Benchmark_ParseFloat64/default-12              50287230        23.76 ns/op       0 B/op       0 allocs/op
+Benchmark_ParseFloat64/default-12              50541388        23.63 ns/op       0 B/op       0 allocs/op
+
+Benchmark_ParseFloat32/fiber-12               100000000        11.72 ns/op       0 B/op       0 allocs/op
+Benchmark_ParseFloat32/fiber-12               100000000        11.73 ns/op       0 B/op       0 allocs/op
+Benchmark_ParseFloat32/fiber_bytes-12         100000000        11.59 ns/op       0 B/op       0 allocs/op
+Benchmark_ParseFloat32/fiber_bytes-12         100000000        11.62 ns/op       0 B/op       0 allocs/op
+Benchmark_ParseFloat32/default-12              46845721        25.06 ns/op       0 B/op       0 allocs/op
+Benchmark_ParseFloat32/default-12              47179315        25.09 ns/op       0 B/op       0 allocs/op
 ```
 
 See all the benchmarks under <https://gofiber.github.io/utils/>
