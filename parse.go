@@ -15,14 +15,14 @@ type Unsigned interface {
 }
 
 // ParseUint parses a decimal ASCII string or byte slice into a uint64.
-// It returns the parsed value and true on success.
-// If the input contains non-digit characters, it returns 0 and false.
+// It returns the parsed value and nil on success.
+// If the input contains non-digit characters, it returns 0 and an error.
 func ParseUint[S byteSeq](s S) (uint64, error) {
 	return parseUnsigned[S, uint64]("ParseUint", s, uint64(math.MaxUint64))
 }
 
 // ParseInt parses a decimal ASCII string or byte slice into an int64.
-// Returns the parsed value and true on success, else 0 and false.
+// Returns the parsed value and nil on success, else 0 and an error.
 func ParseInt[S byteSeq](s S) (int64, error) {
 	return parseSigned[S, int64]("ParseInt", s, math.MinInt64, math.MaxInt64)
 }
