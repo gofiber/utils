@@ -206,3 +206,11 @@ func Test_ReadFile_NoFS(t *testing.T) {
 	require.NoError(t, err)
 	require.Contains(t, string(data), "doe")
 }
+
+func Test_ReadFile_SubDir(t *testing.T) {
+	t.Parallel()
+
+	data, err := ReadFile("example/example1.txt", http.FS(os.DirFS(".github/tests")))
+	require.NoError(t, err)
+	require.NotNil(t, data)
+}

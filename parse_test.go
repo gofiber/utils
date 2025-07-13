@@ -35,6 +35,14 @@ func Test_ParseUint(t *testing.T) {
 	}
 }
 
+func Test_ParseUint_Whitespace(t *testing.T) {
+	t.Parallel()
+
+	v, ok := ParseUint(" 123")
+	require.False(t, ok)
+	require.Equal(t, uint64(0), v)
+}
+
 func Benchmark_ParseUint(b *testing.B) {
 	input := "123456789"
 
@@ -108,6 +116,14 @@ func Test_ParseInt_SignOnly(t *testing.T) {
 		require.False(t, ok)
 		require.Equal(t, int64(0), b)
 	}
+}
+
+func Test_ParseInt_Whitespace(t *testing.T) {
+	t.Parallel()
+
+	v, ok := ParseInt(" 42")
+	require.False(t, ok)
+	require.Equal(t, int64(0), v)
 }
 
 func Test_ParseUnsigned_SignOnly(t *testing.T) {

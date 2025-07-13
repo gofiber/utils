@@ -282,3 +282,24 @@ func Benchmark_TrimBytes(b *testing.B) {
 		require.Equal(b, expected, res)
 	})
 }
+
+func Test_Trim_Edge(t *testing.T) {
+	t.Parallel()
+
+	cases := []struct {
+		input string
+		cut   byte
+		exp   string
+	}{
+		{"foobar", 'x', "foobar"},
+		{"", ' ', ""},
+		{"xxfoobarxx", 'x', "foobar"},
+	}
+	for _, c := range cases {
+		t.Run(c.input, func(t *testing.T) {
+			t.Parallel()
+			require.Equal(t, c.exp, Trim(c.input, c.cut))
+			require.Equal(t, []byte(c.exp), Trim([]byte(c.input), c.cut))
+		})
+	}
+}

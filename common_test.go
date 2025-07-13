@@ -209,6 +209,16 @@ func Test_GetArgument(t *testing.T) {
 	require.False(t, GetArgument("missing-arg"))
 }
 
+func Test_GetArgument_Multiple(t *testing.T) {
+	original := os.Args
+	defer func() { os.Args = original }()
+
+	os.Args = []string{"cmd", "-a", "-b", "--flag"}
+	require.True(t, GetArgument("-a"))
+	require.True(t, GetArgument("--flag"))
+	require.False(t, GetArgument("-c"))
+}
+
 func Test_IncrementIPRange(t *testing.T) {
 	t.Parallel()
 

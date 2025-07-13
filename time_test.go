@@ -112,3 +112,17 @@ func Benchmark_CalculateTimestamp(b *testing.B) {
 		}
 	})
 }
+
+func Test_StartStopRepeat(t *testing.T) {
+	timerTestMu.Lock()
+	defer timerTestMu.Unlock()
+
+	StartTimeStampUpdater()
+	StopTimeStampUpdater()
+	StartTimeStampUpdater()
+	defer StopTimeStampUpdater()
+
+	time.Sleep(50 * time.Millisecond)
+	ts := Timestamp()
+	require.NotZero(t, ts)
+}
