@@ -277,21 +277,21 @@ func Test_ToUpper_NonASCII_Allocations(t *testing.T) {
 	}
 
 	// Statistical analysis
-	var total, min, max float64
-	min = allocResults[0]
-	max = allocResults[0]
+	var total, minVal, maxVal float64
+	minVal = allocResults[0]
+	maxVal = allocResults[0]
 	for _, allocs := range allocResults {
 		total += allocs
-		if allocs < min {
-			min = allocs
+		if allocs < minVal {
+			minVal = allocs
 		}
-		if allocs > max {
-			max = allocs
+		if allocs > maxVal {
+			maxVal = allocs
 		}
 	}
 	avg := total / float64(len(allocResults))
 
-	t.Logf("Statistics: min=%.6f, max=%.6f, avg=%.6f", min, max, avg)
+	t.Logf("Statistics: min=%.6f, max=%.6f, avg=%.6f", minVal, maxVal, avg)
 
 	// Environment info
 	t.Logf("Race detector enabled: %v", isRaceEnabled())
@@ -308,9 +308,9 @@ func Test_ToUpper_NonASCII_Allocations(t *testing.T) {
 	}
 
 	// Check for any non-zero allocations
-	hasAllocations := max > 0
+	hasAllocations := maxVal > 0
 	if hasAllocations {
-		t.Logf("WARNING: Detected allocations (max: %.6f) for non-ASCII input that should not allocate", max)
+		t.Logf("WARNING: Detected allocations (max: %.6f) for non-ASCII input that should not allocate", maxVal)
 		t.Logf("This indicates a potential bug or environmental issue that needs investigation")
 
 		// In CI with race detector, log but don't fail to prevent flaky tests
