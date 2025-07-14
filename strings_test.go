@@ -9,18 +9,11 @@ package utils
 
 import (
 	"fmt"
-	"os"
 	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/require"
 )
-
-// isRaceEnabled detects if the race detector is enabled
-// This helps determine if allocation tests should be strict
-func isRaceEnabled() bool {
-	return raceEnabled
-}
 
 // TestCase defines a test case for case conversion.
 type TestCase struct {
@@ -99,19 +92,10 @@ func Test_ToUpper(t *testing.T) {
 					_ = ToUpper(tc.input)
 				}
 
-				// Now measure allocations after warmup
 				allocs := testing.AllocsPerRun(100, func() {
 					_ = ToUpper(tc.input)
 				})
-
-				// Skip strict allocation check when race detector is enabled
-				// as it introduces additional allocations that are not part of the actual function
-				if !isRaceEnabled() {
-					require.Zero(t, allocs, "ToUpper should not allocate for %s", tc.name)
-				} else {
-					// In race mode, just log the allocation count for debugging
-					t.Logf("ToUpper allocations for %s (with race detector): %f", tc.name, allocs)
-				}
+				require.Zero(t, allocs, "ToUpper should not allocate for %s", tc.name)
 			}
 		})
 	}
@@ -131,19 +115,10 @@ func Test_ToLower(t *testing.T) {
 					_ = ToLower(tc.input)
 				}
 
-				// Now measure allocations after warmup
 				allocs := testing.AllocsPerRun(100, func() {
 					_ = ToLower(tc.input)
 				})
-
-				// Skip strict allocation check when race detector is enabled
-				// as it introduces additional allocations that are not part of the actual function
-				if !isRaceEnabled() {
-					require.Zero(t, allocs, "ToLower should not allocate for %s", tc.name)
-				} else {
-					// In race mode, just log the allocation count for debugging
-					t.Logf("ToLower allocations for %s (with race detector): %f", tc.name, allocs)
-				}
+				require.Zero(t, allocs, "ToLower should not allocate for %s", tc.name)
 			}
 		})
 	}
@@ -224,97 +199,5 @@ func Benchmark_StdToLower(b *testing.B) {
 			}
 			require.Equal(b, tc.lower, res)
 		})
-	}
-}
-
-// Test_ToUpper_NonASCII_Allocations provides comprehensive diagnostic information
-// to help identify the root cause of sporadic allocation failures in CI
-func Test_ToUpper_NonASCII_Allocations(t *testing.T) {
-	t.Parallel()
-	input := "µßäöü"
-
-	// Warm up the function to handle any first-run initialization costs
-	// This prevents the diagnostic test itself from being affected by cold-start allocations
-	for i := 0; i < 10; i++ {
-		_ = ToUpper(input)
-	}
-
-	// Run multiple times to detect inconsistent behavior
-	var allocResults []float64
-	var results []string
-
-	for i := 0; i < 10; i++ {
-		allocs := testing.AllocsPerRun(100, func() {
-			result := ToUpper(input)
-			results = append(results, result)
-		})
-		allocResults = append(allocResults, allocs)
-	}
-
-	// Detailed diagnostics
-	t.Logf("=== ToUpper Non-ASCII Allocation Diagnostics ===")
-	t.Logf("Input: %q", input)
-	t.Logf("Input bytes: %v", []byte(input))
-	t.Logf("Expected bytes: %v", []byte(input)) // Should be unchanged
-
-	// Log all allocation measurements
-	for i, allocs := range allocResults {
-		t.Logf("Run %d: %.6f allocations", i+1, allocs)
-	}
-
-	// Statistical analysis
-	var total, minVal, maxVal float64
-	minVal = allocResults[0]
-	maxVal = allocResults[0]
-	for _, allocs := range allocResults {
-		total += allocs
-		if allocs < minVal {
-			minVal = allocs
-		}
-		if allocs > maxVal {
-			maxVal = allocs
-		}
-	}
-	avg := total / float64(len(allocResults))
-
-	t.Logf("Statistics: min=%.6f, max=%.6f, avg=%.6f", minVal, maxVal, avg)
-
-	// Environment info
-	t.Logf("Race detector enabled: %v", isRaceEnabled())
-	t.Logf("CI environment: %v", os.Getenv("CI"))
-	t.Logf("GITHUB_ACTIONS: %v", os.Getenv("GITHUB_ACTIONS"))
-	t.Logf("RUNNER_OS: %v", os.Getenv("RUNNER_OS"))
-	t.Logf("RUNNER_ARCH: %v", os.Getenv("RUNNER_ARCH"))
-
-	// Verify all results are identical (no allocations should mean same string returned)
-	for i, result := range results {
-		if result != input {
-			t.Errorf("Run %d: ToUpper modified input: got %q, want %q", i, result, input)
-		}
-	}
-
-	// Check for first-run allocation spike (common cause of test flakiness)
-	firstRunAllocs := allocResults[0]
-	subsequentAllocs := allocResults[1:]
-	subsequentMax := 0.0
-	for _, allocs := range subsequentAllocs {
-		if allocs > subsequentMax {
-			subsequentMax = allocs
-		}
-	}
-
-	if firstRunAllocs > 0 && subsequentMax == 0 {
-		t.Logf("DETECTED: First-run allocation spike (%.6f allocs), but subsequent runs are clean", firstRunAllocs)
-		t.Logf("This indicates initialization overhead that has been addressed by function warmup in main tests")
-	} else if maxVal > 0 {
-		t.Logf("WARNING: Detected allocations (max: %.6f) for non-ASCII input that should not allocate", maxVal)
-		t.Logf("This indicates a potential bug or environmental issue that needs investigation")
-
-		// In CI with race detector, this might be expected
-		if isRaceEnabled() && os.Getenv("CI") != "" {
-			t.Logf("Race detector + CI environment: this may be expected race detector overhead")
-		}
-	} else {
-		t.Logf("SUCCESS: No allocations detected as expected")
 	}
 }
