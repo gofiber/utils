@@ -229,7 +229,7 @@ func Test_ToUpper_NonASCII_Allocations(t *testing.T) {
 	t.Logf("Race detector enabled: %v", isRaceEnabled())
 	t.Logf("CI environment: %v", os.Getenv("CI"))
 	t.Logf("GITHUB_ACTIONS: %v", os.Getenv("GITHUB_ACTIONS"))
-	
+
 	// Only enforce zero allocations when not running with race detector
 	if !isRaceEnabled() {
 		require.Zero(t, allocs, "ToUpper should not allocate for non-ascii without race detector")
