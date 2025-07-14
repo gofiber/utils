@@ -95,7 +95,13 @@ func Test_ToUpper(t *testing.T) {
 				allocs := testing.AllocsPerRun(100, func() {
 					_ = ToUpper(tc.input)
 				})
-				require.Zero(t, allocs, "ToUpper should not allocate for %s", tc.name)
+
+				if !raceEnabled {
+					require.Zero(t, allocs, "ToUpper should not allocate for %s", tc.name)
+				} else {
+					// In race mode, just log the allocation count to avoid false failures
+					t.Logf("ToUpper allocations for %s (with race detector): %f", tc.name, allocs)
+				}
 			}
 		})
 	}
@@ -118,7 +124,13 @@ func Test_ToLower(t *testing.T) {
 				allocs := testing.AllocsPerRun(100, func() {
 					_ = ToLower(tc.input)
 				})
-				require.Zero(t, allocs, "ToLower should not allocate for %s", tc.name)
+
+				if !raceEnabled {
+					require.Zero(t, allocs, "ToLower should not allocate for %s", tc.name)
+				} else {
+					// In race mode, just log the allocation count to avoid false failures
+					t.Logf("ToLower allocations for %s (with race detector): %f", tc.name, allocs)
+				}
 			}
 		})
 	}
