@@ -4,7 +4,7 @@ import (
 	"encoding/hex"
 	"testing"
 
-	cbor "github.com/fxamacker/cbor/v2"
+	"github.com/fxamacker/cbor/v2"
 	"github.com/stretchr/testify/require"
 )
 
