@@ -233,6 +233,12 @@ func Test_ToUpper_NonASCII_Allocations(t *testing.T) {
 	t.Parallel()
 	input := "µßäöü"
 
+	// Warm up the function to handle any first-run initialization costs
+	// This prevents the diagnostic test itself from being affected by cold-start allocations
+	for i := 0; i < 10; i++ {
+		_ = ToUpper(input)
+	}
+
 	// Run multiple times to detect inconsistent behavior
 	var allocResults []float64
 	var results []string
