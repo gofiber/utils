@@ -102,7 +102,7 @@ func Test_ToUpper(t *testing.T) {
 					})
 					allocResults = append(allocResults, allocs)
 				}
-				
+
 				// Find max allocations across runs
 				maxAllocs := allocResults[0]
 				for _, allocs := range allocResults {
@@ -110,7 +110,7 @@ func Test_ToUpper(t *testing.T) {
 						maxAllocs = allocs
 					}
 				}
-				
+
 				// Skip strict allocation check when race detector is enabled
 				// as it introduces additional allocations that are not part of the actual function
 				if !isRaceEnabled() {
@@ -144,7 +144,7 @@ func Test_ToLower(t *testing.T) {
 					})
 					allocResults = append(allocResults, allocs)
 				}
-				
+
 				// Find max allocations across runs
 				maxAllocs := allocResults[0]
 				for _, allocs := range allocResults {
@@ -152,7 +152,7 @@ func Test_ToLower(t *testing.T) {
 						maxAllocs = allocs
 					}
 				}
-				
+
 				// Skip strict allocation check when race detector is enabled
 				// as it introduces additional allocations that are not part of the actual function
 				if !isRaceEnabled() {
@@ -252,11 +252,11 @@ func Benchmark_StdToLower(b *testing.B) {
 func Test_ToUpper_NonASCII_Allocations(t *testing.T) {
 	t.Parallel()
 	input := "µßäöü"
-	
+
 	// Run multiple times to detect inconsistent behavior
 	var allocResults []float64
 	var results []string
-	
+
 	for i := 0; i < 10; i++ {
 		allocs := testing.AllocsPerRun(100, func() {
 			result := ToUpper(input)
@@ -264,18 +264,18 @@ func Test_ToUpper_NonASCII_Allocations(t *testing.T) {
 		})
 		allocResults = append(allocResults, allocs)
 	}
-	
+
 	// Detailed diagnostics
 	t.Logf("=== ToUpper Non-ASCII Allocation Diagnostics ===")
 	t.Logf("Input: %q", input)
 	t.Logf("Input bytes: %v", []byte(input))
 	t.Logf("Expected bytes: %v", []byte(input)) // Should be unchanged
-	
+
 	// Log all allocation measurements
 	for i, allocs := range allocResults {
 		t.Logf("Run %d: %.6f allocations", i+1, allocs)
 	}
-	
+
 	// Statistical analysis
 	var total, min, max float64
 	min = allocResults[0]
@@ -290,29 +290,29 @@ func Test_ToUpper_NonASCII_Allocations(t *testing.T) {
 		}
 	}
 	avg := total / float64(len(allocResults))
-	
+
 	t.Logf("Statistics: min=%.6f, max=%.6f, avg=%.6f", min, max, avg)
-	
+
 	// Environment info
 	t.Logf("Race detector enabled: %v", isRaceEnabled())
 	t.Logf("CI environment: %v", os.Getenv("CI"))
 	t.Logf("GITHUB_ACTIONS: %v", os.Getenv("GITHUB_ACTIONS"))
 	t.Logf("RUNNER_OS: %v", os.Getenv("RUNNER_OS"))
 	t.Logf("RUNNER_ARCH: %v", os.Getenv("RUNNER_ARCH"))
-	
+
 	// Verify all results are identical (no allocations should mean same string returned)
 	for i, result := range results {
 		if result != input {
 			t.Errorf("Run %d: ToUpper modified input: got %q, want %q", i, result, input)
 		}
 	}
-	
+
 	// Check for any non-zero allocations
 	hasAllocations := max > 0
 	if hasAllocations {
 		t.Logf("WARNING: Detected allocations (max: %.6f) for non-ASCII input that should not allocate", max)
 		t.Logf("This indicates a potential bug or environmental issue that needs investigation")
-		
+
 		// In CI with race detector, log but don't fail to prevent flaky tests
 		// In other environments, this might indicate a real bug
 		if isRaceEnabled() && os.Getenv("CI") != "" {
