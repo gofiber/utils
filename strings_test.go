@@ -9,11 +9,18 @@ package utils
 
 import (
 	"fmt"
+	"os"
 	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/require"
 )
+
+// isRaceEnabled detects if the race detector is enabled
+// This helps determine if allocation tests should be strict
+func isRaceEnabled() bool {
+	return raceEnabled
+}
 
 // TestCase defines a test case for case conversion.
 type TestCase struct {
@@ -90,7 +97,14 @@ func Test_ToUpper(t *testing.T) {
 				allocs := testing.AllocsPerRun(100, func() {
 					_ = ToUpper(tc.input)
 				})
-				require.Zero(t, allocs, "ToUpper should not allocate for %s", tc.name)
+				// Skip strict allocation check when race detector is enabled
+				// as it introduces additional allocations that are not part of the actual function
+				if !isRaceEnabled() {
+					require.Zero(t, allocs, "ToUpper should not allocate for %s", tc.name)
+				} else {
+					// In race mode, just log the allocation count for debugging
+					t.Logf("ToUpper allocations for %s (with race detector): %f", tc.name, allocs)
+				}
 			}
 		})
 	}
@@ -108,7 +122,14 @@ func Test_ToLower(t *testing.T) {
 				allocs := testing.AllocsPerRun(100, func() {
 					_ = ToLower(tc.input)
 				})
-				require.Zero(t, allocs, "ToLower should not allocate for %s", tc.name)
+				// Skip strict allocation check when race detector is enabled
+				// as it introduces additional allocations that are not part of the actual function
+				if !isRaceEnabled() {
+					require.Zero(t, allocs, "ToLower should not allocate for %s", tc.name)
+				} else {
+					// In race mode, just log the allocation count for debugging
+					t.Logf("ToLower allocations for %s (with race detector): %f", tc.name, allocs)
+				}
 			}
 		})
 	}
@@ -189,5 +210,28 @@ func Benchmark_StdToLower(b *testing.B) {
 			}
 			require.Equal(b, tc.lower, res)
 		})
+	}
+}
+
+// Test_ToUpper_NonASCII_Allocations provides diagnostic information about allocation behavior
+// This test helps debug allocation issues in different environments (with/without race detector)
+func Test_ToUpper_NonASCII_Allocations(t *testing.T) {
+	t.Parallel()
+	input := "µßäöü"
+	allocs := testing.AllocsPerRun(100, func() {
+		result := ToUpper(input)
+		if result != input {
+			t.Errorf("ToUpper modified input: got %v, want %v", result, input)
+		}
+	})
+	t.Logf("Input bytes: %v", []byte(input))
+	t.Logf("Allocations for ToUpper(µßäöü): %f", allocs)
+	t.Logf("Race detector enabled: %v", isRaceEnabled())
+	t.Logf("CI environment: %v", os.Getenv("CI"))
+	t.Logf("GITHUB_ACTIONS: %v", os.Getenv("GITHUB_ACTIONS"))
+	
+	// Only enforce zero allocations when not running with race detector
+	if !isRaceEnabled() {
+		require.Zero(t, allocs, "ToUpper should not allocate for non-ascii without race detector")
 	}
 }
