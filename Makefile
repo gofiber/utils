@@ -28,6 +28,11 @@ coverage:
 format:
 	go run mvdan.cc/gofumpt@latest -w -l .
 
+## benchfmt: 📝 Format README benchmark lines
+.PHONY: benchfmt
+benchfmt:
+	go run ./scripts/format_benchmarks.go
+
 ## lint: 🚨 Run lint checks
 .PHONY: lint
 lint:
