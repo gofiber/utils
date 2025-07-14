@@ -120,7 +120,7 @@ func formatBenchmarks(path string) error {
 	if !strings.HasSuffix(out, "\n") {
 		out += "\n"
 	}
-	return os.WriteFile(path, []byte(out), 0o644) // #nosec G306
+	return os.WriteFile(path, []byte(out), 0o600) // #nosec G306
 }
 
 func columnWidths(entries [][]string) []int {
