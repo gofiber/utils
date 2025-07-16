@@ -87,10 +87,21 @@ func Test_ToUpper(t *testing.T) {
 			result := ToUpper(tc.input)
 			require.Equal(t, tc.upper, result, "ToUpper failed for %s", tc.name)
 			if tc.upperNoConv {
+				// Warm up the function to handle any first-run initialization costs
+				for i := 0; i < 10; i++ {
+					_ = ToUpper(tc.input)
+				}
+
 				allocs := testing.AllocsPerRun(100, func() {
 					_ = ToUpper(tc.input)
 				})
-				require.Zero(t, allocs, "ToUpper should not allocate for %s", tc.name)
+
+				if !raceEnabled {
+					require.Zero(t, allocs, "ToUpper should not allocate for %s", tc.name)
+				} else {
+					// In race mode, just log the allocation count to avoid false failures
+					t.Logf("ToUpper allocations for %s (with race detector): %f", tc.name, allocs)
+				}
 			}
 		})
 	}
@@ -105,10 +116,21 @@ func Test_ToLower(t *testing.T) {
 			result := ToLower(tc.input)
 			require.Equal(t, tc.lower, result, "ToLower failed for %s", tc.name)
 			if tc.lowerNoConv {
+				// Warm up the function to handle any first-run initialization costs
+				for i := 0; i < 10; i++ {
+					_ = ToLower(tc.input)
+				}
+
 				allocs := testing.AllocsPerRun(100, func() {
 					_ = ToLower(tc.input)
 				})
-				require.Zero(t, allocs, "ToLower should not allocate for %s", tc.name)
+
+				if !raceEnabled {
+					require.Zero(t, allocs, "ToLower should not allocate for %s", tc.name)
+				} else {
+					// In race mode, just log the allocation count to avoid false failures
+					t.Logf("ToLower allocations for %s (with race detector): %f", tc.name, allocs)
+				}
 			}
 		})
 	}
