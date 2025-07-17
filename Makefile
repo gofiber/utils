@@ -38,6 +38,11 @@ benchfmt:
 lint:
 	go run github.com/golangci/golangci-lint/cmd/golangci-lint@v1.61.0 run ./...
 
+## modernize: ♻️ Check for outdated patterns
+.PHONY: modernize
+modernize:
+	go run golang.org/x/tools/gopls/internal/analysis/modernize/cmd/modernize@latest -test=false ./...
+
 ## test: 🚦 Execute all tests
 .PHONY: test
 test:
