@@ -106,10 +106,7 @@ func FunctionName(fn any) string {
 
 // GetArgument check if key is in arguments
 func GetArgument(arg string) bool {
-	if slices.Contains(os.Args[1:], arg) {
-		return true
-	}
-	return false
+	return slices.Contains(os.Args[1:], arg)
 }
 
 // IncrementIPRange Find available next IP address
