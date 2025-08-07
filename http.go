@@ -168,6 +168,7 @@ var mimeExtensions = map[string]string{
 	"shtml":   "text/html",
 	"css":     "text/css",
 	"xml":     "application/xml",
+	"cbor":    "application/cbor",
 	"gif":     "image/gif",
 	"jpeg":    "image/jpeg",
 	"jpg":     "image/jpeg",
