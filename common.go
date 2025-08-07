@@ -13,6 +13,7 @@ import (
 	"os"
 	"reflect"
 	"runtime"
+	"slices"
 	"strconv"
 	"strings"
 	"sync"
@@ -105,10 +106,8 @@ func FunctionName(fn any) string {
 
 // GetArgument check if key is in arguments
 func GetArgument(arg string) bool {
-	for i := range os.Args[1:] {
-		if os.Args[1:][i] == arg {
-			return true
-		}
+	if slices.Contains(os.Args[1:], arg) {
+		return true
 	}
 	return false
 }
