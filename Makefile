@@ -19,7 +19,7 @@ benchmark:
 ## coverage: ☂️  Generate coverage report
 .PHONY: coverage
 coverage:
-	go run gotest.tools/gotestsum@latest -f testname -- ./... -race -count=1 -coverprofile=coverage.out -covermode=atomic
+	go run gotest.tools/gotestsum@v1.12.0 -f testname -- ./... -race -count=1 -coverprofile=coverage.out -covermode=atomic
 	go tool cover -html=coverage.out -o coverage.html
 	open coverage.html &
 
@@ -46,7 +46,7 @@ modernize:
 ## test: 🚦 Execute all tests
 .PHONY: test
 test:
-	go run gotest.tools/gotestsum@latest -f testname -- ./... -race -count=1 -shuffle=on
+	go run gotest.tools/gotestsum@v1.12.0 -f testname -- ./... -race -count=1 -shuffle=on
 
 ## tidy: 📌 Clean and tidy dependencies
 .PHONY: tidy
