@@ -31,7 +31,7 @@ jobs:
           go-version: ${{ matrix.go-version }}
 
       - name: Install gotestsum
-        run: go install gotest.tools/gotestsum@latest
+        run: go install gotest.tools/gotestsum@v1.12.0
 
       - name: Test
         run: gotestsum -f testname -- ./... -race -count=1 -shuffle=on
