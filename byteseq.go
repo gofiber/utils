@@ -9,10 +9,46 @@ func EqualFold[S byteSeq](b, s S) bool {
 	if len(b) != len(s) {
 		return false
 	}
-	for i := len(b) - 1; i >= 0; i-- {
-		if toUpperTable[b[i]] != toUpperTable[s[i]] {
+
+	table := toUpperTable
+	n := len(b)
+	i := 0
+
+	// Unroll by 4 to match other hot paths and drive instruction-level parallelism.
+	limit := n &^ 3
+	for i < limit {
+		b0 := b[i+0]
+		s0 := s[i+0]
+		if table[b0] != table[s0] {
 			return false
 		}
+
+		b1 := b[i+1]
+		s1 := s[i+1]
+		if table[b1] != table[s1] {
+			return false
+		}
+
+		b2 := b[i+2]
+		s2 := s[i+2]
+		if table[b2] != table[s2] {
+			return false
+		}
+
+		b3 := b[i+3]
+		s3 := s[i+3]
+		if table[b3] != table[s3] {
+			return false
+		}
+
+		i += 4
+	}
+
+	for i < n {
+		if table[b[i]] != table[s[i]] {
+			return false
+		}
+		i++
 	}
 	return true
 }
