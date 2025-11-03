@@ -7,8 +7,7 @@ import (
 // IsIPv4 works the same way as net.ParseIP,
 // but without check for IPv6 case and without returning net.IP slice, whereby IsIPv4 makes no allocations.
 func IsIPv4(s string) bool {
-	//nolint:modernize-loop // old way is more readable
-	for i := 0; i < net.IPv4len; i++ {
+	for i := range net.IPv4len {
 		if len(s) == 0 {
 			return false
 		}
