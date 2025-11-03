@@ -101,7 +101,7 @@ func Test_IPWhitespace(t *testing.T) {
 	require.False(t, IsIPv6("::1 "))
 }
 
-// go test -v -run=^$ -bench=UnsafeString -benchmem -count=2
+// go test -v -run=^$ -bench=Benchmark_IsIPv4 -benchmem -count=6
 func Benchmark_IsIPv4(b *testing.B) {
 	ip := "174.23.33.100"
 	var res bool
@@ -121,7 +121,7 @@ func Benchmark_IsIPv4(b *testing.B) {
 	})
 }
 
-// go test -v -run=^$ -bench=UnsafeString -benchmem -count=2
+// go test -v -run=^$ -bench=Benchmark_IsIPv6 -benchmem -count=6
 func Benchmark_IsIPv6(b *testing.B) {
 	ip := "9396:9549:b4f7:8ed0:4791:1330:8c06:e62d"
 	var res bool
