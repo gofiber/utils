@@ -7,6 +7,11 @@ run:
   modules-download-mode: readonly
   allow-serial-runners: true
 
+output:
+  sort-order:
+    - file
+    - linter
+
 issues:
   max-issues-per-linter: 0
   max-same-issues: 0
@@ -15,7 +20,6 @@ issues:
 
 linters:
   exclusions:
-    generated: disable
     paths:
       - internal # TODO: Do not ignore interal packages
     rules:
@@ -221,8 +225,6 @@ linters:
 
     testifylint:
       enable-all: true
-      disable:
-        - empty
 
     testpackage:
       skip-regexp: "^$"
@@ -353,6 +355,7 @@ linters:
     - tparallel
     - unconvert
     - unparam
+    - unused
     - usestdlibvars
     # - varnamelen
     # - wastedassign # TODO: Enable
