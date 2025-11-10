@@ -23,20 +23,20 @@ func Test_FunctionName(t *testing.T) {
 	require.Equal(t, "int", FunctionName(dummyint))
 
 	// nil interface should return empty string
-	require.Equal(t, "", FunctionName(nil))
+	require.Empty(t, FunctionName(nil))
 
 	// typed nil function should also return empty string
 	var nilFunc func()
-	require.Equal(t, "", FunctionName(nilFunc))
+	require.Empty(t, FunctionName(nilFunc))
 
 	// typed nil custom func should return empty string
 	type myFunc func()
 	var mf myFunc
-	require.Equal(t, "", FunctionName(mf))
+	require.Empty(t, FunctionName(mf))
 
 	// typed nil function inside interface should return empty string
 	var iface any = mf
-	require.Equal(t, "", FunctionName(iface))
+	require.Empty(t, FunctionName(iface))
 
 	// typed nil pointer should return its type name
 	var ptr *int

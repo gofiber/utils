@@ -37,7 +37,7 @@ func Test_GetMIME(t *testing.T) {
 
 	// empty case
 	res = GetMIME("")
-	require.Equal(t, "", res)
+	require.Empty(t, res)
 
 	err := mime.AddExtensionType(".mjs", "application/javascript")
 	if err == nil {
@@ -114,7 +114,7 @@ func Test_ParseVendorSpecificContentType(t *testing.T) {
 	require.Equal(t, "application/json", cType)
 
 	// Empty and single-character inputs
-	require.Equal(t, "", ParseVendorSpecificContentType(""))
+	require.Empty(t, ParseVendorSpecificContentType(""))
 	require.Equal(t, "+", ParseVendorSpecificContentType("+"))
 	require.Equal(t, ";", ParseVendorSpecificContentType(";"))
 	require.Equal(t, "/", ParseVendorSpecificContentType("/"))
@@ -204,16 +204,16 @@ func Test_StatusMessage(t *testing.T) {
 	require.Equal(t, "Network Authentication Required", res)
 
 	res = StatusMessage(1337)
-	require.Equal(t, "", res)
+	require.Empty(t, res)
 
 	res = StatusMessage(-1)
-	require.Equal(t, "", res)
+	require.Empty(t, res)
 
 	res = StatusMessage(0)
-	require.Equal(t, "", res)
+	require.Empty(t, res)
 
 	res = StatusMessage(600)
-	require.Equal(t, "", res)
+	require.Empty(t, res)
 
 	res = StatusMessage(100)
 	require.Equal(t, "Continue", res)

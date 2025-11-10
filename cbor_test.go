@@ -73,7 +73,7 @@ func Test_DefaultCBORDecoderWithEmptyString(t *testing.T) {
 
 	err = cborDecoder(importantString, &ss)
 	require.NoError(t, err)
-	require.Equal(t, "", ss.ImportantString)
+	require.Empty(t, ss.ImportantString)
 }
 
 func Test_DefaultCBOREncoderWithUnitializedStruct(t *testing.T) {
