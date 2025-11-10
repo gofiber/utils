@@ -160,14 +160,14 @@ func ToString(arg any, timeFormat ...string) string {
 		} else if rv.Kind() == reflect.Slice || rv.Kind() == reflect.Array {
 			// handle slices
 			var buf strings.Builder
-			buf.WriteString("[") //nolint: revive,errcheck // no need to check error
+			buf.WriteString("[") //nolint:errcheck // no need to check error
 			for i := 0; i < rv.Len(); i++ {
 				if i > 0 {
-					buf.WriteString(" ") //nolint: revive,errcheck // no need to check error
+					buf.WriteString(" ") //nolint:errcheck // no need to check error
 				}
-				buf.WriteString(ToString(rv.Index(i).Interface())) //nolint: revive,errcheck // no need to check error
+				buf.WriteString(ToString(rv.Index(i).Interface())) //nolint:errcheck // no need to check error
 			}
-			buf.WriteString("]") //nolint: revive,errcheck // no need to check error
+			buf.WriteString("]") //nolint:errcheck // no need to check error
 			return buf.String()
 		}
 

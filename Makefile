@@ -36,7 +36,7 @@ benchfmt:
 ## lint: 🚨 Run lint checks
 .PHONY: lint
 lint:
-	go run github.com/golangci/golangci-lint/cmd/golangci-lint@v1.61.0 run ./...
+	go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.6.1 run ./...
 
 ## modernize: ♻️ Check for outdated patterns
 .PHONY: modernize
