@@ -370,9 +370,8 @@ func Test_TrimSpace(t *testing.T) {
 
 			// Verify it matches bytes.TrimSpace behavior (nil and empty slices are treated as equal)
 			stdResultBytes := bytes.TrimSpace([]byte(tc.input))
-			if len(stdResultBytes) == 0 && len(resultBytes) == 0 {
-				// Both empty - this is fine (nil vs [] are both valid empty slices)
-			} else {
+			// Only compare if not both empty (nil vs [] are both valid empty slices)
+			if !(len(stdResultBytes) == 0 && len(resultBytes) == 0) {
 				require.Equal(t, stdResultBytes, resultBytes, "TrimSpace should match bytes.TrimSpace for %s", tc.name)
 			}
 		})
