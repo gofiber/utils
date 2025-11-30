@@ -87,3 +87,30 @@ func TrimRight[S byteSeq](s S, cutset byte) S {
 	}
 	return s[:lenStr]
 }
+
+// AddTrailingSlash appends a trailing '/' to v if it does not already end with one.
+//
+// For string inputs, the result is always a new string.
+//
+// For []byte inputs, the result is always a new slice with the trailing '/' appended.
+// The original slice is never modified, even if it has sufficient capacity.
+//
+// This function guarantees that the returned value is independent of the input.
+func AddTrailingSlash[T byteSeq](v T) T {
+	if len(v) > 0 && v[len(v)-1] == '/' {
+		return v
+	}
+
+	switch x := any(v).(type) {
+	case string:
+		return any(x + "/").(T) //nolint:forcetypeassert,errcheck // can't fail
+	case []byte:
+		result := make([]byte, len(x)+1)
+		copy(result, x)
+		result[len(x)] = '/'
+		return any(result).(T) //nolint:forcetypeassert,errcheck // can't fail
+	default:
+		// impossible because of the constraint
+		return v
+	}
+}
