@@ -4,6 +4,12 @@ import (
 	"net"
 )
 
+var hexTable = [256]byte{
+	'0': 0, '1': 1, '2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9,
+	'a': 10, 'b': 11, 'c': 12, 'd': 13, 'e': 14, 'f': 15,
+	'A': 10, 'B': 11, 'C': 12, 'D': 13, 'E': 14, 'F': 15,
+}
+
 // IsIPv4 works the same way as net.ParseIP,
 // but without check for IPv6 case and without returning net.IP slice, whereby IsIPv4 makes no allocations.
 func IsIPv4(s string) bool {
@@ -60,18 +66,12 @@ func IsIPv6(s string) bool {
 		n, ci := 0, 0
 
 		for ci = 0; ci < len(s); ci++ {
-			if '0' <= s[ci] && s[ci] <= '9' {
-				n *= 16
-				n += int(s[ci] - '0')
-			} else if 'a' <= s[ci] && s[ci] <= 'f' {
-				n *= 16
-				n += int(s[ci]-'a') + 10
-			} else if 'A' <= s[ci] && s[ci] <= 'F' {
-				n *= 16
-				n += int(s[ci]-'A') + 10
-			} else {
+			if (s[ci] < '0' || s[ci] > '9') && (s[ci] < 'a' || s[ci] > 'f') && (s[ci] < 'A' || s[ci] > 'F') {
 				break
 			}
+			n *= 16
+			n += int(hexTable[s[ci]])
+
 			if n > 0xFFFF {
 				return false
 			}
