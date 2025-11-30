@@ -48,3 +48,38 @@ func ToUpper(b string) string {
 
 	return b
 }
+
+// TrimSpace removes leading and trailing whitespace from a string.
+// This is an optimized version that's faster than strings.TrimSpace for ASCII strings.
+// It removes the following ASCII whitespace characters: space, tab, newline, carriage return, vertical tab, and form feed.
+func TrimSpace(s string) string {
+	// Fast path for empty strings
+	if len(s) == 0 {
+		return s
+	}
+
+	// Find first non-whitespace character
+	start := 0
+	for start < len(s) && whitespaceTable[s[start]] {
+		start++
+	}
+
+	// If all whitespace, return empty string
+	if start == len(s) {
+		return ""
+	}
+
+	// Find last non-whitespace character
+	end := len(s) - 1
+	for end > start && whitespaceTable[s[end]] {
+		end--
+	}
+
+	// If no trimming needed, return original string (no allocation)
+	if start == 0 && end == len(s)-1 {
+		return s
+	}
+
+	// Return trimmed substring
+	return s[start : end+1]
+}

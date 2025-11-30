@@ -1,0 +1,36 @@
+goos: linux
+goarch: amd64
+pkg: github.com/gofiber/utils/v2
+cpu: Intel(R) Xeon(R) CPU @ 2.60GHz
+Benchmark_TrimSpace/empty-16 	1000000000	         0.6334 ns/op	       0 B/op	       0 allocs/op
+Benchmark_TrimSpace/no-trim-16         	1000000000	         3.275 ns/op	1526.68 MB/s	       0 B/op	       0 allocs/op
+Benchmark_TrimSpace/no-trim-long-16    	1000000000	         3.208 ns/op	10911.58 MB/s	       0 B/op	       0 allocs/op
+Benchmark_TrimSpace/leading-space-16   	668855820	         5.409 ns/op	1109.34 MB/s	       0 B/op	       0 allocs/op
+Benchmark_TrimSpace/trailing-space-16  	833596588	         4.182 ns/op	1434.80 MB/s	       0 B/op	       0 allocs/op
+Benchmark_TrimSpace/both-spaces-16     	596066724	         6.013 ns/op	1164.09 MB/s	       0 B/op	       0 allocs/op
+Benchmark_TrimSpace/both-many-spaces-16         	349878700	        10.38 ns/op	1829.85 MB/s	       0 B/op	       0 allocs/op
+Benchmark_TrimSpace/leading-mixed-16            	498684283	         7.183 ns/op	1253.02 MB/s	       0 B/op	       0 allocs/op
+Benchmark_TrimSpace/trailing-mixed-16           	521087865	         6.781 ns/op	1327.26 MB/s	       0 B/op	       0 allocs/op
+Benchmark_TrimSpace/both-mixed-16               	359921239	        10.09 ns/op	1684.58 MB/s	       0 B/op	       0 allocs/op
+Benchmark_TrimSpace/all-spaces-16               	401293543	         8.779 ns/op	1139.02 MB/s	       0 B/op	       0 allocs/op
+Benchmark_TrimSpace/medium-no-trim-16           	1000000000	         3.221 ns/op	19866.70 MB/s	       0 B/op	       0 allocs/op
+Benchmark_TrimSpace/medium-with-trim-16         	481935852	         7.431 ns/op	9150.35 MB/s	       0 B/op	       0 allocs/op
+Benchmark_TrimSpace/large-no-trim-16            	1000000000	         3.237 ns/op	77233.52 MB/s	       0 B/op	       0 allocs/op
+Benchmark_TrimSpace/large-with-trim-16          	350854892	        10.40 ns/op	24800.69 MB/s	       0 B/op	       0 allocs/op
+Benchmark_StdTrimSpace/empty-16                 	1000000000	         2.915 ns/op	       0 B/op	       0 allocs/op
+Benchmark_StdTrimSpace/no-trim-16               	938613444	         3.994 ns/op	1251.91 MB/s	       0 B/op	       0 allocs/op
+Benchmark_StdTrimSpace/no-trim-long-16          	883282183	         3.873 ns/op	9037.17 MB/s	       0 B/op	       0 allocs/op
+Benchmark_StdTrimSpace/leading-space-16         	817585533	         4.519 ns/op	1327.77 MB/s	       0 B/op	       0 allocs/op
+Benchmark_StdTrimSpace/trailing-space-16        	734094721	         5.214 ns/op	1150.80 MB/s	       0 B/op	       0 allocs/op
+Benchmark_StdTrimSpace/both-spaces-16           	621115699	         5.888 ns/op	1188.93 MB/s	       0 B/op	       0 allocs/op
+Benchmark_StdTrimSpace/both-many-spaces-16      	383286470	         9.349 ns/op	2032.31 MB/s	       0 B/op	       0 allocs/op
+Benchmark_StdTrimSpace/leading-mixed-16         	557155966	         6.554 ns/op	1373.26 MB/s	       0 B/op	       0 allocs/op
+Benchmark_StdTrimSpace/trailing-mixed-16        	532116274	         6.918 ns/op	1300.92 MB/s	       0 B/op	       0 allocs/op
+Benchmark_StdTrimSpace/both-mixed-16            	416253867	         8.304 ns/op	2047.18 MB/s	       0 B/op	       0 allocs/op
+Benchmark_StdTrimSpace/all-spaces-16            	368438984	        10.07 ns/op	 993.27 MB/s	       0 B/op	       0 allocs/op
+Benchmark_StdTrimSpace/medium-no-trim-16        	889286173	         4.021 ns/op	15914.78 MB/s	       0 B/op	       0 allocs/op
+Benchmark_StdTrimSpace/medium-with-trim-16      	500471320	         7.114 ns/op	9558.54 MB/s	       0 B/op	       0 allocs/op
+Benchmark_StdTrimSpace/large-no-trim-16         	940799749	         3.989 ns/op	62674.73 MB/s	       0 B/op	       0 allocs/op
+Benchmark_StdTrimSpace/large-with-trim-16       	373796553	         9.605 ns/op	26860.19 MB/s	       0 B/op	       0 allocs/op
+PASS
+ok  	github.com/gofiber/utils/v2	125.323s
