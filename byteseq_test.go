@@ -401,6 +401,7 @@ func Benchmark_TrimSpace(b *testing.B) {
 	}
 
 	for _, tc := range testCases {
+		tc := tc // capture range variable
 		b.Run("fiber/"+tc.name, func(b *testing.B) {
 			b.ReportAllocs()
 			b.SetBytes(int64(len(tc.input)))
@@ -411,9 +412,6 @@ func Benchmark_TrimSpace(b *testing.B) {
 			}
 			_ = res
 		})
-	}
-
-	for _, tc := range testCases {
 		b.Run("default/"+tc.name, func(b *testing.B) {
 			b.ReportAllocs()
 			b.SetBytes(int64(len(tc.input)))
@@ -450,6 +448,7 @@ func Benchmark_TrimSpaceBytes(b *testing.B) {
 	}
 
 	for _, tc := range testCases {
+		tc := tc // capture range variable
 		b.Run("fiber/"+tc.name, func(b *testing.B) {
 			b.ReportAllocs()
 			b.SetBytes(int64(len(tc.input)))
@@ -460,9 +459,6 @@ func Benchmark_TrimSpaceBytes(b *testing.B) {
 			}
 			_ = res
 		})
-	}
-
-	for _, tc := range testCases {
 		b.Run("default/"+tc.name, func(b *testing.B) {
 			b.ReportAllocs()
 			b.SetBytes(int64(len(tc.input)))
