@@ -415,3 +415,76 @@ func Benchmark_TrimSpaceBytes(b *testing.B) {
 		})
 	}
 }
+
+func Test_AddTrailingSlash_String(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		in   string
+		want string
+	}{
+		{"", "/"},
+		{"abc", "abc/"},
+		{"abc/", "abc/"},
+		{"/", "/"},
+	}
+
+	for _, tt := range tests {
+		require.Equal(t, tt.want, AddTrailingSlash(tt.in))
+	}
+}
+
+func Test_AddTrailingSlash_Bytes(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		in   []byte
+		want []byte
+	}{
+		{[]byte(""), []byte("/")},
+		{[]byte("abc"), []byte("abc/")},
+		{[]byte("abc/"), []byte("abc/")},
+		{[]byte("/"), []byte("/")},
+	}
+
+	for _, tt := range tests {
+		require.Equal(t, tt.want, AddTrailingSlash(tt.in))
+	}
+}
+
+func Benchmark_AddTrailingSlash(b *testing.B) {
+	tests := []struct {
+		name string
+		in   any
+	}{
+		{"StringSmallNoSlash", "abc"},
+		{"StringSmallWithSlash", "abc/"},
+		{"StringLargeNoSlash", string(make([]byte, 10_000))},
+		{"StringLargeWithSlash", string(append(make([]byte, 10_000), '/'))},
+
+		{"BytesSmallNoSlash", []byte("abc")},
+		{"BytesSmallWithSlash", []byte("abc/")},
+		{"BytesLargeNoSlash", make([]byte, 10_000)},
+		{"BytesLargeWithSlash", append(make([]byte, 10_000), '/')},
+	}
+
+	for _, tt := range tests {
+		b.Run(tt.name, func(b *testing.B) {
+			switch v := tt.in.(type) {
+			case string:
+				var out string
+				for i := 0; i < b.N; i++ {
+					out = AddTrailingSlash(v)
+					_ = out
+				}
+
+			case []byte:
+				var out []byte
+				for i := 0; i < b.N; i++ {
+					out = AddTrailingSlash(v)
+					_ = out
+				}
+			}
+		})
+	}
+}

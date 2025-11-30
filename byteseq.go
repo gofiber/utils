@@ -124,3 +124,32 @@ func TrimSpace[S byteSeq](s S) S {
 	// Return trimmed substring/subslice
 	return s[start : end+1]
 }
+
+// AddTrailingSlash appends a trailing '/' to v if it does not already end with one.
+//
+// For string inputs, the result is always a new string.
+//
+// For []byte inputs, a new slice is returned when a '/' is appended.
+// If the input already ends with '/', the original slice is returned unchanged.
+// The original slice is never modified.
+//
+// Note: When no trailing slash needs to be added, the input is returned directly
+// for efficiency. Callers should not modify the input or returned value.
+func AddTrailingSlash[T byteSeq](v T) T {
+	if len(v) > 0 && v[len(v)-1] == '/' {
+		return v
+	}
+
+	switch x := any(v).(type) {
+	case string:
+		return any(x + "/").(T) //nolint:forcetypeassert,errcheck // can't fail
+	case []byte:
+		result := make([]byte, len(x)+1)
+		copy(result, x)
+		result[len(x)] = '/'
+		return any(result).(T) //nolint:forcetypeassert,errcheck // can't fail
+	default:
+		// impossible because of the constraint
+		return v
+	}
+}
