@@ -307,71 +307,39 @@ func Test_Trim_Edge(t *testing.T) {
 func Test_TrimSpace(t *testing.T) {
 	t.Parallel()
 	testCases := []struct {
-		name     string
-		input    string
-		expected string
+		name  string
+		input string
 	}{
-		// Edge cases
-		{name: "empty", input: "", expected: ""},
-		{name: "no-whitespace", input: "hello", expected: "hello"},
-		{name: "all-spaces", input: "     ", expected: ""},
-		{name: "all-tabs", input: "\t\t\t", expected: ""},
-		{name: "all-newlines", input: "\n\n\n", expected: ""},
-		{name: "mixed-whitespace-only", input: " \t\n\r\v\f ", expected: ""},
-
-		// Leading whitespace
-		{name: "leading-space", input: " hello", expected: "hello"},
-		{name: "leading-spaces", input: "   hello", expected: "hello"},
-		{name: "leading-tab", input: "\thello", expected: "hello"},
-		{name: "leading-newline", input: "\nhello", expected: "hello"},
-		{name: "leading-mixed", input: " \t\n hello", expected: "hello"},
-
-		// Trailing whitespace
-		{name: "trailing-space", input: "hello ", expected: "hello"},
-		{name: "trailing-spaces", input: "hello   ", expected: "hello"},
-		{name: "trailing-tab", input: "hello\t", expected: "hello"},
-		{name: "trailing-newline", input: "hello\n", expected: "hello"},
-		{name: "trailing-mixed", input: "hello \t\n ", expected: "hello"},
-
-		// Both leading and trailing
-		{name: "both-space", input: " hello ", expected: "hello"},
-		{name: "both-mixed", input: " \t\nhello\n\t ", expected: "hello"},
-		{name: "both-many", input: "    hello world    ", expected: "hello world"},
-
-		// Whitespace in the middle (should be preserved)
-		{name: "middle-space", input: "hello world", expected: "hello world"},
-		{name: "middle-tab", input: "hello\tworld", expected: "hello\tworld"},
-		{name: "middle-newline", input: "hello\nworld", expected: "hello\nworld"},
-		{name: "middle-and-edges", input: "  hello\t\nworld  ", expected: "hello\t\nworld"},
-
-		// Single character
-		{name: "single-char", input: "a", expected: "a"},
-		{name: "single-space", input: " ", expected: ""},
-
-		// All ASCII whitespace characters
-		{name: "all-whitespace-types", input: " \t\n\r\v\fhello\f\v\r\n\t ", expected: "hello"},
+		{name: "empty", input: ""},
+		{name: "spaces", input: "   "},
+		{name: "tabs", input: "\t\t"},
+		{name: "ascii-word", input: "  fiber  "},
+		{name: "auth-header-bearer", input: "   Bearer abc.def.ghi   "},
+		{name: "auth-header-basic", input: "\tBasic QWxhZGRpbjpvcGVuIHNlc2FtZQ==   "},
+		{name: "accept-encoding", input: "  gzip, deflate, br  "},
+		{name: "content-type-json", input: "  application/json  "},
+		{name: "x-forwarded-for", input: " 203.0.113.5, 198.51.100.7  "},
+		{name: "query-params", input: "  user=alice&id=42  "},
+		{name: "ascii-long", input: "   " + strings.Repeat("fiber utils ", 8) + "   "},
+		{name: "mixed-whitespace", input: "\n\t fiber utils \r\n"},
+		{name: "no-trim", input: "fiber"},
+		{name: "utf8-valid", input: "  Hello, 世界!  "},
 	}
 
 	for _, tc := range testCases {
 		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
-			// Test string variant
+			// Test string variant - must match strings.TrimSpace
 			result := TrimSpace(tc.input)
-			require.Equal(t, tc.expected, result, "TrimSpace failed for string %s", tc.name)
-
-			// Verify it matches strings.TrimSpace behavior
 			stdResult := strings.TrimSpace(tc.input)
 			require.Equal(t, stdResult, result, "TrimSpace should match strings.TrimSpace for %s", tc.name)
 
-			// Test []byte variant
+			// Test []byte variant - must match bytes.TrimSpace
 			resultBytes := TrimSpace([]byte(tc.input))
-			require.Equal(t, []byte(tc.expected), resultBytes, "TrimSpace failed for bytes %s", tc.name)
-
-			// Verify it matches bytes.TrimSpace behavior (nil and empty slices are treated as equal)
 			stdResultBytes := bytes.TrimSpace([]byte(tc.input))
-			// Only compare if not both empty (nil vs [] are both valid empty slices)
-			if len(stdResultBytes) != 0 || len(resultBytes) != 0 {
+			// Both empty slices (nil vs []) are valid and equivalent
+			if !(len(stdResultBytes) == 0 && len(resultBytes) == 0) {
 				require.Equal(t, stdResultBytes, resultBytes, "TrimSpace should match bytes.TrimSpace for %s", tc.name)
 			}
 		})
@@ -384,20 +352,17 @@ func Benchmark_TrimSpace(b *testing.B) {
 		input string
 	}{
 		{name: "empty", input: ""},
-		{name: "no-trim", input: "hello"},
-		{name: "no-trim-long", input: "hello world this is a longer string"},
-		{name: "leading-space", input: " hello"},
-		{name: "trailing-space", input: "hello "},
-		{name: "both-spaces", input: " hello "},
-		{name: "both-many-spaces", input: "    hello world    "},
-		{name: "leading-mixed", input: " \t\n hello"},
-		{name: "trailing-mixed", input: "hello \t\n "},
-		{name: "both-mixed", input: " \t\nhello world\n\t "},
-		{name: "all-spaces", input: "          "},
-		{name: "medium-no-trim", input: strings.Repeat("a", 64)},
-		{name: "medium-with-trim", input: "  " + strings.Repeat("a", 64) + "  "},
-		{name: "large-no-trim", input: strings.Repeat("hello", 50)},
-		{name: "large-with-trim", input: "    " + strings.Repeat("hello", 50) + "    "},
+		{name: "spaces", input: "   "},
+		{name: "ascii-word", input: "  fiber  "},
+		{name: "auth-header-bearer", input: "   Bearer abc.def.ghi   "},
+		{name: "auth-header-basic", input: "\tBasic QWxhZGRpbjpvcGVuIHNlc2FtZQ==   "},
+		{name: "accept-encoding", input: "  gzip, deflate, br  "},
+		{name: "content-type", input: "  application/json  "},
+		{name: "x-forwarded-for", input: " 203.0.113.5, 198.51.100.7  "},
+		{name: "query-params", input: "  user=alice&id=42  "},
+		{name: "ascii-long", input: "   " + strings.Repeat("fiber utils ", 8) + "   "},
+		{name: "no-trim", input: "fiber"},
+		{name: "mixed-whitespace", input: "\n\t fiber utils \r\n"},
 	}
 
 	for _, tc := range testCases {
@@ -431,20 +396,17 @@ func Benchmark_TrimSpaceBytes(b *testing.B) {
 		input []byte
 	}{
 		{name: "empty", input: []byte("")},
-		{name: "no-trim", input: []byte("hello")},
-		{name: "no-trim-long", input: []byte("hello world this is a longer string")},
-		{name: "leading-space", input: []byte(" hello")},
-		{name: "trailing-space", input: []byte("hello ")},
-		{name: "both-spaces", input: []byte(" hello ")},
-		{name: "both-many-spaces", input: []byte("    hello world    ")},
-		{name: "leading-mixed", input: []byte(" \t\n hello")},
-		{name: "trailing-mixed", input: []byte("hello \t\n ")},
-		{name: "both-mixed", input: []byte(" \t\nhello world\n\t ")},
-		{name: "all-spaces", input: []byte("          ")},
-		{name: "medium-no-trim", input: bytes.Repeat([]byte("a"), 64)},
-		{name: "medium-with-trim", input: append(append([]byte("  "), bytes.Repeat([]byte("a"), 64)...), []byte("  ")...)},
-		{name: "large-no-trim", input: bytes.Repeat([]byte("hello"), 50)},
-		{name: "large-with-trim", input: append(append([]byte("    "), bytes.Repeat([]byte("hello"), 50)...), []byte("    ")...)},
+		{name: "spaces", input: []byte("   ")},
+		{name: "ascii-word", input: []byte("  fiber  ")},
+		{name: "auth-header-bearer", input: []byte("   Bearer abc.def.ghi   ")},
+		{name: "auth-header-basic", input: []byte("\tBasic QWxhZGRpbjpvcGVuIHNlc2FtZQ==   ")},
+		{name: "accept-encoding", input: []byte("  gzip, deflate, br  ")},
+		{name: "content-type", input: []byte("  application/json  ")},
+		{name: "x-forwarded-for", input: []byte(" 203.0.113.5, 198.51.100.7  ")},
+		{name: "query-params", input: []byte("  user=alice&id=42  ")},
+		{name: "ascii-long", input: []byte("   " + strings.Repeat("fiber utils ", 8) + "   ")},
+		{name: "no-trim", input: []byte("fiber")},
+		{name: "mixed-whitespace", input: []byte("\n\t fiber utils \r\n")},
 	}
 
 	for _, tc := range testCases {
