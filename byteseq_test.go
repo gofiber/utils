@@ -303,3 +303,176 @@ func Test_Trim_Edge(t *testing.T) {
 		})
 	}
 }
+
+func Test_TrimSpace(t *testing.T) {
+	t.Parallel()
+	testCases := []struct {
+		name     string
+		input    string
+		expected string
+	}{
+		// Edge cases
+		{name: "empty", input: "", expected: ""},
+		{name: "no-whitespace", input: "hello", expected: "hello"},
+		{name: "all-spaces", input: "     ", expected: ""},
+		{name: "all-tabs", input: "\t\t\t", expected: ""},
+		{name: "all-newlines", input: "\n\n\n", expected: ""},
+		{name: "mixed-whitespace-only", input: " \t\n\r\v\f ", expected: ""},
+
+		// Leading whitespace
+		{name: "leading-space", input: " hello", expected: "hello"},
+		{name: "leading-spaces", input: "   hello", expected: "hello"},
+		{name: "leading-tab", input: "\thello", expected: "hello"},
+		{name: "leading-newline", input: "\nhello", expected: "hello"},
+		{name: "leading-mixed", input: " \t\n hello", expected: "hello"},
+
+		// Trailing whitespace
+		{name: "trailing-space", input: "hello ", expected: "hello"},
+		{name: "trailing-spaces", input: "hello   ", expected: "hello"},
+		{name: "trailing-tab", input: "hello\t", expected: "hello"},
+		{name: "trailing-newline", input: "hello\n", expected: "hello"},
+		{name: "trailing-mixed", input: "hello \t\n ", expected: "hello"},
+
+		// Both leading and trailing
+		{name: "both-space", input: " hello ", expected: "hello"},
+		{name: "both-mixed", input: " \t\nhello\n\t ", expected: "hello"},
+		{name: "both-many", input: "    hello world    ", expected: "hello world"},
+
+		// Whitespace in the middle (should be preserved)
+		{name: "middle-space", input: "hello world", expected: "hello world"},
+		{name: "middle-tab", input: "hello\tworld", expected: "hello\tworld"},
+		{name: "middle-newline", input: "hello\nworld", expected: "hello\nworld"},
+		{name: "middle-and-edges", input: "  hello\t\nworld  ", expected: "hello\t\nworld"},
+
+		// Single character
+		{name: "single-char", input: "a", expected: "a"},
+		{name: "single-space", input: " ", expected: ""},
+
+		// All ASCII whitespace characters
+		{name: "all-whitespace-types", input: " \t\n\r\v\fhello\f\v\r\n\t ", expected: "hello"},
+	}
+
+	for _, tc := range testCases {
+		tc := tc
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			// Test string variant
+			result := TrimSpace(tc.input)
+			require.Equal(t, tc.expected, result, "TrimSpace failed for string %s", tc.name)
+
+			// Verify it matches strings.TrimSpace behavior
+			stdResult := strings.TrimSpace(tc.input)
+			require.Equal(t, stdResult, result, "TrimSpace should match strings.TrimSpace for %s", tc.name)
+
+			// Test []byte variant
+			resultBytes := TrimSpace([]byte(tc.input))
+			require.Equal(t, []byte(tc.expected), resultBytes, "TrimSpace failed for bytes %s", tc.name)
+
+			// Verify it matches bytes.TrimSpace behavior (nil and empty slices are treated as equal)
+			stdResultBytes := bytes.TrimSpace([]byte(tc.input))
+			if len(stdResultBytes) == 0 && len(resultBytes) == 0 {
+				// Both empty - this is fine (nil vs [] are both valid empty slices)
+			} else {
+				require.Equal(t, stdResultBytes, resultBytes, "TrimSpace should match bytes.TrimSpace for %s", tc.name)
+			}
+		})
+	}
+}
+
+func Benchmark_TrimSpace(b *testing.B) {
+	testCases := []struct {
+		name  string
+		input string
+	}{
+		{name: "empty", input: ""},
+		{name: "no-trim", input: "hello"},
+		{name: "no-trim-long", input: "hello world this is a longer string"},
+		{name: "leading-space", input: " hello"},
+		{name: "trailing-space", input: "hello "},
+		{name: "both-spaces", input: " hello "},
+		{name: "both-many-spaces", input: "    hello world    "},
+		{name: "leading-mixed", input: " \t\n hello"},
+		{name: "trailing-mixed", input: "hello \t\n "},
+		{name: "both-mixed", input: " \t\nhello world\n\t "},
+		{name: "all-spaces", input: "          "},
+		{name: "medium-no-trim", input: strings.Repeat("a", 64)},
+		{name: "medium-with-trim", input: "  " + strings.Repeat("a", 64) + "  "},
+		{name: "large-no-trim", input: strings.Repeat("hello", 50)},
+		{name: "large-with-trim", input: "    " + strings.Repeat("hello", 50) + "    "},
+	}
+
+	for _, tc := range testCases {
+		b.Run("fiber/"+tc.name, func(b *testing.B) {
+			b.ReportAllocs()
+			b.SetBytes(int64(len(tc.input)))
+			b.ResetTimer()
+			var res string
+			for n := 0; n < b.N; n++ {
+				res = TrimSpace(tc.input)
+			}
+			_ = res
+		})
+	}
+
+	for _, tc := range testCases {
+		b.Run("default/"+tc.name, func(b *testing.B) {
+			b.ReportAllocs()
+			b.SetBytes(int64(len(tc.input)))
+			b.ResetTimer()
+			var res string
+			for n := 0; n < b.N; n++ {
+				res = strings.TrimSpace(tc.input)
+			}
+			_ = res
+		})
+	}
+}
+
+func Benchmark_TrimSpaceBytes(b *testing.B) {
+	testCases := []struct {
+		name  string
+		input []byte
+	}{
+		{name: "empty", input: []byte("")},
+		{name: "no-trim", input: []byte("hello")},
+		{name: "no-trim-long", input: []byte("hello world this is a longer string")},
+		{name: "leading-space", input: []byte(" hello")},
+		{name: "trailing-space", input: []byte("hello ")},
+		{name: "both-spaces", input: []byte(" hello ")},
+		{name: "both-many-spaces", input: []byte("    hello world    ")},
+		{name: "leading-mixed", input: []byte(" \t\n hello")},
+		{name: "trailing-mixed", input: []byte("hello \t\n ")},
+		{name: "both-mixed", input: []byte(" \t\nhello world\n\t ")},
+		{name: "all-spaces", input: []byte("          ")},
+		{name: "medium-no-trim", input: bytes.Repeat([]byte("a"), 64)},
+		{name: "medium-with-trim", input: append(append([]byte("  "), bytes.Repeat([]byte("a"), 64)...), []byte("  ")...)},
+		{name: "large-no-trim", input: bytes.Repeat([]byte("hello"), 50)},
+		{name: "large-with-trim", input: append(append([]byte("    "), bytes.Repeat([]byte("hello"), 50)...), []byte("    ")...)},
+	}
+
+	for _, tc := range testCases {
+		b.Run("fiber/"+tc.name, func(b *testing.B) {
+			b.ReportAllocs()
+			b.SetBytes(int64(len(tc.input)))
+			b.ResetTimer()
+			var res []byte
+			for n := 0; n < b.N; n++ {
+				res = TrimSpace(tc.input)
+			}
+			_ = res
+		})
+	}
+
+	for _, tc := range testCases {
+		b.Run("default/"+tc.name, func(b *testing.B) {
+			b.ReportAllocs()
+			b.SetBytes(int64(len(tc.input)))
+			b.ResetTimer()
+			var res []byte
+			for n := 0; n < b.N; n++ {
+				res = bytes.TrimSpace(tc.input)
+			}
+			_ = res
+		})
+	}
+}
