@@ -66,12 +66,12 @@ func IsIPv6(s string) bool {
 		n, ci := 0, 0
 
 		for ci = 0; ci < len(s); ci++ {
-			if s[ci] >= '0' && s[ci] <= '9' || s[ci] >= 'a' && s[ci] <= 'f' || s[ci] >= 'A' && s[ci] <= 'F' {
-				n *= 16
-				n += int(hexTable[s[ci]])
-			} else {
+			if (s[ci] < '0' || s[ci] > '9') && (s[ci] < 'a' || s[ci] > 'f') && (s[ci] < 'A' || s[ci] > 'F') {
 				break
 			}
+			n *= 16
+			n += int(hexTable[s[ci]])
+
 			if n > 0xFFFF {
 				return false
 			}
