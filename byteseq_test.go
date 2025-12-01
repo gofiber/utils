@@ -8,6 +8,25 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// Shared test cases for TrimSpace benchmarks
+var trimSpaceBenchmarkCases = []struct {
+	name  string
+	input string
+}{
+	{name: "empty", input: ""},
+	{name: "spaces", input: "   "},
+	{name: "ascii-word", input: "  fiber  "},
+	{name: "auth-header-bearer", input: "   Bearer abc.def.ghi   "},
+	{name: "auth-header-basic", input: "\tBasic QWxhZGRpbjpvcGVuIHNlc2FtZQ==   "},
+	{name: "accept-encoding", input: "  gzip, deflate, br  "},
+	{name: "content-type", input: "  application/json  "},
+	{name: "x-forwarded-for", input: " 203.0.113.5, 198.51.100.7  "},
+	{name: "query-params", input: "  user=alice&id=42  "},
+	{name: "ascii-long", input: "   " + strings.Repeat("fiber utils ", 8) + "   "},
+	{name: "no-trim", input: "fiber"},
+	{name: "mixed-whitespace", input: "\n\t fiber utils \r\n"},
+}
+
 func Test_EqualFold(t *testing.T) {
 	t.Parallel()
 	testCases := []struct {
@@ -345,25 +364,7 @@ func Test_TrimSpace(t *testing.T) {
 }
 
 func Benchmark_TrimSpace(b *testing.B) {
-	testCases := []struct {
-		name  string
-		input string
-	}{
-		{name: "empty", input: ""},
-		{name: "spaces", input: "   "},
-		{name: "ascii-word", input: "  fiber  "},
-		{name: "auth-header-bearer", input: "   Bearer abc.def.ghi   "},
-		{name: "auth-header-basic", input: "\tBasic QWxhZGRpbjpvcGVuIHNlc2FtZQ==   "},
-		{name: "accept-encoding", input: "  gzip, deflate, br  "},
-		{name: "content-type", input: "  application/json  "},
-		{name: "x-forwarded-for", input: " 203.0.113.5, 198.51.100.7  "},
-		{name: "query-params", input: "  user=alice&id=42  "},
-		{name: "ascii-long", input: "   " + strings.Repeat("fiber utils ", 8) + "   "},
-		{name: "no-trim", input: "fiber"},
-		{name: "mixed-whitespace", input: "\n\t fiber utils \r\n"},
-	}
-
-	for _, tc := range testCases {
+	for _, tc := range trimSpaceBenchmarkCases {
 		tc := tc // capture range variable
 		b.Run("fiber/"+tc.name, func(b *testing.B) {
 			b.ReportAllocs()
@@ -389,43 +390,26 @@ func Benchmark_TrimSpace(b *testing.B) {
 }
 
 func Benchmark_TrimSpaceBytes(b *testing.B) {
-	testCases := []struct {
-		name  string
-		input []byte
-	}{
-		{name: "empty", input: []byte("")},
-		{name: "spaces", input: []byte("   ")},
-		{name: "ascii-word", input: []byte("  fiber  ")},
-		{name: "auth-header-bearer", input: []byte("   Bearer abc.def.ghi   ")},
-		{name: "auth-header-basic", input: []byte("\tBasic QWxhZGRpbjpvcGVuIHNlc2FtZQ==   ")},
-		{name: "accept-encoding", input: []byte("  gzip, deflate, br  ")},
-		{name: "content-type", input: []byte("  application/json  ")},
-		{name: "x-forwarded-for", input: []byte(" 203.0.113.5, 198.51.100.7  ")},
-		{name: "query-params", input: []byte("  user=alice&id=42  ")},
-		{name: "ascii-long", input: []byte("   " + strings.Repeat("fiber utils ", 8) + "   ")},
-		{name: "no-trim", input: []byte("fiber")},
-		{name: "mixed-whitespace", input: []byte("\n\t fiber utils \r\n")},
-	}
-
-	for _, tc := range testCases {
+	for _, tc := range trimSpaceBenchmarkCases {
 		tc := tc // capture range variable
+		input := []byte(tc.input)
 		b.Run("fiber/"+tc.name, func(b *testing.B) {
 			b.ReportAllocs()
-			b.SetBytes(int64(len(tc.input)))
+			b.SetBytes(int64(len(input)))
 			b.ResetTimer()
 			var res []byte
 			for n := 0; n < b.N; n++ {
-				res = TrimSpace(tc.input)
+				res = TrimSpace(input)
 			}
 			_ = res
 		})
 		b.Run("default/"+tc.name, func(b *testing.B) {
 			b.ReportAllocs()
-			b.SetBytes(int64(len(tc.input)))
+			b.SetBytes(int64(len(input)))
 			b.ResetTimer()
 			var res []byte
 			for n := 0; n < b.N; n++ {
-				res = bytes.TrimSpace(tc.input)
+				res = bytes.TrimSpace(input)
 			}
 			_ = res
 		})
