@@ -92,30 +92,32 @@ func TrimRight[S byteSeq](s S, cutset byte) S {
 // This is an optimized version that's faster than strings/bytes.TrimSpace for ASCII strings.
 // It removes the following ASCII whitespace characters: space, tab, newline, carriage return, vertical tab, and form feed.
 func TrimSpace[S byteSeq](s S) S {
+	length := len(s)
+
 	// Fast path for empty input
-	if len(s) == 0 {
+	if length == 0 {
 		return s
 	}
 
 	// Find first non-whitespace character
 	start := 0
-	for start < len(s) && whitespaceTable[s[start]] {
+	for start < length && whitespaceTable[s[start]] {
 		start++
 	}
 
-	// If all whitespace, return empty
-	if start == len(s) {
-		return s[:0]
+	// If all whitespace, return empty with zero capacity to match bytes.TrimSpace behavior
+	if start == length {
+		return s[length:length]
 	}
 
 	// Find last non-whitespace character
-	end := len(s) - 1
+	end := length - 1
 	for end > start && whitespaceTable[s[end]] {
 		end--
 	}
 
 	// If no trimming needed, return original (no allocation)
-	if start == 0 && end == len(s)-1 {
+	if start == 0 && end == length-1 {
 		return s
 	}
 
