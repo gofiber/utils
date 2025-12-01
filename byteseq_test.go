@@ -8,6 +8,25 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// Shared test cases for TrimSpace benchmarks
+var trimSpaceBenchmarkCases = []struct {
+	name  string
+	input string
+}{
+	{name: "empty", input: ""},
+	{name: "spaces", input: "   "},
+	{name: "ascii-word", input: "  fiber  "},
+	{name: "auth-header-bearer", input: "   Bearer abc.def.ghi   "},
+	{name: "auth-header-basic", input: "\tBasic QWxhZGRpbjpvcGVuIHNlc2FtZQ==   "},
+	{name: "accept-encoding", input: "  gzip, deflate, br  "},
+	{name: "content-type", input: "  application/json  "},
+	{name: "x-forwarded-for", input: " 203.0.113.5, 198.51.100.7  "},
+	{name: "query-params", input: "  user=alice&id=42  "},
+	{name: "ascii-long", input: "   " + strings.Repeat("fiber utils ", 8) + "   "},
+	{name: "no-trim", input: "fiber"},
+	{name: "mixed-whitespace", input: "\n\t fiber utils \r\n"},
+}
+
 func Test_EqualFold(t *testing.T) {
 	t.Parallel()
 	testCases := []struct {
@@ -300,6 +319,99 @@ func Test_Trim_Edge(t *testing.T) {
 			t.Parallel()
 			require.Equal(t, c.exp, Trim(c.input, c.cut))
 			require.Equal(t, []byte(c.exp), Trim([]byte(c.input), c.cut))
+		})
+	}
+}
+
+func Test_TrimSpace(t *testing.T) {
+	t.Parallel()
+	testCases := []struct {
+		name  string
+		input string
+	}{
+		{name: "empty", input: ""},
+		{name: "spaces", input: "   "},
+		{name: "tabs", input: "\t\t"},
+		{name: "ascii-word", input: "  fiber  "},
+		{name: "auth-header-bearer", input: "   Bearer abc.def.ghi   "},
+		{name: "auth-header-basic", input: "\tBasic QWxhZGRpbjpvcGVuIHNlc2FtZQ==   "},
+		{name: "accept-encoding", input: "  gzip, deflate, br  "},
+		{name: "content-type-json", input: "  application/json  "},
+		{name: "x-forwarded-for", input: " 203.0.113.5, 198.51.100.7  "},
+		{name: "query-params", input: "  user=alice&id=42  "},
+		{name: "ascii-long", input: "   " + strings.Repeat("fiber utils ", 8) + "   "},
+		{name: "mixed-whitespace", input: "\n\t fiber utils \r\n"},
+		{name: "no-trim", input: "fiber"},
+		{name: "utf8-valid", input: "  Hello, 世界!  "},
+	}
+
+	for _, tc := range testCases {
+		tc := tc
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			// Test string variant - must match strings.TrimSpace
+			result := TrimSpace(tc.input)
+			stdResult := strings.TrimSpace(tc.input)
+			require.Equal(t, stdResult, result, "TrimSpace should match strings.TrimSpace for %s", tc.name)
+
+			// Test []byte variant - must match bytes.TrimSpace
+			resultBytes := TrimSpace([]byte(tc.input))
+			stdResultBytes := bytes.TrimSpace([]byte(tc.input))
+			// bytes.Equal treats nil and empty slices as equal
+			require.True(t, bytes.Equal(stdResultBytes, resultBytes), "TrimSpace should match bytes.TrimSpace for %s", tc.name)
+		})
+	}
+}
+
+func Benchmark_TrimSpace(b *testing.B) {
+	for _, tc := range trimSpaceBenchmarkCases {
+		tc := tc // capture range variable
+		b.Run("fiber/"+tc.name, func(b *testing.B) {
+			b.ReportAllocs()
+			b.SetBytes(int64(len(tc.input)))
+			b.ResetTimer()
+			var res string
+			for n := 0; n < b.N; n++ {
+				res = TrimSpace(tc.input)
+			}
+			_ = res
+		})
+		b.Run("default/"+tc.name, func(b *testing.B) {
+			b.ReportAllocs()
+			b.SetBytes(int64(len(tc.input)))
+			b.ResetTimer()
+			var res string
+			for n := 0; n < b.N; n++ {
+				res = strings.TrimSpace(tc.input)
+			}
+			_ = res
+		})
+	}
+}
+
+func Benchmark_TrimSpaceBytes(b *testing.B) {
+	for _, tc := range trimSpaceBenchmarkCases {
+		tc := tc // capture range variable
+		input := []byte(tc.input)
+		b.Run("fiber/"+tc.name, func(b *testing.B) {
+			b.ReportAllocs()
+			b.SetBytes(int64(len(input)))
+			b.ResetTimer()
+			var res []byte
+			for n := 0; n < b.N; n++ {
+				res = TrimSpace(input)
+			}
+			_ = res
+		})
+		b.Run("default/"+tc.name, func(b *testing.B) {
+			b.ReportAllocs()
+			b.SetBytes(int64(len(input)))
+			b.ResetTimer()
+			var res []byte
+			for n := 0; n < b.N; n++ {
+				res = bytes.TrimSpace(input)
+			}
+			_ = res
 		})
 	}
 }
