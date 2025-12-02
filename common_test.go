@@ -99,6 +99,57 @@ func Test_UUIDv4_Concurrency(t *testing.T) {
 	require.Len(t, results, iterations)
 }
 
+func Test_GenerateSecureToken(t *testing.T) {
+	t.Parallel()
+	// Test default length (now 32 bytes)
+	token := GenerateSecureToken(32)
+	require.Len(t, token, 43) // base64 encoding of 32 bytes
+	require.NotEmpty(t, token)
+
+	// Test custom length
+	token8 := GenerateSecureToken(8)
+	require.Len(t, token8, 11) // base64 of 8 bytes ~11 chars
+
+	token16 := GenerateSecureToken(16)
+	require.Len(t, token16, 22) // base64 of 16 bytes ~22 chars
+
+	// Test uniqueness
+	token2 := GenerateSecureToken(32)
+	require.NotEqual(t, token, token2)
+
+	// Test invalid length defaults to 32
+	tokenInvalid := GenerateSecureToken(0)
+	require.Len(t, tokenInvalid, 43)
+}
+
+func Test_GenerateSecureToken_Concurrency(t *testing.T) {
+	t.Parallel()
+	iterations := 1000
+	ch := make(chan string, iterations)
+	results := make(map[string]string)
+	for i := 0; i < iterations; i++ {
+		go func() {
+			ch <- GenerateSecureToken(32)
+		}()
+	}
+	for i := 0; i < iterations; i++ {
+		res := <-ch
+		results[res] = res
+	}
+	require.Len(t, results, iterations)
+}
+
+func Test_SecureToken(t *testing.T) {
+	t.Parallel()
+	token := SecureToken()
+	require.Len(t, token, 43)
+	require.NotEmpty(t, token)
+
+	// Test uniqueness
+	token2 := SecureToken()
+	require.NotEqual(t, token, token2)
+}
+
 func Test_ConvertToBytes(t *testing.T) {
 	t.Parallel()
 	// initial assertions
@@ -291,5 +342,39 @@ func Benchmark_UUID(b *testing.B) {
 			res = fmt.Sprintf("%x-%x-%x-%x-%x", rnd[0:4], rnd[4:6], rnd[6:8], rnd[8:10], rnd[10:])
 		}
 		require.Len(b, res, 36)
+	})
+}
+
+// go test -v -run=^$ -bench=Benchmark_GenerateSecureToken -benchmem -count=2
+func Benchmark_GenerateSecureToken(b *testing.B) {
+	var res string
+	b.Run("16_bytes", func(b *testing.B) {
+		for n := 0; n < b.N; n++ {
+			res = GenerateSecureToken(16)
+		}
+		require.Len(b, res, 22)
+	})
+	b.Run("32_bytes", func(b *testing.B) {
+		for n := 0; n < b.N; n++ {
+			res = GenerateSecureToken(32)
+		}
+		require.Len(b, res, 43)
+	})
+}
+
+// go test -v -run=^$ -bench=Benchmark_TokenGenerators -benchmem -count=2
+func Benchmark_TokenGenerators(b *testing.B) {
+	var res string
+	b.Run("UUIDv4", func(b *testing.B) {
+		for n := 0; n < b.N; n++ {
+			res = UUIDv4()
+		}
+		require.Len(b, res, 36)
+	})
+	b.Run("SecureToken", func(b *testing.B) {
+		for n := 0; n < b.N; n++ {
+			res = SecureToken()
+		}
+		require.Len(b, res, 43)
 	})
 }

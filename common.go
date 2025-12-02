@@ -6,6 +6,7 @@ package utils
 
 import (
 	"crypto/rand"
+	"encoding/base64"
 	"encoding/binary"
 	"encoding/hex"
 	"math"
@@ -92,6 +93,26 @@ func UUIDv4() string {
 		return UUID()
 	}
 	return token.String()
+}
+
+// GenerateSecureToken generates a cryptographically secure random token encoded in base64.
+// It uses crypto/rand for randomness and base64.RawURLEncoding for URL-safe output.
+// The default length of 32 bytes provides 256 bits of entropy, suitable for secure tokens.
+func GenerateSecureToken(length int) string {
+	if length <= 0 {
+		length = 32
+	}
+	bytes := make([]byte, length)
+	if _, err := rand.Read(bytes); err != nil {
+		// In case of error, fall back to UUIDv4 for compatibility
+		return UUIDv4()
+	}
+	return base64.RawURLEncoding.EncodeToString(bytes)
+}
+
+// SecureToken generates a secure token with default 32 bytes of entropy.
+func SecureToken() string {
+	return GenerateSecureToken(32)
 }
 
 // FunctionName returns function name
