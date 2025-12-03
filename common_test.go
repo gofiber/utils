@@ -102,26 +102,32 @@ func Test_UUIDv4_Concurrency(t *testing.T) {
 func Test_GenerateSecureToken(t *testing.T) {
 	t.Parallel()
 	// Test with 32 bytes
-	token := GenerateSecureToken(32)
+	token, err := GenerateSecureToken(32)
+	require.NoError(t, err)
 	require.Len(t, token, 43) // base64 encoding of 32 bytes
 	require.NotEmpty(t, token)
 
 	// Test custom length
-	token8 := GenerateSecureToken(8)
+	token8, err := GenerateSecureToken(8)
+	require.NoError(t, err)
 	require.Len(t, token8, 11) // base64 of 8 bytes ~11 chars
 
-	token16 := GenerateSecureToken(16)
+	token16, err := GenerateSecureToken(16)
+	require.NoError(t, err)
 	require.Len(t, token16, 22) // base64 of 16 bytes ~22 chars
 
 	// Test uniqueness
-	token2 := GenerateSecureToken(32)
+	token2, err := GenerateSecureToken(32)
+	require.NoError(t, err)
 	require.NotEqual(t, token, token2)
 
 	// Test invalid length defaults to 32
-	tokenZero := GenerateSecureToken(0)
+	tokenZero, err := GenerateSecureToken(0)
+	require.NoError(t, err)
 	require.Len(t, tokenZero, 43)
 
-	tokenNegative := GenerateSecureToken(-1)
+	tokenNegative, err := GenerateSecureToken(-1)
+	require.NoError(t, err)
 	require.Len(t, tokenNegative, 43)
 }
 
@@ -132,7 +138,7 @@ func Test_GenerateSecureToken_Concurrency(t *testing.T) {
 	results := make(map[string]string)
 	for i := 0; i < iterations; i++ {
 		go func() {
-			ch <- GenerateSecureToken(32)
+			ch <- GenerateSecureTokenMust(32)
 		}()
 	}
 	for i := 0; i < iterations; i++ {
@@ -140,6 +146,25 @@ func Test_GenerateSecureToken_Concurrency(t *testing.T) {
 		results[res] = res
 	}
 	require.Len(t, results, iterations)
+}
+
+func Test_GenerateSecureToken_ErrorOnRandFail(t *testing.T) {
+	// Save and restore original randRead
+	orig := randRead
+	defer func() { randRead = orig }()
+
+	// Simulate read failure
+	randRead = func(b []byte) (int, error) {
+		return 0, fmt.Errorf("simulated failure")
+	}
+
+	s, err := GenerateSecureToken(16)
+	require.Error(t, err)
+	require.Empty(t, s)
+	require.Contains(t, err.Error(), "simulated failure")
+
+	// Must variant should panic on failure
+	require.Panics(t, func() { GenerateSecureTokenMust(16) })
 }
 
 func Test_SecureToken(t *testing.T) {
@@ -352,14 +377,14 @@ func Benchmark_UUID(b *testing.B) {
 func Benchmark_GenerateSecureToken(b *testing.B) {
 	var res string
 	b.Run("16_bytes", func(b *testing.B) {
-		for n := 0; n < b.N; n++ {
-			res = GenerateSecureToken(16)
+			for n := 0; n < b.N; n++ {
+				res = GenerateSecureTokenMust(16)
 		}
 		require.Len(b, res, 22)
 	})
 	b.Run("32_bytes", func(b *testing.B) {
-		for n := 0; n < b.N; n++ {
-			res = GenerateSecureToken(32)
+			for n := 0; n < b.N; n++ {
+				res = GenerateSecureTokenMust(32)
 		}
 		require.Len(b, res, 43)
 	})

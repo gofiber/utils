@@ -6,6 +6,7 @@ package utils
 
 import (
 	"crypto/rand"
+	"fmt"
 	"encoding/base64"
 	"encoding/binary"
 	"encoding/hex"
@@ -23,6 +24,9 @@ import (
 	"github.com/google/uuid"
 )
 
+// randRead is a package-level indirection for crypto/rand.Read so tests
+// can override it to simulate failures.
+var randRead = rand.Read
 const (
 	toLowerTable = "\x00\x01\x02\x03\x04\x05\x06\a\b\t\n\v\f\r\x0e\x0f\x10\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1a\x1b\x1c\x1d\x1e\x1f !\"#$%&'()*+,-./0123456789:;<=>?@abcdefghijklmnopqrstuvwxyz[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~\u007f\x80\x81\x82\x83\x84\x85\x86\x87\x88\x89\x8a\x8b\x8c\x8d\x8e\x8f\x90\x91\x92\x93\x94\x95\x96\x97\x98\x99\x9a\x9b\x9c\x9d\x9e\x9f\xa0\xa1\xa2\xa3\xa4\xa5\xa6\xa7\xa8\xa9\xaa\xab\xac\xad\xae\xaf\xb0\xb1\xb2\xb3\xb4\xb5\xb6\xb7\xb8\xb9\xba\xbb\xbc\xbd\xbe\xbf\xc0\xc1\xc2\xc3\xc4\xc5\xc6\xc7\xc8\xc9\xca\xcb\xcc\xcd\xce\xcf\xd0\xd1\xd2\xd3\xd4\xd5\xd6\xd7\xd8\xd9\xda\xdb\xdc\xdd\xde\xdf\xe0\xe1\xe2\xe3\xe4\xe5\xe6\xe7\xe8\xe9\xea\xeb\xec\xed\xee\xef\xf0\xf1\xf2\xf3\xf4\xf5\xf6\xf7\xf8\xf9\xfa\xfb\xfc\xfd\xfe\xff"
 	toUpperTable = "\x00\x01\x02\x03\x04\x05\x06\a\b\t\n\v\f\r\x0e\x0f\x10\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1a\x1b\x1c\x1d\x1e\x1f !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`ABCDEFGHIJKLMNOPQRSTUVWXYZ{|}~\u007f\x80\x81\x82\x83\x84\x85\x86\x87\x88\x89\x8a\x8b\x8c\x8d\x8e\x8f\x90\x91\x92\x93\x94\x95\x96\x97\x98\x99\x9a\x9b\x9c\x9d\x9e\x9f\xa0\xa1\xa2\xa3\xa4\xa5\xa6\xa7\xa8\xa9\xaa\xab\xac\xad\xae\xaf\xb0\xb1\xb2\xb3\xb4\xb5\xb6\xb7\xb8\xb9\xba\xbb\xbc\xbd\xbe\xbf\xc0\xc1\xc2\xc3\xc4\xc5\xc6\xc7\xc8\xc9\xca\xcb\xcc\xcd\xce\xcf\xd0\xd1\xd2\xd3\xd4\xd5\xd6\xd7\xd8\xd9\xda\xdb\xdc\xdd\xde\xdf\xe0\xe1\xe2\xe3\xe4\xe5\xe6\xe7\xe8\xe9\xea\xeb\xec\xed\xee\xef\xf0\xf1\xf2\xf3\xf4\xf5\xf6\xf7\xf8\xf9\xfa\xfb\xfc\xfd\xfe\xff"
@@ -98,20 +102,33 @@ func UUIDv4() string {
 // GenerateSecureToken generates a cryptographically secure random token encoded in base64.
 // It uses crypto/rand for randomness and base64.RawURLEncoding for URL-safe output.
 // If length is less than or equal to 0, it defaults to 32 bytes (256 bits of entropy).
-func GenerateSecureToken(length int) string {
+// GenerateSecureToken generates a cryptographically secure random token encoded in base64.
+// It uses crypto/rand for randomness and base64.RawURLEncoding for URL-safe output.
+// If length is less than or equal to 0, it defaults to 32 bytes (256 bits of entropy).
+// Returns an error if the random source fails.
+func GenerateSecureToken(length int) (string, error) {
 	if length <= 0 {
 		length = 32
 	}
 	bytes := make([]byte, length)
-	if _, err := rand.Read(bytes); err != nil {
-		panic("utils: failed to read random bytes for token: " + err.Error())
+	if _, err := randRead(bytes); err != nil {
+		return "", fmt.Errorf("utils: failed to read random bytes for token: %w", err)
 	}
-	return base64.RawURLEncoding.EncodeToString(bytes)
+	return base64.RawURLEncoding.EncodeToString(bytes), nil
+}
+
+// GenerateSecureTokenMust is a convenience wrapper that panics on failure.
+func GenerateSecureTokenMust(length int) string {
+	s, err := GenerateSecureToken(length)
+	if err != nil {
+		panic(err)
+	}
+	return s
 }
 
 // SecureToken generates a secure token with default 32 bytes of entropy.
 func SecureToken() string {
-	return GenerateSecureToken(32)
+	return GenerateSecureTokenMust(32)
 }
 
 // FunctionName returns function name
