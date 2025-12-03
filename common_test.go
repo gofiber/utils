@@ -101,7 +101,7 @@ func Test_UUIDv4_Concurrency(t *testing.T) {
 
 func Test_GenerateSecureToken(t *testing.T) {
 	t.Parallel()
-	// Test default length (now 32 bytes)
+	// Test with 32 bytes
 	token := GenerateSecureToken(32)
 	require.Len(t, token, 43) // base64 encoding of 32 bytes
 	require.NotEmpty(t, token)
@@ -118,8 +118,11 @@ func Test_GenerateSecureToken(t *testing.T) {
 	require.NotEqual(t, token, token2)
 
 	// Test invalid length defaults to 32
-	tokenInvalid := GenerateSecureToken(0)
-	require.Len(t, tokenInvalid, 43)
+	tokenZero := GenerateSecureToken(0)
+	require.Len(t, tokenZero, 43)
+
+	tokenNegative := GenerateSecureToken(-1)
+	require.Len(t, tokenNegative, 43)
 }
 
 func Test_GenerateSecureToken_Concurrency(t *testing.T) {

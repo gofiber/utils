@@ -97,15 +97,14 @@ func UUIDv4() string {
 
 // GenerateSecureToken generates a cryptographically secure random token encoded in base64.
 // It uses crypto/rand for randomness and base64.RawURLEncoding for URL-safe output.
-// The default length of 32 bytes provides 256 bits of entropy, suitable for secure tokens.
+// If length is less than or equal to 0, it defaults to 32 bytes (256 bits of entropy).
 func GenerateSecureToken(length int) string {
 	if length <= 0 {
 		length = 32
 	}
 	bytes := make([]byte, length)
 	if _, err := rand.Read(bytes); err != nil {
-		// In case of error, fall back to UUIDv4 for compatibility
-		return UUIDv4()
+		panic("utils: failed to read random bytes for token: " + err.Error())
 	}
 	return base64.RawURLEncoding.EncodeToString(bytes)
 }
