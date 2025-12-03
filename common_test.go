@@ -6,6 +6,7 @@ package utils
 
 import (
 	"crypto/rand"
+	"errors"
 	"fmt"
 	"net"
 	"os"
@@ -154,8 +155,8 @@ func Test_GenerateSecureToken_ErrorOnRandFail(t *testing.T) {
 	defer func() { randRead = orig }()
 
 	// Simulate read failure
-	randRead = func(b []byte) (int, error) {
-		return 0, fmt.Errorf("simulated failure")
+	randRead = func(_ []byte) (int, error) {
+		return 0, errors.New("simulated failure")
 	}
 
 	s, err := GenerateSecureToken(16)
@@ -377,14 +378,14 @@ func Benchmark_UUID(b *testing.B) {
 func Benchmark_GenerateSecureToken(b *testing.B) {
 	var res string
 	b.Run("16_bytes", func(b *testing.B) {
-			for n := 0; n < b.N; n++ {
-				res = GenerateSecureTokenMust(16)
+		for n := 0; n < b.N; n++ {
+			res = GenerateSecureTokenMust(16)
 		}
 		require.Len(b, res, 22)
 	})
 	b.Run("32_bytes", func(b *testing.B) {
-			for n := 0; n < b.N; n++ {
-				res = GenerateSecureTokenMust(32)
+		for n := 0; n < b.N; n++ {
+			res = GenerateSecureTokenMust(32)
 		}
 		require.Len(b, res, 43)
 	})
