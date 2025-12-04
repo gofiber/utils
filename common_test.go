@@ -170,12 +170,14 @@ func Test_GenerateSecureToken_ErrorOnRandFail(t *testing.T) {
 
 func Test_SecureToken(t *testing.T) {
 	t.Parallel()
-	token := SecureToken()
+	token, err := SecureToken()
+	require.NoError(t, err)
 	require.Len(t, token, 43)
 	require.NotEmpty(t, token)
 
 	// Test uniqueness
-	token2 := SecureToken()
+	token2, err := SecureToken()
+	require.NoError(t, err)
 	require.NotEqual(t, token, token2)
 }
 
@@ -402,7 +404,7 @@ func Benchmark_TokenGenerators(b *testing.B) {
 	})
 	b.Run("SecureToken", func(b *testing.B) {
 		for n := 0; n < b.N; n++ {
-			res = SecureToken()
+			res = SecureTokenMust()
 		}
 		require.Len(b, res, 43)
 	})

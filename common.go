@@ -124,14 +124,15 @@ func GenerateSecureTokenMust(length int) string {
 	return s
 }
 
-// SecureToken generates a secure token with default 32 bytes of entropy.
-//
-// NOTE: SecureToken is a convenience wrapper that will panic if the
-// underlying secure random source (crypto/rand) fails. For callers that
-// prefer to handle failures explicitly, use GenerateSecureToken(length)
-// which returns (string, error), or use GenerateSecureTokenMust(length) to
-// get the panicking behavior directly.
-func SecureToken() string {
+// SecureToken generates a secure token with 32 bytes of entropy.
+// Returns an error if the random source fails.
+func SecureToken() (string, error) {
+	return GenerateSecureToken(32)
+}
+
+// SecureToken generates a secure token with 32 bytes of entropy.
+// Panics on failure.
+func SecureTokenMust() string {
 	return GenerateSecureTokenMust(32)
 }
 
