@@ -94,6 +94,11 @@ func TrimRight[S byteSeq](s S, cutset byte) S {
 func TrimSpace[S byteSeq](s S) S {
 	i, j := 0, len(s)-1
 
+	// fast path for empty string
+	if j < 0 {
+		return s
+	}
+
 	// Find first non-whitespace from start
 	for ; i <= j && (s[i] == ' ' || s[i]-'\t' <= 4); i++ { //nolint:revive // we want to check for multiple whitespace chars
 	}
