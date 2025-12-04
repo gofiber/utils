@@ -8,6 +8,7 @@ import (
 	"crypto/rand"
 	"encoding/binary"
 	"encoding/hex"
+	"fmt"
 	"math"
 	"net"
 	"os"
@@ -52,12 +53,12 @@ func UUID() string {
 	// Setup seed & counter once
 	uuidSetup.Do(func() {
 		if _, err := rand.Read(uuidSeed[:]); err != nil {
-			return
+			panic(fmt.Sprintf("utils: failed to seed UUID generator: %v", err))
 		}
 		uuidCounter = binary.LittleEndian.Uint64(uuidSeed[:8])
 	})
 	if atomic.LoadUint64(&uuidCounter) <= 0 {
-		return "00000000-0000-0000-0000-000000000000"
+		panic("utils: UUID generator not properly seeded")
 	}
 	// first 8 bytes differ, taking a slice of the first 16 bytes
 	x := atomic.AddUint64(&uuidCounter, 1)
@@ -89,7 +90,7 @@ func UUID() string {
 func UUIDv4() string {
 	token, err := uuid.NewRandom()
 	if err != nil {
-		return UUID()
+		panic(fmt.Sprintf("utils: failed to generate secure UUID: %v", err))
 	}
 	return token.String()
 }
