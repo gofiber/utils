@@ -100,11 +100,11 @@ func TrimSpace[S byteSeq](s S) S {
 	}
 
 	// Find first non-whitespace from start
-	for ; i <= j && (s[i] == ' ' || s[i]-'\t' <= 4); i++ { //nolint:revive // we want to check for multiple whitespace chars
+	for ; i <= j && whitespaceTable[s[i]]; i++ { //nolint:revive // we want to check for multiple whitespace chars
 	}
 
 	// Find first non-whitespace from end
-	for ; i < j && (s[j] == ' ' || s[j]-'\t' <= 4); j-- { //nolint:revive // we want to check for multiple whitespace chars
+	for ; i < j && whitespaceTable[s[j]]; j-- { //nolint:revive // we want to check for multiple whitespace chars
 	}
 
 	return s[i : j+1]
