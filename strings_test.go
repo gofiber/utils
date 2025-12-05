@@ -79,11 +79,8 @@ var benchmarkCases = []TestCase{
 }
 
 func Test_ToUpper(t *testing.T) {
-	t.Parallel()
 	for _, tc := range testCases {
-		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
-			t.Parallel()
 			result := ToUpper(tc.input)
 			require.Equal(t, tc.upper, result, "ToUpper failed for %s", tc.name)
 			if tc.upperNoConv {
@@ -108,11 +105,8 @@ func Test_ToUpper(t *testing.T) {
 }
 
 func Test_ToLower(t *testing.T) {
-	t.Parallel()
 	for _, tc := range testCases {
-		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
-			t.Parallel()
 			result := ToLower(tc.input)
 			require.Equal(t, tc.lower, result, "ToLower failed for %s", tc.name)
 			if tc.lowerNoConv {

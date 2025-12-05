@@ -16,25 +16,29 @@ func GetMIME(extension string) string {
 	if len(extension) == 0 {
 		return ""
 	}
-	var foundMime string
+
+	// Normalize extension once at the start to avoid repeated checks
+	var extWithoutDot string
+	var extWithDot string
 	if extension[0] == '.' {
-		foundMime = mimeExtensions[extension[1:]]
+		extWithoutDot = extension[1:]
+		extWithDot = extension
 	} else {
-		foundMime = mimeExtensions[extension]
+		extWithoutDot = extension
+		extWithDot = "." + extension
 	}
 
-	if len(foundMime) == 0 {
-		if extension[0] != '.' {
-			foundMime = mime.TypeByExtension("." + extension)
-		} else {
-			foundMime = mime.TypeByExtension(extension)
-		}
-
-		if foundMime == "" {
-			return MIMEOctetStream
-		}
+	// Single map lookup with normalized key
+	if foundMime := mimeExtensions[extWithoutDot]; len(foundMime) > 0 {
+		return foundMime
 	}
-	return foundMime
+
+	// Fallback to mime package with pre-computed extension
+	if foundMime := mime.TypeByExtension(extWithDot); foundMime != "" {
+		return foundMime
+	}
+
+	return MIMEOctetStream
 }
 
 // ParseVendorSpecificContentType check if content type is vendor specific and
@@ -70,7 +74,12 @@ func ParseVendorSpecificContentType(cType string, caseInsensitive ...bool) strin
 		return cType
 	}
 
-	return working[0:slashIndex+1] + parsableType
+	// Avoid string concatenation allocation by using pre-allocated buffer
+	prefixLen := slashIndex + 1
+	result := make([]byte, prefixLen+len(parsableType))
+	copy(result, working[:prefixLen])
+	copy(result[prefixLen:], parsableType)
+	return UnsafeString(result)
 }
 
 // limits for HTTP statuscodes

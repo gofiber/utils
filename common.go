@@ -14,8 +14,6 @@ import (
 	"reflect"
 	"runtime"
 	"slices"
-	"strconv"
-	"strings"
 	"sync"
 	"sync/atomic"
 
@@ -137,29 +135,47 @@ func ConvertToBytes(humanReadableString string) int {
 		return 0
 	}
 
-	var unitPrefixPos, lastNumberPos int
-	// loop backwards to find the last numeric character and the unit prefix
+	// Find the last digit position by scanning backwards
+	// Also identify the unit prefix position in the same pass
+	lastNumberPos := -1
+	unitPrefixPos := 0
 	for i := strLen - 1; i >= 0; i-- {
 		c := humanReadableString[i]
 		if c >= '0' && c <= '9' {
 			lastNumberPos = i
 			break
 		}
-		if c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z' {
+		// Track the first letter position (unit prefix) from the end
+		if (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') {
 			unitPrefixPos = i
 		}
 	}
 
+	// No digits found
+	if lastNumberPos < 0 {
+		return 0
+	}
+
 	numPart := humanReadableString[:lastNumberPos+1]
 	var size float64
-	if strings.IndexByte(numPart, '.') >= 0 {
+
+	// Check for decimal point - use simple byte scan instead of IndexByte
+	hasDot := false
+	for i := 0; i <= lastNumberPos; i++ {
+		if numPart[i] == '.' {
+			hasDot = true
+			break
+		}
+	}
+
+	if hasDot {
 		var err error
-		size, err = strconv.ParseFloat(numPart, 64)
+		size, err = ParseFloat64(numPart)
 		if err != nil {
 			return 0
 		}
 	} else {
-		i64, err := strconv.ParseUint(numPart, 10, 64)
+		i64, err := ParseUint(numPart)
 		if err != nil {
 			return 0
 		}

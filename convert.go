@@ -10,9 +10,18 @@ import (
 	"reflect"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 	"unsafe"
 )
+
+// byteSizePool is a sync.Pool for ByteSize buffer allocation
+var byteSizePool = sync.Pool{
+	New: func() any {
+		buf := make([]byte, 0, 16)
+		return &buf
+	},
+}
 
 // UnsafeString returns a string pointer without allocation
 func UnsafeString(b []byte) string {
@@ -84,11 +93,21 @@ func ByteSize(bytes uint64) string {
 		return "0B"
 	}
 
-	buf := make([]byte, 0, 16)
+	// Get buffer from pool to reduce allocations
+	bufPtr, ok := byteSizePool.Get().(*[]byte)
+	if !ok {
+		bufPtr = new([]byte)
+		*bufPtr = make([]byte, 0, 16)
+	}
+	buf := (*bufPtr)[:0]
+
 	if div == 1 {
 		buf = strconv.AppendUint(buf, bytes, 10)
 		buf = append(buf, unit...)
-		return UnsafeString(buf)
+		result := string(buf) // Copy before returning to pool
+		*bufPtr = buf
+		byteSizePool.Put(bufPtr)
+		return result
 	}
 
 	// Fix: cap bytes to maxSafe for overflow, but format as fractional
@@ -106,7 +125,10 @@ func ByteSize(bytes uint64) string {
 		buf = strconv.AppendUint(buf, fractional, 10)
 	}
 	buf = append(buf, unit...)
-	return UnsafeString(buf)
+	result := string(buf) // Copy before returning to pool
+	*bufPtr = buf
+	byteSizePool.Put(bufPtr)
+	return result
 }
 
 // ToString Change arg to string
@@ -123,15 +145,15 @@ func ToString(arg any, timeFormat ...string) string {
 	case int64:
 		return strconv.FormatInt(v, 10)
 	case uint:
-		return strconv.Itoa(int(v))
+		return strconv.FormatUint(uint64(v), 10)
 	case uint8:
-		return strconv.FormatInt(int64(v), 10)
+		return strconv.FormatUint(uint64(v), 10)
 	case uint16:
-		return strconv.FormatInt(int64(v), 10)
+		return strconv.FormatUint(uint64(v), 10)
 	case uint32:
-		return strconv.FormatInt(int64(v), 10)
+		return strconv.FormatUint(uint64(v), 10)
 	case uint64:
-		return strconv.FormatInt(int64(v), 10)
+		return strconv.FormatUint(v, 10)
 	case string:
 		return v
 	case []byte:
@@ -151,23 +173,91 @@ func ToString(arg any, timeFormat ...string) string {
 		return ToString(v.Interface(), timeFormat...)
 	case fmt.Stringer:
 		return v.String()
+	// Handle common pointer types directly to avoid reflection
+	case *string:
+		if v != nil {
+			return *v
+		}
+		return ""
+	case *int:
+		if v != nil {
+			return strconv.Itoa(*v)
+		}
+		return "0"
+	case *int64:
+		if v != nil {
+			return strconv.FormatInt(*v, 10)
+		}
+		return "0"
+	case *uint64:
+		if v != nil {
+			return strconv.FormatUint(*v, 10)
+		}
+		return "0"
+	case *float64:
+		if v != nil {
+			return strconv.FormatFloat(*v, 'f', -1, 64)
+		}
+		return "0"
+	case *bool:
+		if v != nil {
+			return strconv.FormatBool(*v)
+		}
+		return "false"
+	// Handle common slice types directly to avoid reflection
+	case []string:
+		if len(v) == 0 {
+			return "[]"
+		}
+		var buf strings.Builder
+		buf.Grow(len(v) * 8) // Pre-allocate approximate size
+		buf.WriteByte('[')
+		for i, s := range v {
+			if i > 0 {
+				buf.WriteByte(' ')
+			}
+			buf.WriteString(s)
+		}
+		buf.WriteByte(']')
+		return buf.String()
+	case []int:
+		if len(v) == 0 {
+			return "[]"
+		}
+		var buf strings.Builder
+		buf.Grow(len(v) * 4) // Pre-allocate approximate size
+		buf.WriteByte('[')
+		for i, n := range v {
+			if i > 0 {
+				buf.WriteByte(' ')
+			}
+			buf.WriteString(strconv.Itoa(n))
+		}
+		buf.WriteByte(']')
+		return buf.String()
 	default:
 		// Check if the type is a pointer by using reflection
 		rv := reflect.ValueOf(arg)
-		if rv.Kind() == reflect.Ptr && !rv.IsNil() {
+		kind := rv.Kind()
+		if kind == reflect.Ptr && !rv.IsNil() {
 			// Dereference the pointer and recursively call ToString
 			return ToString(rv.Elem().Interface(), timeFormat...)
-		} else if rv.Kind() == reflect.Slice || rv.Kind() == reflect.Array {
+		} else if kind == reflect.Slice || kind == reflect.Array {
 			// handle slices
-			var buf strings.Builder
-			buf.WriteString("[") //nolint:errcheck // no need to check error
-			for i := 0; i < rv.Len(); i++ {
-				if i > 0 {
-					buf.WriteString(" ") //nolint:errcheck // no need to check error
-				}
-				buf.WriteString(ToString(rv.Index(i).Interface())) //nolint:errcheck // no need to check error
+			n := rv.Len()
+			if n == 0 {
+				return "[]"
 			}
-			buf.WriteString("]") //nolint:errcheck // no need to check error
+			var buf strings.Builder
+			buf.Grow(n * 8) // Pre-allocate approximate size
+			buf.WriteByte('[')
+			for i := 0; i < n; i++ {
+				if i > 0 {
+					buf.WriteByte(' ')
+				}
+				buf.WriteString(ToString(rv.Index(i).Interface()))
+			}
+			buf.WriteByte(']')
 			return buf.String()
 		}
 
