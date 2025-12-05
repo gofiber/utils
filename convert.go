@@ -251,7 +251,7 @@ func ToString(arg any, timeFormat ...string) string {
 			var buf strings.Builder
 			buf.Grow(n * 8) // Pre-allocate approximate size
 			buf.WriteByte('[')
-			for i := 0; i < n; i++ {
+			for i := range n {
 				if i > 0 {
 					buf.WriteByte(' ')
 				}
