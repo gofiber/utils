@@ -164,6 +164,32 @@ func Test_ToString(t *testing.T) {
 		t.Parallel()
 		require.Equal(t, "<nil>", ToString(nil))
 	})
+
+	// Test nil pointer handling - nil pointers return type-specific defaults
+	t.Run("nil pointer to string", func(t *testing.T) {
+		t.Parallel()
+		require.Empty(t, ToString((*string)(nil)))
+	})
+	t.Run("nil pointer to int", func(t *testing.T) {
+		t.Parallel()
+		require.Equal(t, "0", ToString((*int)(nil)))
+	})
+	t.Run("nil pointer to int64", func(t *testing.T) {
+		t.Parallel()
+		require.Equal(t, "0", ToString((*int64)(nil)))
+	})
+	t.Run("nil pointer to uint64", func(t *testing.T) {
+		t.Parallel()
+		require.Equal(t, "0", ToString((*uint64)(nil)))
+	})
+	t.Run("nil pointer to float64", func(t *testing.T) {
+		t.Parallel()
+		require.Equal(t, "0", ToString((*float64)(nil)))
+	})
+	t.Run("nil pointer to bool", func(t *testing.T) {
+		t.Parallel()
+		require.Equal(t, "false", ToString((*bool)(nil)))
+	})
 }
 
 func TestCopyBytes(t *testing.T) {
