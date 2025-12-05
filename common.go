@@ -130,8 +130,8 @@ func SecureToken() (string, error) {
 	return GenerateSecureToken(32)
 }
 
-// SecureToken generates a secure token with 32 bytes of entropy.
-// Panics on failure.
+// SecureTokenMust generates a secure token with 32 bytes of entropy.
+// It panics if the random source fails.
 func SecureTokenMust() string {
 	return GenerateSecureTokenMust(32)
 }
