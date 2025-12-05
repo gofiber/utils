@@ -14,6 +14,7 @@ import (
 	"reflect"
 	"runtime"
 	"slices"
+	"strings"
 	"sync"
 	"sync/atomic"
 
@@ -159,16 +160,7 @@ func ConvertToBytes(humanReadableString string) int {
 	numPart := humanReadableString[:lastNumberPos+1]
 	var size float64
 
-	// Check for decimal point - use simple byte scan instead of IndexByte
-	hasDot := false
-	for i := 0; i <= lastNumberPos; i++ {
-		if numPart[i] == '.' {
-			hasDot = true
-			break
-		}
-	}
-
-	if hasDot {
+	if strings.IndexByte(numPart, '.') >= 0 {
 		var err error
 		size, err = ParseFloat64(numPart)
 		if err != nil {

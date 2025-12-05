@@ -74,12 +74,7 @@ func ParseVendorSpecificContentType(cType string, caseInsensitive ...bool) strin
 		return cType
 	}
 
-	// Avoid string concatenation allocation by using pre-allocated buffer
-	prefixLen := slashIndex + 1
-	result := make([]byte, prefixLen+len(parsableType))
-	copy(result, working[:prefixLen])
-	copy(result[prefixLen:], parsableType)
-	return UnsafeString(result)
+	return working[:slashIndex+1] + parsableType
 }
 
 // limits for HTTP statuscodes

@@ -10,18 +10,9 @@ import (
 	"reflect"
 	"strconv"
 	"strings"
-	"sync"
 	"time"
 	"unsafe"
 )
-
-// byteSizePool is a sync.Pool for ByteSize buffer allocation
-var byteSizePool = sync.Pool{
-	New: func() any {
-		buf := make([]byte, 0, 16)
-		return &buf
-	},
-}
 
 // UnsafeString returns a string pointer without allocation
 func UnsafeString(b []byte) string {
@@ -93,21 +84,12 @@ func ByteSize(bytes uint64) string {
 		return "0B"
 	}
 
-	// Get buffer from pool to reduce allocations
-	bufPtr, ok := byteSizePool.Get().(*[]byte)
-	if !ok {
-		bufPtr = new([]byte)
-		*bufPtr = make([]byte, 0, 16)
-	}
-	buf := (*bufPtr)[:0]
+	buf := make([]byte, 0, 16)
 
 	if div == 1 {
 		buf = AppendUint(buf, bytes)
 		buf = append(buf, unit...)
-		result := string(buf) // Copy before returning to pool
-		*bufPtr = buf
-		byteSizePool.Put(bufPtr)
-		return result
+		return UnsafeString(buf)
 	}
 
 	// Fix: cap bytes to maxSafe for overflow, but format as fractional
@@ -125,10 +107,7 @@ func ByteSize(bytes uint64) string {
 		buf = AppendUint(buf, fractional)
 	}
 	buf = append(buf, unit...)
-	result := string(buf) // Copy before returning to pool
-	*bufPtr = buf
-	byteSizePool.Put(bufPtr)
-	return result
+	return UnsafeString(buf)
 }
 
 // ToString Change arg to string
