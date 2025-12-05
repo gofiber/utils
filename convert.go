@@ -102,7 +102,7 @@ func ByteSize(bytes uint64) string {
 	buf := (*bufPtr)[:0]
 
 	if div == 1 {
-		buf = strconv.AppendUint(buf, bytes, 10)
+		buf = AppendUint(buf, bytes)
 		buf = append(buf, unit...)
 		result := string(buf) // Copy before returning to pool
 		*bufPtr = buf
@@ -119,10 +119,10 @@ func ByteSize(bytes uint64) string {
 	integer := scaled / 10
 	fractional := scaled % 10
 
-	buf = strconv.AppendUint(buf, integer, 10)
+	buf = AppendUint(buf, integer)
 	if fractional > 0 {
 		buf = append(buf, '.')
-		buf = strconv.AppendUint(buf, fractional, 10)
+		buf = AppendUint(buf, fractional)
 	}
 	buf = append(buf, unit...)
 	result := string(buf) // Copy before returning to pool
@@ -135,31 +135,31 @@ func ByteSize(bytes uint64) string {
 func ToString(arg any, timeFormat ...string) string {
 	switch v := arg.(type) {
 	case int:
-		return strconv.Itoa(v)
+		return FormatInt(int64(v))
 	case int8:
-		return strconv.FormatInt(int64(v), 10)
+		return FormatInt8(v)
 	case int16:
-		return strconv.FormatInt(int64(v), 10)
+		return FormatInt16(v)
 	case int32:
-		return strconv.FormatInt(int64(v), 10)
+		return FormatInt32(v)
 	case int64:
-		return strconv.FormatInt(v, 10)
+		return FormatInt(v)
 	case uint:
-		return strconv.FormatUint(uint64(v), 10)
+		return FormatUint(uint64(v))
 	case uint8:
-		return strconv.FormatUint(uint64(v), 10)
+		return FormatUint8(v)
 	case uint16:
-		return strconv.FormatUint(uint64(v), 10)
+		return FormatUint16(v)
 	case uint32:
-		return strconv.FormatUint(uint64(v), 10)
+		return FormatUint32(v)
 	case uint64:
-		return strconv.FormatUint(v, 10)
+		return FormatUint(v)
 	case string:
 		return v
 	case []byte:
 		return string(v)
 	case bool:
-		return strconv.FormatBool(v)
+		return FormatBool(v)
 	case float32:
 		return strconv.FormatFloat(float64(v), 'f', -1, 32)
 	case float64:
@@ -181,17 +181,17 @@ func ToString(arg any, timeFormat ...string) string {
 		return ""
 	case *int:
 		if v != nil {
-			return strconv.Itoa(*v)
+			return FormatInt(int64(*v))
 		}
 		return "0"
 	case *int64:
 		if v != nil {
-			return strconv.FormatInt(*v, 10)
+			return FormatInt(*v)
 		}
 		return "0"
 	case *uint64:
 		if v != nil {
-			return strconv.FormatUint(*v, 10)
+			return FormatUint(*v)
 		}
 		return "0"
 	case *float64:
@@ -201,7 +201,7 @@ func ToString(arg any, timeFormat ...string) string {
 		return "0"
 	case *bool:
 		if v != nil {
-			return strconv.FormatBool(*v)
+			return FormatBool(*v)
 		}
 		return "false"
 	// Handle common slice types directly to avoid reflection
@@ -231,7 +231,7 @@ func ToString(arg any, timeFormat ...string) string {
 			if i > 0 {
 				buf.WriteByte(' ')
 			}
-			buf.WriteString(strconv.Itoa(n))
+			buf.WriteString(FormatInt(int64(n)))
 		}
 		buf.WriteByte(']')
 		return buf.String()
