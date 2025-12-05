@@ -105,19 +105,3 @@ func AppendInt(dst []byte, n int64) []byte {
 	buf[i] = '-'
 	return append(dst, buf[i:]...)
 }
-
-// FormatBool formats a bool as "true" or "false".
-func FormatBool(b bool) string { //nolint:revive  // we want to keep the syntax consistent
-	if b {
-		return "true"
-	}
-	return "false"
-}
-
-// AppendBool appends "true" or "false" to dst.
-func AppendBool(dst []byte, b bool) []byte { //nolint:revive  // we want to keep the syntax consistent
-	if b {
-		return append(dst, "true"...)
-	}
-	return append(dst, "false"...)
-}

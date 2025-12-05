@@ -138,7 +138,7 @@ func ToString(arg any, timeFormat ...string) string {
 	case []byte:
 		return string(v)
 	case bool:
-		return FormatBool(v)
+		return strconv.FormatBool(v)
 	case float32:
 		return strconv.FormatFloat(float64(v), 'f', -1, 32)
 	case float64:
@@ -180,7 +180,7 @@ func ToString(arg any, timeFormat ...string) string {
 		return "0"
 	case *bool:
 		if v != nil {
-			return FormatBool(*v)
+			return strconv.FormatBool(*v)
 		}
 		return "false"
 	// Handle common slice types directly to avoid reflection

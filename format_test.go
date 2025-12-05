@@ -117,18 +117,6 @@ func Test_AppendInt(t *testing.T) {
 	}
 }
 
-func Test_FormatBool(t *testing.T) {
-	t.Parallel()
-	require.Equal(t, "true", FormatBool(true))
-	require.Equal(t, "false", FormatBool(false))
-}
-
-func Test_AppendBool(t *testing.T) {
-	t.Parallel()
-	require.Equal(t, []byte("prefixtrue"), AppendBool([]byte("prefix"), true))
-	require.Equal(t, []byte("prefixfalse"), AppendBool([]byte("prefix"), false))
-}
-
 // Benchmarks
 
 func Benchmark_FormatUint(b *testing.B) {
@@ -320,38 +308,6 @@ func Benchmark_AppendInt(b *testing.B) {
 		b.ReportAllocs()
 		for i := 0; i < b.N; i++ {
 			_ = strconv.AppendInt(dst, input, 10)
-		}
-	})
-}
-
-func Benchmark_FormatBool(b *testing.B) {
-	b.Run("fiber", func(b *testing.B) {
-		b.ReportAllocs()
-		for i := 0; i < b.N; i++ {
-			_ = FormatBool(true)
-		}
-	})
-	b.Run("strconv", func(b *testing.B) {
-		b.ReportAllocs()
-		for i := 0; i < b.N; i++ {
-			_ = strconv.FormatBool(true)
-		}
-	})
-}
-
-func Benchmark_AppendBool(b *testing.B) {
-	dst := make([]byte, 0, 16)
-
-	b.Run("fiber", func(b *testing.B) {
-		b.ReportAllocs()
-		for i := 0; i < b.N; i++ {
-			_ = AppendBool(dst, true)
-		}
-	})
-	b.Run("strconv", func(b *testing.B) {
-		b.ReportAllocs()
-		for i := 0; i < b.N; i++ {
-			_ = strconv.AppendBool(dst, true)
 		}
 	})
 }
