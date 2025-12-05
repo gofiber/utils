@@ -85,8 +85,9 @@ func ByteSize(bytes uint64) string {
 	}
 
 	buf := make([]byte, 0, 16)
+
 	if div == 1 {
-		buf = strconv.AppendUint(buf, bytes, 10)
+		buf = AppendUint(buf, bytes)
 		buf = append(buf, unit...)
 		return UnsafeString(buf)
 	}
@@ -100,10 +101,10 @@ func ByteSize(bytes uint64) string {
 	integer := scaled / 10
 	fractional := scaled % 10
 
-	buf = strconv.AppendUint(buf, integer, 10)
+	buf = AppendUint(buf, integer)
 	if fractional > 0 {
 		buf = append(buf, '.')
-		buf = strconv.AppendUint(buf, fractional, 10)
+		buf = AppendUint(buf, fractional)
 	}
 	buf = append(buf, unit...)
 	return UnsafeString(buf)
@@ -113,25 +114,25 @@ func ByteSize(bytes uint64) string {
 func ToString(arg any, timeFormat ...string) string {
 	switch v := arg.(type) {
 	case int:
-		return strconv.Itoa(v)
+		return FormatInt(int64(v))
 	case int8:
-		return strconv.FormatInt(int64(v), 10)
+		return FormatInt8(v)
 	case int16:
-		return strconv.FormatInt(int64(v), 10)
+		return FormatInt16(v)
 	case int32:
-		return strconv.FormatInt(int64(v), 10)
+		return FormatInt32(v)
 	case int64:
-		return strconv.FormatInt(v, 10)
+		return FormatInt(v)
 	case uint:
-		return strconv.Itoa(int(v))
+		return FormatUint(uint64(v))
 	case uint8:
-		return strconv.FormatInt(int64(v), 10)
+		return FormatUint8(v)
 	case uint16:
-		return strconv.FormatInt(int64(v), 10)
+		return FormatUint16(v)
 	case uint32:
-		return strconv.FormatInt(int64(v), 10)
+		return FormatUint32(v)
 	case uint64:
-		return strconv.FormatInt(int64(v), 10)
+		return FormatUint(v)
 	case string:
 		return v
 	case []byte:
@@ -151,23 +152,91 @@ func ToString(arg any, timeFormat ...string) string {
 		return ToString(v.Interface(), timeFormat...)
 	case fmt.Stringer:
 		return v.String()
+	// Handle common pointer types directly to avoid reflection
+	case *string:
+		if v != nil {
+			return *v
+		}
+		return ""
+	case *int:
+		if v != nil {
+			return FormatInt(int64(*v))
+		}
+		return "0"
+	case *int64:
+		if v != nil {
+			return FormatInt(*v)
+		}
+		return "0"
+	case *uint64:
+		if v != nil {
+			return FormatUint(*v)
+		}
+		return "0"
+	case *float64:
+		if v != nil {
+			return strconv.FormatFloat(*v, 'f', -1, 64)
+		}
+		return "0"
+	case *bool:
+		if v != nil {
+			return strconv.FormatBool(*v)
+		}
+		return "false"
+	// Handle common slice types directly to avoid reflection
+	case []string:
+		if len(v) == 0 {
+			return "[]"
+		}
+		var buf strings.Builder
+		buf.Grow(len(v) * 8) // Pre-allocate approximate size
+		buf.WriteByte('[')
+		for i, s := range v {
+			if i > 0 {
+				buf.WriteByte(' ')
+			}
+			buf.WriteString(s)
+		}
+		buf.WriteByte(']')
+		return buf.String()
+	case []int:
+		if len(v) == 0 {
+			return "[]"
+		}
+		var buf strings.Builder
+		buf.Grow(len(v) * 4) // Pre-allocate approximate size
+		buf.WriteByte('[')
+		for i, n := range v {
+			if i > 0 {
+				buf.WriteByte(' ')
+			}
+			buf.WriteString(FormatInt(int64(n)))
+		}
+		buf.WriteByte(']')
+		return buf.String()
 	default:
 		// Check if the type is a pointer by using reflection
 		rv := reflect.ValueOf(arg)
-		if rv.Kind() == reflect.Ptr && !rv.IsNil() {
+		kind := rv.Kind()
+		if kind == reflect.Ptr && !rv.IsNil() {
 			// Dereference the pointer and recursively call ToString
 			return ToString(rv.Elem().Interface(), timeFormat...)
-		} else if rv.Kind() == reflect.Slice || rv.Kind() == reflect.Array {
+		} else if kind == reflect.Slice || kind == reflect.Array {
 			// handle slices
-			var buf strings.Builder
-			buf.WriteString("[") //nolint:errcheck // no need to check error
-			for i := 0; i < rv.Len(); i++ {
-				if i > 0 {
-					buf.WriteString(" ") //nolint:errcheck // no need to check error
-				}
-				buf.WriteString(ToString(rv.Index(i).Interface())) //nolint:errcheck // no need to check error
+			n := rv.Len()
+			if n == 0 {
+				return "[]"
 			}
-			buf.WriteString("]") //nolint:errcheck // no need to check error
+			var buf strings.Builder
+			buf.Grow(n * 8) // Pre-allocate approximate size
+			buf.WriteByte('[')
+			for i := range n {
+				if i > 0 {
+					buf.WriteByte(' ')
+				}
+				buf.WriteString(ToString(rv.Index(i).Interface()))
+			}
+			buf.WriteByte(']')
 			return buf.String()
 		}
 

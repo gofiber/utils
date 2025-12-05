@@ -79,11 +79,8 @@ var benchmarkCases = []TestCase{
 }
 
 func Test_ToUpper(t *testing.T) {
-	t.Parallel()
 	for _, tc := range testCases {
-		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
-			t.Parallel()
 			result := ToUpper(tc.input)
 			require.Equal(t, tc.upper, result, "ToUpper failed for %s", tc.name)
 			if tc.upperNoConv {
@@ -108,11 +105,8 @@ func Test_ToUpper(t *testing.T) {
 }
 
 func Test_ToLower(t *testing.T) {
-	t.Parallel()
 	for _, tc := range testCases {
-		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
-			t.Parallel()
 			result := ToLower(tc.input)
 			require.Equal(t, tc.lower, result, "ToLower failed for %s", tc.name)
 			if tc.lowerNoConv {
@@ -160,11 +154,19 @@ func Benchmark_ToUpper(b *testing.B) {
 			b.ReportAllocs()
 			b.SetBytes(int64(len(tc.input)))
 			b.ResetTimer()
-			var res string
-			for n := 0; n < b.N; n++ {
-				res = ToUpper(tc.input)
-			}
-			require.Equal(b, tc.upper, res)
+			var fiberRes, stdRes string
+			b.Run("fiber", func(b *testing.B) {
+				for n := 0; n < b.N; n++ {
+					fiberRes = ToUpper(tc.input)
+				}
+				require.Equal(b, tc.upper, fiberRes)
+			})
+			b.Run("default", func(b *testing.B) {
+				for n := 0; n < b.N; n++ {
+					stdRes = strings.ToUpper(tc.input)
+				}
+				require.Equal(b, tc.upper, stdRes)
+			})
 		})
 	}
 }
@@ -175,41 +177,19 @@ func Benchmark_ToLower(b *testing.B) {
 			b.ReportAllocs()
 			b.SetBytes(int64(len(tc.input)))
 			b.ResetTimer()
-			var res string
-			for n := 0; n < b.N; n++ {
-				res = ToLower(tc.input)
-			}
-			require.Equal(b, tc.lower, res)
-		})
-	}
-}
-
-func Benchmark_StdToUpper(b *testing.B) {
-	for _, tc := range benchmarkCases {
-		b.Run(tc.name, func(b *testing.B) {
-			b.ReportAllocs()
-			b.SetBytes(int64(len(tc.input)))
-			b.ResetTimer()
-			var res string
-			for n := 0; n < b.N; n++ {
-				res = strings.ToUpper(tc.input)
-			}
-			require.Equal(b, tc.upper, res)
-		})
-	}
-}
-
-func Benchmark_StdToLower(b *testing.B) {
-	for _, tc := range benchmarkCases {
-		b.Run(tc.name, func(b *testing.B) {
-			b.ReportAllocs()
-			b.SetBytes(int64(len(tc.input)))
-			b.ResetTimer()
-			var res string
-			for n := 0; n < b.N; n++ {
-				res = strings.ToLower(tc.input)
-			}
-			require.Equal(b, tc.lower, res)
+			var fiberRes, stdRes string
+			b.Run("fiber", func(b *testing.B) {
+				for n := 0; n < b.N; n++ {
+					fiberRes = ToLower(tc.input)
+				}
+				require.Equal(b, tc.lower, fiberRes)
+			})
+			b.Run("default", func(b *testing.B) {
+				for n := 0; n < b.N; n++ {
+					stdRes = strings.ToLower(tc.input)
+				}
+				require.Equal(b, tc.lower, stdRes)
+			})
 		})
 	}
 }
