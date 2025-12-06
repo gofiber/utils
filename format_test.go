@@ -121,14 +121,20 @@ func Test_AppendInt_SmallNegativeCache(t *testing.T) {
 	t.Parallel()
 	// Test all small negative integers that should use the cache (-1 to -99)
 	for i := int64(-1); i >= -99; i-- {
-		expected := strconv.AppendInt([]byte("prefix"), i, 10)
-		result := AppendInt([]byte("prefix"), i)
-		require.Equal(t, expected, result, "AppendInt(%d)", i)
+		t.Run(strconv.FormatInt(i, 10), func(t *testing.T) {
+			t.Parallel()
+			expected := strconv.AppendInt([]byte("prefix"), i, 10)
+			result := AppendInt([]byte("prefix"), i)
+			require.Equal(t, expected, result)
+		})
 	}
 	// Verify boundary: -100 should NOT use the cache
-	expected := strconv.AppendInt([]byte("prefix"), -100, 10)
-	result := AppendInt([]byte("prefix"), -100)
-	require.Equal(t, expected, result, "AppendInt(-100)")
+	t.Run("boundary/-100", func(t *testing.T) {
+		t.Parallel()
+		expected := strconv.AppendInt([]byte("prefix"), -100, 10)
+		result := AppendInt([]byte("prefix"), -100)
+		require.Equal(t, expected, result)
+	})
 }
 
 // Benchmarks
