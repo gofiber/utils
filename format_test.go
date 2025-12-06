@@ -109,12 +109,26 @@ func Test_AppendUint(t *testing.T) {
 
 func Test_AppendInt(t *testing.T) {
 	t.Parallel()
-	tests := []int64{0, 1, -1, 99, -99, 12345, -12345, math.MaxInt64, math.MinInt64}
+	tests := []int64{0, 1, -1, 99, -99, 100, -100, 12345, -12345, math.MaxInt64, math.MinInt64}
 	for _, tt := range tests {
 		expected := strconv.AppendInt([]byte("prefix"), tt, 10)
 		result := AppendInt([]byte("prefix"), tt)
 		require.Equal(t, expected, result, "AppendInt(%d)", tt)
 	}
+}
+
+func Test_AppendInt_SmallNegativeCache(t *testing.T) {
+	t.Parallel()
+	// Test all small negative integers that should use the cache (-1 to -99)
+	for i := int64(-1); i >= -99; i-- {
+		expected := strconv.AppendInt([]byte("prefix"), i, 10)
+		result := AppendInt([]byte("prefix"), i)
+		require.Equal(t, expected, result, "AppendInt(%d)", i)
+	}
+	// Verify boundary: -100 should NOT use the cache
+	expected := strconv.AppendInt([]byte("prefix"), -100, 10)
+	result := AppendInt([]byte("prefix"), -100)
+	require.Equal(t, expected, result, "AppendInt(-100)")
 }
 
 // Benchmarks
@@ -295,19 +309,27 @@ func Benchmark_AppendUint(b *testing.B) {
 }
 
 func Benchmark_AppendInt(b *testing.B) {
-	input := int64(-123456789)
+	inputs := []struct {
+		name  string
+		value int64
+	}{
+		{"small_neg", -42},
+		{"medium_neg", -123456789},
+	}
 	dst := make([]byte, 0, 32)
 
-	b.Run("fiber", func(b *testing.B) {
-		b.ReportAllocs()
-		for i := 0; i < b.N; i++ {
-			_ = AppendInt(dst, input)
-		}
-	})
-	b.Run("strconv", func(b *testing.B) {
-		b.ReportAllocs()
-		for i := 0; i < b.N; i++ {
-			_ = strconv.AppendInt(dst, input, 10)
-		}
-	})
+	for _, input := range inputs {
+		b.Run(input.name+"/fiber", func(b *testing.B) {
+			b.ReportAllocs()
+			for i := 0; i < b.N; i++ {
+				_ = AppendInt(dst, input.value)
+			}
+		})
+		b.Run(input.name+"/strconv", func(b *testing.B) {
+			b.ReportAllocs()
+			for i := 0; i < b.N; i++ {
+				_ = strconv.AppendInt(dst, input.value, 10)
+			}
+		})
+	}
 }
