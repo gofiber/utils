@@ -79,7 +79,7 @@ func parseDigits[S byteSeq](s S, i int) (uint64, error) {
 // It supports optional '+' or '-' prefix, checks for overflow and underflow, and returns (0, error) on error.
 func parseSigned[S byteSeq, T Signed](fn string, s S, minRange, maxRange T) (T, error) {
 	if len(s) == 0 {
-		return 0, &strconv.NumError{Func: fn, Num: string(s), Err: strconv.ErrSyntax}
+		return 0, &strconv.NumError{Func: fn, Num: "", Err: strconv.ErrSyntax}
 	}
 
 	neg := false
@@ -122,13 +122,11 @@ func parseSigned[S byteSeq, T Signed](fn string, s S, minRange, maxRange T) (T, 
 // It does not support sign prefixes, checks for overflow, and returns (0, error) on error.
 func parseUnsigned[S byteSeq, T Unsigned](fn string, s S, maxRange T) (T, error) {
 	if len(s) == 0 {
-		return 0, &strconv.NumError{Func: fn, Num: string(s), Err: strconv.ErrSyntax}
+		return 0, &strconv.NumError{Func: fn, Num: "", Err: strconv.ErrSyntax}
 	}
 
-	i := 0
-
-	// Parse digits
-	n, err := parseDigits(s, i)
+	// Parse digits directly from index 0
+	n, err := parseDigits(s, 0)
 	// Check for overflow
 	if err != nil {
 		return 0, &strconv.NumError{Func: fn, Num: string(s), Err: err}
@@ -144,7 +142,7 @@ func parseUnsigned[S byteSeq, T Unsigned](fn string, s S, maxRange T) (T, error)
 // on error or overflow.
 func parseFloat[S byteSeq](fn string, s S) (float64, error) {
 	if len(s) == 0 {
-		return 0, &strconv.NumError{Func: fn, Num: string(s), Err: strconv.ErrSyntax}
+		return 0, &strconv.NumError{Func: fn, Num: "", Err: strconv.ErrSyntax}
 	}
 	i := 0
 	neg := false
