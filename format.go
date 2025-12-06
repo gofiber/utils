@@ -196,9 +196,12 @@ func AppendInt(dst []byte, n int64) []byte {
 	if n >= 0 {
 		return AppendUint(dst, uint64(n))
 	}
+	if n > -100 {
+		return append(dst, smallNegInts[-n]...)
+	}
 	var buf [20]byte
 	i := formatUintBuf(&buf, uint64(-n))
 	i--
-	buf[i] = '-'
+	buf[i] = '-' //nolint:gosec // i is always >= 0: formatUintBuf returns at least 1 for any input, so i >= 0 after decrement
 	return append(dst, buf[i:]...)
 }
