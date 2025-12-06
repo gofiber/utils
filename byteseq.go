@@ -112,29 +112,29 @@ func TrimSpace[S byteSeq](s S) S {
 
 // AddTrailingSlash appends a trailing '/' to v if it does not already end with one.
 //
-// For string inputs, the result is always a new string.
+// For string inputs, a new string is returned only when a '/' needs to be appended.
+// If the input already ends with '/', the original string is returned.
 //
 // For []byte inputs, a new slice is returned when a '/' is appended.
 // If the input already ends with '/', the original slice is returned unchanged.
 // The original slice is never modified.
-//
-// Note: When no trailing slash needs to be added, the input is returned directly
-// for efficiency. Callers should not modify the input or returned value.
 func AddTrailingSlash[T byteSeq](v T) T {
-	if len(v) > 0 && v[len(v)-1] == '/' {
+	n := len(v)
+	if n > 0 && v[n-1] == '/' {
 		return v
 	}
-
+	// Type-specific optimization
 	switch x := any(v).(type) {
 	case string:
-		return any(x + "/").(T) //nolint:forcetypeassert,errcheck // can't fail
+		// For strings: allocate exact size, use UnsafeString to avoid double alloc
+		buf := make([]byte, n+1)
+		copy(buf, x)
+		buf[n] = '/'
+		return any(UnsafeString(buf)).(T) //nolint:forcetypeassert,errcheck // type is guaranteed
 	case []byte:
-		result := make([]byte, len(x)+1)
-		copy(result, x)
-		result[len(x)] = '/'
-		return any(result).(T) //nolint:forcetypeassert,errcheck // can't fail
+		// For bytes: use append which may reuse capacity
+		return any(append(x, '/')).(T) //nolint:forcetypeassert,errcheck // type is guaranteed
 	default:
-		// impossible because of the constraint
 		return v
 	}
 }

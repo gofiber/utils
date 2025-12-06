@@ -41,7 +41,7 @@ lint:
 ## modernize: ♻️ Check for outdated patterns
 .PHONY: modernize
 modernize:
-	go run golang.org/x/tools/gopls/internal/analysis/modernize/cmd/modernize@latest -test=false ./...
+	go run golang.org/x/tools/gopls/internal/analysis/modernize/cmd/modernize@latest -fix -test=false ./...
 
 ## test: 🚦 Execute all tests
 .PHONY: test

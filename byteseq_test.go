@@ -416,75 +416,113 @@ func Benchmark_TrimSpaceBytes(b *testing.B) {
 	}
 }
 
-func Test_AddTrailingSlash_String(t *testing.T) {
+// Shared test cases for AddTrailingSlash benchmarks
+var addTrailingSlashBenchmarkCases = []struct {
+	name  string
+	input string
+}{
+	{name: "empty", input: ""},
+	{name: "slash-only", input: "/"},
+	{name: "short-no-slash", input: "abc"},
+	{name: "short-with-slash", input: "abc/"},
+	{name: "path-no-slash", input: "/api/v1/users"},
+	{name: "path-with-slash", input: "/api/v1/users/"},
+	{name: "long-no-slash", input: "/api/v1/users/profile/settings/notifications"},
+	{name: "long-with-slash", input: "/api/v1/users/profile/settings/notifications/"},
+}
+
+func Test_AddTrailingSlash(t *testing.T) {
 	t.Parallel()
 
-	tests := []struct {
+	testCases := []struct {
+		name string
 		in   string
 		want string
 	}{
-		{"", "/"},
-		{"abc", "abc/"},
-		{"abc/", "abc/"},
-		{"/", "/"},
+		{name: "empty", in: "", want: "/"},
+		{name: "slash-only", in: "/", want: "/"},
+		{name: "short-no-slash", in: "abc", want: "abc/"},
+		{name: "short-with-slash", in: "abc/", want: "abc/"},
+		{name: "path-no-slash", in: "/api/v1/users", want: "/api/v1/users/"},
+		{name: "path-with-slash", in: "/api/v1/users/", want: "/api/v1/users/"},
+		{name: "double-slash", in: "abc//", want: "abc//"},
+		{name: "root-path", in: "/", want: "/"},
+		{name: "spaces", in: "  ", want: "  /"},
+		{name: "unicode", in: "/日本語", want: "/日本語/"},
+		{name: "unicode-with-slash", in: "/日本語/", want: "/日本語/"},
 	}
 
-	for _, tt := range tests {
-		require.Equal(t, tt.want, AddTrailingSlash(tt.in))
+	for _, tc := range testCases {
+		tc := tc
+		t.Run(tc.name+"/string", func(t *testing.T) {
+			t.Parallel()
+			result := AddTrailingSlash(tc.in)
+			require.Equal(t, tc.want, result)
+		})
+		t.Run(tc.name+"/bytes", func(t *testing.T) {
+			t.Parallel()
+			result := AddTrailingSlash([]byte(tc.in))
+			require.Equal(t, []byte(tc.want), result)
+		})
 	}
 }
 
-func Test_AddTrailingSlash_Bytes(t *testing.T) {
+func Test_AddTrailingSlash_NoMutation(t *testing.T) {
 	t.Parallel()
 
-	tests := []struct {
-		in   []byte
-		want []byte
-	}{
-		{[]byte(""), []byte("/")},
-		{[]byte("abc"), []byte("abc/")},
-		{[]byte("abc/"), []byte("abc/")},
-		{[]byte("/"), []byte("/")},
-	}
+	// Ensure original byte slice is not mutated
+	original := []byte("test")
+	originalCopy := make([]byte, len(original))
+	copy(originalCopy, original)
 
-	for _, tt := range tests {
-		require.Equal(t, tt.want, AddTrailingSlash(tt.in))
-	}
+	_ = AddTrailingSlash(original)
+
+	require.Equal(t, originalCopy, original, "original slice should not be mutated")
+}
+
+func Test_AddTrailingSlash_AlreadyHasSlash_ReturnsSame(t *testing.T) {
+	t.Parallel()
+
+	// For byte slices with trailing slash, should return the same slice
+	input := []byte("test/")
+	result := AddTrailingSlash(input)
+	require.Equal(t, input, result)
+
+	// For strings with trailing slash, should return the same string
+	inputStr := "test/"
+	resultStr := AddTrailingSlash(inputStr)
+	require.Equal(t, inputStr, resultStr)
 }
 
 func Benchmark_AddTrailingSlash(b *testing.B) {
-	tests := []struct {
-		name string
-		in   any
-	}{
-		{"StringSmallNoSlash", "abc"},
-		{"StringSmallWithSlash", "abc/"},
-		{"StringLargeNoSlash", string(make([]byte, 10_000))},
-		{"StringLargeWithSlash", string(append(make([]byte, 10_000), '/'))},
-
-		{"BytesSmallNoSlash", []byte("abc")},
-		{"BytesSmallWithSlash", []byte("abc/")},
-		{"BytesLargeNoSlash", make([]byte, 10_000)},
-		{"BytesLargeWithSlash", append(make([]byte, 10_000), '/')},
-	}
-
-	for _, tt := range tests {
-		b.Run(tt.name, func(b *testing.B) {
-			switch v := tt.in.(type) {
-			case string:
-				var out string
-				for i := 0; i < b.N; i++ {
-					out = AddTrailingSlash(v)
-					_ = out
-				}
-
-			case []byte:
-				var out []byte
-				for i := 0; i < b.N; i++ {
-					out = AddTrailingSlash(v)
-					_ = out
-				}
+	for _, tc := range addTrailingSlashBenchmarkCases {
+		tc := tc
+		b.Run("string/"+tc.name, func(b *testing.B) {
+			b.ReportAllocs()
+			b.SetBytes(int64(len(tc.input)))
+			b.ResetTimer()
+			var res string
+			for n := 0; n < b.N; n++ {
+				res = AddTrailingSlash(tc.input)
 			}
+			_ = res
+		})
+	}
+}
+
+func Benchmark_AddTrailingSlashBytes(b *testing.B) {
+	for _, tc := range addTrailingSlashBenchmarkCases {
+		tc := tc
+		input := []byte(tc.input)
+		b.Run("bytes/"+tc.name, func(b *testing.B) {
+			b.ReportAllocs()
+			b.SetBytes(int64(len(input)))
+			b.ResetTimer()
+			var res []byte
+			for n := 0; n < b.N; n++ {
+				res = AddTrailingSlash(input)
+			}
+			_ = res
 		})
 	}
 }
