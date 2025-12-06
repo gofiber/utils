@@ -483,15 +483,59 @@ func Test_AddTrailingSlash_NoMutation(t *testing.T) {
 func Test_AddTrailingSlash_AlreadyHasSlash_ReturnsSame(t *testing.T) {
 	t.Parallel()
 
-	// For byte slices with trailing slash, should return the same slice
+	// For byte slices with trailing slash, should return the same slice instance
 	input := []byte("test/")
 	result := AddTrailingSlash(input)
 	require.Equal(t, input, result)
+	require.Same(t, &input[0], &result[0], "should return same slice instance")
 
 	// For strings with trailing slash, should return the same string
 	inputStr := "test/"
 	resultStr := AddTrailingSlash(inputStr)
 	require.Equal(t, inputStr, resultStr)
+}
+
+func Test_AddTrailingSlash_NamedTypes(t *testing.T) {
+	t.Parallel()
+
+	type MyString string
+	type MyBytes []byte
+
+	t.Run("named string without slash", func(t *testing.T) {
+		t.Parallel()
+		result := AddTrailingSlash(MyString("abc"))
+		require.Equal(t, MyString("abc/"), result)
+	})
+
+	t.Run("named string with slash", func(t *testing.T) {
+		t.Parallel()
+		result := AddTrailingSlash(MyString("abc/"))
+		require.Equal(t, MyString("abc/"), result)
+	})
+
+	t.Run("named bytes without slash", func(t *testing.T) {
+		t.Parallel()
+		result := AddTrailingSlash(MyBytes("abc"))
+		require.Equal(t, MyBytes("abc/"), result)
+	})
+
+	t.Run("named bytes with slash", func(t *testing.T) {
+		t.Parallel()
+		result := AddTrailingSlash(MyBytes("abc/"))
+		require.Equal(t, MyBytes("abc/"), result)
+	})
+
+	t.Run("empty named string", func(t *testing.T) {
+		t.Parallel()
+		result := AddTrailingSlash(MyString(""))
+		require.Equal(t, MyString("/"), result)
+	})
+
+	t.Run("empty named bytes", func(t *testing.T) {
+		t.Parallel()
+		result := AddTrailingSlash(MyBytes(""))
+		require.Equal(t, MyBytes("/"), result)
+	})
 }
 
 func Benchmark_AddTrailingSlash(b *testing.B) {

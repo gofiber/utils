@@ -1,5 +1,10 @@
 package utils
 
+import (
+	"reflect"
+	"slices"
+)
+
 type byteSeq interface {
 	~string | ~[]byte
 }
@@ -135,6 +140,17 @@ func AddTrailingSlash[T byteSeq](v T) T {
 		// For bytes: use append which may reuse capacity
 		return any(append(x, '/')).(T) //nolint:forcetypeassert,errcheck // type is guaranteed
 	default:
-		return v
+		// Fallback for named types (e.g., type MyString string) using reflection
+		val := reflect.ValueOf(v)
+		if val.Kind() == reflect.String {
+			s := val.String() + "/"
+			return reflect.ValueOf(s).Convert(val.Type()).Interface().(T) //nolint:forcetypeassert,errcheck // type is guaranteed
+		}
+		// Assumed to be a slice of bytes
+		b := val.Bytes()
+		res := append(slices.Clone(b), '/')
+		newSlice := reflect.MakeSlice(val.Type(), len(res), len(res))
+		reflect.Copy(newSlice, reflect.ValueOf(res))
+		return newSlice.Interface().(T) //nolint:forcetypeassert,errcheck // type is guaranteed
 	}
 }
