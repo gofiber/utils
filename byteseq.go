@@ -1,10 +1,5 @@
 package utils
 
-import (
-	"reflect"
-	"slices"
-)
-
 type byteSeq interface {
 	~string | ~[]byte
 }
@@ -113,44 +108,4 @@ func TrimSpace[S byteSeq](s S) S {
 	}
 
 	return s[i : j+1]
-}
-
-// AddTrailingSlash appends a trailing '/' to v if it does not already end with one.
-//
-// For string inputs, a new string is returned only when a '/' needs to be appended.
-// If the input already ends with '/', the original string is returned.
-//
-// For []byte inputs, a new slice is returned when a '/' is appended.
-// If the input already ends with '/', the original slice is returned unchanged.
-// The original slice is never modified.
-func AddTrailingSlash[T byteSeq](v T) T {
-	n := len(v)
-	if n > 0 && v[n-1] == '/' {
-		return v
-	}
-	// Type-specific optimization
-	switch x := any(v).(type) {
-	case string:
-		// For strings: allocate exact size, use UnsafeString to avoid double alloc
-		buf := make([]byte, n+1)
-		copy(buf, x)
-		buf[n] = '/'
-		return any(UnsafeString(buf)).(T) //nolint:forcetypeassert,errcheck // type is guaranteed
-	case []byte:
-		// For bytes: use append which may reuse capacity
-		return any(append(x, '/')).(T) //nolint:forcetypeassert,errcheck // type is guaranteed
-	default:
-		// Fallback for named types (e.g., type MyString string) using reflection
-		val := reflect.ValueOf(v)
-		if val.Kind() == reflect.String {
-			s := val.String() + "/"
-			return reflect.ValueOf(s).Convert(val.Type()).Interface().(T) //nolint:forcetypeassert,errcheck // type is guaranteed
-		}
-		// Assumed to be a slice of bytes
-		b := val.Bytes()
-		res := append(slices.Clone(b), '/')
-		newSlice := reflect.MakeSlice(val.Type(), len(res), len(res))
-		reflect.Copy(newSlice, reflect.ValueOf(res))
-		return newSlice.Interface().(T) //nolint:forcetypeassert,errcheck // type is guaranteed
-	}
 }

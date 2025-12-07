@@ -63,3 +63,10 @@ func ToUpperBytes(b []byte) []byte {
 
 	return b
 }
+
+// AddTrailingSlashBytes appends a trailing '/' to b if it does not already end with one.
+// If the input already ends with '/', the original slice is returned.
+// A new slice is returned when a '/' is appended. The original slice is never modified.
+func AddTrailingSlashBytes(b []byte) []byte {
+	return UnsafeBytes(AddTrailingSlashString(UnsafeString(b)))
+}
