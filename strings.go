@@ -48,3 +48,20 @@ func ToUpper(b string) string {
 
 	return b
 }
+
+// AddTrailingSlashString appends a trailing '/' to s if it does not already end with one.
+// If the input already ends with '/', the original string is returned.
+// A new string is returned only when a '/' needs to be appended.
+func AddTrailingSlashString(s string) string {
+	n := len(s)
+	if n == 0 {
+		return "/"
+	}
+	if s[n-1] == '/' {
+		return s
+	}
+	buf := make([]byte, n+1)
+	copy(buf, s)
+	buf[n] = '/'
+	return UnsafeString(buf)
+}
