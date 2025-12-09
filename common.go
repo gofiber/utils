@@ -102,37 +102,28 @@ func UUIDv4() string {
 // GenerateSecureToken generates a cryptographically secure random token encoded in base64.
 // It uses crypto/rand for randomness and base64.RawURLEncoding for URL-safe output.
 // If length is less than or equal to 0, it defaults to 32 bytes (256 bits of entropy).
-// Returns an error if the random source fails.
-func GenerateSecureToken(length int) (string, error) {
+// Panics if the random source fails.
+func GenerateSecureToken(length int) string {
 	if length <= 0 {
 		length = 32
 	}
 	bytes := make([]byte, length)
 	if _, err := randRead(bytes); err != nil {
-		return "", fmt.Errorf("utils: failed to read random bytes for token: %w", err)
+		// On Go 1.24+, crypto/rand.Read panics internally and never returns an error.
+		// On Go 1.23 and earlier, we panic for the same reasons: RNG failures indicate
+		// a broken system state (uninitialized entropy pool, misconfigured VM, etc.)
+		// that is almost certainly permanent rather than transient.
+		// See: https://cs.opensource.google/go/go/+/refs/tags/go1.24.0:src/crypto/rand/rand.go
+		//      https://go.dev/issue/66821
+		panic(fmt.Sprintf("utils: failed to read random bytes for token: %v", err))
 	}
-	return base64.RawURLEncoding.EncodeToString(bytes), nil
-}
-
-// GenerateSecureTokenMust is a convenience wrapper that panics on failure.
-func GenerateSecureTokenMust(length int) string {
-	s, err := GenerateSecureToken(length)
-	if err != nil {
-		panic(err)
-	}
-	return s
+	return base64.RawURLEncoding.EncodeToString(bytes)
 }
 
 // SecureToken generates a secure token with 32 bytes of entropy.
-// Returns an error if the random source fails.
-func SecureToken() (string, error) {
+// Panics if the random source fails. See GenerateSecureToken for details.
+func SecureToken() string {
 	return GenerateSecureToken(32)
-}
-
-// SecureTokenMust generates a secure token with 32 bytes of entropy.
-// It panics if the random source fails.
-func SecureTokenMust() string {
-	return GenerateSecureTokenMust(32)
 }
 
 // FunctionName returns function name
