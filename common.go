@@ -32,7 +32,7 @@ func UUID() string {
 	// Setup seed & counter once
 	uuidSetup.Do(func() {
 		if _, err := rand.Read(uuidSeed[:]); err != nil {
-			panic(fmt.Sprintf("utils: failed to seed UUID generator: %v", err))
+			panic(fmt.Errorf("utils: failed to seed UUID generator: %v", err))
 		}
 		uuidCounter = binary.LittleEndian.Uint64(uuidSeed[:8])
 	})
