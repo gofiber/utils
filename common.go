@@ -57,7 +57,7 @@ func UUID() string {
 	// Setup seed & counter once
 	uuidSetup.Do(func() {
 		if _, err := rand.Read(uuidSeed[:]); err != nil {
-			panic(fmt.Sprintf("utils: failed to seed UUID generator: %v", err))
+			panic(fmt.Errorf("utils: failed to seed UUID generator: %w", err))
 		}
 		uuidCounter = binary.LittleEndian.Uint64(uuidSeed[:8])
 	})
@@ -94,7 +94,7 @@ func UUID() string {
 func UUIDv4() string {
 	token, err := uuid.NewRandom()
 	if err != nil {
-		panic(fmt.Sprintf("utils: failed to generate secure UUID: %v", err))
+		panic(fmt.Errorf("utils: failed to generate secure UUID: %w", err))
 	}
 	return token.String()
 }
@@ -115,7 +115,7 @@ func GenerateSecureToken(length int) string {
 		// that is almost certainly permanent rather than transient.
 		// See: https://cs.opensource.google/go/go/+/refs/tags/go1.24.0:src/crypto/rand/rand.go
 		//      https://go.dev/issue/66821
-		panic(fmt.Sprintf("utils: failed to read random bytes for token: %v", err))
+		panic(fmt.Errorf("utils: failed to read random bytes for token: %w", err))
 	}
 	return base64.RawURLEncoding.EncodeToString(bytes)
 }
