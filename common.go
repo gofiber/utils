@@ -25,12 +25,12 @@ const toUpperTable = "\x00\x01\x02\x03\x04\x05\x06\a\b\t\n\v\f\r\x0e\x0f\x10\x11
 
 var uuidSeed [24]byte
 var uuidCounter uint64
-var UUIDSetup sync.Once
+var uuidSetup sync.Once
 
 // UUID generates an universally unique identifier (UUID)
 func UUID() string {
 	// Setup seed & counter once
-	UUIDSetup.Do(func() {
+	uuidSetup.Do(func() {
 		if _, err := rand.Read(uuidSeed[:]); err != nil {
 			panic(fmt.Sprintf("utils: failed to seed UUID generator: %v", err))
 		}
