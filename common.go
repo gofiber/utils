@@ -61,9 +61,6 @@ func UUID() string {
 		}
 		uuidCounter = binary.LittleEndian.Uint64(uuidSeed[:8])
 	})
-	if atomic.LoadUint64(&uuidCounter) <= 0 {
-		panic("utils: UUID generator not properly seeded")
-	}
 	// first 8 bytes differ, taking a slice of the first 16 bytes
 	x := atomic.AddUint64(&uuidCounter, 1)
 	_uuid := uuidSeed
