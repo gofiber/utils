@@ -25,20 +25,17 @@ const toUpperTable = "\x00\x01\x02\x03\x04\x05\x06\a\b\t\n\v\f\r\x0e\x0f\x10\x11
 
 var uuidSeed [24]byte
 var uuidCounter uint64
-var uuidSetup sync.Once
+var UUIDSetup sync.Once
 
 // UUID generates an universally unique identifier (UUID)
 func UUID() string {
 	// Setup seed & counter once
-	uuidSetup.Do(func() {
+	UUIDSetup.Do(func() {
 		if _, err := rand.Read(uuidSeed[:]); err != nil {
 			panic(fmt.Sprintf("utils: failed to seed UUID generator: %v", err))
 		}
 		uuidCounter = binary.LittleEndian.Uint64(uuidSeed[:8])
 	})
-	if atomic.LoadUint64(&uuidCounter) <= 0 {
-		panic("utils: UUID counter is not properly initialized")
-	}
 	// first 8 bytes differ, taking a slice of the first 16 bytes
 	x := atomic.AddUint64(&uuidCounter, 1)
 	uuid := uuidSeed
