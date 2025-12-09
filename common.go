@@ -57,7 +57,7 @@ func UUID() string {
 	// Setup seed & counter once
 	uuidSetup.Do(func() {
 		if _, err := rand.Read(uuidSeed[:]); err != nil {
-			panic(fmt.Errorf("utils: failed to seed UUID generator: %v", err))
+			panic(fmt.Errorf("utils: failed to seed UUID generator: %w", err))
 		}
 		uuidCounter = binary.LittleEndian.Uint64(uuidSeed[:8])
 	})
@@ -91,7 +91,7 @@ func UUID() string {
 func UUIDv4() string {
 	token, err := uuid.NewRandom()
 	if err != nil {
-		panic(fmt.Errorf("utils: failed to generate secure UUID: %v", err))
+		panic(fmt.Errorf("utils: failed to generate secure UUID: %w", err))
 	}
 	return token.String()
 }
