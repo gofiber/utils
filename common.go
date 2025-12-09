@@ -91,7 +91,7 @@ func UUID() string {
 func UUIDv4() string {
 	token, err := uuid.NewRandom()
 	if err != nil {
-		panic(fmt.Sprintf("utils: failed to generate secure UUID: %v", err))
+		panic(fmt.Errorf("utils: failed to generate secure UUID: %v", err))
 	}
 	return token.String()
 }
