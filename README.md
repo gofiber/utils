@@ -6,7 +6,7 @@
 ![Linter](https://github.com/gofiber/utils/workflows/Linter/badge.svg)
 [![Discord](https://img.shields.io/badge/discord-join%20channel-7289DA)](https://gofiber.io/discord)
 
-A collection of common functions but with better performance, fewer allocations, and fewer dependencies created for [Fiber](https://github.com/gofiber/fiber).
+A collection of common functions for [Fiber](https://github.com/gofiber/fiber) with better performance, fewer allocations, and fewer dependencies.
 
 ## Benchmarks
 
