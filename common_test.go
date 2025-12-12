@@ -103,32 +103,26 @@ func Test_UUIDv4_Concurrency(t *testing.T) {
 func Test_GenerateSecureToken(t *testing.T) {
 	t.Parallel()
 	// Test with 32 bytes
-	token, err := GenerateSecureToken(32)
-	require.NoError(t, err)
+	token := GenerateSecureToken(32)
 	require.Len(t, token, 43) // base64 encoding of 32 bytes
 	require.NotEmpty(t, token)
 
 	// Test custom length
-	token8, err := GenerateSecureToken(8)
-	require.NoError(t, err)
+	token8 := GenerateSecureToken(8)
 	require.Len(t, token8, 11) // base64 of 8 bytes ~11 chars
 
-	token16, err := GenerateSecureToken(16)
-	require.NoError(t, err)
+	token16 := GenerateSecureToken(16)
 	require.Len(t, token16, 22) // base64 of 16 bytes ~22 chars
 
 	// Test uniqueness
-	token2, err := GenerateSecureToken(32)
-	require.NoError(t, err)
+	token2 := GenerateSecureToken(32)
 	require.NotEqual(t, token, token2)
 
 	// Test invalid length defaults to 32
-	tokenZero, err := GenerateSecureToken(0)
-	require.NoError(t, err)
+	tokenZero := GenerateSecureToken(0)
 	require.Len(t, tokenZero, 43)
 
-	tokenNegative, err := GenerateSecureToken(-1)
-	require.NoError(t, err)
+	tokenNegative := GenerateSecureToken(-1)
 	require.Len(t, tokenNegative, 43)
 }
 
@@ -139,7 +133,7 @@ func Test_GenerateSecureToken_Concurrency(t *testing.T) {
 	results := make(map[string]string)
 	for i := 0; i < iterations; i++ {
 		go func() {
-			ch <- GenerateSecureTokenMust(32)
+			ch <- GenerateSecureToken(32)
 		}()
 	}
 	for i := 0; i < iterations; i++ {
@@ -159,25 +153,18 @@ func Test_GenerateSecureToken_ErrorOnRandFail(t *testing.T) {
 		return 0, errors.New("simulated failure")
 	}
 
-	s, err := GenerateSecureToken(16)
-	require.Error(t, err)
-	require.Empty(t, s)
-	require.Contains(t, err.Error(), "simulated failure")
-
-	// Must variant should panic on failure
-	require.Panics(t, func() { GenerateSecureTokenMust(16) })
+	// Should panic on failure
+	require.Panics(t, func() { GenerateSecureToken(16) })
 }
 
 func Test_SecureToken(t *testing.T) {
 	t.Parallel()
-	token, err := SecureToken()
-	require.NoError(t, err)
+	token := SecureToken()
 	require.Len(t, token, 43)
 	require.NotEmpty(t, token)
 
 	// Test uniqueness
-	token2, err := SecureToken()
-	require.NoError(t, err)
+	token2 := SecureToken()
 	require.NotEqual(t, token, token2)
 }
 
@@ -381,13 +368,13 @@ func Benchmark_GenerateSecureToken(b *testing.B) {
 	var res string
 	b.Run("16_bytes", func(b *testing.B) {
 		for n := 0; n < b.N; n++ {
-			res = GenerateSecureTokenMust(16)
+			res = GenerateSecureToken(16)
 		}
 		require.Len(b, res, 22)
 	})
 	b.Run("32_bytes", func(b *testing.B) {
 		for n := 0; n < b.N; n++ {
-			res = GenerateSecureTokenMust(32)
+			res = GenerateSecureToken(32)
 		}
 		require.Len(b, res, 43)
 	})
@@ -404,7 +391,7 @@ func Benchmark_TokenGenerators(b *testing.B) {
 	})
 	b.Run("SecureToken", func(b *testing.B) {
 		for n := 0; n < b.N; n++ {
-			res = SecureTokenMust()
+			res = SecureToken()
 		}
 		require.Len(b, res, 43)
 	})
