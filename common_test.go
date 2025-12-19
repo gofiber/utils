@@ -5,9 +5,7 @@
 package utils
 
 import (
-	"crypto/rand"
 	"errors"
-	"fmt"
 	"net"
 	"os"
 	"testing"
@@ -17,7 +15,7 @@ import (
 
 func Test_FunctionName(t *testing.T) {
 	t.Parallel()
-	require.Equal(t, "github.com/gofiber/utils/v2.Test_UUID", FunctionName(Test_UUID))
+	require.Equal(t, "github.com/gofiber/utils/v2.Test_UUIDv4", FunctionName(Test_UUIDv4))
 	require.Equal(t, "github.com/gofiber/utils/v2.Test_FunctionName.func1", FunctionName(func() {}))
 
 	dummyint := 20
@@ -48,31 +46,6 @@ func Test_FunctionName(t *testing.T) {
 	var s sampleStruct
 	require.Equal(t, "utils.sampleStruct", FunctionName(s))
 	require.Equal(t, "*utils.sampleStruct", FunctionName(&s))
-}
-
-func Test_UUID(t *testing.T) {
-	t.Parallel()
-	res := UUID()
-	require.Len(t, res, 36)
-	require.NotEqual(t, "00000000-0000-0000-0000-000000000000", res)
-}
-
-func Test_UUID_Concurrency(t *testing.T) {
-	t.Parallel()
-	iterations := 1000
-	var res string
-	ch := make(chan string, iterations)
-	results := make(map[string]string)
-	for i := 0; i < iterations; i++ {
-		go func() {
-			ch <- UUID()
-		}()
-	}
-	for i := 0; i < iterations; i++ {
-		res = <-ch
-		results[res] = res
-	}
-	require.Len(t, results, iterations)
 }
 
 func Test_UUIDv4(t *testing.T) {
@@ -341,25 +314,6 @@ func Benchmark_ConvertToBytes(b *testing.B) {
 			res = ConvertToBytes("42B")
 		}
 		require.Equal(b, 42, res)
-	})
-}
-
-// go test -v -run=^$ -bench=Benchmark_UUID -benchmem -count=2
-func Benchmark_UUID(b *testing.B) {
-	var res string
-	b.Run("fiber", func(b *testing.B) {
-		for n := 0; n < b.N; n++ {
-			res = UUID()
-		}
-		require.Len(b, res, 36)
-	})
-	b.Run("default", func(b *testing.B) {
-		rnd := make([]byte, 16)
-		_, _ = rand.Read(rnd) //nolint: errcheck // No need to check error
-		for n := 0; n < b.N; n++ {
-			res = fmt.Sprintf("%x-%x-%x-%x-%x", rnd[0:4], rnd[4:6], rnd[6:8], rnd[8:10], rnd[10:])
-		}
-		require.Len(b, res, 36)
 	})
 }
 
