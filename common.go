@@ -48,6 +48,12 @@ func UUIDv4() string {
 	return token.String()
 }
 
+// UUID generates an universally unique identifier (UUID).
+// This is an alias for UUIDv4 for backward compatibility.
+func UUID() string {
+	return UUIDv4()
+}
+
 // GenerateSecureToken generates a cryptographically secure random token encoded in base64.
 // It uses crypto/rand for randomness and base64.RawURLEncoding for URL-safe output.
 // If length is less than or equal to 0, it defaults to 32 bytes (256 bits of entropy).
