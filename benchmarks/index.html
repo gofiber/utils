@@ -347,10 +347,12 @@
             }
         }
 
-        window.grouping = true;
+        const groupingToggle = document.querySelector('.switch-light input');
+        groupingToggle.checked = true;
+        window.grouping = groupingToggle.checked;
         renderAllCharts(init());
 
-        document.querySelector('.switch-light input').addEventListener('change', (event) => {
+        groupingToggle.addEventListener('change', (event) => {
             window.grouping = event.currentTarget.checked;
             renderAllCharts(init());
         });
