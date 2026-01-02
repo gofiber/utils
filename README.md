@@ -2,4 +2,4 @@
 
 All benchmarks are stored for each commit, they can be viewed here:
 
-https://gofiber.github.io/utils
+https://gofiber.github.io/utils/benchmarks
