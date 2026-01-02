@@ -23,6 +23,7 @@ coverage.html
 *.fasthttp.gz
 *.pprof
 *.workspace
+.claude
 
 # Dependencies
 /vendor/
