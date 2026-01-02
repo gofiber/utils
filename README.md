@@ -206,4 +206,4 @@ Benchmark_ParseFloat32/default-12           46055755   25.65  ns/op    0  B/op  
 Benchmark_ParseFloat32/default-12           45263090   25.78  ns/op    0  B/op  0  allocs/op
 ```
 
-See all the benchmarks under <https://gofiber.github.io/utils/>
+See all the benchmarks under <https://gofiber.github.io/utils/benchmarks>
