@@ -3,7 +3,7 @@ package utils
 import (
 	"testing"
 
-	msgpack "github.com/shamaton/msgpack/v2"
+	msgpack "github.com/shamaton/msgpack/v3"
 	"github.com/stretchr/testify/require"
 )
 
