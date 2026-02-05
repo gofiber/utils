@@ -6,19 +6,28 @@ package utils
 
 // ToLower converts ascii string to lower-case
 func ToLower(b string) string {
-	if len(b) == 0 {
+	n := len(b)
+	if n == 0 {
 		return b
 	}
 
-	for i := 0; i < len(b); i++ {
+	table := toLowerTable
+	for i := 0; i < n; i++ {
 		c := b[i]
-		low := toLowerTable[c]
+		low := table[c]
 		if low != c {
-			res := make([]byte, len(b))
+			res := make([]byte, n)
 			copy(res, b[:i])
 			res[i] = low
-			for j := i + 1; j < len(b); j++ {
-				res[j] = toLowerTable[b[j]]
+			j := i + 1
+			for ; j+3 < n; j += 4 {
+				res[j+0] = table[b[j+0]]
+				res[j+1] = table[b[j+1]]
+				res[j+2] = table[b[j+2]]
+				res[j+3] = table[b[j+3]]
+			}
+			for ; j < n; j++ {
+				res[j] = table[b[j]]
 			}
 			return UnsafeString(res)
 		}
@@ -28,19 +37,28 @@ func ToLower(b string) string {
 
 // ToUpper converts ascii string to upper-case
 func ToUpper(b string) string {
-	if len(b) == 0 {
+	n := len(b)
+	if n == 0 {
 		return b
 	}
 
-	for i := 0; i < len(b); i++ {
+	table := toUpperTable
+	for i := 0; i < n; i++ {
 		c := b[i]
-		up := toUpperTable[c]
+		up := table[c]
 		if up != c {
-			res := make([]byte, len(b))
+			res := make([]byte, n)
 			copy(res, b[:i])
 			res[i] = up
-			for j := i + 1; j < len(b); j++ {
-				res[j] = toUpperTable[b[j]]
+			j := i + 1
+			for ; j+3 < n; j += 4 {
+				res[j+0] = table[b[j+0]]
+				res[j+1] = table[b[j+1]]
+				res[j+2] = table[b[j+2]]
+				res[j+3] = table[b[j+3]]
+			}
+			for ; j < n; j++ {
+				res[j] = table[b[j]]
 			}
 			return UnsafeString(res)
 		}
