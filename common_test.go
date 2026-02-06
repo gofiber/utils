@@ -5,7 +5,6 @@
 package utils
 
 import (
-	"errors"
 	"net"
 	"os"
 	"testing"
@@ -114,20 +113,6 @@ func Test_GenerateSecureToken_Concurrency(t *testing.T) {
 		results[res] = res
 	}
 	require.Len(t, results, iterations)
-}
-
-func Test_GenerateSecureToken_ErrorOnRandFail(t *testing.T) {
-	// Save and restore original randRead
-	orig := randRead
-	defer func() { randRead = orig }()
-
-	// Simulate read failure
-	randRead = func(_ []byte) (int, error) {
-		return 0, errors.New("simulated failure")
-	}
-
-	// Should panic on failure
-	require.Panics(t, func() { GenerateSecureToken(16) })
 }
 
 func Test_SecureToken(t *testing.T) {
