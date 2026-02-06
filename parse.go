@@ -7,25 +7,6 @@ import (
 
 const maxFracDigits = 16
 
-var fracScale = [...]float64{
-	0.1,
-	0.01,
-	0.001,
-	0.0001,
-	0.00001,
-	0.000001,
-	0.0000001,
-	0.00000001,
-	0.000000001,
-	0.0000000001,
-	0.00000000001,
-	0.000000000001,
-	0.0000000000001,
-	0.00000000000001,
-	0.000000000000001,
-	0.0000000000000001,
-}
-
 type Signed interface {
 	~int | ~int8 | ~int16 | ~int32 | ~int64
 }
@@ -43,6 +24,21 @@ func ParseUint[S byteSeq](s S) (uint64, error) {
 // ParseInt parses a decimal ASCII string or byte slice into an int64.
 // Returns the parsed value and nil on success, else 0 and an error.
 func ParseInt[S byteSeq](s S) (int64, error) {
+	if len(s) > 0 && s[0] != '-' && s[0] != '+' && len(s) <= 19 {
+		var n uint64
+		for i := range len(s) {
+			c := s[i] - '0'
+			if c > 9 {
+				return 0, &strconv.NumError{Func: "ParseInt", Num: string(s), Err: strconv.ErrSyntax}
+			}
+			n = n*10 + uint64(c)
+		}
+		if n > uint64(math.MaxInt64) {
+			return 0, &strconv.NumError{Func: "ParseInt", Num: string(s), Err: strconv.ErrRange}
+		}
+		return int64(n), nil
+	}
+
 	return parseSigned[S, int64]("ParseInt", s, math.MinInt64, math.MaxInt64)
 }
 
@@ -140,16 +136,23 @@ func ParseUint8[S byteSeq](s S) (uint8, error) {
 // It returns an error if any non-digit is encountered or overflow happens.
 func parseDigits[S byteSeq](s S, i int) (uint64, error) {
 	var n uint64
+	const (
+		cutoff = math.MaxUint64 / 10
+		cutlim = math.MaxUint64 % 10
+	)
+	digits := 0
 	for ; i < len(s); i++ {
 		c := s[i] - '0'
 		if c > 9 {
 			return 0, strconv.ErrSyntax
 		}
 		d := uint64(c)
-		if n > math.MaxUint64/10 || (n == math.MaxUint64/10 && d > math.MaxUint64%10) {
+		// Any value with <= 19 digits is guaranteed to fit in uint64.
+		if digits >= 19 && (n > cutoff || (n == cutoff && d > cutlim)) {
 			return 0, strconv.ErrRange
 		}
 		n = n*10 + d
+		digits++
 	}
 	return n, nil
 }
@@ -174,24 +177,10 @@ func parseSigned[S byteSeq, T Signed](fn string, s S, minRange, maxRange T) (T, 
 		return 0, &strconv.NumError{Func: fn, Num: string(s), Err: strconv.ErrSyntax}
 	}
 
-	digitsLen := len(s) - i
-	var (
-		n   uint64
-		err error
-	)
-	if digitsLen <= 19 {
-		for ; i < len(s); i++ {
-			c := s[i] - '0'
-			if c > 9 {
-				return 0, &strconv.NumError{Func: fn, Num: string(s), Err: strconv.ErrSyntax}
-			}
-			n = n*10 + uint64(c)
-		}
-	} else {
-		n, err = parseDigits(s, i)
-		if err != nil {
-			return 0, &strconv.NumError{Func: fn, Num: string(s), Err: err}
-		}
+	// Parse digits.
+	n, err := parseDigits(s, i)
+	if err != nil {
+		return 0, &strconv.NumError{Func: fn, Num: string(s), Err: err}
 	}
 
 	if !neg {
@@ -218,23 +207,10 @@ func parseUnsigned[S byteSeq, T Unsigned](fn string, s S, maxRange T) (T, error)
 		return 0, &strconv.NumError{Func: fn, Num: "", Err: strconv.ErrSyntax}
 	}
 
-	var (
-		n   uint64
-		err error
-	)
-	if len(s) <= 19 {
-		for i := range len(s) {
-			c := s[i] - '0'
-			if c > 9 {
-				return 0, &strconv.NumError{Func: fn, Num: string(s), Err: strconv.ErrSyntax}
-			}
-			n = n*10 + uint64(c)
-		}
-	} else {
-		n, err = parseDigits(s, 0)
-		if err != nil {
-			return 0, &strconv.NumError{Func: fn, Num: string(s), Err: err}
-		}
+	// Parse digits directly from index 0.
+	n, err := parseDigits(s, 0)
+	if err != nil {
+		return 0, &strconv.NumError{Func: fn, Num: string(s), Err: err}
 	}
 	// Check for overflow
 	if n > uint64(maxRange) {
@@ -269,15 +245,16 @@ func parseFloat[S byteSeq](fn string, s S) (float64, error) {
 		if c > 9 {
 			break
 		}
-		d := uint64(c)
-		if intPart > math.MaxUint64/10 || (intPart == math.MaxUint64/10 && d > math.MaxUint64%10) {
+		nn := intPart*10 + uint64(c)
+		if nn < intPart {
 			return 0, &strconv.NumError{Func: fn, Num: string(s), Err: strconv.ErrRange}
 		}
-		intPart = intPart*10 + d
+		intPart = nn
 		i++
 	}
 
 	var fracPart uint64
+	var fracDiv uint64 = 1
 	var fracDigits int
 	if i < len(s) && s[i] == '.' {
 		i++
@@ -290,6 +267,7 @@ func parseFloat[S byteSeq](fn string, s S) (float64, error) {
 				return 0, &strconv.NumError{Func: fn, Num: string(s), Err: strconv.ErrRange}
 			}
 			fracPart = fracPart*10 + uint64(c)
+			fracDiv *= 10
 			fracDigits++
 			i++
 		}
@@ -337,7 +315,7 @@ func parseFloat[S byteSeq](fn string, s S) (float64, error) {
 
 	f := float64(intPart)
 	if fracPart > 0 {
-		f += float64(fracPart) * fracScale[fracDigits-1]
+		f += float64(fracPart) / float64(fracDiv)
 	}
 	if exp != 0 {
 		f *= math.Pow10(int(exp))
