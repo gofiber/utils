@@ -12,7 +12,7 @@ func ToLower(b string) string {
 	}
 
 	table := toLowerTable
-	for i := 0; i < n; i++ {
+	for i := range n {
 		c := b[i]
 		low := table[c]
 		if low != c {
@@ -43,7 +43,7 @@ func ToUpper(b string) string {
 	}
 
 	table := toUpperTable
-	for i := 0; i < n; i++ {
+	for i := range n {
 		c := b[i]
 		up := table[c]
 		if up != c {
