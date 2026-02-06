@@ -8,7 +8,6 @@ import (
 const maxFracDigits = 16
 
 var fracScale = [...]float64{
-	1,
 	0.1,
 	0.01,
 	0.001,
@@ -146,11 +145,11 @@ func parseDigits[S byteSeq](s S, i int) (uint64, error) {
 		if c > 9 {
 			return 0, strconv.ErrSyntax
 		}
-		nn := n*10 + uint64(c)
-		if nn < n {
+		d := uint64(c)
+		if n > math.MaxUint64/10 || (n == math.MaxUint64/10 && d > math.MaxUint64%10) {
 			return 0, strconv.ErrRange
 		}
-		n = nn
+		n = n*10 + d
 	}
 	return n, nil
 }
@@ -270,11 +269,11 @@ func parseFloat[S byteSeq](fn string, s S) (float64, error) {
 		if c > 9 {
 			break
 		}
-		nn := intPart*10 + uint64(c)
-		if nn < intPart {
+		d := uint64(c)
+		if intPart > math.MaxUint64/10 || (intPart == math.MaxUint64/10 && d > math.MaxUint64%10) {
 			return 0, &strconv.NumError{Func: fn, Num: string(s), Err: strconv.ErrRange}
 		}
-		intPart = nn
+		intPart = intPart*10 + d
 		i++
 	}
 
@@ -338,7 +337,7 @@ func parseFloat[S byteSeq](fn string, s S) (float64, error) {
 
 	f := float64(intPart)
 	if fracPart > 0 {
-		f += float64(fracPart) * fracScale[fracDigits]
+		f += float64(fracPart) * fracScale[fracDigits-1]
 	}
 	if exp != 0 {
 		f *= math.Pow10(int(exp))
