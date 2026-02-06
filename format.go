@@ -6,11 +6,29 @@ var smallInts [100]string
 // smallNegInts contains precomputed string representations for small negative integers -1 to -99
 var smallNegInts [100]string
 
+// uint8Strs contains precomputed string representations for all uint8 values.
+var uint8Strs [256]string
+
+// int8Strs contains precomputed string representations for all int8 values indexed by uint8(value).
+var int8Strs [256]string
+
 func init() {
 	for i := range 100 {
 		smallInts[i] = formatUintSmall(uint64(i))
 		if i > 0 {
 			smallNegInts[i] = "-" + smallInts[i]
+		}
+	}
+
+	for i := range 256 {
+		v := uint8(i)
+		uint8Strs[i] = formatUint8Slow(v)
+
+		sv := int8(i)
+		if sv >= 0 {
+			int8Strs[i] = uint8Strs[sv]
+		} else {
+			int8Strs[i] = "-" + uint8Strs[uint8(-sv)]
 		}
 	}
 }
@@ -20,6 +38,13 @@ func formatUintSmall(n uint64) string {
 		return string(byte(n) + '0')
 	}
 	return string([]byte{byte(n/10) + '0', byte(n%10) + '0'})
+}
+
+func formatUint8Slow(n uint8) string {
+	if n < 100 {
+		return smallInts[n]
+	}
+	return string([]byte{n/100 + '0', (n/10)%10 + '0', n%10 + '0'})
 }
 
 // formatUintBuf writes the digits of n into buf from the end and returns the start index.
@@ -156,29 +181,12 @@ func FormatInt16(n int16) string {
 
 // FormatUint8 formats a uint8 as a decimal string.
 func FormatUint8(n uint8) string {
-	if n < 100 {
-		return smallInts[n]
-	}
-	// uint8 max is 255, so max 3 digits
-	return string([]byte{n/100 + '0', (n/10)%10 + '0', n%10 + '0'})
+	return uint8Strs[n]
 }
 
 // FormatInt8 formats an int8 as a decimal string.
 func FormatInt8(n int8) string {
-	if n >= 0 && n < 100 {
-		return smallInts[n]
-	}
-	if n < 0 && n > -100 {
-		return smallNegInts[-n]
-	}
-	// Only -128 to -100 and 100 to 127 reach here
-	if n >= 0 {
-		un := uint8(n)
-		return string([]byte{un/100 + '0', (un/10)%10 + '0', un%10 + '0'})
-	}
-	// n is -128 to -100
-	un := uint8(-n)
-	return string([]byte{'-', un/100 + '0', (un/10)%10 + '0', un%10 + '0'})
+	return int8Strs[uint8(n)]
 }
 
 // AppendUint appends the decimal string representation of n to dst.

@@ -24,6 +24,21 @@ func ParseUint[S byteSeq](s S) (uint64, error) {
 // ParseInt parses a decimal ASCII string or byte slice into an int64.
 // Returns the parsed value and nil on success, else 0 and an error.
 func ParseInt[S byteSeq](s S) (int64, error) {
+	if len(s) > 0 && s[0] != '-' && s[0] != '+' && len(s) <= 19 {
+		var n uint64
+		for i := range len(s) {
+			c := s[i] - '0'
+			if c > 9 {
+				return 0, &strconv.NumError{Func: "ParseInt", Num: string(s), Err: strconv.ErrSyntax}
+			}
+			n = n*10 + uint64(c)
+		}
+		if n > uint64(math.MaxInt64) {
+			return 0, &strconv.NumError{Func: "ParseInt", Num: string(s), Err: strconv.ErrRange}
+		}
+		return int64(n), nil
+	}
+
 	return parseSigned[S, int64]("ParseInt", s, math.MinInt64, math.MaxInt64)
 }
 
@@ -39,6 +54,47 @@ func ParseInt16[S byteSeq](s S) (int16, error) {
 
 // ParseInt8 parses a decimal ASCII string or byte slice into an int8.
 func ParseInt8[S byteSeq](s S) (int8, error) {
+	if len(s) == 0 {
+		return 0, &strconv.NumError{Func: "ParseInt8", Num: "", Err: strconv.ErrSyntax}
+	}
+
+	neg := false
+	i := 0
+	switch s[0] {
+	case '-':
+		neg = true
+		i++
+	case '+':
+		i++
+	}
+	if i == len(s) {
+		return 0, &strconv.NumError{Func: "ParseInt8", Num: string(s), Err: strconv.ErrSyntax}
+	}
+
+	if len(s)-i <= 3 {
+		var n uint16
+		for ; i < len(s); i++ {
+			c := s[i] - '0'
+			if c > 9 {
+				return 0, &strconv.NumError{Func: "ParseInt8", Num: string(s), Err: strconv.ErrSyntax}
+			}
+			n = n*10 + uint16(c)
+		}
+		if neg {
+			if n > 128 {
+				return 0, &strconv.NumError{Func: "ParseInt8", Num: string(s), Err: strconv.ErrRange}
+			}
+			if n == 128 {
+				return math.MinInt8, nil
+			}
+			return -int8(n), nil
+		}
+		if n > math.MaxInt8 {
+			return 0, &strconv.NumError{Func: "ParseInt8", Num: string(s), Err: strconv.ErrRange}
+		}
+		return int8(n), nil
+	}
+
 	return parseSigned[S, int8]("ParseInt8", s, math.MinInt8, math.MaxInt8)
 }
 
@@ -54,6 +110,25 @@ func ParseUint16[S byteSeq](s S) (uint16, error) {
 
 // ParseUint8 parses a decimal ASCII string or byte slice into a uint8.
 func ParseUint8[S byteSeq](s S) (uint8, error) {
+	if len(s) == 0 {
+		return 0, &strconv.NumError{Func: "ParseUint8", Num: "", Err: strconv.ErrSyntax}
+	}
+
+	if len(s) <= 3 {
+		var n uint16
+		for i := range len(s) {
+			c := s[i] - '0'
+			if c > 9 {
+				return 0, &strconv.NumError{Func: "ParseUint8", Num: string(s), Err: strconv.ErrSyntax}
+			}
+			n = n*10 + uint16(c)
+		}
+		if n > math.MaxUint8 {
+			return 0, &strconv.NumError{Func: "ParseUint8", Num: string(s), Err: strconv.ErrRange}
+		}
+		return uint8(n), nil
+	}
+
 	return parseUnsigned[S, uint8]("ParseUint8", s, uint8(math.MaxUint8))
 }
 
@@ -61,16 +136,23 @@ func ParseUint8[S byteSeq](s S) (uint8, error) {
 // It returns an error if any non-digit is encountered or overflow happens.
 func parseDigits[S byteSeq](s S, i int) (uint64, error) {
 	var n uint64
+	const (
+		cutoff = math.MaxUint64 / 10
+		cutlim = math.MaxUint64 % 10
+	)
+	digits := 0
 	for ; i < len(s); i++ {
 		c := s[i] - '0'
 		if c > 9 {
 			return 0, strconv.ErrSyntax
 		}
-		nn := n*10 + uint64(c)
-		if nn < n {
+		d := uint64(c)
+		// Any value with <= 19 digits is guaranteed to fit in uint64.
+		if digits >= 19 && (n > cutoff || (n == cutoff && d > cutlim)) {
 			return 0, strconv.ErrRange
 		}
-		n = nn
+		n = n*10 + d
+		digits++
 	}
 	return n, nil
 }
@@ -95,7 +177,7 @@ func parseSigned[S byteSeq, T Signed](fn string, s S, minRange, maxRange T) (T, 
 		return 0, &strconv.NumError{Func: fn, Num: string(s), Err: strconv.ErrSyntax}
 	}
 
-	// Parse digits
+	// Parse digits.
 	n, err := parseDigits(s, i)
 	if err != nil {
 		return 0, &strconv.NumError{Func: fn, Num: string(s), Err: err}
@@ -125,12 +207,12 @@ func parseUnsigned[S byteSeq, T Unsigned](fn string, s S, maxRange T) (T, error)
 		return 0, &strconv.NumError{Func: fn, Num: "", Err: strconv.ErrSyntax}
 	}
 
-	// Parse digits directly from index 0
+	// Parse digits directly from index 0.
 	n, err := parseDigits(s, 0)
-	// Check for overflow
 	if err != nil {
 		return 0, &strconv.NumError{Func: fn, Num: string(s), Err: err}
 	}
+	// Check for overflow
 	if n > uint64(maxRange) {
 		return 0, &strconv.NumError{Func: fn, Num: string(s), Err: strconv.ErrRange}
 	}

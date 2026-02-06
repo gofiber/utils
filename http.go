@@ -10,6 +10,12 @@ import (
 )
 
 const MIMEOctetStream = "application/octet-stream"
+const (
+	contentTypeApplicationJSON               = "application/json"
+	contentTypeApplicationXML                = "application/xml"
+	contentTypeApplicationFormURLEncoded     = "application/x-www-form-urlencoded"
+	contentTypePrefixApplicationWithSlashLen = len("application/")
+)
 
 // GetMIME returns the content-type of a file extension
 func GetMIME(extension string) string {
@@ -72,6 +78,17 @@ func ParseVendorSpecificContentType(cType string, caseInsensitive ...bool) strin
 
 	if slashIndex == -1 {
 		return cType
+	}
+
+	if slashIndex+1 == contentTypePrefixApplicationWithSlashLen {
+		switch parsableType {
+		case "json":
+			return contentTypeApplicationJSON
+		case "xml":
+			return contentTypeApplicationXML
+		case "x-www-form-urlencoded":
+			return contentTypeApplicationFormURLEncoded
+		}
 	}
 
 	return working[:slashIndex+1] + parsableType
