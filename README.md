@@ -16,7 +16,7 @@ goarch: arm64
 pkg: github.com/gofiber/utils/v2
 cpu: Apple M2 Pro
 
-```go
+```text
 // go test -benchmem -run=^$ -bench=Benchmark_ -count=1
 
 Benchmark_ToLowerBytes/empty/fiber-12                           553808877  1.978  ns/op         0  B/op   0  allocs/op

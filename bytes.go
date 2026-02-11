@@ -12,24 +12,36 @@ func ToLowerBytes(b []byte) []byte {
 	}
 
 	table := toLowerTable
-	dst := make([]byte, n)
 	i := 0
-	// Unroll by 4 to balance instruction-level parallelism with cache pressure.
-	limit := n &^ 3
-	for i < limit {
-		dst[i+0] = table[b[i+0]]
-		dst[i+1] = table[b[i+1]]
-		dst[i+2] = table[b[i+2]]
-		dst[i+3] = table[b[i+3]]
-		i += 4
-	}
-
 	for i < n {
-		dst[i] = table[b[i]]
+		c := b[i]
+		low := table[c]
+		if low != c {
+			dst := make([]byte, n)
+			copy(dst, b[:i])
+			dst[i] = low
+			i++
+			// Unroll by 4 to balance instruction-level parallelism with cache pressure.
+			limit := i + ((n - i) &^ 3)
+			for i < limit {
+				dst[i+0] = table[b[i+0]]
+				dst[i+1] = table[b[i+1]]
+				dst[i+2] = table[b[i+2]]
+				dst[i+3] = table[b[i+3]]
+				i += 4
+			}
+
+			for i < n {
+				dst[i] = table[b[i]]
+				i++
+			}
+
+			return dst
+		}
 		i++
 	}
 
-	return dst
+	return b
 }
 
 // ToLowerBytesMut converts an ASCII byte slice to lower-case in-place.
@@ -71,24 +83,36 @@ func ToUpperBytes(b []byte) []byte {
 	}
 
 	table := toUpperTable
-	dst := make([]byte, n)
 	i := 0
-	// Unroll by 4 to balance instruction-level parallelism with cache pressure.
-	limit := n &^ 3
-	for i < limit {
-		dst[i+0] = table[b[i+0]]
-		dst[i+1] = table[b[i+1]]
-		dst[i+2] = table[b[i+2]]
-		dst[i+3] = table[b[i+3]]
-		i += 4
-	}
-
 	for i < n {
-		dst[i] = table[b[i]]
+		c := b[i]
+		up := table[c]
+		if up != c {
+			dst := make([]byte, n)
+			copy(dst, b[:i])
+			dst[i] = up
+			i++
+			// Unroll by 4 to balance instruction-level parallelism with cache pressure.
+			limit := i + ((n - i) &^ 3)
+			for i < limit {
+				dst[i+0] = table[b[i+0]]
+				dst[i+1] = table[b[i+1]]
+				dst[i+2] = table[b[i+2]]
+				dst[i+3] = table[b[i+3]]
+				i += 4
+			}
+
+			for i < n {
+				dst[i] = table[b[i]]
+				i++
+			}
+
+			return dst
+		}
 		i++
 	}
 
-	return dst
+	return b
 }
 
 // ToUpperBytesMut converts an ASCII byte slice to upper-case in-place.

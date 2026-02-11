@@ -154,10 +154,9 @@ func Benchmark_ToUpper(b *testing.B) {
 		b.Run(tc.name, func(b *testing.B) {
 			b.ReportAllocs()
 			b.SetBytes(int64(len(tc.input)))
-			b.ResetTimer()
 			var fiberRes, stdRes string
 			b.Run("fiber", func(b *testing.B) {
-				for n := 0; n < b.N; n++ {
+				for b.Loop() {
 					fiberRes = ToUpper(tc.input)
 				}
 				require.Equal(b, tc.upper, fiberRes)
@@ -165,14 +164,14 @@ func Benchmark_ToUpper(b *testing.B) {
 			b.Run("fiber/mut", func(b *testing.B) {
 				template := []byte(tc.input)
 				work := make([]byte, len(template))
-				for n := 0; n < b.N; n++ {
+				for b.Loop() {
 					copy(work, template)
 					fiberRes = ToUpperMut(UnsafeString(work))
 				}
 				require.Equal(b, tc.upper, fiberRes)
 			})
 			b.Run("default", func(b *testing.B) {
-				for n := 0; n < b.N; n++ {
+				for b.Loop() {
 					stdRes = strings.ToUpper(tc.input)
 				}
 				require.Equal(b, tc.upper, stdRes)
@@ -186,10 +185,9 @@ func Benchmark_ToLower(b *testing.B) {
 		b.Run(tc.name, func(b *testing.B) {
 			b.ReportAllocs()
 			b.SetBytes(int64(len(tc.input)))
-			b.ResetTimer()
 			var fiberRes, stdRes string
 			b.Run("fiber", func(b *testing.B) {
-				for n := 0; n < b.N; n++ {
+				for b.Loop() {
 					fiberRes = ToLower(tc.input)
 				}
 				require.Equal(b, tc.lower, fiberRes)
@@ -197,15 +195,14 @@ func Benchmark_ToLower(b *testing.B) {
 			b.Run("fiber/mut", func(b *testing.B) {
 				template := []byte(tc.input)
 				work := make([]byte, len(template))
-				b.ResetTimer()
-				for n := 0; n < b.N; n++ {
+				for b.Loop() {
 					copy(work, template)
 					fiberRes = ToLowerMut(UnsafeString(work))
 				}
 				require.Equal(b, tc.lower, fiberRes)
 			})
 			b.Run("default", func(b *testing.B) {
-				for n := 0; n < b.N; n++ {
+				for b.Loop() {
 					stdRes = strings.ToLower(tc.input)
 				}
 				require.Equal(b, tc.lower, stdRes)

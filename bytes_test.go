@@ -79,7 +79,6 @@ func Test_ToUpperBytesMut(t *testing.T) {
 
 func Benchmark_ToLowerBytes(b *testing.B) {
 	for _, tc := range benchmarkCoreCases {
-		tc := tc
 		b.Run(tc.name, func(b *testing.B) {
 			template := []byte(tc.input)
 			want := []byte(tc.lower)
@@ -87,7 +86,7 @@ func Benchmark_ToLowerBytes(b *testing.B) {
 
 			b.Run("fiber", func(b *testing.B) {
 				b.ReportAllocs()
-				for n := 0; n < b.N; n++ {
+				for b.Loop() {
 					res = ToLowerBytes(template)
 				}
 				require.True(b, bytes.Equal(want, res))
@@ -95,7 +94,6 @@ func Benchmark_ToLowerBytes(b *testing.B) {
 			b.Run("fiber/mut", func(b *testing.B) {
 				b.ReportAllocs()
 				work := make([]byte, len(template))
-				b.ResetTimer()
 				for b.Loop() {
 					copy(work, template)
 					res = ToLowerBytesMut(work)
@@ -104,7 +102,7 @@ func Benchmark_ToLowerBytes(b *testing.B) {
 			})
 			b.Run("default", func(b *testing.B) {
 				b.ReportAllocs()
-				for n := 0; n < b.N; n++ {
+				for b.Loop() {
 					res = bytes.ToLower(template)
 				}
 				require.True(b, bytes.Equal(want, res))
@@ -115,7 +113,6 @@ func Benchmark_ToLowerBytes(b *testing.B) {
 
 func Benchmark_ToUpperBytes(b *testing.B) {
 	for _, tc := range benchmarkCoreCases {
-		tc := tc
 		b.Run(tc.name, func(b *testing.B) {
 			template := []byte(tc.input)
 			want := []byte(tc.upper)
@@ -123,7 +120,7 @@ func Benchmark_ToUpperBytes(b *testing.B) {
 
 			b.Run("fiber", func(b *testing.B) {
 				b.ReportAllocs()
-				for n := 0; n < b.N; n++ {
+				for b.Loop() {
 					res = ToUpperBytes(template)
 				}
 				require.Equal(b, want, res)
@@ -131,8 +128,7 @@ func Benchmark_ToUpperBytes(b *testing.B) {
 			b.Run("fiber/mut", func(b *testing.B) {
 				b.ReportAllocs()
 				work := make([]byte, len(template))
-				b.ResetTimer()
-				for n := 0; n < b.N; n++ {
+				for b.Loop() {
 					copy(work, template)
 					res = ToUpperBytesMut(work)
 				}
@@ -140,7 +136,7 @@ func Benchmark_ToUpperBytes(b *testing.B) {
 			})
 			b.Run("default", func(b *testing.B) {
 				b.ReportAllocs()
-				for n := 0; n < b.N; n++ {
+				for b.Loop() {
 					res = bytes.ToUpper(template)
 				}
 				require.Equal(b, want, res)
