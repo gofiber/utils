@@ -6,25 +6,119 @@ package utils
 
 // ToLowerBytes converts an ASCII byte slice to lower-case without modifying the input.
 func ToLowerBytes(b []byte) []byte {
-	return mapASCIICopy(b, toLowerTable)
+	n := len(b)
+	if n == 0 {
+		return b
+	}
+
+	table := toLowerTable
+	dst := make([]byte, n)
+	i := 0
+	// Unroll by 4 to balance instruction-level parallelism with cache pressure.
+	limit := n &^ 3
+	for i < limit {
+		dst[i+0] = table[b[i+0]]
+		dst[i+1] = table[b[i+1]]
+		dst[i+2] = table[b[i+2]]
+		dst[i+3] = table[b[i+3]]
+		i += 4
+	}
+
+	for i < n {
+		dst[i] = table[b[i]]
+		i++
+	}
+
+	return dst
 }
 
 // ToLowerBytesMut converts an ASCII byte slice to lower-case in-place.
 // The passed slice content is modified and the same slice is returned.
 func ToLowerBytesMut(b []byte) []byte {
-	mapASCIIInPlace(b, toLowerTable)
+	table := toLowerTable
+	n := len(b)
+	i := 0
+
+	// Unroll by 4 to balance instruction-level parallelism with cache pressure.
+	limit := n &^ 3
+	for i < limit {
+		b0 := b[i+0]
+		b1 := b[i+1]
+		b2 := b[i+2]
+		b3 := b[i+3]
+
+		b[i+0] = table[b0]
+		b[i+1] = table[b1]
+		b[i+2] = table[b2]
+		b[i+3] = table[b3]
+
+		i += 4
+	}
+
+	for i < n {
+		b[i] = table[b[i]]
+		i++
+	}
+
 	return b
 }
 
 // ToUpperBytes converts an ASCII byte slice to upper-case without modifying the input.
 func ToUpperBytes(b []byte) []byte {
-	return mapASCIICopy(b, toUpperTable)
+	n := len(b)
+	if n == 0 {
+		return b
+	}
+
+	table := toUpperTable
+	dst := make([]byte, n)
+	i := 0
+	// Unroll by 4 to balance instruction-level parallelism with cache pressure.
+	limit := n &^ 3
+	for i < limit {
+		dst[i+0] = table[b[i+0]]
+		dst[i+1] = table[b[i+1]]
+		dst[i+2] = table[b[i+2]]
+		dst[i+3] = table[b[i+3]]
+		i += 4
+	}
+
+	for i < n {
+		dst[i] = table[b[i]]
+		i++
+	}
+
+	return dst
 }
 
 // ToUpperBytesMut converts an ASCII byte slice to upper-case in-place.
 // The passed slice content is modified and the same slice is returned.
 func ToUpperBytesMut(b []byte) []byte {
-	mapASCIIInPlace(b, toUpperTable)
+	table := toUpperTable
+	n := len(b)
+	i := 0
+
+	// Unroll by 4 to balance instruction-level parallelism with cache pressure.
+	limit := n &^ 3
+	for i < limit {
+		b0 := b[i+0]
+		b1 := b[i+1]
+		b2 := b[i+2]
+		b3 := b[i+3]
+
+		b[i+0] = table[b0]
+		b[i+1] = table[b1]
+		b[i+2] = table[b2]
+		b[i+3] = table[b3]
+
+		i += 4
+	}
+
+	for i < n {
+		b[i] = table[b[i]]
+		i++
+	}
+
 	return b
 }
 
