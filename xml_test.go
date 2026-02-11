@@ -90,7 +90,7 @@ func Benchmark_GolangXMLEncoder(b *testing.B) {
 
 	b.ReportAllocs()
 	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		_, err := xmlEncoder(ss)
 		if err != nil {
 			b.Fatal(err)
@@ -112,7 +112,7 @@ func Benchmark_DefaultXMLEncoder(b *testing.B) {
 
 	b.ReportAllocs()
 	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		_, err := xmlEncoder(ss)
 		if err != nil {
 			b.Fatal(err)
@@ -129,7 +129,7 @@ func Benchmark_DefaultXMLDecoder(b *testing.B) {
 
 	b.ReportAllocs()
 	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		err := xmlDecoder(xmlBytes, &ss)
 		if err != nil {
 			b.Fatal(err)

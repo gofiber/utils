@@ -4,63 +4,27 @@
 
 package utils
 
-// ToLowerBytes converts ascii slice to lower-case
+// ToLowerBytes converts an ASCII byte slice to lower-case without modifying the input.
 func ToLowerBytes(b []byte) []byte {
-	table := toLowerTable
-	n := len(b)
-	i := 0
+	return mapASCIICopy(b, toLowerTable)
+}
 
-	// Unroll by 4 to balance instruction-level parallelism with cache pressure.
-	limit := n &^ 3
-	for i < limit {
-		b0 := b[i+0]
-		b1 := b[i+1]
-		b2 := b[i+2]
-		b3 := b[i+3]
-
-		b[i+0] = table[b0]
-		b[i+1] = table[b1]
-		b[i+2] = table[b2]
-		b[i+3] = table[b3]
-
-		i += 4
-	}
-
-	for i < n {
-		b[i] = table[b[i]]
-		i++
-	}
-
+// ToLowerBytesMut converts an ASCII byte slice to lower-case in-place.
+// The passed slice content is modified and the same slice is returned.
+func ToLowerBytesMut(b []byte) []byte {
+	mapASCIIInPlace(b, toLowerTable)
 	return b
 }
 
-// ToUpperBytes converts ascii slice to upper-case
+// ToUpperBytes converts an ASCII byte slice to upper-case without modifying the input.
 func ToUpperBytes(b []byte) []byte {
-	table := toUpperTable
-	n := len(b)
-	i := 0
+	return mapASCIICopy(b, toUpperTable)
+}
 
-	// Unroll by 4 to match ToLowerBytes and maximize throughput on amd64.
-	limit := n &^ 3
-	for i < limit {
-		b0 := b[i+0]
-		b1 := b[i+1]
-		b2 := b[i+2]
-		b3 := b[i+3]
-
-		b[i+0] = table[b0]
-		b[i+1] = table[b1]
-		b[i+2] = table[b2]
-		b[i+3] = table[b3]
-
-		i += 4
-	}
-
-	for i < n {
-		b[i] = table[b[i]]
-		i++
-	}
-
+// ToUpperBytesMut converts an ASCII byte slice to upper-case in-place.
+// The passed slice content is modified and the same slice is returned.
+func ToUpperBytesMut(b []byte) []byte {
+	mapASCIIInPlace(b, toUpperTable)
 	return b
 }
 

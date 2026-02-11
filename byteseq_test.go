@@ -59,14 +59,14 @@ func Benchmark_EqualFoldBytes(b *testing.B) {
 	var res bool
 	b.Run("fiber", func(b *testing.B) {
 		b.ReportAllocs()
-		for n := 0; n < b.N; n++ {
+		for b.Loop() {
 			res = EqualFold(left, right)
 		}
 		require.True(b, res)
 	})
 	b.Run("default", func(b *testing.B) {
 		b.ReportAllocs()
-		for n := 0; n < b.N; n++ {
+		for b.Loop() {
 			res = bytes.EqualFold(left, right)
 		}
 		require.True(b, res)
@@ -78,14 +78,14 @@ func Benchmark_EqualFold(b *testing.B) {
 	var res bool
 	b.Run("fiber", func(b *testing.B) {
 		b.ReportAllocs()
-		for n := 0; n < b.N; n++ {
+		for b.Loop() {
 			res = EqualFold(upperStr, lowerStr)
 		}
 		require.True(b, res)
 	})
 	b.Run("default", func(b *testing.B) {
 		b.ReportAllocs()
-		for n := 0; n < b.N; n++ {
+		for b.Loop() {
 			res = strings.EqualFold(upperStr, lowerStr)
 		}
 		require.True(b, res)
@@ -122,14 +122,14 @@ func Benchmark_TrimRight(b *testing.B) {
 
 	b.Run("fiber", func(b *testing.B) {
 		b.ReportAllocs()
-		for n := 0; n < b.N; n++ {
+		for b.Loop() {
 			res = TrimRight(word, ' ')
 		}
 		require.Equal(b, expected, res)
 	})
 	b.Run("default", func(b *testing.B) {
 		b.ReportAllocs()
-		for n := 0; n < b.N; n++ {
+		for b.Loop() {
 			res = strings.TrimRight(word, " ")
 		}
 		require.Equal(b, expected, res)
@@ -143,14 +143,14 @@ func Benchmark_TrimRightBytes(b *testing.B) {
 
 	b.Run("fiber", func(b *testing.B) {
 		b.ReportAllocs()
-		for n := 0; n < b.N; n++ {
+		for b.Loop() {
 			res = TrimRight(word, ' ')
 		}
 		require.Equal(b, expected, res)
 	})
 	b.Run("default", func(b *testing.B) {
 		b.ReportAllocs()
-		for n := 0; n < b.N; n++ {
+		for b.Loop() {
 			res = bytes.TrimRight(word, " ")
 		}
 		require.Equal(b, expected, res)
@@ -187,14 +187,14 @@ func Benchmark_TrimLeft(b *testing.B) {
 
 	b.Run("fiber", func(b *testing.B) {
 		b.ReportAllocs()
-		for n := 0; n < b.N; n++ {
+		for b.Loop() {
 			res = TrimLeft(word, ' ')
 		}
 		require.Equal(b, expected, res)
 	})
 	b.Run("default", func(b *testing.B) {
 		b.ReportAllocs()
-		for n := 0; n < b.N; n++ {
+		for b.Loop() {
 			res = strings.TrimLeft(word, " ")
 		}
 		require.Equal(b, expected, res)
@@ -208,14 +208,14 @@ func Benchmark_TrimLeftBytes(b *testing.B) {
 
 	b.Run("fiber", func(b *testing.B) {
 		b.ReportAllocs()
-		for n := 0; n < b.N; n++ {
+		for b.Loop() {
 			res = TrimLeft(word, ' ')
 		}
 		require.Equal(b, expected, res)
 	})
 	b.Run("default", func(b *testing.B) {
 		b.ReportAllocs()
-		for n := 0; n < b.N; n++ {
+		for b.Loop() {
 			res = bytes.TrimLeft(word, " ")
 		}
 		require.Equal(b, expected, res)
@@ -253,21 +253,21 @@ func Benchmark_Trim(b *testing.B) {
 
 	b.Run("fiber", func(b *testing.B) {
 		b.ReportAllocs()
-		for n := 0; n < b.N; n++ {
+		for b.Loop() {
 			res = Trim(word, ' ')
 		}
 		require.Equal(b, expected, res)
 	})
 	b.Run("default", func(b *testing.B) {
 		b.ReportAllocs()
-		for n := 0; n < b.N; n++ {
+		for b.Loop() {
 			res = strings.Trim(word, " ")
 		}
 		require.Equal(b, expected, res)
 	})
 	b.Run("default.trimspace", func(b *testing.B) {
 		b.ReportAllocs()
-		for n := 0; n < b.N; n++ {
+		for b.Loop() {
 			res = strings.TrimSpace(word)
 		}
 		require.Equal(b, expected, res)
@@ -281,21 +281,21 @@ func Benchmark_TrimBytes(b *testing.B) {
 
 	b.Run("fiber", func(b *testing.B) {
 		b.ReportAllocs()
-		for n := 0; n < b.N; n++ {
+		for b.Loop() {
 			res = Trim(word, ' ')
 		}
 		require.Equal(b, expected, res)
 	})
 	b.Run("default", func(b *testing.B) {
 		b.ReportAllocs()
-		for n := 0; n < b.N; n++ {
+		for b.Loop() {
 			res = bytes.Trim(word, " ")
 		}
 		require.Equal(b, expected, res)
 	})
 	b.Run("default.trimspace", func(b *testing.B) {
 		b.ReportAllocs()
-		for n := 0; n < b.N; n++ {
+		for b.Loop() {
 			res = bytes.TrimSpace(word)
 		}
 		require.Equal(b, expected, res)
@@ -371,7 +371,7 @@ func Benchmark_TrimSpace(b *testing.B) {
 			b.SetBytes(int64(len(tc.input)))
 			b.ResetTimer()
 			var res string
-			for n := 0; n < b.N; n++ {
+			for b.Loop() {
 				res = TrimSpace(tc.input)
 			}
 			_ = res
@@ -381,7 +381,7 @@ func Benchmark_TrimSpace(b *testing.B) {
 			b.SetBytes(int64(len(tc.input)))
 			b.ResetTimer()
 			var res string
-			for n := 0; n < b.N; n++ {
+			for b.Loop() {
 				res = strings.TrimSpace(tc.input)
 			}
 			_ = res
@@ -398,7 +398,7 @@ func Benchmark_TrimSpaceBytes(b *testing.B) {
 			b.SetBytes(int64(len(input)))
 			b.ResetTimer()
 			var res []byte
-			for n := 0; n < b.N; n++ {
+			for b.Loop() {
 				res = TrimSpace(input)
 			}
 			_ = res
@@ -408,7 +408,7 @@ func Benchmark_TrimSpaceBytes(b *testing.B) {
 			b.SetBytes(int64(len(input)))
 			b.ResetTimer()
 			var res []byte
-			for n := 0; n < b.N; n++ {
+			for b.Loop() {
 				res = bytes.TrimSpace(input)
 			}
 			_ = res

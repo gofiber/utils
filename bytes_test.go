@@ -37,41 +37,114 @@ func Test_ToUpperBytes(t *testing.T) {
 	require.Equal(t, []byte("/MY4/NAME/IS/:PARAM/*"), ToUpperBytes([]byte("/my4/name/is/:param/*")))
 }
 
-func Benchmark_ToLowerBytes(b *testing.B) {
-	path := []byte(largeStr)
-	want := []byte(lowerStr)
-	var res []byte
+func Test_ToLowerBytes_NoMutation(t *testing.T) {
+	t.Parallel()
 
-	b.Run("fiber", func(b *testing.B) {
-		for n := 0; n < b.N; n++ {
-			res = ToLowerBytes(path)
-		}
-		require.True(b, bytes.Equal(want, res))
-	})
-	b.Run("default", func(b *testing.B) {
-		for n := 0; n < b.N; n++ {
-			res = bytes.ToLower(path)
-		}
-		require.True(b, bytes.Equal(want, res))
-	})
+	original := []byte("/MY/NAME/IS/:PARAM/*")
+	snapshot := append([]byte(nil), original...)
+	out := ToLowerBytes(original)
+
+	require.Equal(t, snapshot, original, "input slice should not be mutated")
+	require.Equal(t, []byte("/my/name/is/:param/*"), out)
+}
+
+func Test_ToUpperBytes_NoMutation(t *testing.T) {
+	t.Parallel()
+
+	original := []byte("/my/name/is/:param/*")
+	snapshot := append([]byte(nil), original...)
+	out := ToUpperBytes(original)
+
+	require.Equal(t, snapshot, original, "input slice should not be mutated")
+	require.Equal(t, []byte("/MY/NAME/IS/:PARAM/*"), out)
+}
+
+func Test_ToLowerBytesMut(t *testing.T) {
+	t.Parallel()
+
+	buf := []byte("/MY/NAME/IS/:PARAM/*")
+	out := ToLowerBytesMut(buf)
+	require.Same(t, &buf[0], &out[0], "should return same backing array")
+	require.Equal(t, []byte("/my/name/is/:param/*"), buf)
+}
+
+func Test_ToUpperBytesMut(t *testing.T) {
+	t.Parallel()
+
+	buf := []byte("/my/name/is/:param/*")
+	out := ToUpperBytesMut(buf)
+	require.Same(t, &buf[0], &out[0], "should return same backing array")
+	require.Equal(t, []byte("/MY/NAME/IS/:PARAM/*"), buf)
+}
+
+func Benchmark_ToLowerBytes(b *testing.B) {
+	for _, tc := range benchmarkCoreCases {
+		tc := tc
+		b.Run(tc.name, func(b *testing.B) {
+			template := []byte(tc.input)
+			want := []byte(tc.lower)
+			var res []byte
+
+			b.Run("fiber", func(b *testing.B) {
+				b.ReportAllocs()
+				for b.Loop() {
+					res = ToLowerBytes(template)
+				}
+				require.True(b, bytes.Equal(want, res))
+			})
+			b.Run("fiber/mut", func(b *testing.B) {
+				b.ReportAllocs()
+				work := make([]byte, len(template))
+				for b.Loop() {
+					copy(work, template)
+					res = ToLowerBytesMut(work)
+				}
+				require.True(b, bytes.Equal(want, res))
+			})
+			b.Run("default", func(b *testing.B) {
+				b.ReportAllocs()
+				for b.Loop() {
+					res = bytes.ToLower(template)
+				}
+				require.True(b, bytes.Equal(want, res))
+			})
+		})
+	}
 }
 
 func Benchmark_ToUpperBytes(b *testing.B) {
-	path := []byte(largeStr)
-	want := []byte(upperStr)
-	var res []byte
-	b.Run("fiber", func(b *testing.B) {
-		for n := 0; n < b.N; n++ {
-			res = ToUpperBytes(path)
-		}
-		require.Equal(b, want, res)
-	})
-	b.Run("default", func(b *testing.B) {
-		for n := 0; n < b.N; n++ {
-			res = bytes.ToUpper(path)
-		}
-		require.Equal(b, want, res)
-	})
+	for _, tc := range benchmarkCoreCases {
+		tc := tc
+		b.Run(tc.name, func(b *testing.B) {
+			template := []byte(tc.input)
+			want := []byte(tc.upper)
+			var res []byte
+
+			b.Run("fiber", func(b *testing.B) {
+				b.ReportAllocs()
+				for b.Loop() {
+					res = ToUpperBytes(template)
+				}
+				require.Equal(b, want, res)
+			})
+			b.Run("fiber/mut", func(b *testing.B) {
+				b.ReportAllocs()
+				work := make([]byte, len(template))
+				for b.Loop() {
+					copy(work, template)
+					res = ToUpperBytesMut(work)
+				}
+				require.Equal(b, want, res)
+			})
+			b.Run("default", func(b *testing.B) {
+				b.ReportAllocs()
+				for b.Loop() {
+					res = bytes.ToUpper(template)
+				}
+				require.Equal(b, want, res)
+			})
+		})
+	}
 }
 
 func Test_ToLowerBytes_Edge(t *testing.T) {
@@ -171,7 +244,7 @@ func Benchmark_AddTrailingSlashBytes(b *testing.B) {
 		b.Run(tc.name, func(b *testing.B) {
 			b.ReportAllocs()
 			var res []byte
-			for n := 0; n < b.N; n++ {
+			for b.Loop() {
 				res = AddTrailingSlashBytes(tc.input)
 			}
 			_ = res

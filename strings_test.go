@@ -43,39 +43,18 @@ var testCases = []TestCase{
 	{name: "mixed-ascii-non-ascii", input: "Goµ", upper: "GOµ", lower: "goµ"},
 }
 
-var benchmarkCases = []TestCase{
-	// Benchmark cases for performance testing
-	{name: "empty", input: "", upper: "", lower: "", upperNoConv: true, lowerNoConv: true},
-	{name: "single-lower", input: "a", upper: "A", lower: "a", lowerNoConv: true},
-	{name: "single-upper", input: "A", upper: "A", lower: "a", upperNoConv: true},
-	{name: "numbers", input: "1234567890", upper: "1234567890", lower: "1234567890", upperNoConv: true, lowerNoConv: true},
-	{name: "http-get", input: "get", upper: "GET", lower: "get", lowerNoConv: true},
-	{name: "http-get-upper", input: "GET", upper: "GET", lower: "get", upperNoConv: true},
-	{name: "http-get-pascal", input: "Get", upper: "GET", lower: "get"},
+var benchmarkCoreCases = []TestCase{
+	{name: "empty", input: "", upper: "", lower: ""},
+	{name: "http-get", input: "get", upper: "GET", lower: "get"},
+	{name: "http-get-upper", input: "GET", upper: "GET", lower: "get"},
 	{
 		name: "header-content-type-mixed", input: "Content-Type: text/html; charset=utf-8",
 		upper: "CONTENT-TYPE: TEXT/HTML; CHARSET=UTF-8",
 		lower: "content-type: text/html; charset=utf-8",
 	},
-	{
-		name: "url-camel", input: "/api/v1/usersName?nameJohn&sortDesc",
-		upper: "/API/V1/USERSNAME?NAMEJOHN&SORTDESC",
-		lower: "/api/v1/usersname?namejohn&sortdesc",
-	},
-	{name: "15-char-mixed", input: "aBcDeFgHiJkLmNo", upper: "ABCDEFGHIJKLMNO", lower: "abcdefghijklmno"},
-	{name: "16-char-mixed", input: "aBcDeFgHiJkLmNoP", upper: "ABCDEFGHIJKLMNOP", lower: "abcdefghijklmnop"},
-	{name: "24-char-mixed", input: "aBcDeFgHiJkLmNoPqRsTuvWx", upper: "ABCDEFGHIJKLMNOPQRSTUVWX", lower: "abcdefghijklmnopqrstuvwx"},
-	{name: "25-char-mixed", input: "aBcDeFgHiJkLmNoPqRsTuVwXy", upper: "ABCDEFGHIJKLMNOPQRSTUVWXY", lower: "abcdefghijklmnopqrstuvwxy"},
-	{name: "large-lower", input: strings.Repeat("a", 64), upper: strings.Repeat("A", 64), lower: strings.Repeat("a", 64), lowerNoConv: true},
+	{name: "large-lower", input: strings.Repeat("a", 64), upper: strings.Repeat("A", 64), lower: strings.Repeat("a", 64)},
+	{name: "large-upper", input: strings.Repeat("A", 64), upper: strings.Repeat("A", 64), lower: strings.Repeat("a", 64)},
 	{name: "large-mixed", input: strings.Repeat("aB", 32), upper: strings.Repeat("AB", 32), lower: strings.Repeat("ab", 32)},
-	{name: "large-upper", input: strings.Repeat("A", 64), upper: strings.Repeat("A", 64), lower: strings.Repeat("a", 64), upperNoConv: true},
-	{name: "large-first-upper", input: "A" + strings.Repeat("a", 63), upper: strings.Repeat("A", 64), lower: strings.Repeat("a", 64)},
-	{name: "large-last-upper", input: strings.Repeat("a", 63) + "A", upper: strings.Repeat("A", 64), lower: strings.Repeat("a", 64)},
-	{name: "very-large-lower", input: strings.Repeat("a", 256), upper: strings.Repeat("A", 256), lower: strings.Repeat("a", 256), lowerNoConv: true},
-	{name: "very-large-mixed", input: strings.Repeat("aB", 128), upper: strings.Repeat("AB", 128), lower: strings.Repeat("ab", 128)},
-	{name: "very-large-upper", input: strings.Repeat("A", 256), upper: strings.Repeat("A", 256), lower: strings.Repeat("a", 256), upperNoConv: true},
-	{name: "very-large-first-upper", input: "A" + strings.Repeat("a", 255), upper: strings.Repeat("A", 256), lower: strings.Repeat("a", 256)},
-	{name: "very-large-last-upper", input: strings.Repeat("a", 255) + "A", upper: strings.Repeat("A", 256), lower: strings.Repeat("a", 256)},
 }
 
 func Test_ToUpper(t *testing.T) {
@@ -130,6 +109,28 @@ func Test_ToLower(t *testing.T) {
 	}
 }
 
+func Test_ToLowerMut(t *testing.T) {
+	t.Parallel()
+
+	buf := []byte("Content-Type")
+	s := UnsafeString(buf)
+	out := ToLowerMut(s)
+
+	require.Equal(t, "content-type", out)
+	require.Equal(t, []byte("content-type"), buf, "backing bytes should be mutated in-place")
+}
+
+func Test_ToUpperMut(t *testing.T) {
+	t.Parallel()
+
+	buf := []byte("content-type")
+	s := UnsafeString(buf)
+	out := ToUpperMut(s)
+
+	require.Equal(t, "CONTENT-TYPE", out)
+	require.Equal(t, []byte("CONTENT-TYPE"), buf, "backing bytes should be mutated in-place")
+}
+
 func Test_ASCII_EdgeCases(t *testing.T) {
 	// Test ASCII characters from 0 to 127 for ToUpper and ToLower
 	// This ensures that all basic ASCII characters are handled correctly.
@@ -149,20 +150,29 @@ func Test_ASCII_EdgeCases(t *testing.T) {
 }
 
 func Benchmark_ToUpper(b *testing.B) {
-	for _, tc := range benchmarkCases {
+	for _, tc := range benchmarkCoreCases {
 		b.Run(tc.name, func(b *testing.B) {
 			b.ReportAllocs()
 			b.SetBytes(int64(len(tc.input)))
 			b.ResetTimer()
 			var fiberRes, stdRes string
 			b.Run("fiber", func(b *testing.B) {
-				for n := 0; n < b.N; n++ {
+				for b.Loop() {
 					fiberRes = ToUpper(tc.input)
 				}
 				require.Equal(b, tc.upper, fiberRes)
 			})
+			b.Run("fiber/mut", func(b *testing.B) {
+				template := []byte(tc.input)
+				work := make([]byte, len(template))
+				for b.Loop() {
+					copy(work, template)
+					fiberRes = ToUpperMut(UnsafeString(work))
+				}
+				require.Equal(b, tc.upper, fiberRes)
+			})
 			b.Run("default", func(b *testing.B) {
-				for n := 0; n < b.N; n++ {
+				for b.Loop() {
 					stdRes = strings.ToUpper(tc.input)
 				}
 				require.Equal(b, tc.upper, stdRes)
@@ -172,20 +182,29 @@ func Benchmark_ToUpper(b *testing.B) {
 }
 
 func Benchmark_ToLower(b *testing.B) {
-	for _, tc := range benchmarkCases {
+	for _, tc := range benchmarkCoreCases {
 		b.Run(tc.name, func(b *testing.B) {
 			b.ReportAllocs()
 			b.SetBytes(int64(len(tc.input)))
 			b.ResetTimer()
 			var fiberRes, stdRes string
 			b.Run("fiber", func(b *testing.B) {
-				for n := 0; n < b.N; n++ {
+				for b.Loop() {
 					fiberRes = ToLower(tc.input)
 				}
 				require.Equal(b, tc.lower, fiberRes)
 			})
+			b.Run("fiber/mut", func(b *testing.B) {
+				template := []byte(tc.input)
+				work := make([]byte, len(template))
+				for b.Loop() {
+					copy(work, template)
+					fiberRes = ToLowerMut(UnsafeString(work))
+				}
+				require.Equal(b, tc.lower, fiberRes)
+			})
 			b.Run("default", func(b *testing.B) {
-				for n := 0; n < b.N; n++ {
+				for b.Loop() {
 					stdRes = strings.ToLower(tc.input)
 				}
 				require.Equal(b, tc.lower, stdRes)
@@ -238,7 +257,7 @@ func Benchmark_AddTrailingSlashString(b *testing.B) {
 		b.Run(tc.name, func(b *testing.B) {
 			b.ReportAllocs()
 			var res string
-			for n := 0; n < b.N; n++ {
+			for b.Loop() {
 				res = AddTrailingSlashString(tc.input)
 			}
 			_ = res

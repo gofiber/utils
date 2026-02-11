@@ -295,7 +295,7 @@ func Test_IncrementIPRange_IPv6(t *testing.T) {
 func Benchmark_ConvertToBytes(b *testing.B) {
 	var res int
 	b.Run("fiber", func(b *testing.B) {
-		for n := 0; n < b.N; n++ {
+		for b.Loop() {
 			res = ConvertToBytes("42B")
 		}
 		require.Equal(b, 42, res)
@@ -306,13 +306,13 @@ func Benchmark_ConvertToBytes(b *testing.B) {
 func Benchmark_GenerateSecureToken(b *testing.B) {
 	var res string
 	b.Run("16_bytes", func(b *testing.B) {
-		for n := 0; n < b.N; n++ {
+		for b.Loop() {
 			res = GenerateSecureToken(16)
 		}
 		require.Len(b, res, 22)
 	})
 	b.Run("32_bytes", func(b *testing.B) {
-		for n := 0; n < b.N; n++ {
+		for b.Loop() {
 			res = GenerateSecureToken(32)
 		}
 		require.Len(b, res, 43)
@@ -323,13 +323,13 @@ func Benchmark_GenerateSecureToken(b *testing.B) {
 func Benchmark_TokenGenerators(b *testing.B) {
 	var res string
 	b.Run("UUIDv4", func(b *testing.B) {
-		for n := 0; n < b.N; n++ {
+		for b.Loop() {
 			res = UUIDv4()
 		}
 		require.Len(b, res, 36)
 	})
 	b.Run("SecureToken", func(b *testing.B) {
-		for n := 0; n < b.N; n++ {
+		for b.Loop() {
 			res = SecureToken()
 		}
 		require.Len(b, res, 43)

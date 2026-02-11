@@ -291,7 +291,7 @@ func Benchmark_ToString(b *testing.B) {
 		b.Run(reflect.TypeOf(value).String(), func(b *testing.B) {
 			b.ReportAllocs()
 			b.ResetTimer()
-			for i := 0; i < b.N; i++ {
+			for b.Loop() {
 				_ = ToString(value)
 			}
 		})
@@ -318,13 +318,13 @@ func Benchmark_UnsafeBytes(b *testing.B) {
 	hello := "Hello, World!"
 	var res []byte
 	b.Run("unsafe", func(b *testing.B) {
-		for n := 0; n < b.N; n++ {
+		for b.Loop() {
 			res = UnsafeBytes(hello)
 		}
 		require.Equal(b, []byte("Hello, World!"), res)
 	})
 	b.Run("default", func(b *testing.B) {
-		for n := 0; n < b.N; n++ {
+		for b.Loop() {
 			res = []byte(hello)
 		}
 		require.Equal(b, []byte("Hello, World!"), res)
@@ -336,13 +336,13 @@ func Benchmark_UnsafeString(b *testing.B) {
 	hello := []byte("Hello, World!")
 	var res string
 	b.Run("unsafe", func(b *testing.B) {
-		for n := 0; n < b.N; n++ {
+		for b.Loop() {
 			res = UnsafeString(hello)
 		}
 		require.Equal(b, "Hello, World!", res)
 	})
 	b.Run("default", func(b *testing.B) {
-		for n := 0; n < b.N; n++ {
+		for b.Loop() {
 			res = string(hello)
 		}
 		require.Equal(b, "Hello, World!", res)
@@ -372,7 +372,7 @@ func Benchmark_ByteSize(b *testing.B) {
 		b.Run(strconv.FormatUint(bytes, 10), func(b *testing.B) {
 			b.ResetTimer()
 			b.ReportAllocs()
-			for i := 0; i < b.N; i++ {
+			for b.Loop() {
 				_ = ByteSize(bytes)
 			}
 		})

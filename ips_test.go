@@ -107,14 +107,14 @@ func Benchmark_IsIPv4(b *testing.B) {
 	var res bool
 
 	b.Run("fiber", func(b *testing.B) {
-		for n := 0; n < b.N; n++ {
+		for b.Loop() {
 			res = IsIPv4(ip)
 		}
 		require.True(b, res)
 	})
 
 	b.Run("default", func(b *testing.B) {
-		for n := 0; n < b.N; n++ {
+		for b.Loop() {
 			res = net.ParseIP(ip) != nil
 		}
 		require.True(b, res)
@@ -127,14 +127,14 @@ func Benchmark_IsIPv6(b *testing.B) {
 	var res bool
 
 	b.Run("fiber", func(b *testing.B) {
-		for n := 0; n < b.N; n++ {
+		for b.Loop() {
 			res = IsIPv6(ip)
 		}
 		require.True(b, res)
 	})
 
 	b.Run("default", func(b *testing.B) {
-		for n := 0; n < b.N; n++ {
+		for b.Loop() {
 			res = net.ParseIP(ip) != nil
 		}
 		require.True(b, res)
