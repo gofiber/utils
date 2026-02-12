@@ -74,7 +74,7 @@ func formatBenchmarks(path string) error {
 	for i, line := range lines {
 		trimmed := strings.TrimSpace(line)
 		switch {
-		case trimmed == "```go":
+		case trimmed == "```text":
 			inBlock = true
 			output = append(output, line)
 			continue
