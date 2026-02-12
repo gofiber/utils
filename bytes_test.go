@@ -86,7 +86,7 @@ func Benchmark_ToLowerBytes(b *testing.B) {
 
 			b.Run("fiber", func(b *testing.B) {
 				b.ReportAllocs()
-				for b.Loop() {
+				for n := 0; n < b.N; n++ {
 					res = ToLowerBytes(template)
 				}
 				require.True(b, bytes.Equal(want, res))
@@ -94,7 +94,7 @@ func Benchmark_ToLowerBytes(b *testing.B) {
 			b.Run("fiber/mut", func(b *testing.B) {
 				b.ReportAllocs()
 				work := make([]byte, len(template))
-				for b.Loop() {
+				for n := 0; n < b.N; n++ {
 					copy(work, template)
 					res = ToLowerBytesMut(work)
 				}
@@ -102,7 +102,7 @@ func Benchmark_ToLowerBytes(b *testing.B) {
 			})
 			b.Run("default", func(b *testing.B) {
 				b.ReportAllocs()
-				for b.Loop() {
+				for n := 0; n < b.N; n++ {
 					res = bytes.ToLower(template)
 				}
 				require.True(b, bytes.Equal(want, res))
@@ -120,7 +120,7 @@ func Benchmark_ToUpperBytes(b *testing.B) {
 
 			b.Run("fiber", func(b *testing.B) {
 				b.ReportAllocs()
-				for b.Loop() {
+				for n := 0; n < b.N; n++ {
 					res = ToUpperBytes(template)
 				}
 				require.Equal(b, want, res)
@@ -128,7 +128,7 @@ func Benchmark_ToUpperBytes(b *testing.B) {
 			b.Run("fiber/mut", func(b *testing.B) {
 				b.ReportAllocs()
 				work := make([]byte, len(template))
-				for b.Loop() {
+				for n := 0; n < b.N; n++ {
 					copy(work, template)
 					res = ToUpperBytesMut(work)
 				}
@@ -136,7 +136,7 @@ func Benchmark_ToUpperBytes(b *testing.B) {
 			})
 			b.Run("default", func(b *testing.B) {
 				b.ReportAllocs()
-				for b.Loop() {
+				for n := 0; n < b.N; n++ {
 					res = bytes.ToUpper(template)
 				}
 				require.Equal(b, want, res)
@@ -242,7 +242,7 @@ func Benchmark_AddTrailingSlashBytes(b *testing.B) {
 		b.Run(tc.name, func(b *testing.B) {
 			b.ReportAllocs()
 			var res []byte
-			for b.Loop() {
+			for n := 0; n < b.N; n++ {
 				res = AddTrailingSlashBytes(tc.input)
 			}
 			_ = res

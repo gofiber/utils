@@ -78,7 +78,7 @@ func Benchmark_CalculateTimestamp(b *testing.B) {
 	b.Run("fiber", func(bb *testing.B) {
 		bb.ReportAllocs()
 		bb.ResetTimer()
-		for bb.Loop() {
+		for n := 0; n < bb.N; n++ {
 			_ = Timestamp()
 		}
 	})
@@ -86,7 +86,7 @@ func Benchmark_CalculateTimestamp(b *testing.B) {
 	b.Run("default", func(bb *testing.B) {
 		bb.ReportAllocs()
 		bb.ResetTimer()
-		for bb.Loop() {
+		for n := 0; n < bb.N; n++ {
 			_ = uint32(time.Now().Unix())
 		}
 	})
@@ -95,7 +95,7 @@ func Benchmark_CalculateTimestamp(b *testing.B) {
 	b.Run("fiber_asserted", func(bb *testing.B) {
 		bb.ReportAllocs()
 		bb.ResetTimer()
-		for bb.Loop() {
+		for n := 0; n < bb.N; n++ {
 			res := Timestamp()
 			expected := uint32(time.Now().Unix())
 			checkTimeStamp(bb, expected, res)
@@ -105,7 +105,7 @@ func Benchmark_CalculateTimestamp(b *testing.B) {
 	b.Run("default_asserted", func(bb *testing.B) {
 		bb.ReportAllocs()
 		bb.ResetTimer()
-		for bb.Loop() {
+		for n := 0; n < bb.N; n++ {
 			expected := uint32(time.Now().Unix())
 			res := uint32(time.Now().Unix())
 			checkTimeStamp(bb, expected, res)
