@@ -54,7 +54,7 @@ func Benchmark_AddTrailingSlashString(b *testing.B) {
 		b.Run(tc.name, func(b *testing.B) {
 			b.ReportAllocs()
 			var res string
-			for n := 0; n < b.N; n++ {
+			for i := 0; i < b.N; i++ {
 				res = AddTrailingSlashString(tc.input)
 			}
 			_ = res

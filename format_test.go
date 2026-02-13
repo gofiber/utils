@@ -152,13 +152,13 @@ func Benchmark_FormatUint(b *testing.B) {
 	for _, input := range inputs {
 		b.Run(input.name+"/fiber", func(b *testing.B) {
 			b.ReportAllocs()
-			for n := 0; n < b.N; n++ {
+			for i := 0; i < b.N; i++ {
 				_ = FormatUint(input.value)
 			}
 		})
 		b.Run(input.name+"/strconv", func(b *testing.B) {
 			b.ReportAllocs()
-			for n := 0; n < b.N; n++ {
+			for i := 0; i < b.N; i++ {
 				_ = strconv.FormatUint(input.value, 10)
 			}
 		})
@@ -181,13 +181,13 @@ func Benchmark_FormatInt(b *testing.B) {
 	for _, input := range inputs {
 		b.Run(input.name+"/fiber", func(b *testing.B) {
 			b.ReportAllocs()
-			for n := 0; n < b.N; n++ {
+			for i := 0; i < b.N; i++ {
 				_ = FormatInt(input.value)
 			}
 		})
 		b.Run(input.name+"/strconv", func(b *testing.B) {
 			b.ReportAllocs()
-			for n := 0; n < b.N; n++ {
+			for i := 0; i < b.N; i++ {
 				_ = strconv.FormatInt(input.value, 10)
 			}
 		})
@@ -199,13 +199,13 @@ func Benchmark_FormatUint32(b *testing.B) {
 
 	b.Run("fiber", func(b *testing.B) {
 		b.ReportAllocs()
-		for n := 0; n < b.N; n++ {
+		for i := 0; i < b.N; i++ {
 			_ = FormatUint32(input)
 		}
 	})
 	b.Run("strconv", func(b *testing.B) {
 		b.ReportAllocs()
-		for n := 0; n < b.N; n++ {
+		for i := 0; i < b.N; i++ {
 			_ = strconv.FormatUint(uint64(input), 10)
 		}
 	})
@@ -216,13 +216,13 @@ func Benchmark_FormatInt32(b *testing.B) {
 
 	b.Run("fiber", func(b *testing.B) {
 		b.ReportAllocs()
-		for n := 0; n < b.N; n++ {
+		for i := 0; i < b.N; i++ {
 			_ = FormatInt32(input)
 		}
 	})
 	b.Run("strconv", func(b *testing.B) {
 		b.ReportAllocs()
-		for n := 0; n < b.N; n++ {
+		for i := 0; i < b.N; i++ {
 			_ = strconv.FormatInt(int64(input), 10)
 		}
 	})
@@ -233,13 +233,13 @@ func Benchmark_FormatUint16(b *testing.B) {
 
 	b.Run("fiber", func(b *testing.B) {
 		b.ReportAllocs()
-		for n := 0; n < b.N; n++ {
+		for i := 0; i < b.N; i++ {
 			_ = FormatUint16(input)
 		}
 	})
 	b.Run("strconv", func(b *testing.B) {
 		b.ReportAllocs()
-		for n := 0; n < b.N; n++ {
+		for i := 0; i < b.N; i++ {
 			_ = strconv.FormatUint(uint64(input), 10)
 		}
 	})
@@ -250,13 +250,13 @@ func Benchmark_FormatInt16(b *testing.B) {
 
 	b.Run("fiber", func(b *testing.B) {
 		b.ReportAllocs()
-		for n := 0; n < b.N; n++ {
+		for i := 0; i < b.N; i++ {
 			_ = FormatInt16(input)
 		}
 	})
 	b.Run("strconv", func(b *testing.B) {
 		b.ReportAllocs()
-		for n := 0; n < b.N; n++ {
+		for i := 0; i < b.N; i++ {
 			_ = strconv.FormatInt(int64(input), 10)
 		}
 	})
@@ -267,13 +267,13 @@ func Benchmark_FormatUint8(b *testing.B) {
 
 	b.Run("fiber", func(b *testing.B) {
 		b.ReportAllocs()
-		for n := 0; n < b.N; n++ {
+		for i := 0; i < b.N; i++ {
 			_ = FormatUint8(input)
 		}
 	})
 	b.Run("strconv", func(b *testing.B) {
 		b.ReportAllocs()
-		for n := 0; n < b.N; n++ {
+		for i := 0; i < b.N; i++ {
 			_ = strconv.FormatUint(uint64(input), 10)
 		}
 	})
@@ -284,13 +284,13 @@ func Benchmark_FormatInt8(b *testing.B) {
 
 	b.Run("fiber", func(b *testing.B) {
 		b.ReportAllocs()
-		for n := 0; n < b.N; n++ {
+		for i := 0; i < b.N; i++ {
 			_ = FormatInt8(input)
 		}
 	})
 	b.Run("strconv", func(b *testing.B) {
 		b.ReportAllocs()
-		for n := 0; n < b.N; n++ {
+		for i := 0; i < b.N; i++ {
 			_ = strconv.FormatInt(int64(input), 10)
 		}
 	})
@@ -302,13 +302,13 @@ func Benchmark_AppendUint(b *testing.B) {
 
 	b.Run("fiber", func(b *testing.B) {
 		b.ReportAllocs()
-		for n := 0; n < b.N; n++ {
+		for i := 0; i < b.N; i++ {
 			_ = AppendUint(dst, input)
 		}
 	})
 	b.Run("strconv", func(b *testing.B) {
 		b.ReportAllocs()
-		for n := 0; n < b.N; n++ {
+		for i := 0; i < b.N; i++ {
 			_ = strconv.AppendUint(dst, input, 10)
 		}
 	})
@@ -327,13 +327,13 @@ func Benchmark_AppendInt(b *testing.B) {
 	for _, input := range inputs {
 		b.Run(input.name+"/fiber", func(b *testing.B) {
 			b.ReportAllocs()
-			for n := 0; n < b.N; n++ {
+			for i := 0; i < b.N; i++ {
 				_ = AppendInt(dst, input.value)
 			}
 		})
 		b.Run(input.name+"/strconv", func(b *testing.B) {
 			b.ReportAllocs()
-			for n := 0; n < b.N; n++ {
+			for i := 0; i < b.N; i++ {
 				_ = strconv.AppendInt(dst, input.value, 10)
 			}
 		})

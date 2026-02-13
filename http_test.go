@@ -54,7 +54,7 @@ func Test_GetMIME(t *testing.T) {
 func Benchmark_GetMIME(b *testing.B) {
 	var res string
 	b.Run("fiber", func(b *testing.B) {
-		for n := 0; n < b.N; n++ {
+		for i := 0; i < b.N; i++ {
 			res = GetMIME(".xml")
 			res = GetMIME(".txt")
 			res = GetMIME(".png")
@@ -64,7 +64,7 @@ func Benchmark_GetMIME(b *testing.B) {
 		require.Equal(b, "application/json", res)
 	})
 	b.Run("default", func(b *testing.B) {
-		for n := 0; n < b.N; n++ {
+		for i := 0; i < b.N; i++ {
 			res = mime.TypeByExtension(".xml")
 			res = mime.TypeByExtension(".txt")
 			res = mime.TypeByExtension(".png")
@@ -177,13 +177,13 @@ func Test_ParseVendorSpecificContentType_IndexByteOptimization(t *testing.T) {
 
 func Benchmark_ParseVendorSpecificContentType(b *testing.B) {
 	b.Run("vendorContentType", func(b *testing.B) {
-		for n := 0; n < b.N; n++ {
+		for i := 0; i < b.N; i++ {
 			ParseVendorSpecificContentType("application/vnd.api+json; version=1")
 		}
 	})
 
 	b.Run("defaultContentType", func(b *testing.B) {
-		for n := 0; n < b.N; n++ {
+		for i := 0; i < b.N; i++ {
 			ParseVendorSpecificContentType("application/json")
 		}
 	})
@@ -225,12 +225,12 @@ func Test_StatusMessage(t *testing.T) {
 // go test -run=^$ -bench=Benchmark_StatusMessage -benchmem -count=2
 func Benchmark_StatusMessage(b *testing.B) {
 	b.Run("fiber", func(b *testing.B) {
-		for n := 0; n < b.N; n++ {
+		for i := 0; i < b.N; i++ {
 			StatusMessage(http.StatusNotExtended)
 		}
 	})
 	b.Run("default", func(b *testing.B) {
-		for n := 0; n < b.N; n++ {
+		for i := 0; i < b.N; i++ {
 			http.StatusText(http.StatusNotExtended)
 		}
 	})

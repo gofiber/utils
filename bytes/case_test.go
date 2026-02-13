@@ -123,7 +123,7 @@ func Benchmark_ToLowerBytes(b *testing.B) {
 
 			b.Run("fiber", func(b *testing.B) {
 				b.ReportAllocs()
-				for n := 0; n < b.N; n++ {
+				for i := 0; i < b.N; i++ {
 					res = ToLower(template)
 				}
 				require.Equal(b, want, res)
@@ -131,7 +131,7 @@ func Benchmark_ToLowerBytes(b *testing.B) {
 			b.Run("fiber/unsafe", func(b *testing.B) {
 				b.ReportAllocs()
 				work := make([]byte, len(template))
-				for n := 0; n < b.N; n++ {
+				for i := 0; i < b.N; i++ {
 					copy(work, template)
 					res = UnsafeToLower(work)
 				}
@@ -139,7 +139,7 @@ func Benchmark_ToLowerBytes(b *testing.B) {
 			})
 			b.Run("default", func(b *testing.B) {
 				b.ReportAllocs()
-				for n := 0; n < b.N; n++ {
+				for i := 0; i < b.N; i++ {
 					res = stdbytes.ToLower(template)
 				}
 				require.Equal(b, want, res)
@@ -157,7 +157,7 @@ func Benchmark_ToUpperBytes(b *testing.B) {
 
 			b.Run("fiber", func(b *testing.B) {
 				b.ReportAllocs()
-				for n := 0; n < b.N; n++ {
+				for i := 0; i < b.N; i++ {
 					res = ToUpper(template)
 				}
 				require.Equal(b, want, res)
@@ -165,7 +165,7 @@ func Benchmark_ToUpperBytes(b *testing.B) {
 			b.Run("fiber/unsafe", func(b *testing.B) {
 				b.ReportAllocs()
 				work := make([]byte, len(template))
-				for n := 0; n < b.N; n++ {
+				for i := 0; i < b.N; i++ {
 					copy(work, template)
 					res = UnsafeToUpper(work)
 				}
@@ -173,7 +173,7 @@ func Benchmark_ToUpperBytes(b *testing.B) {
 			})
 			b.Run("default", func(b *testing.B) {
 				b.ReportAllocs()
-				for n := 0; n < b.N; n++ {
+				for i := 0; i < b.N; i++ {
 					res = stdbytes.ToUpper(template)
 				}
 				require.Equal(b, want, res)
