@@ -17,7 +17,7 @@ pkg: github.com/gofiber/utils/v2
 cpu: Apple M2 Pro
 
 ```text
-// go test -benchmem -run=^$ -bench=Benchmark_ -count=1
+// go test ./... -benchmem -run=^$ -bench=Benchmark_ -count=1
 
 # Case Conversion
 Benchmark_ToLowerBytes/empty/fiber-12                              593913379   1.975  ns/op         0  B/op   0  allocs/op

@@ -2,7 +2,10 @@ package bytes
 
 import (
 	stdbytes "bytes"
+	"strings"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 type benchCase struct {
@@ -12,147 +15,168 @@ type benchCase struct {
 	upper string
 }
 
-var benchCases = []benchCase{
-	{name: "empty", input: "", lower: "", upper: ""},
-	{name: "http-get", input: "get", lower: "get", upper: "GET"},
-	{name: "http-get-upper", input: "GET", lower: "get", upper: "GET"},
+var benchmarkCoreCases = []benchCase{
+	{name: "empty", input: "", upper: "", lower: ""},
+	{name: "http-get", input: "get", upper: "GET", lower: "get"},
+	{name: "http-get-upper", input: "GET", upper: "GET", lower: "get"},
 	{
 		name:  "header-content-type-mixed",
 		input: "Content-Type: text/html; charset=utf-8",
-		lower: "content-type: text/html; charset=utf-8",
 		upper: "CONTENT-TYPE: TEXT/HTML; CHARSET=UTF-8",
+		lower: "content-type: text/html; charset=utf-8",
 	},
+	{name: "large-lower", input: strings.Repeat("a", 64), upper: strings.Repeat("A", 64), lower: strings.Repeat("a", 64)},
+	{name: "large-upper", input: strings.Repeat("A", 64), upper: strings.Repeat("A", 64), lower: strings.Repeat("a", 64)},
+	{name: "large-mixed", input: strings.Repeat("aB", 32), upper: strings.Repeat("AB", 32), lower: strings.Repeat("ab", 32)},
 }
 
-func TestToLower_NoMutation(t *testing.T) {
+func Test_ToLowerBytes(t *testing.T) {
+	t.Parallel()
+
+	require.Equal(t, []byte("/my/name/is/:param/*"), UnsafeToLower([]byte("/MY/NAME/IS/:PARAM/*")))
+	require.Equal(t, []byte("/my1/name/is/:param/*"), UnsafeToLower([]byte("/MY1/NAME/IS/:PARAM/*")))
+	require.Equal(t, []byte("/my2/name/is/:param/*"), UnsafeToLower([]byte("/MY2/NAME/IS/:PARAM/*")))
+	require.Equal(t, []byte("/my3/name/is/:param/*"), UnsafeToLower([]byte("/MY3/NAME/IS/:PARAM/*")))
+	require.Equal(t, []byte("/my4/name/is/:param/*"), UnsafeToLower([]byte("/MY4/NAME/IS/:PARAM/*")))
+}
+
+func Test_ToUpperBytes(t *testing.T) {
+	t.Parallel()
+
+	require.Equal(t, []byte("/MY/NAME/IS/:PARAM/*"), UnsafeToUpper([]byte("/my/name/is/:param/*")))
+	require.Equal(t, []byte("/MY1/NAME/IS/:PARAM/*"), UnsafeToUpper([]byte("/my1/name/is/:param/*")))
+	require.Equal(t, []byte("/MY2/NAME/IS/:PARAM/*"), UnsafeToUpper([]byte("/my2/name/is/:param/*")))
+	require.Equal(t, []byte("/MY3/NAME/IS/:PARAM/*"), UnsafeToUpper([]byte("/my3/name/is/:param/*")))
+	require.Equal(t, []byte("/MY4/NAME/IS/:PARAM/*"), UnsafeToUpper([]byte("/my4/name/is/:param/*")))
+}
+
+func Test_ToLower_NoMutation(t *testing.T) {
 	in := []byte("Content-Type")
 	snapshot := append([]byte(nil), in...)
 	out := ToLower(in)
 
-	if string(out) != "content-type" {
-		t.Fatalf("unexpected output: %q", out)
-	}
-	if !stdbytes.Equal(in, snapshot) {
-		t.Fatalf("input was mutated: %q", in)
-	}
+	require.Equal(t, "content-type", string(out))
+	require.Equal(t, snapshot, in)
 }
 
-func TestToUpper_NoMutation(t *testing.T) {
+func Test_ToUpper_NoMutation(t *testing.T) {
 	in := []byte("content-type")
 	snapshot := append([]byte(nil), in...)
 	out := ToUpper(in)
 
-	if string(out) != "CONTENT-TYPE" {
-		t.Fatalf("unexpected output: %q", out)
-	}
-	if !stdbytes.Equal(in, snapshot) {
-		t.Fatalf("input was mutated: %q", in)
-	}
+	require.Equal(t, "CONTENT-TYPE", string(out))
+	require.Equal(t, snapshot, in)
 }
 
 func TestUnsafeToLower_Mutates(t *testing.T) {
 	in := []byte("Content-Type")
 	out := UnsafeToLower(in)
-	if &out[0] != &in[0] {
-		t.Fatal("expected same backing array")
-	}
-	if string(in) != "content-type" {
-		t.Fatalf("unexpected output: %q", in)
-	}
+	require.Same(t, &out[0], &in[0])
+	require.Equal(t, "content-type", string(in))
 }
 
 func TestUnsafeToUpper_Mutates(t *testing.T) {
 	in := []byte("content-type")
 	out := UnsafeToUpper(in)
-	if &out[0] != &in[0] {
-		t.Fatal("expected same backing array")
+	require.Same(t, &out[0], &in[0])
+	require.Equal(t, "CONTENT-TYPE", string(in))
+}
+
+func Test_ToLowerBytes_Edge(t *testing.T) {
+	t.Parallel()
+
+	cases := [][]byte{
+		{},
+		[]byte("123"),
+		[]byte("!@#"),
 	}
-	if string(in) != "CONTENT-TYPE" {
-		t.Fatalf("unexpected output: %q", in)
+	for _, c := range cases {
+		t.Run(string(c), func(t *testing.T) {
+			t.Parallel()
+			require.Equal(t, stdbytes.ToLower(c), UnsafeToLower(c))
+		})
 	}
 }
 
-func Benchmark_SubpkgToLower(b *testing.B) {
-	for _, tc := range benchCases {
-		tc := tc
+func Test_ToUpperBytes_Edge(t *testing.T) {
+	t.Parallel()
+
+	cases := [][]byte{
+		{},
+		[]byte("123"),
+		[]byte("!@#"),
+	}
+	for _, c := range cases {
+		t.Run(string(c), func(t *testing.T) {
+			t.Parallel()
+			require.Equal(t, stdbytes.ToUpper(c), UnsafeToUpper(c))
+		})
+	}
+}
+
+func Benchmark_ToLowerBytes(b *testing.B) {
+	for _, tc := range benchmarkCoreCases {
 		b.Run(tc.name, func(b *testing.B) {
-			input := []byte(tc.input)
+			template := []byte(tc.input)
 			want := []byte(tc.lower)
 			var res []byte
 
-			b.Run("subpkg", func(b *testing.B) {
+			b.Run("fiber", func(b *testing.B) {
 				b.ReportAllocs()
 				for n := 0; n < b.N; n++ {
-					res = ToLower(input)
+					res = ToLower(template)
 				}
-				if !stdbytes.Equal(want, res) {
-					b.Fatalf("unexpected output: %q", res)
-				}
+				require.Equal(b, want, res)
 			})
-
-			b.Run("subpkg/unsafe", func(b *testing.B) {
+			b.Run("fiber/unsafe", func(b *testing.B) {
 				b.ReportAllocs()
-				work := make([]byte, len(input))
+				work := make([]byte, len(template))
 				for n := 0; n < b.N; n++ {
-					copy(work, input)
+					copy(work, template)
 					res = UnsafeToLower(work)
 				}
-				if !stdbytes.Equal(want, res) {
-					b.Fatalf("unexpected output: %q", res)
-				}
+				require.Equal(b, want, res)
 			})
-
-			b.Run("stdlib", func(b *testing.B) {
+			b.Run("default", func(b *testing.B) {
 				b.ReportAllocs()
 				for n := 0; n < b.N; n++ {
-					res = stdbytes.ToLower(input)
+					res = stdbytes.ToLower(template)
 				}
-				if !stdbytes.Equal(want, res) {
-					b.Fatalf("unexpected output: %q", res)
-				}
+				require.Equal(b, want, res)
 			})
 		})
 	}
 }
 
-func Benchmark_SubpkgToUpper(b *testing.B) {
-	for _, tc := range benchCases {
-		tc := tc
+func Benchmark_ToUpperBytes(b *testing.B) {
+	for _, tc := range benchmarkCoreCases {
 		b.Run(tc.name, func(b *testing.B) {
-			input := []byte(tc.input)
+			template := []byte(tc.input)
 			want := []byte(tc.upper)
 			var res []byte
 
-			b.Run("subpkg", func(b *testing.B) {
+			b.Run("fiber", func(b *testing.B) {
 				b.ReportAllocs()
 				for n := 0; n < b.N; n++ {
-					res = ToUpper(input)
+					res = ToUpper(template)
 				}
-				if !stdbytes.Equal(want, res) {
-					b.Fatalf("unexpected output: %q", res)
-				}
+				require.Equal(b, want, res)
 			})
-
-			b.Run("subpkg/unsafe", func(b *testing.B) {
+			b.Run("fiber/unsafe", func(b *testing.B) {
 				b.ReportAllocs()
-				work := make([]byte, len(input))
+				work := make([]byte, len(template))
 				for n := 0; n < b.N; n++ {
-					copy(work, input)
+					copy(work, template)
 					res = UnsafeToUpper(work)
 				}
-				if !stdbytes.Equal(want, res) {
-					b.Fatalf("unexpected output: %q", res)
-				}
+				require.Equal(b, want, res)
 			})
-
-			b.Run("stdlib", func(b *testing.B) {
+			b.Run("default", func(b *testing.B) {
 				b.ReportAllocs()
 				for n := 0; n < b.N; n++ {
-					res = stdbytes.ToUpper(input)
+					res = stdbytes.ToUpper(template)
 				}
-				if !stdbytes.Equal(want, res) {
-					b.Fatalf("unexpected output: %q", res)
-				}
+				require.Equal(b, want, res)
 			})
 		})
 	}
