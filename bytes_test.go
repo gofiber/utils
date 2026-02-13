@@ -8,6 +8,7 @@ import (
 	"bytes"
 	"testing"
 
+	casebytes "github.com/gofiber/utils/v2/bytes"
 	"github.com/stretchr/testify/require"
 )
 
@@ -59,24 +60,6 @@ func Test_ToUpperBytes_NoMutation(t *testing.T) {
 	require.Equal(t, []byte("/MY/NAME/IS/:PARAM/*"), out)
 }
 
-func Test_ToLowerBytesMut(t *testing.T) {
-	t.Parallel()
-
-	buf := []byte("/MY/NAME/IS/:PARAM/*")
-	out := ToLowerBytesMut(buf)
-	require.Same(t, &buf[0], &out[0], "should return same backing array")
-	require.Equal(t, []byte("/my/name/is/:param/*"), buf)
-}
-
-func Test_ToUpperBytesMut(t *testing.T) {
-	t.Parallel()
-
-	buf := []byte("/my/name/is/:param/*")
-	out := ToUpperBytesMut(buf)
-	require.Same(t, &buf[0], &out[0], "should return same backing array")
-	require.Equal(t, []byte("/MY/NAME/IS/:PARAM/*"), buf)
-}
-
 func Benchmark_ToLowerBytes(b *testing.B) {
 	for _, tc := range benchmarkCoreCases {
 		b.Run(tc.name, func(b *testing.B) {
@@ -91,12 +74,12 @@ func Benchmark_ToLowerBytes(b *testing.B) {
 				}
 				require.True(b, bytes.Equal(want, res))
 			})
-			b.Run("fiber/mut", func(b *testing.B) {
+			b.Run("fiber/unsafe", func(b *testing.B) {
 				b.ReportAllocs()
 				work := make([]byte, len(template))
 				for n := 0; n < b.N; n++ {
 					copy(work, template)
-					res = ToLowerBytesMut(work)
+					res = casebytes.UnsafeToLower(work)
 				}
 				require.True(b, bytes.Equal(want, res))
 			})
@@ -125,12 +108,12 @@ func Benchmark_ToUpperBytes(b *testing.B) {
 				}
 				require.Equal(b, want, res)
 			})
-			b.Run("fiber/mut", func(b *testing.B) {
+			b.Run("fiber/unsafe", func(b *testing.B) {
 				b.ReportAllocs()
 				work := make([]byte, len(template))
 				for n := 0; n < b.N; n++ {
 					copy(work, template)
-					res = ToUpperBytesMut(work)
+					res = casebytes.UnsafeToUpper(work)
 				}
 				require.Equal(b, want, res)
 			})

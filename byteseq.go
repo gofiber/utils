@@ -1,5 +1,9 @@
 package utils
 
+import (
+	"github.com/gofiber/utils/v2/internal/caseconv"
+)
+
 type byteSeq interface {
 	~string | ~[]byte
 }
@@ -10,7 +14,7 @@ func EqualFold[S byteSeq](b, s S) bool {
 		return false
 	}
 
-	table := toUpperTable
+	table := caseconv.ToUpperTable
 	n := len(b)
 	i := 0
 

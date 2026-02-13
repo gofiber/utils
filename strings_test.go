@@ -12,6 +12,7 @@ import (
 	"strings"
 	"testing"
 
+	casestrings "github.com/gofiber/utils/v2/strings"
 	"github.com/stretchr/testify/require"
 )
 
@@ -109,28 +110,6 @@ func Test_ToLower(t *testing.T) {
 	}
 }
 
-func Test_ToLowerMut(t *testing.T) {
-	t.Parallel()
-
-	buf := []byte("Content-Type")
-	s := UnsafeString(buf)
-	out := ToLowerMut(s)
-
-	require.Equal(t, "content-type", out)
-	require.Equal(t, []byte("content-type"), buf, "backing bytes should be mutated in-place")
-}
-
-func Test_ToUpperMut(t *testing.T) {
-	t.Parallel()
-
-	buf := []byte("content-type")
-	s := UnsafeString(buf)
-	out := ToUpperMut(s)
-
-	require.Equal(t, "CONTENT-TYPE", out)
-	require.Equal(t, []byte("CONTENT-TYPE"), buf, "backing bytes should be mutated in-place")
-}
-
 func Test_ASCII_EdgeCases(t *testing.T) {
 	// Test ASCII characters from 0 to 127 for ToUpper and ToLower
 	// This ensures that all basic ASCII characters are handled correctly.
@@ -161,12 +140,12 @@ func Benchmark_ToUpper(b *testing.B) {
 				}
 				require.Equal(b, tc.upper, fiberRes)
 			})
-			b.Run("fiber/mut", func(b *testing.B) {
+			b.Run("fiber/unsafe", func(b *testing.B) {
 				template := []byte(tc.input)
 				work := make([]byte, len(template))
 				for n := 0; n < b.N; n++ {
 					copy(work, template)
-					fiberRes = ToUpperMut(UnsafeString(work))
+					fiberRes = casestrings.UnsafeToUpper(UnsafeString(work))
 				}
 				require.Equal(b, tc.upper, fiberRes)
 			})
@@ -192,12 +171,12 @@ func Benchmark_ToLower(b *testing.B) {
 				}
 				require.Equal(b, tc.lower, fiberRes)
 			})
-			b.Run("fiber/mut", func(b *testing.B) {
+			b.Run("fiber/unsafe", func(b *testing.B) {
 				template := []byte(tc.input)
 				work := make([]byte, len(template))
 				for n := 0; n < b.N; n++ {
 					copy(work, template)
-					fiberRes = ToLowerMut(UnsafeString(work))
+					fiberRes = casestrings.UnsafeToLower(UnsafeString(work))
 				}
 				require.Equal(b, tc.lower, fiberRes)
 			})
