@@ -8,20 +8,20 @@ import (
 	casebytes "github.com/gofiber/utils/v2/bytes"
 )
 
-// ToLowerBytes converts an ASCII byte slice to lower-case without modifying the input.
+// ToLowerBytes converts an ASCII byte slice to lower-case in-place.
 //
-// Deprecated: use package "github.com/gofiber/utils/v2/bytes" and call bytes.ToLower.
-// This wrapper keeps backward compatibility by applying in-place conversion on a copied slice.
+// Deprecated: use package "github.com/gofiber/utils/v2/bytes" and call bytes.UnsafeToLower.
+// This wrapper keeps backward compatibility by mutating the provided slice.
 func ToLowerBytes(b []byte) []byte {
-	return casebytes.ToLower(b)
+	return casebytes.UnsafeToLower(b)
 }
 
-// ToUpperBytes converts an ASCII byte slice to upper-case without modifying the input.
+// ToUpperBytes converts an ASCII byte slice to upper-case in-place.
 //
-// Deprecated: use package "github.com/gofiber/utils/v2/bytes" and call bytes.ToUpper.
-// This wrapper keeps backward compatibility by applying in-place conversion on a copied slice.
+// Deprecated: use package "github.com/gofiber/utils/v2/bytes" and call bytes.UnsafeToUpper.
+// This wrapper keeps backward compatibility by mutating the provided slice.
 func ToUpperBytes(b []byte) []byte {
-	return casebytes.ToUpper(b)
+	return casebytes.UnsafeToUpper(b)
 }
 
 // AddTrailingSlashBytes appends a trailing '/' to b if it does not already end with one.
