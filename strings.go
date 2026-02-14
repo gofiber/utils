@@ -4,67 +4,22 @@
 
 package utils
 
-// ToLower converts ascii string to lower-case
-func ToLower(b string) string {
-	n := len(b)
-	if n == 0 {
-		return b
-	}
+import (
+	casestrings "github.com/gofiber/utils/v2/strings"
+)
 
-	table := toLowerTable
-	for i := range n {
-		c := b[i]
-		low := table[c]
-		if low != c {
-			res := make([]byte, n)
-			copy(res, b[:i])
-			res[i] = low
-			j := i + 1
-			for ; j+3 < n; j += 4 {
-				res[j+0] = table[b[j+0]]
-				res[j+1] = table[b[j+1]]
-				res[j+2] = table[b[j+2]]
-				res[j+3] = table[b[j+3]]
-			}
-			for ; j < n; j++ {
-				res[j] = table[b[j]]
-			}
-			return UnsafeString(res)
-		}
-	}
-	return b
+// ToLower converts ascii string to lower-case.
+//
+// Deprecated: use package "github.com/gofiber/utils/v2/strings" and call strings.ToLower.
+func ToLower(b string) string {
+	return casestrings.ToLower(b)
 }
 
-// ToUpper converts ascii string to upper-case
+// ToUpper converts ascii string to upper-case.
+//
+// Deprecated: use package "github.com/gofiber/utils/v2/strings" and call strings.ToUpper.
 func ToUpper(b string) string {
-	n := len(b)
-	if n == 0 {
-		return b
-	}
-
-	table := toUpperTable
-	for i := range n {
-		c := b[i]
-		up := table[c]
-		if up != c {
-			res := make([]byte, n)
-			copy(res, b[:i])
-			res[i] = up
-			j := i + 1
-			for ; j+3 < n; j += 4 {
-				res[j+0] = table[b[j+0]]
-				res[j+1] = table[b[j+1]]
-				res[j+2] = table[b[j+2]]
-				res[j+3] = table[b[j+3]]
-			}
-			for ; j < n; j++ {
-				res[j] = table[b[j]]
-			}
-			return UnsafeString(res)
-		}
-	}
-
-	return b
+	return casestrings.ToUpper(b)
 }
 
 // AddTrailingSlashString appends a trailing '/' to s if it does not already end with one.

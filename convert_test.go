@@ -318,13 +318,13 @@ func Benchmark_UnsafeBytes(b *testing.B) {
 	hello := "Hello, World!"
 	var res []byte
 	b.Run("unsafe", func(b *testing.B) {
-		for n := 0; n < b.N; n++ {
+		for i := 0; i < b.N; i++ {
 			res = UnsafeBytes(hello)
 		}
 		require.Equal(b, []byte("Hello, World!"), res)
 	})
 	b.Run("default", func(b *testing.B) {
-		for n := 0; n < b.N; n++ {
+		for i := 0; i < b.N; i++ {
 			res = []byte(hello)
 		}
 		require.Equal(b, []byte("Hello, World!"), res)
@@ -336,13 +336,13 @@ func Benchmark_UnsafeString(b *testing.B) {
 	hello := []byte("Hello, World!")
 	var res string
 	b.Run("unsafe", func(b *testing.B) {
-		for n := 0; n < b.N; n++ {
+		for i := 0; i < b.N; i++ {
 			res = UnsafeString(hello)
 		}
 		require.Equal(b, "Hello, World!", res)
 	})
 	b.Run("default", func(b *testing.B) {
-		for n := 0; n < b.N; n++ {
+		for i := 0; i < b.N; i++ {
 			res = string(hello)
 		}
 		require.Equal(b, "Hello, World!", res)

@@ -4,64 +4,24 @@
 
 package utils
 
-// ToLowerBytes converts ascii slice to lower-case
+import (
+	casebytes "github.com/gofiber/utils/v2/bytes"
+)
+
+// ToLowerBytes converts an ASCII byte slice to lower-case in-place.
+//
+// Deprecated: use package "github.com/gofiber/utils/v2/bytes" and call bytes.UnsafeToLower.
+// This wrapper keeps backward compatibility by mutating the provided slice.
 func ToLowerBytes(b []byte) []byte {
-	table := toLowerTable
-	n := len(b)
-	i := 0
-
-	// Unroll by 4 to balance instruction-level parallelism with cache pressure.
-	limit := n &^ 3
-	for i < limit {
-		b0 := b[i+0]
-		b1 := b[i+1]
-		b2 := b[i+2]
-		b3 := b[i+3]
-
-		b[i+0] = table[b0]
-		b[i+1] = table[b1]
-		b[i+2] = table[b2]
-		b[i+3] = table[b3]
-
-		i += 4
-	}
-
-	for i < n {
-		b[i] = table[b[i]]
-		i++
-	}
-
-	return b
+	return casebytes.UnsafeToLower(b)
 }
 
-// ToUpperBytes converts ascii slice to upper-case
+// ToUpperBytes converts an ASCII byte slice to upper-case in-place.
+//
+// Deprecated: use package "github.com/gofiber/utils/v2/bytes" and call bytes.UnsafeToUpper.
+// This wrapper keeps backward compatibility by mutating the provided slice.
 func ToUpperBytes(b []byte) []byte {
-	table := toUpperTable
-	n := len(b)
-	i := 0
-
-	// Unroll by 4 to match ToLowerBytes and maximize throughput on amd64.
-	limit := n &^ 3
-	for i < limit {
-		b0 := b[i+0]
-		b1 := b[i+1]
-		b2 := b[i+2]
-		b3 := b[i+3]
-
-		b[i+0] = table[b0]
-		b[i+1] = table[b1]
-		b[i+2] = table[b2]
-		b[i+3] = table[b3]
-
-		i += 4
-	}
-
-	for i < n {
-		b[i] = table[b[i]]
-		i++
-	}
-
-	return b
+	return casebytes.UnsafeToUpper(b)
 }
 
 // AddTrailingSlashBytes appends a trailing '/' to b if it does not already end with one.

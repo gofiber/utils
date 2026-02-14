@@ -11,21 +11,18 @@ import (
 	"strconv"
 	"strings"
 	"time"
-	"unsafe"
+
+	"github.com/gofiber/utils/v2/internal/unsafeconv"
 )
 
 // UnsafeString returns a string pointer without allocation
 func UnsafeString(b []byte) string {
-	// the new way is slower `return unsafe.String(unsafe.SliceData(b), len(b))`
-	// unsafe.Pointer variant: 0.3538 ns/op vs unsafe.String variant: 0.5410 ns/op
-	// #nosec G103
-	return *(*string)(unsafe.Pointer(&b))
+	return unsafeconv.UnsafeString(b)
 }
 
 // UnsafeBytes returns a byte pointer without allocation.
 func UnsafeBytes(s string) []byte {
-	// #nosec G103
-	return unsafe.Slice(unsafe.StringData(s), len(s))
+	return unsafeconv.UnsafeBytes(s)
 }
 
 // CopyString copies a string to make it immutable
