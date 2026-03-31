@@ -3,7 +3,7 @@ module github.com/gofiber/utils/v2
 go 1.24.0
 
 require (
-	github.com/fxamacker/cbor/v2 v2.9.0
+	github.com/fxamacker/cbor/v2 v2.9.1
 	github.com/google/uuid v1.6.0
 	github.com/stretchr/testify v1.11.1
 )
