@@ -1,0 +1,46 @@
+name: Weekly release
+
+# Pilot caller for the centrally-hosted weekly auto-release workflow.
+#
+# Schedule: every Tuesday 07:00 UTC (08:00 CET / 09:00 CEST). Also
+# supports manual invocation via the Actions UI (workflow_dispatch).
+#
+# `dry-run: true` is hard-coded during the pilot so the first few runs
+# compute the cleaned body + a unified diff in the job summary WITHOUT
+# writing anything back to GitHub. Once the output looks sane, flip this
+# single line to `false` in a dedicated commit — that's the go-live moment
+# for the weekly auto-publish.
+
+on:
+  schedule:
+    # Pilot override: fire tomorrow (Friday = 5) at 07:00 UTC for the first
+    # dry-run canary. After the canary lands, revert to the target cadence
+    # `0 7 * * 2` (Tuesday) — that's utils' permanent slot.
+    - cron: '0 7 * * 5'
+  workflow_dispatch: {}
+
+# Prevent a scheduled run from colliding with a manual one. cancel-in-
+# progress stays false so a half-way publish never gets aborted.
+concurrency:
+  group: weekly-release-${{ github.repository }}
+  cancel-in-progress: false
+
+# Permissions requested by the reusable workflow. They must also be
+# granted here because a reusable workflow cannot ask for more than what
+# the caller permits.
+permissions:
+  contents: write
+  pull-requests: read
+  issues: write
+
+jobs:
+  release:
+    uses: gofiber/.github/.github/workflows/weekly-release.yml@main
+    with:
+      repo-type: single
+      # Pilot mode. Change to `false` (single-line commit) once a dry-run
+      # canary has confirmed the cleanup output.
+      dry-run: true
+    # No secrets are passed — the reusable workflow uses the auto-provisioned
+    # GITHUB_TOKEN. The `permissions:` block above grants it the contents /
+    # issues / pull-requests access the reusable needs.
