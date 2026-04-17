@@ -3,37 +3,23 @@ name: Weekly release
 # Caller for the centrally-hosted weekly auto-release workflow.
 #
 # Schedule: every Tuesday 07:00 UTC (08:00 CET / 09:00 CEST).
-#
-# Three ways to use:
-#   1. Let the cron run — auto-publishes all pending non-major drafts.
-#   2. Dispatch with mode=select — creates a GitHub Issue with checkboxes
-#      so you can pick which drafts to publish. After checking the boxes,
-#      add the label `approve-release` to the issue.
-#   3. Dispatch with mode=auto + draft-tags — power-user shortcut to
-#      publish specific tags without the issue flow.
+# Manual dispatch supports filtering by tag or package name and dry-run.
 
 on:
   schedule:
     - cron: '0 7 * * 2'
   workflow_dispatch:
     inputs:
-      mode:
-        description: 'auto: publish all | select: create issue with checkboxes'
-        type: choice
-        options: ['auto', 'select']
-        default: 'auto'
       draft-tags:
         description: >
-          Comma-separated tags (e.g. "v2.0.3"). Only used with mode=auto.
-          Leave empty to process ALL pending drafts.
+          Tags or package names to publish, comma-separated (e.g. "v2.0.3"
+          or "websocket,jwt"). Matched as substrings. Empty = all drafts.
         type: string
         default: ''
       dry-run:
         description: Show diff but do not publish.
         type: boolean
         default: false
-  issues:
-    types: [labeled]
 
 concurrency:
   group: weekly-release-${{ github.repository }}
@@ -46,18 +32,8 @@ permissions:
 
 jobs:
   release:
-    # For issue events: only react to the approve-release label.
-    if: >-
-      github.event_name != 'issues' ||
-      github.event.label.name == 'approve-release'
     uses: gofiber/.github/.github/workflows/weekly-release.yml@main
     with:
       repo-type: single
-      mode: >-
-        ${{
-          github.event_name == 'issues' && 'process' ||
-          inputs.mode || 'auto'
-        }}
-      issue-number: ${{ github.event_name == 'issues' && github.event.issue.number || 0 }}
       dry-run: ${{ inputs.dry-run || false }}
       draft-tags: ${{ inputs.draft-tags || '' }}
