@@ -1,0 +1,29 @@
+name: After Release
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+
+jobs:
+  trigger-dependabot:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        repo:
+          - gofiber/fiber
+          - gofiber/contrib
+          - gofiber/storage
+          - gofiber/template
+          - gofiber/cli
+          - gofiber/boilerplate
+          - gofiber/recipes
+          - gofiber/schema
+    steps:
+      - uses: gofiber/.github/.github/actions/trigger-dependabot@main
+        with:
+          repo: ${{ matrix.repo }}
+          reason: 'utils ${{ github.event.release.tag_name }} released'
+          token: ${{ secrets.DISPATCH_TOKEN }}
