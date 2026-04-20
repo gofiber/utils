@@ -2,7 +2,7 @@ name: Weekly release
 
 # Caller for the centrally-hosted weekly auto-release workflow.
 #
-# Schedule: every Monday 07:00 UTC (08:00 CET / 09:00 CEST).
+# Schedule: every Monday 08:00 UTC (09:00 CET / 10:00 CEST).
 # Manual dispatch supports filtering by tag or package name and dry-run.
 
 on:
@@ -37,3 +37,6 @@ jobs:
       repo-type: single
       dry-run: ${{ inputs.dry-run || false }}
       draft-tags: ${{ inputs.draft-tags || '' }}
+      post-release-events: after-release
+    secrets:
+      dispatch-token: ${{ secrets.DISPATCH_TOKEN }}
