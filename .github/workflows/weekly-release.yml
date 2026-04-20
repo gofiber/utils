@@ -2,12 +2,12 @@ name: Weekly release
 
 # Caller for the centrally-hosted weekly auto-release workflow.
 #
-# Schedule: every Tuesday 07:00 UTC (08:00 CET / 09:00 CEST).
+# Schedule: every Monday 07:00 UTC (08:00 CET / 09:00 CEST).
 # Manual dispatch supports filtering by tag or package name and dry-run.
 
 on:
   schedule:
-    - cron: '0 8 * * 2'
+    - cron: '0 8 * * 1'
   workflow_dispatch:
     inputs:
       draft-tags:
