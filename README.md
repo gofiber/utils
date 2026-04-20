@@ -3,7 +3,7 @@
 ![Release](https://img.shields.io/github/release/gofiber/utils.svg)
 ![Test](https://github.com/gofiber/utils/workflows/Test/badge.svg)
 ![Codecov](https://img.shields.io/codecov/c/github/gofiber/utils?token=3Cr92CwaPQ&style=flat-square&logo=codecov&label=codecov)
-![Linter](https://github.com/gofiber/utils/workflows/Linter/badge.svg)
+![Linter](https://github.com/gofiber/utils/actions/workflows/lint.yml/badge.svg)
 [![Discord](https://img.shields.io/badge/discord-join%20channel-7289DA)](https://gofiber.io/discord)
 
 A collection of common functions for [Fiber](https://github.com/gofiber/fiber) with better performance, fewer allocations, and fewer dependencies.
