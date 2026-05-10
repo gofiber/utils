@@ -102,6 +102,9 @@ func Test_ParseVendorSpecificContentType(t *testing.T) {
 	cType = ParseVendorSpecificContentType("text/vnd.example+plain")
 	require.Equal(t, "text/plain", cType)
 
+	cType = ParseVendorSpecificContentType("aaaaaaaaaaa/vnd.api+json")
+	require.Equal(t, "aaaaaaaaaaa/json", cType)
+
 	cType = ParseVendorSpecificContentType("application/vnd.test+json;boundary=test")
 	require.Equal(t, "application/json", cType)
 

@@ -14,7 +14,7 @@ const (
 	contentTypeApplicationJSON               = "application/json"
 	contentTypeApplicationXML                = "application/xml"
 	contentTypeApplicationFormURLEncoded     = "application/x-www-form-urlencoded"
-	contentTypePrefixApplicationWithSlashLen = len("application/")
+	contentTypePrefixApplicationWithSlash    = "application/"
 )
 
 // GetMIME returns the content-type of a file extension
@@ -80,7 +80,7 @@ func ParseVendorSpecificContentType(cType string, caseInsensitive ...bool) strin
 		return cType
 	}
 
-	if slashIndex+1 == contentTypePrefixApplicationWithSlashLen {
+	if strings.HasPrefix(working, contentTypePrefixApplicationWithSlash) {
 		switch parsableType {
 		case "json":
 			return contentTypeApplicationJSON
