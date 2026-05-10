@@ -11,10 +11,10 @@ import (
 
 const MIMEOctetStream = "application/octet-stream"
 const (
-	contentTypeApplicationJSON               = "application/json"
-	contentTypeApplicationXML                = "application/xml"
-	contentTypeApplicationFormURLEncoded     = "application/x-www-form-urlencoded"
-	contentTypePrefixApplicationWithSlash    = "application/"
+	contentTypeApplicationJSON            = "application/json"
+	contentTypeApplicationXML             = "application/xml"
+	contentTypeApplicationFormURLEncoded  = "application/x-www-form-urlencoded"
+	contentTypePrefixApplicationWithSlash = "application/"
 )
 
 // GetMIME returns the content-type of a file extension
