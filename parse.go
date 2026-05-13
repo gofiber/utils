@@ -5,7 +5,11 @@ import (
 	"strconv"
 )
 
-const maxFracDigits = 16
+const (
+	maxFracDigits   = 16
+	maxUint64Cutoff = math.MaxUint64 / 10
+	maxUint64Cutlim = math.MaxUint64 % 10
+)
 
 type Signed interface {
 	~int | ~int8 | ~int16 | ~int32 | ~int64
@@ -136,10 +140,6 @@ func ParseUint8[S byteSeq](s S) (uint8, error) {
 // It returns an error if any non-digit is encountered or overflow happens.
 func parseDigits[S byteSeq](s S, i int) (uint64, error) {
 	var n uint64
-	const (
-		cutoff = math.MaxUint64 / 10
-		cutlim = math.MaxUint64 % 10
-	)
 	digits := 0
 	for ; i < len(s); i++ {
 		c := s[i] - '0'
@@ -148,7 +148,7 @@ func parseDigits[S byteSeq](s S, i int) (uint64, error) {
 		}
 		d := uint64(c)
 		// Any value with <= 19 digits is guaranteed to fit in uint64.
-		if digits >= 19 && (n > cutoff || (n == cutoff && d > cutlim)) {
+		if digits >= 19 && (n > maxUint64Cutoff || (n == maxUint64Cutoff && d > maxUint64Cutlim)) {
 			return 0, strconv.ErrRange
 		}
 		n = n*10 + d
@@ -240,14 +240,12 @@ func parseFloat[S byteSeq](fn string, s S) (float64, error) {
 	}
 
 	var intPart uint64
-	const maxUint64Div10 = ^uint64(0) / 10
-	const maxUint64Mod10 = ^uint64(0) % 10
 	for i < len(s) {
 		c := s[i] - '0'
 		if c > 9 {
 			break
 		}
-		if intPart > maxUint64Div10 || (intPart == maxUint64Div10 && uint64(c) > maxUint64Mod10) {
+		if intPart > maxUint64Cutoff || (intPart == maxUint64Cutoff && uint64(c) > maxUint64Cutlim) {
 			return 0, &strconv.NumError{Func: fn, Num: string(s), Err: strconv.ErrRange}
 		}
 		intPart = intPart*10 + uint64(c)
