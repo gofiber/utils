@@ -240,16 +240,17 @@ func parseFloat[S byteSeq](fn string, s S) (float64, error) {
 	}
 
 	var intPart uint64
+	const maxUint64Div10 = ^uint64(0) / 10
+	const maxUint64Mod10 = ^uint64(0) % 10
 	for i < len(s) {
 		c := s[i] - '0'
 		if c > 9 {
 			break
 		}
-		nn := intPart*10 + uint64(c)
-		if nn < intPart {
+		if intPart > maxUint64Div10 || (intPart == maxUint64Div10 && uint64(c) > maxUint64Mod10) {
 			return 0, &strconv.NumError{Func: fn, Num: string(s), Err: strconv.ErrRange}
 		}
-		intPart = nn
+		intPart = intPart*10 + uint64(c)
 		i++
 	}
 
