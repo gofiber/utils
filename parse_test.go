@@ -556,6 +556,7 @@ func Test_ParseFloat64(t *testing.T) {
 		{strconv.FormatFloat(-math.MaxFloat64, 'g', -1, 64), -math.MaxFloat64, true},
 		{"5e-324", 0, true},
 		{"1e-400", 0, true},
+		{"25000000000000000000e-18", 0, false},
 		{"1234567891234567891234567", 0, false},
 		{"1.2345678912345678", 1.2345678912345678, true}, // large number
 		{"0.11111111111111119", 0, false},
