@@ -10,16 +10,20 @@ import (
 
 // ToLowerBytes converts an ASCII byte slice to lower-case in-place.
 //
-// Deprecated: use package "github.com/gofiber/utils/v2/bytes" and call bytes.UnsafeToLower.
+// Deprecated: use [github.com/gofiber/utils/v2/bytes.UnsafeToLower] instead.
 // This wrapper keeps backward compatibility by mutating the provided slice.
+//
+//go:fix inline
 func ToLowerBytes(b []byte) []byte {
 	return casebytes.UnsafeToLower(b)
 }
 
 // ToUpperBytes converts an ASCII byte slice to upper-case in-place.
 //
-// Deprecated: use package "github.com/gofiber/utils/v2/bytes" and call bytes.UnsafeToUpper.
+// Deprecated: use [github.com/gofiber/utils/v2/bytes.UnsafeToUpper] instead.
 // This wrapper keeps backward compatibility by mutating the provided slice.
+//
+//go:fix inline
 func ToUpperBytes(b []byte) []byte {
 	return casebytes.UnsafeToUpper(b)
 }
