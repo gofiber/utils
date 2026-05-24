@@ -351,7 +351,6 @@ func Test_TrimSpace(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
-		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 			// Test string variant - must match strings.TrimSpace
@@ -370,7 +369,6 @@ func Test_TrimSpace(t *testing.T) {
 
 func Benchmark_TrimSpace(b *testing.B) {
 	for _, tc := range trimSpaceBenchmarkCases {
-		tc := tc // capture range variable
 		b.Run("fiber/"+tc.name, func(b *testing.B) {
 			b.ReportAllocs()
 			b.SetBytes(int64(len(tc.input)))
@@ -396,7 +394,6 @@ func Benchmark_TrimSpace(b *testing.B) {
 
 func Benchmark_TrimSpaceBytes(b *testing.B) {
 	for _, tc := range trimSpaceBenchmarkCases {
-		tc := tc // capture range variable
 		input := []byte(tc.input)
 		b.Run("fiber/"+tc.name, func(b *testing.B) {
 			b.ReportAllocs()

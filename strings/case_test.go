@@ -62,8 +62,7 @@ func Test_ToLower(t *testing.T) {
 
 func Test_ASCII_EdgeCases(t *testing.T) {
 	t.Parallel()
-	for i := 0; i < 128; i++ {
-		idx := i
+	for idx := range 128 {
 		c := byte(idx)
 		t.Run(fmt.Sprintf("ASCII-char-%03d", idx), func(t *testing.T) {
 			t.Parallel()

@@ -102,11 +102,11 @@ func FormatUint32(n uint32) string {
 	i := 10
 	for n >= 10 {
 		i--
-		buf[i] = byte(n%10) + '0' //nolint:gosec // i is always in bounds: starts at 10, decrements max 10 times for uint32
+		buf[i] = byte(n%10) + '0'
 		n /= 10
 	}
 	i--
-	buf[i] = byte(n) + '0' //nolint:gosec // i is always >= 0 after loop
+	buf[i] = byte(n) + '0'
 	return string(buf[i:])
 }
 
@@ -145,11 +145,11 @@ func FormatUint16(n uint16) string {
 	i := 5
 	for n >= 10 {
 		i--
-		buf[i] = byte(n%10) + '0' //nolint:gosec // i is always in bounds: starts at 5, decrements max 5 times for uint16
+		buf[i] = byte(n%10) + '0'
 		n /= 10
 	}
 	i--
-	buf[i] = byte(n) + '0' //nolint:gosec // i is always >= 0 after loop
+	buf[i] = byte(n) + '0'
 	return string(buf[i:])
 }
 
@@ -169,13 +169,13 @@ func FormatInt16(n int16) string {
 	i := 6
 	for un >= 10 {
 		i--
-		buf[i] = byte(un%10) + '0' //nolint:gosec // i is always in bounds
+		buf[i] = byte(un%10) + '0'
 		un /= 10
 	}
 	i--
-	buf[i] = byte(un) + '0' //nolint:gosec // i is always >= 1 after loop
+	buf[i] = byte(un) + '0'
 	i--
-	buf[i] = '-' //nolint:gosec // i is always >= 0 after decrement
+	buf[i] = '-'
 	return string(buf[i:])
 }
 
@@ -210,6 +210,6 @@ func AppendInt(dst []byte, n int64) []byte {
 	var buf [20]byte
 	i := formatUintBuf(&buf, uint64(-n))
 	i--
-	buf[i] = '-' //nolint:gosec // i is always >= 0: formatUintBuf returns at least 1 for any input, so i >= 0 after decrement
+	buf[i] = '-'
 	return append(dst, buf[i:]...)
 }
