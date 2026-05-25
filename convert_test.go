@@ -162,7 +162,16 @@ func Test_ToString(t *testing.T) {
 
 	t.Run("nil", func(t *testing.T) {
 		t.Parallel()
-		require.Equal(t, "<nil>", ToString(nil))
+		require.NotPanics(t, func() {
+			require.Empty(t, ToString(nil))
+		})
+	})
+
+	t.Run("invalid reflect.Value", func(t *testing.T) {
+		t.Parallel()
+		require.NotPanics(t, func() {
+			require.Empty(t, ToString(reflect.Value{}))
+		})
 	})
 
 	// Test nil pointer handling - nil pointers return type-specific defaults
