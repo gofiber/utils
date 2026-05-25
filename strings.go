@@ -10,14 +10,18 @@ import (
 
 // ToLower converts ascii string to lower-case.
 //
-// Deprecated: use package "github.com/gofiber/utils/v2/strings" and call strings.ToLower.
+// Deprecated: use [github.com/gofiber/utils/v2/strings.ToLower] instead.
+//
+//go:fix inline
 func ToLower(b string) string {
 	return casestrings.ToLower(b)
 }
 
 // ToUpper converts ascii string to upper-case.
 //
-// Deprecated: use package "github.com/gofiber/utils/v2/strings" and call strings.ToUpper.
+// Deprecated: use [github.com/gofiber/utils/v2/strings.ToUpper] instead.
+//
+//go:fix inline
 func ToUpper(b string) string {
 	return casestrings.ToUpper(b)
 }
