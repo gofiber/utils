@@ -146,6 +146,9 @@ func ToString(arg any, timeFormat ...string) string {
 		}
 		return v.Format("2006-01-02 15:04:05")
 	case reflect.Value:
+		if !v.IsValid() || !v.CanInterface() {
+			return ""
+		}
 		return ToString(v.Interface(), timeFormat...)
 	case fmt.Stringer:
 		return v.String()
@@ -214,6 +217,9 @@ func ToString(arg any, timeFormat ...string) string {
 	default:
 		// Check if the type is a pointer by using reflection
 		rv := reflect.ValueOf(arg)
+		if !rv.IsValid() {
+			return ""
+		}
 		kind := rv.Kind()
 		if kind == reflect.Ptr && !rv.IsNil() {
 			// Dereference the pointer and recursively call ToString
