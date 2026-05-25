@@ -221,7 +221,7 @@ func ToString(arg any, timeFormat ...string) string {
 			return ""
 		}
 		kind := rv.Kind()
-		if kind == reflect.Ptr && !rv.IsNil() {
+		if kind == reflect.Pointer && !rv.IsNil() {
 			// Dereference the pointer and recursively call ToString
 			return ToString(rv.Elem().Interface(), timeFormat...)
 		} else if kind == reflect.Slice || kind == reflect.Array {

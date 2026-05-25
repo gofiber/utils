@@ -60,12 +60,12 @@ func Test_UUIDv4_Concurrency(t *testing.T) {
 	var res string
 	ch := make(chan string, iterations)
 	results := make(map[string]string)
-	for i := 0; i < iterations; i++ {
+	for range iterations {
 		go func() {
 			ch <- UUIDv4()
 		}()
 	}
-	for i := 0; i < iterations; i++ {
+	for range iterations {
 		res = <-ch
 		results[res] = res
 	}
@@ -103,12 +103,12 @@ func Test_GenerateSecureToken_Concurrency(t *testing.T) {
 	iterations := 1000
 	ch := make(chan string, iterations)
 	results := make(map[string]string)
-	for i := 0; i < iterations; i++ {
+	for range iterations {
 		go func() {
 			ch <- GenerateSecureToken(32)
 		}()
 	}
-	for i := 0; i < iterations; i++ {
+	for range iterations {
 		res := <-ch
 		results[res] = res
 	}
@@ -260,7 +260,6 @@ func Test_IncrementIPRange(t *testing.T) {
 	}
 
 	for _, c := range cases {
-		c := c
 		t.Run(c.input.String(), func(t *testing.T) {
 			t.Parallel()
 			IncrementIPRange(c.input)
@@ -282,7 +281,6 @@ func Test_IncrementIPRange_IPv6(t *testing.T) {
 	}
 
 	for _, c := range cases {
-		c := c
 		t.Run(c.input.String(), func(t *testing.T) {
 			t.Parallel()
 			IncrementIPRange(c.input)

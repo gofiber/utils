@@ -7,7 +7,7 @@ import (
 )
 
 var (
-	timestamp   uint32
+	timestamp   atomic.Uint32
 	updaterOnce sync.Once
 	stopUpdater chan struct{}
 	updaterDone chan struct{}
@@ -16,14 +16,14 @@ var (
 // Timestamp returns the current cached Unix timestamp (seconds).
 // Call StartTimeStampUpdater() once at app startup for best performance.
 func Timestamp() uint32 {
-	return atomic.LoadUint32(&timestamp)
+	return timestamp.Load()
 }
 
 // StartTimeStampUpdater launches a background goroutine that updates the cached timestamp every second.
 // It is safe to call multiple times; only the first call will start the updater.
 func StartTimeStampUpdater() {
 	updaterOnce.Do(func() {
-		atomic.StoreUint32(&timestamp, uint32(time.Now().Unix()))
+		timestamp.Store(uint32(time.Now().Unix()))
 		stopUpdater = make(chan struct{})
 		updaterDone = make(chan struct{})
 
@@ -35,7 +35,7 @@ func StartTimeStampUpdater() {
 			for {
 				select {
 				case <-ticker.C:
-					atomic.StoreUint32(&timestamp, uint32(time.Now().Unix()))
+					timestamp.Store(uint32(time.Now().Unix()))
 				case <-stopUpdater:
 					return
 				}

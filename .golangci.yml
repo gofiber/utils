@@ -194,6 +194,8 @@ linters:
           disabled: true # TODO: Do not disable
         - name: package-comments
           disabled: true
+        - name: package-naming
+          disabled: true
         - name: optimize-operands-order
           disabled: true
         - name: unchecked-type-assertion
@@ -320,6 +322,7 @@ linters:
     # - maligned
     - mirror
     - misspell
+    - modernize
     - musttag
     - nakedret
     # - nestif

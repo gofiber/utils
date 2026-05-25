@@ -7,7 +7,7 @@ import (
 	"os"
 	pathpkg "path"
 	"path/filepath"
-	"sort"
+	"slices"
 )
 
 // Walk walks the filesystem rooted at root, calling walkFn for each file or
@@ -46,7 +46,7 @@ func readDirNames(fs http.FileSystem, dirname string) ([]string, error) {
 	for i := range fis {
 		names[i] = fis[i].Name()
 	}
-	sort.Strings(names)
+	slices.Sort(names)
 	return names, nil
 }
 
