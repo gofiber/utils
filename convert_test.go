@@ -162,16 +162,36 @@ func Test_ToString(t *testing.T) {
 
 	t.Run("nil", func(t *testing.T) {
 		t.Parallel()
+		var res string
 		require.NotPanics(t, func() {
-			require.Empty(t, ToString(nil))
+			res = ToString(nil)
 		})
+		require.Empty(t, res)
 	})
 
 	t.Run("invalid reflect.Value", func(t *testing.T) {
 		t.Parallel()
+		var res string
 		require.NotPanics(t, func() {
-			require.Empty(t, ToString(reflect.Value{}))
+			res = ToString(reflect.Value{})
 		})
+		require.Empty(t, res)
+	})
+
+	t.Run("non-interfaceable reflect.Value", func(t *testing.T) {
+		t.Parallel()
+		type sample struct {
+			value string
+		}
+
+		field := reflect.ValueOf(sample{value: "secret"}).FieldByName("value")
+		require.False(t, field.CanInterface())
+
+		var res string
+		require.NotPanics(t, func() {
+			res = ToString(field)
+		})
+		require.Empty(t, res)
 	})
 
 	// Test nil pointer handling - nil pointers return type-specific defaults

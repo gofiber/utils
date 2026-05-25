@@ -146,7 +146,7 @@ func ToString(arg any, timeFormat ...string) string {
 		}
 		return v.Format("2006-01-02 15:04:05")
 	case reflect.Value:
-		if !v.IsValid() {
+		if !v.IsValid() || !v.CanInterface() {
 			return ""
 		}
 		return ToString(v.Interface(), timeFormat...)
