@@ -7,6 +7,8 @@ package utils
 import (
 	"mime"
 	"strings"
+
+	casestrings "github.com/gofiber/utils/v2/strings"
 )
 
 const MIMEOctetStream = "application/octet-stream"
@@ -56,8 +58,8 @@ func ParseVendorSpecificContentType(cType string, caseInsensitive ...bool) strin
 	working := cType
 	if useLower {
 		// Content types are case-insensitive. Normalize if requested using the
-		// utils.ToLower function to avoid allocations when possible.
-		working = ToLower(cType)
+		// strings.ToLower function to avoid allocations when possible.
+		working = casestrings.ToLower(cType)
 	}
 	plusIndex := strings.IndexByte(working, '+')
 
