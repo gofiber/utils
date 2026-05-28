@@ -47,6 +47,57 @@ func Test_ParseUint_Whitespace(t *testing.T) {
 	require.Equal(t, uint64(0), v)
 }
 
+func Test_ParseNativeUint(t *testing.T) {
+	t.Parallel()
+
+	large := uint64(4294967296)
+	tests := []struct {
+		in       string
+		val      uint
+		success  bool
+		rangeErr bool
+	}{
+		{"0", 0, true, false},
+		{"42", 42, true, false},
+		{strconv.FormatUint(uint64(math.MaxUint), 10), math.MaxUint, true, false},
+		{"18446744073709551616", 0, false, true},
+	}
+
+	if strconv.IntSize == 32 {
+		tests = append(tests, struct {
+			in       string
+			val      uint
+			success  bool
+			rangeErr bool
+		}{strconv.FormatUint(large, 10), 0, false, true})
+	} else {
+		tests = append(tests, struct {
+			in       string
+			val      uint
+			success  bool
+			rangeErr bool
+		}{strconv.FormatUint(large, 10), uint(large), true, false})
+	}
+
+	for _, tt := range tests {
+		v, err := ParseNativeUint(tt.in)
+		require.Equal(t, tt.success, err == nil)
+		if err == nil {
+			require.Equal(t, tt.val, v)
+		} else if tt.rangeErr {
+			require.ErrorIs(t, err, strconv.ErrRange)
+		}
+
+		b, err := ParseNativeUint([]byte(tt.in))
+		require.Equal(t, tt.success, err == nil)
+		if err == nil {
+			require.Equal(t, tt.val, b)
+		} else if tt.rangeErr {
+			require.ErrorIs(t, err, strconv.ErrRange)
+		}
+	}
+}
+
 func Benchmark_ParseUint(b *testing.B) {
 	input := "123456789"
 
@@ -133,6 +184,74 @@ func Test_ParseInt_Whitespace(t *testing.T) {
 	v, err := ParseInt(" 42")
 	require.Error(t, err)
 	require.Equal(t, int64(0), v)
+}
+
+func Test_ParseNativeInt(t *testing.T) {
+	t.Parallel()
+
+	large := int64(3000000000)
+	tests := []struct {
+		in       string
+		val      int
+		success  bool
+		rangeErr bool
+	}{
+		{"0", 0, true, false},
+		{"42", 42, true, false},
+		{strconv.FormatInt(int64(math.MaxInt), 10), math.MaxInt, true, false},
+		{strconv.FormatInt(int64(math.MinInt), 10), math.MinInt, true, false},
+		{"9223372036854775808", 0, false, true},
+	}
+
+	if strconv.IntSize == 32 {
+		tests = append(tests,
+			struct {
+				in       string
+				val      int
+				success  bool
+				rangeErr bool
+			}{strconv.FormatInt(large, 10), 0, false, true},
+			struct {
+				in       string
+				val      int
+				success  bool
+				rangeErr bool
+			}{strconv.FormatInt(-large, 10), 0, false, true},
+		)
+	} else {
+		tests = append(tests,
+			struct {
+				in       string
+				val      int
+				success  bool
+				rangeErr bool
+			}{strconv.FormatInt(large, 10), int(large), true, false},
+			struct {
+				in       string
+				val      int
+				success  bool
+				rangeErr bool
+			}{strconv.FormatInt(-large, 10), int(-large), true, false},
+		)
+	}
+
+	for _, tt := range tests {
+		v, err := ParseNativeInt(tt.in)
+		require.Equal(t, tt.success, err == nil)
+		if err == nil {
+			require.Equal(t, tt.val, v)
+		} else if tt.rangeErr {
+			require.ErrorIs(t, err, strconv.ErrRange)
+		}
+
+		b, err := ParseNativeInt([]byte(tt.in))
+		require.Equal(t, tt.success, err == nil)
+		if err == nil {
+			require.Equal(t, tt.val, b)
+		} else if tt.rangeErr {
+			require.ErrorIs(t, err, strconv.ErrRange)
+		}
+	}
 }
 
 func Test_ParseUnsigned_SignOnly(t *testing.T) {
