@@ -25,6 +25,11 @@ func ParseUint[S byteSeq](s S) (uint64, error) {
 	return parseUnsigned[S, uint64]("ParseUint", s, uint64(math.MaxUint64))
 }
 
+// ParseNativeUint parses a decimal ASCII string or byte slice into a uint.
+func ParseNativeUint[S byteSeq](s S) (uint, error) {
+	return parseUnsigned[S, uint]("ParseNativeUint", s, math.MaxUint)
+}
+
 // ParseInt parses a decimal ASCII string or byte slice into an int64.
 // Returns the parsed value and nil on success, else 0 and an error.
 func ParseInt[S byteSeq](s S) (int64, error) {
@@ -44,6 +49,11 @@ func ParseInt[S byteSeq](s S) (int64, error) {
 	}
 
 	return parseSigned[S, int64]("ParseInt", s, math.MinInt64, math.MaxInt64)
+}
+
+// ParseNativeInt parses a decimal ASCII string or byte slice into an int.
+func ParseNativeInt[S byteSeq](s S) (int, error) {
+	return parseSigned[S, int]("ParseNativeInt", s, math.MinInt, math.MaxInt)
 }
 
 // ParseInt32 parses a decimal ASCII string or byte slice into an int32.
