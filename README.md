@@ -374,7 +374,7 @@ The Sponsorship list below is kept in sync automatically by the [`sync-sponsors`
     <tr><th></th><th>User</th><th>Sponsorship</th></tr>
   </thead>
   <tbody>
-  <!-- guardian --><!-- guardian -->
-  <!-- supporter --><!-- supporter -->
+  <!-- guardian --><tr><td colspan="3"><em>Be the first Fiber Guardian and <a href="https://github.com/sponsors/gofiber">sponsor gofiber</a>.</em></td></tr><!-- guardian -->
+  <!-- supporter --><tr><td colspan="3"><em>Be the first Fiber Supporter and <a href="https://github.com/sponsors/gofiber">sponsor gofiber</a>.</em></td></tr><!-- supporter -->
   </tbody>
 </table>
