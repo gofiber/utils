@@ -367,4 +367,63 @@ See all the benchmarks under <https://gofiber.github.io/utils/benchmarks>
 
 Fiber is an open-source project that runs on donations to pay the bills, e.g., our domain name, hosting, and serverless infrastructure. If you want to support Fiber, please become a [GitHub Sponsor](https://github.com/sponsors/gofiber).
 
-<!-- sponsors --><!-- sponsors -->
+<!-- sponsors -->
+### 📅 Monthly Sponsors
+
+<table>
+  <thead>
+    <tr><th></th><th>User</th><th>Sponsorship</th></tr>
+  </thead>
+  <tbody>
+<tr><td align="center"><img src="https://github.com/goran-lm.png" width="60" /></td><td><a href="https://github.com/goran-lm">@goran-lm</a></td><td>🔥 Fiber Guardian</td></tr>
+<tr><td align="center"><img src="https://github.com/coderabbitai.png" width="60" /></td><td><a href="https://www.coderabbit.ai/?utm_source=cr_org&amp;utm_medium=github">@coderabbitai</a></td><td>🔥 Fiber Guardian</td></tr>
+<tr><td align="center"><img src="https://github.com/mercedes-benz.png" width="60" /></td><td><a href="https://opensource.mercedes-benz.com/">@mercedes-benz</a></td><td>🚀 Fiber Hero</td></tr>
+<tr><td align="center"><img src="https://github.com/IllumiChat.png" width="60" /></td><td><a href="https://illumichat.com">@IllumiChat</a></td><td>⭐ Fiber Champion</td></tr>
+<tr><td align="center"><img src="https://github.com/H0llyW00dzZ.png" width="60" /></td><td><a href="https://h0llyw00dzz.link">@H0llyW00dzZ</a></td><td>⭐ Fiber Champion</td></tr>
+<tr><td align="center"><img src="https://github.com/iwpnd.png" width="60" /></td><td><a href="https://github.com/iwpnd">@iwpnd</a></td><td>☕ Fiber Supporter</td></tr>
+<tr><td align="center"><img src="https://github.com/solrac97gr.png" width="60" /></td><td><a href="https://carlos.lat">@solrac97gr</a></td><td>☕ Fiber Supporter</td></tr>
+<tr><td align="center"><img src="https://github.com/Xanik.png" width="60" /></td><td><a href="https://github.com/Xanik">@Xanik</a></td><td>☕ Fiber Supporter</td></tr>
+<tr><td align="center"><img src="https://github.com/petercool.png" width="60" /></td><td><a href="https://cyberapper.ai">@petercool</a></td><td>☕ Fiber Supporter</td></tr>
+<tr><td align="center"><img src="https://github.com/ohkinozomu.png" width="60" /></td><td><a href="https://github.com/ohkinozomu">@ohkinozomu</a></td><td>☕ Fiber Supporter</td></tr>
+<tr><td align="center"><img src="https://github.com/ssimk0.png" width="60" /></td><td><a href="https://sebastiansimko.sk">@ssimk0</a></td><td>☕ Fiber Supporter</td></tr>
+<tr><td align="center"><img src="https://github.com/sangjinsu.png" width="60" /></td><td><a href="https://sangjinsu.dev">@sangjinsu</a></td><td>☕ Fiber Supporter</td></tr>
+<tr><td align="center"><img src="https://github.com/loopholelabs.png" width="60" /></td><td><a href="https://loopholelabs.io">@loopholelabs</a></td><td>☕ Fiber Supporter</td></tr>
+<tr><td align="center"><img src="https://github.com/baekilda.png" width="60" /></td><td><a href="https://ilda.me">@baekilda</a></td><td>☕ Fiber Supporter</td></tr>
+<tr><td align="center"><img src="https://github.com/cgiax.png" width="60" /></td><td><a href="https://github.com/cgiax">@cgiax</a></td><td>☕ Fiber Supporter</td></tr>
+<tr><td align="center"><img src="https://github.com/gzuidhof.png" width="60" /></td><td><a href="https://guido.io">@gzuidhof</a></td><td>☕ Fiber Supporter</td></tr>
+<tr><td align="center"><img src="https://github.com/getsentry.png" width="60" /></td><td><a href="https://sentry.io">@getsentry</a></td><td>☕ Fiber Supporter</td></tr>
+<tr><td align="center"><img src="https://github.com/jaredallard.png" width="60" /></td><td><a href="https://git.rgst.io/jaredallard">@jaredallard</a></td><td>☕ Fiber Supporter</td></tr>
+<tr><td align="center"><img src="https://github.com/itscarlosrufo.png" width="60" /></td><td><a href="https://github.com/itscarlosrufo">@itscarlosrufo</a></td><td>☕ Fiber Supporter</td></tr>
+<tr><td align="center"><img src="https://github.com/bbert75.png" width="60" /></td><td><a href="https://github.com/bbert75">@bbert75</a></td><td>☕ Fiber Supporter</td></tr>
+<tr><td align="center"><img src="https://github.com/taniko.png" width="60" /></td><td><a href="https://github.com/taniko">@taniko</a></td><td>☕ Fiber Supporter</td></tr>
+<tr><td align="center"><img src="https://github.com/rahulkp220.png" width="60" /></td><td><a href="https://github.com/rahulkp220">@rahulkp220</a></td><td>☕ Fiber Supporter</td></tr>
+<tr><td align="center"><img src="https://github.com/NdoleStudio.png" width="60" /></td><td><a href="https://ndole.studio">@NdoleStudio</a></td><td>☕ Fiber Supporter</td></tr>
+<tr><td align="center"><img src="https://github.com/ryanbekhen.png" width="60" /></td><td><a href="https://ryanbekhen.dev">@ryanbekhen</a></td><td>☕ Fiber Supporter</td></tr>
+<tr><td align="center"><img src="https://github.com/Fenny.png" width="60" /></td><td><a href="https://github.com/sponsors/gofiber">@Fenny</a></td><td>🌱 Fiber Friend</td></tr>
+  </tbody>
+</table>
+
+### 🎁 One-time Sponsors
+
+<table>
+  <thead>
+    <tr><th></th><th>User</th><th>Sponsorship</th></tr>
+  </thead>
+  <tbody>
+<tr><td align="center"><img src="https://github.com/github.png" width="40" /></td><td><a href="https://github.com/about">@github</a></td><td>💎 Fiber Visionary</td></tr>
+<tr><td align="center"><img src="https://github.com/thnxdev.png" width="40" /></td><td><a href="https://www.thanks.dev">@thnxdev</a></td><td>🚀 Fiber Hero</td></tr>
+<tr><td align="center"><img src="https://github.com/andys.png" width="40" /></td><td><a href="http://modulus.org">@andys</a></td><td>🚀 Fiber Hero</td></tr>
+<tr><td align="center"><img src="https://github.com/defstream.png" width="40" /></td><td><a href="https://hectorgray.com">@defstream</a></td><td>☕ Fiber Supporter</td></tr>
+<tr><td align="center"><img src="https://github.com/webp-sh.png" width="40" /></td><td><a href="https://docs.webp.sh/">@webp-sh</a></td><td>☕ Fiber Supporter</td></tr>
+<tr><td align="center"><img src="https://github.com/ZerGo0.png" width="40" /></td><td><a href="https://zergo0.dev">@ZerGo0</a></td><td>☕ Fiber Supporter</td></tr>
+<tr><td align="center"><img src="https://github.com/hiifong.png" width="40" /></td><td><a href="https://f.style">@hiifong</a></td><td>☕ Fiber Supporter</td></tr>
+<tr><td align="center"><img src="https://github.com/decomoraes.png" width="40" /></td><td><a href="https://github.com/decomoraes">@decomoraes</a></td><td>☕ Fiber Supporter</td></tr>
+<tr><td align="center"><img src="https://github.com/bsdrop.png" width="40" /></td><td><a href="https://github.com/bsdrop">@bsdrop</a></td><td>☕ Fiber Supporter</td></tr>
+<tr><td align="center"><img src="https://github.com/prplx.png" width="40" /></td><td><a href="https://kos.sh">@prplx</a></td><td>☕ Fiber Supporter</td></tr>
+<tr><td align="center"><img src="https://github.com/sebajax.png" width="40" /></td><td><a href="https://github.com/sebajax">@sebajax</a></td><td>☕ Fiber Supporter</td></tr>
+<tr><td align="center"><img src="https://github.com/Aceix.png" width="40" /></td><td><a href="https://theaceix.site">@Aceix</a></td><td>☕ Fiber Supporter</td></tr>
+<tr><td align="center"><img src="https://github.com/rj-davidson.png" width="40" /></td><td><a href="https://rjd.app">@rj-davidson</a></td><td>☕ Fiber Supporter</td></tr>
+<tr><td align="center"><img src="https://github.com/mstgnz.png" width="40" /></td><td><a href="https://mesutgenez.com">@mstgnz</a></td><td>☕ Fiber Supporter</td></tr>
+  </tbody>
+</table>
+<!-- sponsors -->
