@@ -374,7 +374,7 @@ The Sponsorship list below is kept in sync automatically by the [`sync-sponsors`
     <tr><th></th><th>User</th><th>Sponsorship</th></tr>
   </thead>
   <tbody>
-  <!-- guardian --><!-- guardian -->
-  <!-- supporter --><!-- supporter -->
+  <!-- sponsors-table -->
+  <!-- sponsors-table -->
   </tbody>
 </table>
