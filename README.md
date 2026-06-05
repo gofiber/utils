@@ -365,16 +365,6 @@ See all the benchmarks under <https://gofiber.github.io/utils/benchmarks>
 
 ## ☕ Supporters
 
-Fiber is an open-source project that runs on donations to pay the bills, e.g., our domain name, hosting, and serverless infrastructure. If you want to support Fiber, you can ☕ [buy a coffee](https://buymeacoff.ee/fenny) or become a [GitHub Sponsor](https://github.com/sponsors/gofiber).
+Fiber is an open-source project that runs on donations to pay the bills, e.g., our domain name, hosting, and serverless infrastructure. If you want to support Fiber, please become a [GitHub Sponsor](https://github.com/sponsors/gofiber).
 
-The Sponsorship list below is kept in sync automatically by the [`sync-sponsors`](https://github.com/gofiber/.github/blob/main/.github/workflows/sync-sponsors.yml) workflow.
-
-<table>
-  <thead>
-    <tr><th></th><th>User</th><th>Sponsorship</th></tr>
-  </thead>
-  <tbody>
-  <!-- sponsors-table -->
-  <!-- sponsors-table -->
-  </tbody>
-</table>
+<!-- sponsors --><!-- sponsors -->
