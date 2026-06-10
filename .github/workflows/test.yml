@@ -1,4 +1,5 @@
 on:
+  workflow_dispatch:
   push:
     branches:
       - master
@@ -15,6 +16,10 @@ on:
 
 name: Test
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
 
@@ -25,6 +30,7 @@ jobs:
         go-version: [1.25.x, 1.26.x]
         platform: [ubuntu-latest, windows-latest, macos-latest]
     runs-on: ${{ matrix.platform }}
+    timeout-minutes: 30
     steps:
       - name: Fetch Repository
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
@@ -34,14 +40,10 @@ jobs:
         with:
           go-version: ${{ matrix.go-version }}
 
-      - name: Install gotestsum
-        run: go install gotest.tools/gotestsum@v1.13.0
-
       - name: Test
-        run: gotestsum -f testname -- ./... -race -count=1 -shuffle=on
-
-      - name: Test
-        run: gotestsum -f testname -- ./... -race -count=1 -coverprofile=coverage.txt -covermode=atomic -shuffle=on
+        uses: gofiber/.github/.github/actions/gotestsum@main
+        with:
+          args: ./... -race -count=1 -coverprofile=coverage.txt -covermode=atomic -shuffle=on
 
       - name: Upload coverage reports to Codecov
         if: ${{ matrix.platform == 'ubuntu-latest' && matrix.go-version == '1.26.x' }}
