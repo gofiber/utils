@@ -3,6 +3,7 @@ package utils
 import (
 	"math"
 	"strconv"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -701,6 +702,12 @@ func Test_ParseFloat64(t *testing.T) {
 		{"123e1a", 0, false},
 		{"9999999999999999999", 1e19, true},
 		{"1.2.3", 0, false},
+		{"0e400", 0, true},
+		{"-0e400", 0, true},
+		{"1e400", 0, false},
+		{"0.1e1000", 0, false},
+		{strings.Repeat("9", 400), 0, false},
+		{strings.Repeat("9", 400) + "e-390", 1e10, true},
 	}
 	for _, tt := range tests {
 		v, err := ParseFloat64(tt.in)

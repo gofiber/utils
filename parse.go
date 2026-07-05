@@ -305,17 +305,17 @@ func parseFloat[S byteSeq](fn string, s S) (float64, error) {
 		if i == len(s) {
 			return 0, &strconv.NumError{Func: fn, Num: string(s), Err: strconv.ErrSyntax}
 		}
+		// Saturate the parsed exponent far beyond anything exp10 (bounded by
+		// the input length) could pull back into range. Clamping to the final
+		// range must wait until both are combined below.
+		const maxParsedExp = int64(1) << 50
 		for i < len(s) {
 			c := s[i] - '0'
 			if c > 9 {
 				return 0, &strconv.NumError{Func: fn, Num: string(s), Err: strconv.ErrSyntax}
 			}
-			exp = exp*10 + int64(c)
-			if !expSign && exp > 308 {
-				exp = 309
-			}
-			if expSign && exp > 324 {
-				exp = 325
+			if exp < maxParsedExp {
+				exp = exp*10 + int64(c)
 			}
 			i++
 		}
@@ -327,10 +327,21 @@ func parseFloat[S byteSeq](fn string, s S) (float64, error) {
 	if expSign {
 		exp = -exp
 	}
+	// Clamp the combined exponent to math.Pow10's saturation range so the
+	// int conversion below cannot wrap on 32-bit platforms for extremely
+	// long digit strings; larger magnitudes overflow (Inf, caught below) or
+	// underflow (Pow10 returns 0) anyway.
 	exp += int64(exp10)
+	if exp > 309 {
+		exp = 309
+	} else if exp < -325 {
+		exp = -325
+	}
 
 	f := float64(mantissa)
-	if exp != 0 {
+	// Skip scaling for a zero mantissa: 0 * Pow10(309) would be 0 * Inf = NaN
+	// and turn inputs like "0e400" into a spurious range error.
+	if exp != 0 && f != 0 {
 		f *= math.Pow10(int(exp))
 	}
 	if neg {
