@@ -8,7 +8,7 @@ import (
 
 var (
 	timestamp   atomic.Uint32
-	updaterOnce sync.Once
+	updaterMu   sync.Mutex
 	stopUpdater chan struct{}
 	updaterDone chan struct{}
 )
@@ -20,39 +20,46 @@ func Timestamp() uint32 {
 }
 
 // StartTimeStampUpdater launches a background goroutine that updates the cached timestamp every second.
-// It is safe to call multiple times; only the first call will start the updater.
+// It is safe to call multiple times and from multiple goroutines; only one updater runs at a time.
 func StartTimeStampUpdater() {
-	updaterOnce.Do(func() {
-		timestamp.Store(uint32(time.Now().Unix()))
-		stopUpdater = make(chan struct{})
-		updaterDone = make(chan struct{})
+	updaterMu.Lock()
+	defer updaterMu.Unlock()
+	if stopUpdater != nil {
+		return
+	}
 
-		go func() {
-			ticker := time.NewTicker(time.Second)
-			defer ticker.Stop()
-			defer close(updaterDone)
+	timestamp.Store(uint32(time.Now().Unix()))
+	stopUpdater = make(chan struct{})
+	updaterDone = make(chan struct{})
 
-			for {
-				select {
-				case <-ticker.C:
-					timestamp.Store(uint32(time.Now().Unix()))
-				case <-stopUpdater:
-					return
-				}
+	go func(stop, done chan struct{}) {
+		ticker := time.NewTicker(time.Second)
+		defer ticker.Stop()
+		defer close(done)
+
+		for {
+			select {
+			case <-ticker.C:
+				timestamp.Store(uint32(time.Now().Unix()))
+			case <-stop:
+				return
 			}
-		}()
-	})
+		}
+	}(stopUpdater, updaterDone)
 }
 
 // StopTimeStampUpdater stops the background updater goroutine.
 // Call this on app shutdown to avoid leaking goroutines.
+// It is safe to call multiple times and from multiple goroutines.
 func StopTimeStampUpdater() {
-	if stopUpdater != nil {
-		close(stopUpdater)
-		<-updaterDone
-		// Reset the sync.Once so StartTimeStampUpdater can be called again
-		updaterOnce = sync.Once{}
-		stopUpdater = nil
-		updaterDone = nil
+	updaterMu.Lock()
+	defer updaterMu.Unlock()
+	if stopUpdater == nil {
+		return
 	}
+
+	close(stopUpdater)
+	<-updaterDone
+	stopUpdater = nil
+	updaterDone = nil
 }

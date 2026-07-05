@@ -35,6 +35,13 @@ func Test_GetMIME(t *testing.T) {
 	res = GetMIME("cbor")
 	require.Equal(t, "application/cbor", res)
 
+	// upper-case extensions match case-insensitively
+	res = GetMIME("PNG")
+	require.Equal(t, "image/png", res)
+
+	res = GetMIME(".JSON")
+	require.Equal(t, "application/json", res)
+
 	// empty case
 	res = GetMIME("")
 	require.Empty(t, res)

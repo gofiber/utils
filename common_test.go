@@ -52,6 +52,7 @@ func Test_UUIDv4(t *testing.T) {
 	res := UUIDv4()
 	require.Len(t, res, 36)
 	require.NotEqual(t, "00000000-0000-0000-0000-000000000000", res)
+	require.Regexp(t, `^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$`, res)
 }
 
 func Test_UUIDv4_Concurrency(t *testing.T) {
@@ -179,6 +180,20 @@ func Test_ConvertToBytes(t *testing.T) {
 	require.Equal(t, 42*1000000000000000, ConvertToBytes("42p"))
 	require.Equal(t, 42*1000000000000000, ConvertToBytes("42PB"))
 	require.Equal(t, 42*1000000000000000, ConvertToBytes("42pb"))
+
+	// Test binary units (KiB = 1024)
+	require.Equal(t, 42*1024, ConvertToBytes("42Ki"))
+	require.Equal(t, 42*1024, ConvertToBytes("42KiB"))
+	require.Equal(t, 42*1024, ConvertToBytes("42kib"))
+	require.Equal(t, 42*1024*1024, ConvertToBytes("42MiB"))
+	require.Equal(t, 42*1024*1024*1024, ConvertToBytes("42GiB"))
+	require.Equal(t, 42*1024*1024*1024*1024, ConvertToBytes("42TiB"))
+	require.Equal(t, 42*1024*1024*1024*1024*1024, ConvertToBytes("42PiB"))
+	require.Equal(t, int(1.5*1024), ConvertToBytes("1.5KiB"))
+
+	// Negative sizes are unrecognized
+	require.Equal(t, 0, ConvertToBytes("-5k"))
+	require.Equal(t, 0, ConvertToBytes("-5.0k"))
 
 	// Test edge cases and error conditions
 	require.Equal(t, 0, ConvertToBytes("string"))

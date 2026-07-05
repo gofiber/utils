@@ -150,6 +150,9 @@ func ToString(arg any, timeFormat ...string) string {
 			return ""
 		}
 		return ToString(v.Interface(), timeFormat...)
+	// error before fmt.Stringer to match the fmt package's precedence
+	case error:
+		return v.Error()
 	case fmt.Stringer:
 		return v.String()
 	// Handle common pointer types directly to avoid reflection

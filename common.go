@@ -127,7 +127,10 @@ func IncrementIPRange(ip net.IP) {
 }
 
 // ConvertToBytes returns integer size of bytes from human-readable string, ex. 42kb, 42M
-// Returns 0 if string is unrecognized
+// Decimal units are powers of 1000 (42k = 42000); binary units with an 'i' infix
+// are powers of 1024 (42Ki = 43008). Note that ByteSize formats with powers of 1024,
+// so use binary suffixes for a lossless round-trip.
+// Returns 0 if the string is unrecognized or negative.
 func ConvertToBytes(humanReadableString string) int {
 	strLen := len(humanReadableString)
 	if strLen == 0 {
@@ -189,7 +192,7 @@ func ConvertToBytes(humanReadableString string) int {
 	if strings.IndexByte(numPart, '.') >= 0 {
 		var err error
 		size, err = ParseFloat64(numPart)
-		if err != nil {
+		if err != nil || size < 0 {
 			return 0
 		}
 	} else {
@@ -201,17 +204,28 @@ func ConvertToBytes(humanReadableString string) int {
 	}
 
 	if unitPrefixPos > 0 {
+		// An 'i' after the unit prefix selects binary units (KiB = 1024).
+		binary := unitPrefixPos+1 < strLen &&
+			(humanReadableString[unitPrefixPos+1] == 'i' || humanReadableString[unitPrefixPos+1] == 'I')
+		var decMul, binMul float64
 		switch humanReadableString[unitPrefixPos] {
 		case 'k', 'K':
-			size *= 1e3
+			decMul, binMul = 1e3, 1<<10
 		case 'm', 'M':
-			size *= 1e6
+			decMul, binMul = 1e6, 1<<20
 		case 'g', 'G':
-			size *= 1e9
+			decMul, binMul = 1e9, 1<<30
 		case 't', 'T':
-			size *= 1e12
+			decMul, binMul = 1e12, 1<<40
 		case 'p', 'P':
-			size *= 1e15
+			decMul, binMul = 1e15, 1<<50
+		default:
+			decMul, binMul = 1, 1
+		}
+		if binary {
+			size *= binMul
+		} else {
+			size *= decMul
 		}
 	}
 

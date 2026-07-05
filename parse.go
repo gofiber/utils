@@ -6,7 +6,6 @@ import (
 )
 
 const (
-	maxFracDigits   = 16
 	maxUint64Cutoff = math.MaxUint64 / 10
 	maxUint64Cutlim = math.MaxUint64 % 10
 )
@@ -249,22 +248,26 @@ func parseFloat[S byteSeq](fn string, s S) (float64, error) {
 		return 0, &strconv.NumError{Func: fn, Num: string(s), Err: strconv.ErrSyntax}
 	}
 
-	var intPart uint64
+	// Collect integer and fractional digits into a single mantissa and track
+	// the decimal exponent. Digits beyond uint64 precision are dropped: integer
+	// digits shift the exponent up, fractional digits are simply ignored.
+	var mantissa uint64
+	var exp10 int
+	digits := 0
 	for i < len(s) {
 		c := s[i] - '0'
 		if c > 9 {
 			break
 		}
-		if intPart > maxUint64Cutoff || (intPart == maxUint64Cutoff && uint64(c) > maxUint64Cutlim) {
-			return 0, &strconv.NumError{Func: fn, Num: string(s), Err: strconv.ErrRange}
+		if mantissa > maxUint64Cutoff || (mantissa == maxUint64Cutoff && uint64(c) > maxUint64Cutlim) {
+			exp10++
+		} else {
+			mantissa = mantissa*10 + uint64(c)
 		}
-		intPart = intPart*10 + uint64(c)
+		digits++
 		i++
 	}
 
-	var fracPart uint64
-	var fracDiv uint64 = 1
-	var fracDigits int
 	if i < len(s) && s[i] == '.' {
 		i++
 		for i < len(s) {
@@ -272,14 +275,17 @@ func parseFloat[S byteSeq](fn string, s S) (float64, error) {
 			if c > 9 {
 				break
 			}
-			if fracDigits >= maxFracDigits {
-				return 0, &strconv.NumError{Func: fn, Num: string(s), Err: strconv.ErrRange}
+			if mantissa < maxUint64Cutoff || (mantissa == maxUint64Cutoff && uint64(c) <= maxUint64Cutlim) {
+				mantissa = mantissa*10 + uint64(c)
+				exp10--
 			}
-			fracPart = fracPart*10 + uint64(c)
-			fracDiv *= 10
-			fracDigits++
+			digits++
 			i++
 		}
+	}
+
+	if digits == 0 {
+		return 0, &strconv.NumError{Func: fn, Num: string(s), Err: strconv.ErrSyntax}
 	}
 
 	var expSign bool
@@ -321,11 +327,9 @@ func parseFloat[S byteSeq](fn string, s S) (float64, error) {
 	if expSign {
 		exp = -exp
 	}
+	exp += int64(exp10)
 
-	f := float64(intPart)
-	if fracPart > 0 {
-		f += float64(fracPart) / float64(fracDiv)
-	}
+	f := float64(mantissa)
 	if exp != 0 {
 		f *= math.Pow10(int(exp))
 	}
