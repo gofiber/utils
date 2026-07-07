@@ -3,6 +3,7 @@ package utils
 import (
 	"math"
 	"strconv"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -675,10 +676,15 @@ func Test_ParseFloat64(t *testing.T) {
 		{strconv.FormatFloat(-math.MaxFloat64, 'g', -1, 64), -math.MaxFloat64, true},
 		{"5e-324", 0, true},
 		{"1e-400", 0, true},
-		{"25000000000000000000e-18", 0, false},
-		{"1234567891234567891234567", 0, false},
+		{"25000000000000000000e-18", 25, true},
+		{"1234567891234567891234567", 1.2345678912345679e24, true},
 		{"1.2345678912345678", 1.2345678912345678, true}, // large number
-		{"0.11111111111111119", 0, false},
+		{"0.11111111111111119", 0.11111111111111119, true},
+		{".", 0, false},
+		{"+.", 0, false},
+		{"-.", 0, false},
+		{"e5", 0, false},
+		{".e5", 0, false},
 		{"1.2.3", 0, false},
 		{"1e1.0", 0, false},
 		{"1e309", 0, false},
@@ -696,6 +702,12 @@ func Test_ParseFloat64(t *testing.T) {
 		{"123e1a", 0, false},
 		{"9999999999999999999", 1e19, true},
 		{"1.2.3", 0, false},
+		{"0e400", 0, true},
+		{"-0e400", 0, true},
+		{"1e400", 0, false},
+		{"0.1e1000", 0, false},
+		{strings.Repeat("9", 400), 0, false},
+		{strings.Repeat("9", 400) + "e-390", 1e10, true},
 	}
 	for _, tt := range tests {
 		v, err := ParseFloat64(tt.in)
@@ -774,9 +786,11 @@ func Test_ParseFloat32(t *testing.T) {
 		{"1e", 0, false, false},
 		{"1e+", 0, false, false},
 		{"1e-", 0, false, false},
-		{"1234567891234567891234567", 0, false, false},
+		{"1234567891234567891234567", 1.2345679e24, true, false},
 		{"1.2345678912345678", 1.2345679, true, false},
-		{"0.11111111111111119", 0, false, false},
+		{"0.11111111111111119", 0.11111112, true, false},
+		{".", 0, false, false},
+		{"e5", 0, false, false},
 		{"1.2.3", 0, false, false},
 		{"1e1.0", 0, false, false},
 		{"1e309", 0, false, false},

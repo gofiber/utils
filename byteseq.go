@@ -57,7 +57,8 @@ func EqualFold[S byteSeq](b, s S) bool {
 	return true
 }
 
-// TrimLeft is the equivalent of strings/bytes.TrimLeft
+// TrimLeft removes all leading occurrences of the byte cutset from s.
+// Unlike strings/bytes.TrimLeft, cutset is a single byte, not a set of characters.
 func TrimLeft[S byteSeq](s S, cutset byte) S {
 	lenStr, start := len(s), 0
 	for start < lenStr && s[start] == cutset {
@@ -66,7 +67,8 @@ func TrimLeft[S byteSeq](s S, cutset byte) S {
 	return s[start:]
 }
 
-// Trim is the equivalent of strings/bytes.Trim
+// Trim removes all leading and trailing occurrences of the byte cutset from s.
+// Unlike strings/bytes.Trim, cutset is a single byte, not a set of characters.
 func Trim[S byteSeq](s S, cutset byte) S {
 	i, j := 0, len(s)-1
 	for ; i <= j; i++ {
@@ -83,7 +85,8 @@ func Trim[S byteSeq](s S, cutset byte) S {
 	return s[i : j+1]
 }
 
-// TrimRight is the equivalent of strings/bytes.TrimRight
+// TrimRight removes all trailing occurrences of the byte cutset from s.
+// Unlike strings/bytes.TrimRight, cutset is a single byte, not a set of characters.
 func TrimRight[S byteSeq](s S, cutset byte) S {
 	lenStr := len(s)
 	for lenStr > 0 && s[lenStr-1] == cutset {

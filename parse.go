@@ -6,7 +6,6 @@ import (
 )
 
 const (
-	maxFracDigits   = 16
 	maxUint64Cutoff = math.MaxUint64 / 10
 	maxUint64Cutlim = math.MaxUint64 % 10
 )
@@ -249,22 +248,26 @@ func parseFloat[S byteSeq](fn string, s S) (float64, error) {
 		return 0, &strconv.NumError{Func: fn, Num: string(s), Err: strconv.ErrSyntax}
 	}
 
-	var intPart uint64
+	// Collect integer and fractional digits into a single mantissa and track
+	// the decimal exponent. Digits beyond uint64 precision are dropped: integer
+	// digits shift the exponent up, fractional digits are simply ignored.
+	var mantissa uint64
+	var exp10 int
+	digits := 0
 	for i < len(s) {
 		c := s[i] - '0'
 		if c > 9 {
 			break
 		}
-		if intPart > maxUint64Cutoff || (intPart == maxUint64Cutoff && uint64(c) > maxUint64Cutlim) {
-			return 0, &strconv.NumError{Func: fn, Num: string(s), Err: strconv.ErrRange}
+		if mantissa > maxUint64Cutoff || (mantissa == maxUint64Cutoff && uint64(c) > maxUint64Cutlim) {
+			exp10++
+		} else {
+			mantissa = mantissa*10 + uint64(c)
 		}
-		intPart = intPart*10 + uint64(c)
+		digits++
 		i++
 	}
 
-	var fracPart uint64
-	var fracDiv uint64 = 1
-	var fracDigits int
 	if i < len(s) && s[i] == '.' {
 		i++
 		for i < len(s) {
@@ -272,14 +275,17 @@ func parseFloat[S byteSeq](fn string, s S) (float64, error) {
 			if c > 9 {
 				break
 			}
-			if fracDigits >= maxFracDigits {
-				return 0, &strconv.NumError{Func: fn, Num: string(s), Err: strconv.ErrRange}
+			if mantissa < maxUint64Cutoff || (mantissa == maxUint64Cutoff && uint64(c) <= maxUint64Cutlim) {
+				mantissa = mantissa*10 + uint64(c)
+				exp10--
 			}
-			fracPart = fracPart*10 + uint64(c)
-			fracDiv *= 10
-			fracDigits++
+			digits++
 			i++
 		}
+	}
+
+	if digits == 0 {
+		return 0, &strconv.NumError{Func: fn, Num: string(s), Err: strconv.ErrSyntax}
 	}
 
 	var expSign bool
@@ -299,17 +305,17 @@ func parseFloat[S byteSeq](fn string, s S) (float64, error) {
 		if i == len(s) {
 			return 0, &strconv.NumError{Func: fn, Num: string(s), Err: strconv.ErrSyntax}
 		}
+		// Saturate the parsed exponent far beyond anything exp10 (bounded by
+		// the input length) could pull back into range. Clamping to the final
+		// range must wait until both are combined below.
+		const maxParsedExp = int64(1) << 50
 		for i < len(s) {
 			c := s[i] - '0'
 			if c > 9 {
 				return 0, &strconv.NumError{Func: fn, Num: string(s), Err: strconv.ErrSyntax}
 			}
-			exp = exp*10 + int64(c)
-			if !expSign && exp > 308 {
-				exp = 309
-			}
-			if expSign && exp > 324 {
-				exp = 325
+			if exp < maxParsedExp {
+				exp = exp*10 + int64(c)
 			}
 			i++
 		}
@@ -321,12 +327,21 @@ func parseFloat[S byteSeq](fn string, s S) (float64, error) {
 	if expSign {
 		exp = -exp
 	}
-
-	f := float64(intPart)
-	if fracPart > 0 {
-		f += float64(fracPart) / float64(fracDiv)
+	// Clamp the combined exponent to math.Pow10's saturation range so the
+	// int conversion below cannot wrap on 32-bit platforms for extremely
+	// long digit strings; larger magnitudes overflow (Inf, caught below) or
+	// underflow (Pow10 returns 0) anyway.
+	exp += int64(exp10)
+	if exp > 309 {
+		exp = 309
+	} else if exp < -325 {
+		exp = -325
 	}
-	if exp != 0 {
+
+	f := float64(mantissa)
+	// Skip scaling for a zero mantissa: 0 * Pow10(309) would be 0 * Inf = NaN
+	// and turn inputs like "0e400" into a spurious range error.
+	if exp != 0 && f != 0 {
 		f *= math.Pow10(int(exp))
 	}
 	if neg {

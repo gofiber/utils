@@ -36,8 +36,9 @@ func GetMIME(extension string) string {
 		extWithDot = "." + extension
 	}
 
-	// Single map lookup with normalized key
-	if foundMime := mimeExtensions[extWithoutDot]; len(foundMime) > 0 {
+	// Single map lookup with normalized key. Extensions are matched
+	// case-insensitively; ToLower only allocates for upper-case input.
+	if foundMime := mimeExtensions[casestrings.ToLower(extWithoutDot)]; len(foundMime) > 0 {
 		return foundMime
 	}
 

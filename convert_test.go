@@ -5,6 +5,7 @@
 package utils
 
 import (
+	"errors"
 	"fmt"
 	"math"
 	"reflect"
@@ -118,6 +119,9 @@ func Test_ToString(t *testing.T) {
 
 		// fmt.Stringer
 		{name: "fmt.Stringer", input: stringerSample, expected: "Stringer Value"},
+
+		// error
+		{name: "error", input: errors.New("something failed"), expected: "something failed"},
 
 		// Composite types (arrays, slices)
 		{name: "[]string", input: []string{"Hello", "World"}, expected: "[Hello World]"},
