@@ -6,7 +6,7 @@ import (
 
 // swarMinLen is the smallest input length worth routing through the
 // word-at-a-time (SWAR) helpers; shorter inputs are cheaper byte-by-byte.
-const swarMinLen = 8
+const swarMinLen = caseconv.WordLen
 
 // ToLower converts an ASCII byte slice to lower-case without modifying the input.
 func ToLower(b []byte) []byte {
@@ -37,7 +37,7 @@ func ToLower(b []byte) []byte {
 	dst := make([]byte, n)
 	// Copy the unchanged prefix up to the word containing the first
 	// uppercase byte, then convert the rest word-at-a-time.
-	from := i &^ 7
+	from := i &^ (caseconv.WordLen - 1)
 	copy(dst, b[:from])
 	caseconv.ToLowerCopy(dst, b, from)
 	return dst
@@ -70,7 +70,7 @@ func ToUpper(b []byte) []byte {
 	}
 
 	dst := make([]byte, n)
-	from := i &^ 7
+	from := i &^ (caseconv.WordLen - 1)
 	copy(dst, b[:from])
 	caseconv.ToUpperCopy(dst, b, from)
 	return dst

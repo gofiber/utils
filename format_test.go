@@ -339,3 +339,32 @@ func Benchmark_AppendInt(b *testing.B) {
 		})
 	}
 }
+
+func Test_UintDigits_IntDigits(t *testing.T) {
+	t.Parallel()
+	checkU := func(n uint64) {
+		t.Helper()
+		require.Equal(t, len(strconv.FormatUint(n, 10)), uintDigits(n), "n=%d", n)
+	}
+	for n := range uint64(100000) {
+		checkU(n)
+	}
+	// Every power-of-ten boundary up to the uint64 limit.
+	p := uint64(1)
+	for range 20 {
+		checkU(p - 1)
+		checkU(p)
+		checkU(p + 1)
+		if p > math.MaxUint64/10 {
+			break
+		}
+		p *= 10
+	}
+	checkU(math.MaxUint64)
+
+	for n := int64(-100000); n < 100000; n++ {
+		require.Equal(t, len(strconv.FormatInt(n, 10)), intDigits(n), "n=%d", n)
+	}
+	require.Equal(t, 20, intDigits(math.MinInt64))
+	require.Equal(t, 19, intDigits(math.MaxInt64))
+}

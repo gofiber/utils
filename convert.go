@@ -211,7 +211,13 @@ func ToString(arg any, timeFormat ...string) string {
 		if len(v) == 0 {
 			return "[]"
 		}
-		buf := make([]byte, 0, len(v)*4+2)
+		// Compute the exact output size for a single allocation:
+		// '[' + ']' + one separating space per gap + all element digits.
+		size := len(v) + 1
+		for _, n := range v {
+			size += intDigits(int64(n))
+		}
+		buf := make([]byte, 0, size)
 		buf = append(buf, '[')
 		for i, n := range v {
 			if i > 0 {

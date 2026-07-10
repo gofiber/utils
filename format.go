@@ -1,5 +1,9 @@
 package utils
 
+import (
+	"math/bits"
+)
+
 // smallInts contains precomputed string representations for small integers 0-99
 var smallInts [100]string
 
@@ -187,6 +191,37 @@ func FormatUint8(n uint8) string {
 // FormatInt8 formats an int8 as a decimal string.
 func FormatInt8(n int8) string {
 	return int8Strs[uint8(n)]
+}
+
+// pow10 holds the powers of ten representable in a uint64.
+var pow10 = [20]uint64{
+	1, 1e1, 1e2, 1e3, 1e4, 1e5, 1e6, 1e7, 1e8, 1e9,
+	1e10, 1e11, 1e12, 1e13, 1e14, 1e15, 1e16, 1e17, 1e18, 1e19,
+}
+
+// uintDigits returns the number of decimal digits in n. It is loop-free so it
+// inlines into per-element sizing passes.
+func uintDigits(n uint64) int {
+	if n < 10 {
+		return 1
+	}
+	// floor(log10(n)) approximated from floor(log2(n)): 1233/4096 ~= log10(2).
+	t := (bits.Len64(n) * 1233) >> 12
+	if n < pow10[t] {
+		return t
+	}
+	return t + 1
+}
+
+// intDigits returns the length of the decimal string representation of n,
+// including the '-' sign for negative values.
+func intDigits(n int64) int {
+	if n < 0 {
+		// uint64(-n) yields the absolute value for all negatives via two's
+		// complement, including math.MinInt64.
+		return 1 + uintDigits(uint64(-n))
+	}
+	return uintDigits(uint64(n))
 }
 
 // AppendUint appends the decimal string representation of n to dst.

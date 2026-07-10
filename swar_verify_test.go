@@ -7,6 +7,8 @@ import (
 	"testing"
 
 	casebytes "github.com/gofiber/utils/v2/bytes"
+	"github.com/gofiber/utils/v2/internal/caseconv"
+	"github.com/gofiber/utils/v2/internal/unsafeconv"
 	casestrings "github.com/gofiber/utils/v2/strings"
 	"github.com/stretchr/testify/require"
 )
@@ -44,7 +46,43 @@ func Test_SWAR_Randomized(t *testing.T) {
 		require.Equal(t, asciiFoldUpper(as), string(casebytes.ToUpper(append([]byte(nil), a...))))
 		require.Equal(t, asciiFoldLower(as), string(casebytes.UnsafeToLower(append([]byte(nil), a...))))
 		require.Equal(t, asciiFoldUpper(as), string(casebytes.UnsafeToUpper(append([]byte(nil), a...))))
+
+		// The strings in-place wrappers mutate their backing bytes, so hand
+		// each a string view over a private mutable copy — string(a) may
+		// reference read-only interned memory (e.g. 1-byte strings).
+		la := append([]byte(nil), a...)
+		require.Equal(t, asciiFoldLower(as), casestrings.UnsafeToLower(unsafeconv.UnsafeString(la)))
+		ua := append([]byte(nil), a...)
+		require.Equal(t, asciiFoldUpper(as), casestrings.UnsafeToUpper(unsafeconv.UnsafeString(ua)))
+
+		// Exercise the caseconv helpers directly so their sub-word tails are
+		// covered even though the public wrappers route short inputs away.
+		lowered := append([]byte(nil), a...)
+		caseconv.ToLowerInPlace(lowered)
+		require.Equal(t, asciiFoldLower(as), string(lowered))
+		uppered := append([]byte(nil), a...)
+		caseconv.ToUpperInPlace(uppered)
+		require.Equal(t, asciiFoldUpper(as), string(uppered))
+
+		require.Equal(t, stdFirstIndex(a, 'A', 'Z'), caseconv.FirstUpperIndex(a))
+		require.Equal(t, stdFirstIndex(a, 'a', 'z'), caseconv.FirstLowerIndex(a))
+
+		loweredCopy := make([]byte, n)
+		caseconv.ToLowerCopy(loweredCopy, a, 0)
+		require.Equal(t, asciiFoldLower(as), string(loweredCopy))
+		upperedCopy := make([]byte, n)
+		caseconv.ToUpperCopy(upperedCopy, a, 0)
+		require.Equal(t, asciiFoldUpper(as), string(upperedCopy))
 	}
+}
+
+func stdFirstIndex(b []byte, lo, hi byte) int {
+	for i, c := range b {
+		if c >= lo && c <= hi {
+			return i
+		}
+	}
+	return -1
 }
 
 func asciiOnly(s string) string {

@@ -9,17 +9,19 @@ type byteSeq interface {
 }
 
 // loadWord assembles 8 bytes of s starting at i into a little-endian uint64.
-// The compiler recognizes this pattern and emits a single 8-byte load on
+// The 8-byte reslice pins the length so the constant-index reads below are
+// bounds-check free, and the compiler fuses them into a single 8-byte load on
 // little-endian platforms; on big-endian ones it stays correct, just slower.
 func loadWord[S byteSeq](s S, i int) uint64 {
-	return uint64(s[i]) |
-		uint64(s[i+1])<<8 |
-		uint64(s[i+2])<<16 |
-		uint64(s[i+3])<<24 |
-		uint64(s[i+4])<<32 |
-		uint64(s[i+5])<<40 |
-		uint64(s[i+6])<<48 |
-		uint64(s[i+7])<<56
+	w := s[i : i+8]
+	return uint64(w[0]) |
+		uint64(w[1])<<8 |
+		uint64(w[2])<<16 |
+		uint64(w[3])<<24 |
+		uint64(w[4])<<32 |
+		uint64(w[5])<<40 |
+		uint64(w[6])<<48 |
+		uint64(w[7])<<56
 }
 
 // EqualFold tests ascii strings or bytes for equality case-insensitively
@@ -29,10 +31,13 @@ func EqualFold[S byteSeq](b, s S) bool {
 		return false
 	}
 
-	// Compare 8 bytes per iteration by upper-casing both words with SWAR.
+	// Compare 8 bytes per iteration; case-fold with SWAR only when the raw
+	// words differ, so byte-identical input skips both folds entirely.
 	i := 0
 	for ; i+8 <= n; i += 8 {
-		if caseconv.ToUpperWord(loadWord(b, i)) != caseconv.ToUpperWord(loadWord(s, i)) {
+		x := loadWord(b, i)
+		y := loadWord(s, i)
+		if x != y && caseconv.ToUpperWord(x) != caseconv.ToUpperWord(y) {
 			return false
 		}
 	}
@@ -42,7 +47,9 @@ func EqualFold[S byteSeq](b, s S) bool {
 	if n >= 8 {
 		// Handle the tail with one overlapping word compare; re-checking
 		// bytes that were already equal cannot change the outcome.
-		return caseconv.ToUpperWord(loadWord(b, n-8)) == caseconv.ToUpperWord(loadWord(s, n-8))
+		x := loadWord(b, n-8)
+		y := loadWord(s, n-8)
+		return x == y || caseconv.ToUpperWord(x) == caseconv.ToUpperWord(y)
 	}
 
 	table := caseconv.ToUpperTable
