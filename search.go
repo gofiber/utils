@@ -5,24 +5,15 @@ import (
 	"github.com/gofiber/utils/v2/swar"
 )
 
-// Multi-needle and case-insensitive searching. Word loops scan 8 bytes per
-// iteration with i+8 <= n bounds; inputs of 8+ bytes finish with one
-// overlapping word at n-8 (pure loads, and lanes already scanned are known
-// non-matching, so the first set lane always falls in the new bytes), while
-// shorter inputs use scalar loops.
-//
-// The scans below use the approximate zero-detect form (x-Ones) &^ x instead
-// of the exact swar.MatchByteMask: it is two ops cheaper per needle, and its
-// false positives can only appear in lanes ABOVE a true match (borrows
-// propagate upward), so the lowest set lane — all these scans consume — is
-// always a true match, and a word with no true match yields a zero mask.
-
-// zeroLanes marks (approximately, per the note above) the lanes of x that
-// are zero. Callers pre-broadcast the needle with uint64(c)*swar.Ones and
-// XOR it into x so the multiply is hoisted out of their word loops.
-func zeroLanes(x uint64) uint64 {
-	return (x - swar.Ones) &^ x & swar.HighBits
-}
+// Multi-needle and case-insensitive searching, built on swar.ZeroLanes
+// first-match masks with needle broadcasts hoisted out of the word loops.
+// IndexAny2/IndexAny3 scan words while i+8 <= n and finish 8+ byte inputs
+// with one overlapping word at n-8 (pure loads; already-scanned lanes are
+// known non-matching, so the first set lane falls in the new bytes).
+// IndexFold instead scans candidate start positions only up to n-k, so its
+// word loop hands the final partial word to a scalar remainder; the
+// overlapping-window trick appears there only inside the verify reads.
+// Inputs shorter than a word use scalar loops throughout.
 
 // IndexAny2 returns the index of the first occurrence in s of either a or b,
 // or -1 if neither is present.
@@ -36,7 +27,7 @@ func IndexAny2[S byteSeq](s S, a, b byte) int {
 		i := 0
 		for ; i+8 <= n; i += 8 {
 			w := swar.Load8(s, i)
-			if m := zeroLanes(w^bcA) | zeroLanes(w^bcB); m != 0 {
+			if m := swar.ZeroLanes(w^bcA) | swar.ZeroLanes(w^bcB); m != 0 {
 				return i + swar.FirstLane(m)
 			}
 		}
@@ -44,7 +35,7 @@ func IndexAny2[S byteSeq](s S, a, b byte) int {
 			return -1
 		}
 		w := swar.Load8(s, n-8)
-		if m := zeroLanes(w^bcA) | zeroLanes(w^bcB); m != 0 {
+		if m := swar.ZeroLanes(w^bcA) | swar.ZeroLanes(w^bcB); m != 0 {
 			return n - 8 + swar.FirstLane(m)
 		}
 		return -1
@@ -68,7 +59,7 @@ func IndexAny3[S byteSeq](s S, a, b, c byte) int {
 		i := 0
 		for ; i+8 <= n; i += 8 {
 			w := swar.Load8(s, i)
-			if m := zeroLanes(w^bcA) | zeroLanes(w^bcB) | zeroLanes(w^bcC); m != 0 {
+			if m := swar.ZeroLanes(w^bcA) | swar.ZeroLanes(w^bcB) | swar.ZeroLanes(w^bcC); m != 0 {
 				return i + swar.FirstLane(m)
 			}
 		}
@@ -76,7 +67,7 @@ func IndexAny3[S byteSeq](s S, a, b, c byte) int {
 			return -1
 		}
 		w := swar.Load8(s, n-8)
-		if m := zeroLanes(w^bcA) | zeroLanes(w^bcB) | zeroLanes(w^bcC); m != 0 {
+		if m := swar.ZeroLanes(w^bcA) | swar.ZeroLanes(w^bcB) | swar.ZeroLanes(w^bcC); m != 0 {
 			return n - 8 + swar.FirstLane(m)
 		}
 		return -1
@@ -120,14 +111,17 @@ func IndexFold[S byteSeq](s S, needle string) int {
 
 		// For needles up to one word the verify is a single masked word
 		// compare against the folded needle, built lazily on the first
-		// candidate; longer needles fold-compare word-at-a-time.
+		// candidate; longer needles fold-compare word-at-a-time. The verify
+		// block is deliberately spelled out in both loops below: routing it
+		// through a closure taxes every call with capture setup even on the
+		// no-candidate path, so keep the two copies in sync.
 		var needleWord, lenMask uint64
 		built := false
 
 		i := 0
 		for ; i+8 <= n; i += 8 {
 			w := swar.Load8(s, i)
-			cand := zeroLanes(w^bc1) | zeroLanes(w^bc2)
+			cand := swar.ZeroLanes(w^bc1) | swar.ZeroLanes(w^bc2)
 			for cand != 0 {
 				pos := i + swar.FirstLane(cand)
 				if pos > last {

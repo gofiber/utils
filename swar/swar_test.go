@@ -164,3 +164,33 @@ func Benchmark_Load8_Fusion(b *testing.B) {
 		_ = acc
 	})
 }
+
+func Test_ZeroLanes_FirstMatchProperty(t *testing.T) {
+	t.Parallel()
+	// For every word shape: the mask is zero iff no lane is zero, and the
+	// lowest set lane is always a true zero lane (false positives may only
+	// appear above it).
+	for zeroAt := range 8 {
+		for fill := range 256 {
+			var lanes [8]byte
+			for i := range lanes {
+				lanes[i] = byte(fill)
+			}
+			lanes[zeroAt] = 0
+			m := ZeroLanes(wordFromLanes(lanes))
+			require.NotZero(t, m, "fill 0x%02x zero at %d", fill, zeroAt)
+			lo := FirstLane(m)
+			require.Zero(t, lanes[lo], "fill 0x%02x zero at %d: first lane %d", fill, zeroAt, lo)
+			if byte(fill) != 0 {
+				require.Equal(t, zeroAt, lo)
+			}
+		}
+	}
+	for fill := 1; fill < 256; fill++ {
+		var lanes [8]byte
+		for i := range lanes {
+			lanes[i] = byte(fill)
+		}
+		require.Zero(t, ZeroLanes(wordFromLanes(lanes)), "fill 0x%02x", fill)
+	}
+}

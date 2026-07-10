@@ -6,8 +6,8 @@ import (
 
 // quoteLanes and backslashLanes broadcast '"' and '\\' to every lane.
 const (
-	quoteLanes     = 0x2222222222222222
-	backslashLanes = 0x5c5c5c5c5c5c5c5c
+	quoteLanes     = uint64('"') * swar.Ones
+	backslashLanes = uint64('\\') * swar.Ones
 )
 
 // IsASCII reports whether s contains only ASCII bytes (no byte >= 0x80).
@@ -76,7 +76,7 @@ func IndexNonQuotable[S byteSeq](s S) int {
 }
 
 // nonQuotableMask marks the lanes of w holding bytes that need RFC 9110
-// quoted-string escaping. Like zeroLanes, the result is exact in and below
+// quoted-string escaping. Like swar.ZeroLanes, the result is exact in and below
 // the first marked lane, which is all the first-match scan above consumes.
 func nonQuotableMask(w uint64) uint64 {
 	// Controls (< 0x20) and DEL (0x7F) share one biased range test:
@@ -85,5 +85,5 @@ func nonQuotableMask(w uint64) uint64 {
 	// (obs-text, always quotable) are excluded by the &^ w term.
 	t := ((w & swar.LowSeven) + swar.Ones) & swar.LowSeven
 	ctl := ^(t + (0x80-0x21)*swar.Ones) &^ w & swar.HighBits
-	return ctl | zeroLanes(w^quoteLanes) | zeroLanes(w^backslashLanes)
+	return ctl | swar.ZeroLanes(w^quoteLanes) | swar.ZeroLanes(w^backslashLanes)
 }
