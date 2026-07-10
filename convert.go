@@ -191,32 +191,36 @@ func ToString(arg any, timeFormat ...string) string {
 		if len(v) == 0 {
 			return "[]"
 		}
-		var buf strings.Builder
-		buf.Grow(len(v) * 8) // Pre-allocate approximate size
-		buf.WriteByte('[')
+		// Compute the exact output size for a single allocation:
+		// '[' + ']' + one separating space per gap + all element bytes.
+		size := len(v) + 1
+		for _, s := range v {
+			size += len(s)
+		}
+		buf := make([]byte, 0, size)
+		buf = append(buf, '[')
 		for i, s := range v {
 			if i > 0 {
-				buf.WriteByte(' ')
+				buf = append(buf, ' ')
 			}
-			buf.WriteString(s)
+			buf = append(buf, s...)
 		}
-		buf.WriteByte(']')
-		return buf.String()
+		buf = append(buf, ']')
+		return UnsafeString(buf)
 	case []int:
 		if len(v) == 0 {
 			return "[]"
 		}
-		var buf strings.Builder
-		buf.Grow(len(v) * 4) // Pre-allocate approximate size
-		buf.WriteByte('[')
+		buf := make([]byte, 0, len(v)*4+2)
+		buf = append(buf, '[')
 		for i, n := range v {
 			if i > 0 {
-				buf.WriteByte(' ')
+				buf = append(buf, ' ')
 			}
-			buf.WriteString(FormatInt(int64(n)))
+			buf = AppendInt(buf, int64(n))
 		}
-		buf.WriteByte(']')
-		return buf.String()
+		buf = append(buf, ']')
+		return UnsafeString(buf)
 	default:
 		// Check if the type is a pointer by using reflection
 		rv := reflect.ValueOf(arg)
