@@ -43,7 +43,7 @@ func ParseInt[S byteSeq](s S) (int64, error) {
 		i := 0
 		for ; len(s)-i >= 8; i += 8 {
 			w := swar.Load8(s, i)
-			if swar.MatchRangeMask(w, '0', '9') != asciiHighBits {
+			if !isEightDigits(w) {
 				break
 			}
 			n = n*100000000 + parse8Digits(w)
@@ -159,6 +159,19 @@ func ParseUint8[S byteSeq](s S) (uint8, error) {
 	return parseUnsigned[S, uint8]("ParseUint8", s, uint8(math.MaxUint8))
 }
 
+// isEightDigits reports whether every lane of w is an ASCII digit ('0'..'9').
+// High nibbles must all be 3 and low nibbles must not carry past 9 when 6 is
+// added. A lane >= 0xFA can carry into its neighbor's sum, but such a lane
+// already fails its own high-nibble test, so the answer stays exact.
+func isEightDigits(w uint64) bool {
+	const (
+		highNibbles = 0xF0F0F0F0F0F0F0F0
+		sixes       = 0x0606060606060606
+		threes      = 0x3333333333333333
+	)
+	return (w&highNibbles)|((w+sixes)&highNibbles)>>4 == threes
+}
+
 // parse8Digits converts a word of 8 ASCII digit bytes (first digit in lane 0,
 // most significant) to its numeric value using two pairwise multiply-combine
 // steps. The caller must have validated that every lane is '0'..'9'.
@@ -174,26 +187,18 @@ func parse8Digits(w uint64) uint64 {
 	return ((w&pairMask)*mul1 + (w>>16&pairMask)*mul2) >> 32
 }
 
-// parseDigits parses a sequence of digits and returns the uint64 value.
-// It returns an error if any non-digit is encountered or overflow happens.
-// It must stay under the inlining budget — parseSigned and parseUnsigned
-// dispatch digit runs of 8+ bytes to parseDigitsBig instead, so the overflow
-// guard here is only reachable through a caller that skips that dispatch.
+// parseDigits parses a run of fewer than 8 digits and returns the uint64
+// value, or an error on the first non-digit. Callers must route runs of 8+
+// bytes to parseDigitsBig — that is what makes overflow impossible here (at
+// most 7 digits) and keeps this body under the inlining budget.
 func parseDigits[S byteSeq](s S, i int) (uint64, error) {
 	var n uint64
-	digits := 0
 	for ; i < len(s); i++ {
 		c := s[i] - '0'
 		if c > 9 {
 			return 0, strconv.ErrSyntax
 		}
-		d := uint64(c)
-		// Any value with <= 19 digits is guaranteed to fit in uint64.
-		if digits >= 19 && (n > maxUint64Cutoff || (n == maxUint64Cutoff && d > maxUint64Cutlim)) {
-			return 0, strconv.ErrRange
-		}
-		n = n*10 + d
-		digits++
+		n = n*10 + uint64(c)
 	}
 	return n, nil
 }
@@ -208,7 +213,7 @@ func parseDigitsBig[S byteSeq](s S, i int) (uint64, error) {
 	digits := 0
 	for len(s)-i >= 8 && digits+8 <= 19 {
 		w := swar.Load8(s, i)
-		if swar.MatchRangeMask(w, '0', '9') != asciiHighBits {
+		if !isEightDigits(w) {
 			break
 		}
 		n = n*100000000 + parse8Digits(w)

@@ -4,27 +4,28 @@ import (
 	"github.com/gofiber/utils/v2/swar"
 )
 
+// quoteLanes and backslashLanes broadcast '"' and '\\' to every lane.
 const (
-	// asciiHighBits has 0x80 in every byte lane; a word ANDed with it is
-	// nonzero iff some byte has its high bit set (i.e. is not ASCII).
-	asciiHighBits = 0x8080808080808080
-	// asciiOnes has 0x01 in every byte lane.
-	asciiOnes = 0x0101010101010101
-	// asciiLowSeven has 0x7F in every byte lane.
-	asciiLowSeven = 0x7f7f7f7f7f7f7f7f
-	// quoteLanes and backslashLanes broadcast '"' and '\\' to every lane.
 	quoteLanes     = 0x2222222222222222
 	backslashLanes = 0x5c5c5c5c5c5c5c5c
 )
 
 // IsASCII reports whether s contains only ASCII bytes (no byte >= 0x80).
-// It tests 8 bytes per iteration; inputs of 8+ bytes finish with one
-// overlapping word at n-8, shorter ones byte-wise.
+// It ORs four words per iteration where possible (no index is needed, so
+// detection can be deferred to one test per 32 bytes), then tests word-wise;
+// inputs of 8+ bytes finish with one overlapping word at n-8, shorter ones
+// byte-wise.
 func IsASCII[S byteSeq](s S) bool {
 	n := len(s)
 	i := 0
+	for ; i+32 <= n; i += 32 {
+		acc := swar.Load8(s, i) | swar.Load8(s, i+8) | swar.Load8(s, i+16) | swar.Load8(s, i+24)
+		if acc&swar.HighBits != 0 {
+			return false
+		}
+	}
 	for ; i+8 <= n; i += 8 {
-		if swar.Load8(s, i)&asciiHighBits != 0 {
+		if swar.Load8(s, i)&swar.HighBits != 0 {
 			return false
 		}
 	}
@@ -32,7 +33,7 @@ func IsASCII[S byteSeq](s S) bool {
 		return true
 	}
 	if n >= 8 {
-		return swar.Load8(s, n-8)&asciiHighBits == 0
+		return swar.Load8(s, n-8)&swar.HighBits == 0
 	}
 	for ; i < n; i++ {
 		if s[i] >= 0x80 {
@@ -75,20 +76,14 @@ func IndexNonQuotable[S byteSeq](s S) int {
 }
 
 // nonQuotableMask marks the lanes of w holding bytes that need RFC 9110
-// quoted-string escaping. The result is exact in and below the first marked
-// lane; higher lanes may carry false positives (the quote/backslash tests use
-// the cheaper zero-detect form, whose borrows only corrupt lanes above a true
-// match), which is fine for the first-match scans in IndexNonQuotable.
+// quoted-string escaping. Like zeroLanes, the result is exact in and below
+// the first marked lane, which is all the first-match scan above consumes.
 func nonQuotableMask(w uint64) uint64 {
 	// Controls (< 0x20) and DEL (0x7F) share one biased range test:
 	// t := ((c & 0x7F) + 1) & 0x7F maps DEL to 0 and controls to 0x01..0x20,
 	// so t <= 0x20 captures exactly both; lanes with the high bit set
 	// (obs-text, always quotable) are excluded by the &^ w term.
-	t := ((w & asciiLowSeven) + asciiOnes) & asciiLowSeven
-	ctl := ^(t + (0x80-0x21)*asciiOnes) &^ w & asciiHighBits
-	// '"' and '\\' via zero-byte detection on the XORed word.
-	q := w ^ quoteLanes
-	bs := w ^ backslashLanes
-	quotes := ((q-asciiOnes)&^q | (bs-asciiOnes)&^bs) & asciiHighBits
-	return ctl | quotes
+	t := ((w & swar.LowSeven) + swar.Ones) & swar.LowSeven
+	ctl := ^(t + (0x80-0x21)*swar.Ones) &^ w & swar.HighBits
+	return ctl | zeroLanes(w^quoteLanes) | zeroLanes(w^backslashLanes)
 }

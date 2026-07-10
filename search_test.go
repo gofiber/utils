@@ -174,6 +174,14 @@ func Test_IndexFold_Fixed(t *testing.T) {
 	require.Equal(t, 0, IndexFold("gZiP, deflate", "GzIp"))
 	require.True(t, ContainsFold("Cache-Control: NO-CACHE", "no-cache"))
 	require.False(t, ContainsFold("Cache-Control: no\rcache", "no-cache"))
+	// Long needles (> 8 bytes) use the SWAR candidate scan with a word-wise
+	// fold-compare verify, including matches ending exactly at the tail.
+	require.Equal(t, 21, IndexFold("x-real-ip, x-req-id, Proxy-Authorization", "proxy-authorization"))
+	require.Equal(t, 7, IndexFold("cookie CONTENT-type: text", "content-type"))
+	require.Equal(t, -1, IndexFold("cookie CONTENT-typ: text.", "content-type"))
+	require.Equal(t, 12, IndexFold("abcdefghijklTRANSFER-ENCODING", "transfer-encoding"))
+	require.Equal(t, 0, IndexFold("authorizatioN", "authorization"))
+	require.Equal(t, -1, IndexFold("authorizatio", "authorization"))
 }
 
 func Test_IndexNonQuotable_Fixed(t *testing.T) {
@@ -187,6 +195,10 @@ func Test_IndexNonQuotable_Fixed(t *testing.T) {
 	// obs-text (>= 0x80) is quotable.
 	require.Equal(t, -1, IndexNonQuotable("caf\xc3\xa9 r\xc3\xa9sum\xc3\xa9.pdf"))
 	require.Equal(t, 9, IndexNonQuotable([]byte("aaaaaaaaa\ttab")))
+	// Borrow-stress shapes: obs-text lanes before a quote, and a quote
+	// directly ahead of a control byte.
+	require.Equal(t, 7, IndexNonQuotable("\xff\xff\xff\xff\xff\xff\xff\""))
+	require.Equal(t, 1, IndexNonQuotable("a\"\x00defgh"))
 }
 
 func Test_IsASCII_Fixed(t *testing.T) {
@@ -275,6 +287,10 @@ func Benchmark_IndexFold(b *testing.B) {
 		"hit-tail":  "max-age=31536000, immutable, private, stale-if-error, NO-CACHE",
 		"miss-512B": strings.Repeat("max-age=31536000", 32),
 	}
+	longNeedle := map[string]string{
+		"long-miss-64B": strings.Repeat("max-age=31536000", 4),
+		"long-hit-64B":  "max-age=31536000, immutable, Proxy-Authorization: basic aaaa",
+	}
 	for name, s := range headers {
 		b.Run(name+"/swar", func(b *testing.B) {
 			b.SetBytes(int64(len(s)))
@@ -289,6 +305,24 @@ func Benchmark_IndexFold(b *testing.B) {
 			var r int
 			for b.Loop() {
 				r = refIndexFold(s, "no-cache")
+			}
+			_ = r
+		})
+	}
+	for name, s := range longNeedle {
+		b.Run(name+"/swar", func(b *testing.B) {
+			b.SetBytes(int64(len(s)))
+			var r int
+			for b.Loop() {
+				r = IndexFold(s, "proxy-authorization")
+			}
+			_ = r
+		})
+		b.Run(name+"/scalar", func(b *testing.B) {
+			b.SetBytes(int64(len(s)))
+			var r int
+			for b.Loop() {
+				r = refIndexFold(s, "proxy-authorization")
 			}
 			_ = r
 		})

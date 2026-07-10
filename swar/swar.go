@@ -23,12 +23,14 @@ const (
 	// while i+WordLen <= len(s) and route shorter inputs to scalar code.
 	WordLen = 8
 
-	// ones has 0x01 in every byte lane.
-	ones = 0x0101010101010101
-	// highBits has 0x80 in every byte lane.
-	highBits = 0x8080808080808080
-	// lowSeven has 0x7F in every byte lane.
-	lowSeven = 0x7f7f7f7f7f7f7f7f
+	// Ones has 0x01 in every byte lane.
+	Ones = 0x0101010101010101
+	// HighBits has 0x80 in every byte lane; w&HighBits != 0 iff some byte
+	// has its high bit set, and Match* masks equal HighBits iff every lane
+	// matched.
+	HighBits = 0x8080808080808080
+	// LowSeven has 0x7F in every byte lane.
+	LowSeven = 0x7f7f7f7f7f7f7f7f
 )
 
 // Load8 assembles s[i:i+8] into a little-endian uint64: s[i] becomes the
@@ -59,7 +61,7 @@ func ToLowerWord(w uint64) uint64 {
 // ToUpperWord upper-cases every 'a'..'z' lane in w. All other bytes,
 // including those >= 0x80, pass through unchanged.
 func ToUpperWord(w uint64) uint64 {
-	return w ^ MatchRangeMask(w, 'a', 'z')>>2 // clear bit 5 on matched lanes
+	return w &^ (MatchRangeMask(w, 'a', 'z') >> 2) // clear bit 5 on matched lanes
 }
 
 // MatchByteMask returns a word with 0x80 set in exactly the lanes of w whose
@@ -67,24 +69,24 @@ func ToUpperWord(w uint64) uint64 {
 // (no false positives in lanes above a match), so it is safe to feed to
 // LastLane or to arbitrary lane masking, not just first-match scans.
 func MatchByteMask(w uint64, c byte) uint64 {
-	x := w ^ (uint64(c) * ones)
+	x := w ^ (uint64(c) * Ones)
 	// Setting the high bit before the per-lane subtraction keeps every lane
 	// >= 0x80, so borrows cannot cross lanes and the test stays exact:
 	// after the subtraction the high bit is clear only where the lane was 0,
 	// and OR-ing x back in rejects lanes that had their own high bit set.
-	return ^(((x | highBits) - ones) | x) & highBits
+	return ^(((x | HighBits) - Ones) | x) & HighBits
 }
 
 // MatchRangeMask returns a word with 0x80 set in exactly the lanes of w
 // whose byte is within [lo, hi]. It requires lo <= hi <= 0x7F; lanes with
 // the high bit set (bytes >= 0x80) never match.
 func MatchRangeMask(w uint64, lo, hi byte) uint64 {
-	b := w & lowSeven
+	b := w & LowSeven
 	// After masking, every lane is <= 0x7F, so the biased additions below
 	// cannot carry into a neighboring lane.
-	ge := b + (0x80-uint64(lo))*ones   // high bit set where lane >= lo
-	gt := b + (0x80-uint64(hi)-1)*ones // high bit set where lane > hi
-	return ge &^ gt &^ w & highBits
+	ge := b + (0x80-uint64(lo))*Ones   // high bit set where lane >= lo
+	gt := b + (0x80-uint64(hi)-1)*Ones // high bit set where lane > hi
+	return ge &^ gt &^ w & HighBits
 }
 
 // FirstLane returns the index (0..7) of the lowest-addressed set lane in
