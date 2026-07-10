@@ -2,26 +2,11 @@ package utils
 
 import (
 	"github.com/gofiber/utils/v2/internal/caseconv"
+	"github.com/gofiber/utils/v2/swar"
 )
 
 type byteSeq interface {
 	~string | ~[]byte
-}
-
-// loadWord assembles 8 bytes of s starting at i into a little-endian uint64.
-// The 8-byte reslice pins the length so the constant-index reads below are
-// bounds-check free, and the compiler fuses them into a single 8-byte load on
-// little-endian platforms; on big-endian ones it stays correct, just slower.
-func loadWord[S byteSeq](s S, i int) uint64 {
-	w := s[i : i+8]
-	return uint64(w[0]) |
-		uint64(w[1])<<8 |
-		uint64(w[2])<<16 |
-		uint64(w[3])<<24 |
-		uint64(w[4])<<32 |
-		uint64(w[5])<<40 |
-		uint64(w[6])<<48 |
-		uint64(w[7])<<56
 }
 
 // EqualFold tests ascii strings or bytes for equality case-insensitively
@@ -35,9 +20,9 @@ func EqualFold[S byteSeq](b, s S) bool {
 	// words differ, so byte-identical input skips both folds entirely.
 	i := 0
 	for ; i+8 <= n; i += 8 {
-		x := loadWord(b, i)
-		y := loadWord(s, i)
-		if x != y && caseconv.ToUpperWord(x) != caseconv.ToUpperWord(y) {
+		x := swar.Load8(b, i)
+		y := swar.Load8(s, i)
+		if x != y && swar.ToUpperWord(x) != swar.ToUpperWord(y) {
 			return false
 		}
 	}
@@ -47,9 +32,9 @@ func EqualFold[S byteSeq](b, s S) bool {
 	if n >= 8 {
 		// Handle the tail with one overlapping word compare; re-checking
 		// bytes that were already equal cannot change the outcome.
-		x := loadWord(b, n-8)
-		y := loadWord(s, n-8)
-		return x == y || caseconv.ToUpperWord(x) == caseconv.ToUpperWord(y)
+		x := swar.Load8(b, n-8)
+		y := swar.Load8(s, n-8)
+		return x == y || swar.ToUpperWord(x) == swar.ToUpperWord(y)
 	}
 
 	table := caseconv.ToUpperTable

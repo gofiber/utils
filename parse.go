@@ -3,6 +3,8 @@ package utils
 import (
 	"math"
 	"strconv"
+
+	"github.com/gofiber/utils/v2/swar"
 )
 
 const (
@@ -33,8 +35,20 @@ func ParseNativeUint[S byteSeq](s S) (uint, error) {
 // Returns the parsed value and nil on success, else 0 and an error.
 func ParseInt[S byteSeq](s S) (int64, error) {
 	if len(s) > 0 && s[0] != '-' && s[0] != '+' && len(s) <= 19 {
+		// At most 19 digits fit here, so two 8-digit SWAR steps plus a
+		// scalar remainder can never overflow before the final range check.
+		// A word with a non-digit lane falls through to the scalar loop,
+		// which reports the syntax error.
 		var n uint64
-		for i := range len(s) {
+		i := 0
+		for ; len(s)-i >= 8; i += 8 {
+			w := swar.Load8(s, i)
+			if swar.MatchRangeMask(w, '0', '9') != asciiHighBits {
+				break
+			}
+			n = n*100000000 + parse8Digits(w)
+		}
+		for ; i < len(s); i++ {
 			c := s[i] - '0'
 			if c > 9 {
 				return 0, &strconv.NumError{Func: "ParseInt", Num: string(s), Err: strconv.ErrSyntax}
@@ -145,11 +159,62 @@ func ParseUint8[S byteSeq](s S) (uint8, error) {
 	return parseUnsigned[S, uint8]("ParseUint8", s, uint8(math.MaxUint8))
 }
 
+// parse8Digits converts a word of 8 ASCII digit bytes (first digit in lane 0,
+// most significant) to its numeric value using two pairwise multiply-combine
+// steps. The caller must have validated that every lane is '0'..'9'.
+func parse8Digits(w uint64) uint64 {
+	const (
+		digitZeros = 0x3030303030303030 // '0' in every lane
+		pairMask   = 0x000000FF000000FF
+		mul1       = 100 + (1000000 << 32)
+		mul2       = 1 + (10000 << 32)
+	)
+	w -= digitZeros
+	w = w*10 + w>>8 // adjacent digit pairs -> 2-digit values in even lanes
+	return ((w&pairMask)*mul1 + (w>>16&pairMask)*mul2) >> 32
+}
+
 // parseDigits parses a sequence of digits and returns the uint64 value.
 // It returns an error if any non-digit is encountered or overflow happens.
+// It must stay under the inlining budget — parseSigned and parseUnsigned
+// dispatch digit runs of 8+ bytes to parseDigitsBig instead, so the overflow
+// guard here is only reachable through a caller that skips that dispatch.
 func parseDigits[S byteSeq](s S, i int) (uint64, error) {
 	var n uint64
 	digits := 0
+	for ; i < len(s); i++ {
+		c := s[i] - '0'
+		if c > 9 {
+			return 0, strconv.ErrSyntax
+		}
+		d := uint64(c)
+		// Any value with <= 19 digits is guaranteed to fit in uint64.
+		if digits >= 19 && (n > maxUint64Cutoff || (n == maxUint64Cutoff && d > maxUint64Cutlim)) {
+			return 0, strconv.ErrRange
+		}
+		n = n*10 + d
+		digits++
+	}
+	return n, nil
+}
+
+// parseDigitsBig parses digit runs of 8+ bytes, consuming 8 digits per word
+// while the running value is guaranteed to still fit: two full steps reach 16
+// digits, and any value with <= 19 digits fits in uint64. A word with any
+// non-digit lane falls through to the scalar loop, which reports syntax
+// errors byte-precisely and applies the overflow checks.
+func parseDigitsBig[S byteSeq](s S, i int) (uint64, error) {
+	var n uint64
+	digits := 0
+	for len(s)-i >= 8 && digits+8 <= 19 {
+		w := swar.Load8(s, i)
+		if swar.MatchRangeMask(w, '0', '9') != asciiHighBits {
+			break
+		}
+		n = n*100000000 + parse8Digits(w)
+		digits += 8
+		i += 8
+	}
 	for ; i < len(s); i++ {
 		c := s[i] - '0'
 		if c > 9 {
@@ -186,8 +251,14 @@ func parseSigned[S byteSeq, T Signed](fn string, s S, minRange, maxRange T) (T, 
 		return 0, &strconv.NumError{Func: fn, Num: string(s), Err: strconv.ErrSyntax}
 	}
 
-	// Parse digits.
-	n, err := parseDigits(s, i)
+	// Parse digits, taking the 8-digits-per-word path for long runs.
+	var n uint64
+	var err error
+	if len(s)-i >= 8 {
+		n, err = parseDigitsBig(s, i)
+	} else {
+		n, err = parseDigits(s, i)
+	}
 	if err != nil {
 		return 0, &strconv.NumError{Func: fn, Num: string(s), Err: err}
 	}
@@ -216,8 +287,15 @@ func parseUnsigned[S byteSeq, T Unsigned](fn string, s S, maxRange T) (T, error)
 		return 0, &strconv.NumError{Func: fn, Num: "", Err: strconv.ErrSyntax}
 	}
 
-	// Parse digits directly from index 0.
-	n, err := parseDigits(s, 0)
+	// Parse digits directly from index 0, taking the 8-digits-per-word path
+	// for long runs.
+	var n uint64
+	var err error
+	if len(s) >= 8 {
+		n, err = parseDigitsBig(s, 0)
+	} else {
+		n, err = parseDigits(s, 0)
+	}
 	if err != nil {
 		return 0, &strconv.NumError{Func: fn, Num: string(s), Err: err}
 	}
