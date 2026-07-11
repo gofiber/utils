@@ -21,40 +21,13 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 permissions:
-  contents: read
+  deployments: write
+  contents: write
+  pull-requests: write
 
 jobs:
-  Compare:
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
-    steps:
-      - name: Fetch Repository
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
-
-      - name: Install Go
-        uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6
-        with:
-          go-version-file: go.mod
-
-      - name: Run Benchmark
-        run: set -o pipefail; go test ./... -benchmem -run=^$ -bench . | tee output.txt
-
-      - name: Get Previous Benchmark Results
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        with:
-          path: ./cache
-          key: ${{ runner.os }}-benchmark
-
-      - name: Save Benchmark Results
-        uses: benchmark-action/github-action-benchmark@52576c92bccf6ac60c8223ec7eb2565637cae9ba # v1
-        with:
-          tool: 'go'
-          output-file-path: output.txt
-          github-token: ${{ secrets.BENCHMARK_TOKEN }}
-          benchmark-data-dir-path: 'benchmarks'
-          fail-on-alert: true
-          comment-on-alert: ${{ github.event_name == 'push' || github.event_name == 'workflow_dispatch' }}
-          # Enable Job Summary for PRs - deactivated because of issues
-          #summary-always: ${{ github.event_name != 'push' && github.event_name != 'workflow_dispatch' }}
-          auto-push: ${{ github.event_name == 'push' || github.event_name == 'workflow_dispatch' }}
-          save-data-file: ${{ github.event_name == 'push' || github.event_name == 'workflow_dispatch' }}
+  benchmark:
+    uses: gofiber/.github/.github/workflows/benchmark.yml@main
+    with:
+      # ~3 months of default-branch pushes (59 in the last 90 days)
+      max-items-in-chart: 60
