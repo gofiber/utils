@@ -164,3 +164,36 @@ func Benchmark_ToLower(b *testing.B) {
 		})
 	}
 }
+
+// Test_Case_PathCoverage exercises every dispatch path of the string case
+// converters in-package: sub-word inputs, word-path inputs, identity
+// returns, and the in-place variants across both length regimes.
+func Test_Case_PathCoverage(t *testing.T) {
+	t.Parallel()
+
+	cases := []struct{ in, lower, upper string }{
+		{"", "", ""},
+		{"a", "a", "A"},
+		{"AbC", "abc", "ABC"},
+		{"\xe9!z", "\xe9!z", "\xe9!Z"},
+		{"abcdefgh", "abcdefgh", "ABCDEFGH"},
+		{"nochangehere-1234", "nochangehere-1234", "NOCHANGEHERE-1234"},
+		{"aaaaaaaaaXbbbb", "aaaaaaaaaxbbbb", "AAAAAAAAAXBBBB"},
+		{"aaaaaaaaaaaaY", "aaaaaaaaaaaay", "AAAAAAAAAAAAY"},
+	}
+	for _, tc := range cases {
+		require.Equal(t, tc.lower, ToLower(tc.in), "ToLower %q", tc.in)
+		require.Equal(t, tc.upper, ToUpper(tc.in), "ToUpper %q", tc.in)
+
+		lowerBuf := []byte(tc.in)
+		require.Equal(t, tc.lower, UnsafeToLower(unsafeconv.UnsafeString(lowerBuf)), "UnsafeToLower %q", tc.in)
+		upperBuf := []byte(tc.in)
+		require.Equal(t, tc.upper, UnsafeToUpper(unsafeconv.UnsafeString(upperBuf)), "UnsafeToUpper %q", tc.in)
+	}
+
+	// Unchanged inputs come back as-is (the fast identity paths).
+	require.Equal(t, "short", ToLower("short"))
+	require.Equal(t, "SHORT", ToUpper("SHORT"))
+	require.Equal(t, "already lower, one word plus", ToLower("already lower, one word plus"))
+	require.Equal(t, "ALREADY UPPER, ONE WORD PLUS", ToUpper("ALREADY UPPER, ONE WORD PLUS"))
+}

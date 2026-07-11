@@ -89,6 +89,41 @@ func Test_ParseSWAR_Parity(t *testing.T) {
 	}
 }
 
+func Test_ParseInt_SWARPaths(t *testing.T) {
+	t.Parallel()
+	// Fast path: a non-digit inside the first word falls back to the scalar
+	// loop, which reports the syntax error.
+	for _, s := range []string{"1234x678", "12345678\x00", "123456789012345678x"} {
+		_, err := ParseInt(s)
+		require.Error(t, err, s)
+		want, wantErr := strconv.ParseInt(s, 10, 64)
+		require.Error(t, wantErr, s)
+		require.Equal(t, want, int64(0), s) // strconv returns 0 on syntax errors too
+	}
+
+	// Signed inputs with 8+ digit runs route through parseSigned's word path.
+	for _, s := range []string{
+		"-123456789", "+123456789012", "-9223372036854775808", "+9223372036854775807",
+		"-9223372036854775809", "-99999999999999999999", "-12345678a", "-000000001",
+	} {
+		got, gotErr := ParseInt(s)
+		want, wantErr := strconv.ParseInt(s, 10, 64)
+		require.Equal(t, wantErr == nil, gotErr == nil, s)
+		if wantErr == nil {
+			require.Equal(t, want, got, s)
+		} else {
+			require.Zero(t, got, s)
+		}
+	}
+
+	// The same dispatch feeds the narrower signed parsers.
+	v32, err := ParseInt32("-214748364")
+	require.NoError(t, err)
+	require.Equal(t, int32(-214748364), v32)
+	_, err = ParseInt32("-21474836480")
+	require.Error(t, err)
+}
+
 func Benchmark_ParseUint_DigitRuns(b *testing.B) {
 	nums := map[string]string{
 		"1digit":  "8",

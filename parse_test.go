@@ -867,3 +867,51 @@ func Benchmark_ParseFloat32(b *testing.B) {
 		}
 	})
 }
+
+func Test_ParseInt8_ParseUint8_EdgeCases(t *testing.T) {
+	t.Parallel()
+
+	// Empty, sign-only, and non-digit inputs on the short fast path.
+	for _, s := range []string{"", "+", "-", "1x", "+2y", "-!3"} {
+		_, err := ParseInt8(s)
+		require.Error(t, err, "ParseInt8(%q)", s)
+	}
+	for _, s := range []string{"", "2x", "!25"} {
+		_, err := ParseUint8(s)
+		require.Error(t, err, "ParseUint8(%q)", s)
+	}
+
+	// Explicit '+' sign and the exact negative boundary.
+	v, err := ParseInt8("+127")
+	require.NoError(t, err)
+	require.Equal(t, int8(127), v)
+	v, err = ParseInt8("-128")
+	require.NoError(t, err)
+	require.Equal(t, int8(-128), v)
+	v, err = ParseInt8("-5")
+	require.NoError(t, err)
+	require.Equal(t, int8(-5), v)
+	_, err = ParseInt8("-129")
+	require.Error(t, err)
+	_, err = ParseInt8("+128")
+	require.Error(t, err)
+
+	// Inputs longer than the short fast path fall back to the generic
+	// parsers, including leading zeros and range errors.
+	v, err = ParseInt8("0127")
+	require.NoError(t, err)
+	require.Equal(t, int8(127), v)
+	v, err = ParseInt8("-00128")
+	require.NoError(t, err)
+	require.Equal(t, int8(-128), v)
+	_, err = ParseInt8("00128")
+	require.Error(t, err)
+
+	u, err := ParseUint8("0255")
+	require.NoError(t, err)
+	require.Equal(t, uint8(255), u)
+	_, err = ParseUint8("0256")
+	require.Error(t, err)
+	_, err = ParseUint8("025x")
+	require.Error(t, err)
+}

@@ -143,18 +143,17 @@ func IndexFold[S byteSeq](s S, needle string) int {
 			}
 		}
 		// Candidate starts in the final partial word: positions [i, last].
+		// Here i is the word loop's exit index n - n%8, so this region is
+		// non-empty only when k <= n%8 <= 7 — the needle always fits in one
+		// word and only the short-needle verify can apply.
 		for ; i <= last; i++ {
 			if table[s[i]] == first {
-				if k <= 8 {
-					if !built {
-						needleWord = foldNeedle(needle)
-						lenMask = ^uint64(0) >> ((8 - k) * 8)
-						built = true
-					}
-					if foldedWindowAt(s, i, lenMask) == needleWord {
-						return i
-					}
-				} else if foldEqualAt(s, i, needle) {
+				if !built {
+					needleWord = foldNeedle(needle)
+					lenMask = ^uint64(0) >> ((8 - k) * 8)
+					built = true
+				}
+				if foldedWindowAt(s, i, lenMask) == needleWord {
 					return i
 				}
 			}

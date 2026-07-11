@@ -182,6 +182,14 @@ func Test_IndexFold_Fixed(t *testing.T) {
 	require.Equal(t, 12, IndexFold("abcdefghijklTRANSFER-ENCODING", "transfer-encoding"))
 	require.Equal(t, 0, IndexFold("authorizatioN", "authorization"))
 	require.Equal(t, -1, IndexFold("authorizatio", "authorization"))
+	// The first candidate appears only in the scalar remainder after the
+	// word loop, so the folded needle is built there.
+	require.Equal(t, 10, IndexFold("aaaaaaaaaaGZ", "gz"))
+	require.Equal(t, -1, IndexFold("aaaaaaaaaaGx", "gz"))
+	// Needle length an exact multiple of the word size: the fold-compare
+	// covers it with full words only, matching and mismatching.
+	require.Equal(t, 2, IndexFold("__proxy-authorizatXYZ", "PROXY-AUTHORIZAT"))
+	require.Equal(t, -1, IndexFold("__proxy-authorizaQXYZ", "PROXY-AUTHORIZAT"))
 }
 
 func Test_IndexNonQuotable_Fixed(t *testing.T) {
