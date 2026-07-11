@@ -57,7 +57,7 @@ func refIndexFold(s, needle string) int {
 
 func refIndexNonQuotable(s string) int {
 	for i := 0; i < len(s); i++ {
-		if c := s[i]; c == '\\' || c == '"' || c < 0x20 || c == 0x7f {
+		if c := s[i]; c == '\\' || c == '"' || (c < 0x20 && c != '\t') || c == 0x7f {
 			return i
 		}
 	}
@@ -89,7 +89,7 @@ func Test_Search_Randomized(t *testing.T) {
 			if rng.Intn(8) == 0 {
 				buf[i] = byte(rng.Intn(256))
 			} else {
-				buf[i] = "abcDEF,\"\\\x00\x7f\xe9 :."[rng.Intn(14)]
+				buf[i] = "abcDEF,\"\\\x00\x7f\xe9\t :."[rng.Intn(15)]
 			}
 		}
 		s := string(buf)
@@ -194,7 +194,12 @@ func Test_IndexNonQuotable_Fixed(t *testing.T) {
 	require.Equal(t, 7, IndexNonQuotable("abcdefg\x7f"))
 	// obs-text (>= 0x80) is quotable.
 	require.Equal(t, -1, IndexNonQuotable("caf\xc3\xa9 r\xc3\xa9sum\xc3\xa9.pdf"))
-	require.Equal(t, 9, IndexNonQuotable([]byte("aaaaaaaaa\ttab")))
+	// HTAB is valid qdtext (RFC 9110) and must NOT be flagged, in the word
+	// path, the scalar path, and directly before a real control byte.
+	require.Equal(t, -1, IndexNonQuotable([]byte("aaaaaaaaa\ttab")))
+	require.Equal(t, -1, IndexNonQuotable("a\tb"))
+	require.Equal(t, 9, IndexNonQuotable("aaaaaaaa\t\x1f"))
+	require.Equal(t, 3, IndexNonQuotable("ab\t\x08cdefgh"))
 	// Borrow-stress shapes: obs-text lanes before a quote, and a quote
 	// directly ahead of a control byte.
 	require.Equal(t, 7, IndexNonQuotable("\xff\xff\xff\xff\xff\xff\xff\""))

@@ -129,7 +129,8 @@ func IndexFold[S byteSeq](s S, needle string) int {
 				}
 				if k <= 8 {
 					if !built {
-						needleWord, lenMask = foldNeedle(needle)
+						needleWord = foldNeedle(needle)
+						lenMask = ^uint64(0) >> ((8 - k) * 8)
 						built = true
 					}
 					if foldedWindowAt(s, pos, lenMask) == needleWord {
@@ -146,7 +147,8 @@ func IndexFold[S byteSeq](s S, needle string) int {
 			if table[s[i]] == first {
 				if k <= 8 {
 					if !built {
-						needleWord, lenMask = foldNeedle(needle)
+						needleWord = foldNeedle(needle)
+						lenMask = ^uint64(0) >> ((8 - k) * 8)
 						built = true
 					}
 					if foldedWindowAt(s, i, lenMask) == needleWord {
@@ -176,19 +178,20 @@ outer:
 	return -1
 }
 
-// foldNeedle returns needle lower-cased into one little-endian word (lane 0
-// is needle[0]) plus the mask covering its lanes. len(needle) must be 1..8.
-func foldNeedle(needle string) (uint64, uint64) {
+// foldNeedle returns needle lower-cased into one little-endian word, lane 0
+// holding needle[0]. len(needle) must be 1..8; lanes past the needle are
+// zero, matching the ^uint64(0) >> ((8-k)*8) mask callers apply to windows.
+func foldNeedle(needle string) uint64 {
 	k := len(needle)
 	if k == 8 {
-		return swar.ToLowerWord(swar.Load8(needle, 0)), ^uint64(0)
+		return swar.ToLowerWord(swar.Load8(needle, 0))
 	}
 	table := caseconv.ToLowerTable
 	var word uint64
 	for j := k - 1; j >= 0; j-- {
 		word = word<<8 | uint64(table[needle[j]])
 	}
-	return word, ^uint64(0) >> ((8 - k) * 8)
+	return word
 }
 
 // foldedWindowAt returns the lower-cased window of s starting at pos, masked

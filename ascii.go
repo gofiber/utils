@@ -45,11 +45,12 @@ func IsASCII[S byteSeq](s S) bool {
 
 // IndexNonQuotable returns the index of the first byte of s that cannot
 // appear verbatim inside an RFC 9110 quoted-string — that is, a byte
-// matching c == '\\' || c == '"' || c < 0x20 || c == 0x7f — or -1 if every
-// byte is quotable. Returning the index (rather than a bool) lets callers
-// copy the clean prefix and start escaping exactly at the offending byte.
-// Bytes >= 0x80 (obs-text) are quotable. Inputs of 8+ bytes finish with one
-// overlapping word at n-8, shorter ones byte-wise.
+// matching c == '\\' || c == '"' || (c < 0x20 && c != '\t') || c == 0x7f —
+// or -1 if every byte is quotable. qdtext is HTAB / SP / %x21 / %x23-5B /
+// %x5D-7E / obs-text, so HTAB and bytes >= 0x80 are quotable. Returning the
+// index (rather than a bool) lets callers copy the clean prefix and start
+// escaping exactly at the offending byte. Inputs of 8+ bytes finish with
+// one overlapping word at n-8, shorter ones byte-wise.
 func IndexNonQuotable[S byteSeq](s S) int {
 	n := len(s)
 	i := 0
@@ -68,7 +69,7 @@ func IndexNonQuotable[S byteSeq](s S) int {
 		return -1
 	}
 	for ; i < n; i++ {
-		if c := s[i]; c == '\\' || c == '"' || c < 0x20 || c == 0x7f {
+		if c := s[i]; c == '\\' || c == '"' || (c < 0x20 && c != '\t') || c == 0x7f {
 			return i
 		}
 	}
@@ -82,8 +83,10 @@ func nonQuotableMask(w uint64) uint64 {
 	// Controls (< 0x20) and DEL (0x7F) share one biased range test:
 	// t := ((c & 0x7F) + 1) & 0x7F maps DEL to 0 and controls to 0x01..0x20,
 	// so t <= 0x20 captures exactly both; lanes with the high bit set
-	// (obs-text, always quotable) are excluded by the &^ w term.
+	// (obs-text, always quotable) are excluded by the &^ w term. HTAB is
+	// quotable qdtext, so its lanes are cleared with an exact match mask —
+	// an approximate one could wrongly clear a control lane above a tab.
 	t := ((w & swar.LowSeven) + swar.Ones) & swar.LowSeven
-	ctl := ^(t + (0x80-0x21)*swar.Ones) &^ w & swar.HighBits
+	ctl := ^(t + (0x80-0x21)*swar.Ones) &^ w & swar.HighBits &^ swar.MatchByteMask(w, '\t')
 	return ctl | swar.ZeroLanes(w^quoteLanes) | swar.ZeroLanes(w^backslashLanes)
 }
