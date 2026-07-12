@@ -5,66 +5,78 @@ import (
 	"github.com/gofiber/utils/v2/internal/unsafeconv"
 )
 
+// swarMinLen is the smallest input length worth routing through the
+// word-at-a-time (SWAR) helpers; shorter inputs are cheaper byte-by-byte.
+const swarMinLen = caseconv.WordLen
+
 // ToLower converts an ASCII string to lower-case without modifying the input.
 func ToLower(s string) string {
 	n := len(s)
-	if n == 0 {
+	if n < swarMinLen {
+		table := caseconv.ToLowerTable
+		for i := 0; i < n; i++ {
+			c := s[i]
+			low := table[c]
+			if low != c {
+				res := make([]byte, n)
+				copy(res, s[:i])
+				res[i] = low
+				for i++; i < n; i++ {
+					res[i] = table[s[i]]
+				}
+				return unsafeconv.UnsafeString(res)
+			}
+		}
 		return s
 	}
 
-	table := caseconv.ToLowerTable
-	for i := range n {
-		c := s[i]
-		low := table[c]
-		if low != c {
-			res := make([]byte, n)
-			copy(res, s[:i])
-			res[i] = low
-			j := i + 1
-			for ; j+3 < n; j += 4 {
-				res[j+0] = table[s[j+0]]
-				res[j+1] = table[s[j+1]]
-				res[j+2] = table[s[j+2]]
-				res[j+3] = table[s[j+3]]
-			}
-			for ; j < n; j++ {
-				res[j] = table[s[j]]
-			}
-			return unsafeconv.UnsafeString(res)
-		}
+	src := unsafeconv.UnsafeBytes(s)
+	i := caseconv.FirstUpperIndex(src)
+	if i < 0 {
+		return s
 	}
-	return s
+
+	res := make([]byte, n)
+	// Copy the unchanged prefix up to the word containing the first
+	// uppercase byte, then convert the rest word-at-a-time.
+	from := i &^ (caseconv.WordLen - 1)
+	copy(res, src[:from])
+	caseconv.ToLowerCopy(res, src, from)
+	return unsafeconv.UnsafeString(res)
 }
 
 // ToUpper converts an ASCII string to upper-case without modifying the input.
 func ToUpper(s string) string {
 	n := len(s)
-	if n == 0 {
+	if n < swarMinLen {
+		table := caseconv.ToUpperTable
+		for i := 0; i < n; i++ {
+			c := s[i]
+			up := table[c]
+			if up != c {
+				res := make([]byte, n)
+				copy(res, s[:i])
+				res[i] = up
+				for i++; i < n; i++ {
+					res[i] = table[s[i]]
+				}
+				return unsafeconv.UnsafeString(res)
+			}
+		}
 		return s
 	}
 
-	table := caseconv.ToUpperTable
-	for i := range n {
-		c := s[i]
-		up := table[c]
-		if up != c {
-			res := make([]byte, n)
-			copy(res, s[:i])
-			res[i] = up
-			j := i + 1
-			for ; j+3 < n; j += 4 {
-				res[j+0] = table[s[j+0]]
-				res[j+1] = table[s[j+1]]
-				res[j+2] = table[s[j+2]]
-				res[j+3] = table[s[j+3]]
-			}
-			for ; j < n; j++ {
-				res[j] = table[s[j]]
-			}
-			return unsafeconv.UnsafeString(res)
-		}
+	src := unsafeconv.UnsafeBytes(s)
+	i := caseconv.FirstLowerIndex(src)
+	if i < 0 {
+		return s
 	}
-	return s
+
+	res := make([]byte, n)
+	from := i &^ (caseconv.WordLen - 1)
+	copy(res, src[:from])
+	caseconv.ToUpperCopy(res, src, from)
+	return unsafeconv.UnsafeString(res)
 }
 
 // UnsafeToLower converts an ASCII string to lower-case by mutating its backing bytes in-place.
@@ -72,26 +84,14 @@ func ToUpper(s string) string {
 // string is known to reference mutable memory.
 func UnsafeToLower(s string) string {
 	b := unsafeconv.UnsafeBytes(s)
-	table := caseconv.ToLowerTable
-	n := len(b)
-	i := 0
-	limit := n &^ 3
-	for i < limit {
-		b0 := b[i+0]
-		b1 := b[i+1]
-		b2 := b[i+2]
-		b3 := b[i+3]
-
-		b[i+0] = table[b0]
-		b[i+1] = table[b1]
-		b[i+2] = table[b2]
-		b[i+3] = table[b3]
-		i += 4
+	if len(b) < swarMinLen {
+		table := caseconv.ToLowerTable
+		for i := range b {
+			b[i] = table[b[i]]
+		}
+		return s
 	}
-	for i < n {
-		b[i] = table[b[i]]
-		i++
-	}
+	caseconv.ToLowerInPlace(b)
 	return s
 }
 
@@ -100,25 +100,13 @@ func UnsafeToLower(s string) string {
 // string is known to reference mutable memory.
 func UnsafeToUpper(s string) string {
 	b := unsafeconv.UnsafeBytes(s)
-	table := caseconv.ToUpperTable
-	n := len(b)
-	i := 0
-	limit := n &^ 3
-	for i < limit {
-		b0 := b[i+0]
-		b1 := b[i+1]
-		b2 := b[i+2]
-		b3 := b[i+3]
-
-		b[i+0] = table[b0]
-		b[i+1] = table[b1]
-		b[i+2] = table[b2]
-		b[i+3] = table[b3]
-		i += 4
+	if len(b) < swarMinLen {
+		table := caseconv.ToUpperTable
+		for i := range b {
+			b[i] = table[b[i]]
+		}
+		return s
 	}
-	for i < n {
-		b[i] = table[b[i]]
-		i++
-	}
+	caseconv.ToUpperInPlace(b)
 	return s
 }

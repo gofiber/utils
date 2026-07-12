@@ -2,6 +2,7 @@ package utils
 
 import (
 	"github.com/gofiber/utils/v2/internal/caseconv"
+	"github.com/gofiber/utils/v2/swar"
 )
 
 type byteSeq interface {
@@ -10,49 +11,37 @@ type byteSeq interface {
 
 // EqualFold tests ascii strings or bytes for equality case-insensitively
 func EqualFold[S byteSeq](b, s S) bool {
-	if len(b) != len(s) {
+	n := len(b)
+	if n != len(s) {
 		return false
 	}
 
-	table := caseconv.ToUpperTable
-	n := len(b)
+	// Compare 8 bytes per iteration; case-fold with SWAR only when the raw
+	// words differ, so byte-identical input skips both folds entirely.
 	i := 0
-
-	// Unroll by 4 to match other hot paths and drive instruction-level parallelism.
-	limit := n &^ 3
-	for i < limit {
-		b0 := b[i+0]
-		s0 := s[i+0]
-		if table[b0] != table[s0] {
+	for ; i+8 <= n; i += 8 {
+		x := swar.Load8(b, i)
+		y := swar.Load8(s, i)
+		if x != y && swar.ToUpperWord(x) != swar.ToUpperWord(y) {
 			return false
 		}
-
-		b1 := b[i+1]
-		s1 := s[i+1]
-		if table[b1] != table[s1] {
-			return false
-		}
-
-		b2 := b[i+2]
-		s2 := s[i+2]
-		if table[b2] != table[s2] {
-			return false
-		}
-
-		b3 := b[i+3]
-		s3 := s[i+3]
-		if table[b3] != table[s3] {
-			return false
-		}
-
-		i += 4
+	}
+	if i == n {
+		return true
+	}
+	if n >= 8 {
+		// Handle the tail with one overlapping word compare; re-checking
+		// bytes that were already equal cannot change the outcome.
+		x := swar.Load8(b, n-8)
+		y := swar.Load8(s, n-8)
+		return x == y || swar.ToUpperWord(x) == swar.ToUpperWord(y)
 	}
 
-	for i < n {
+	table := caseconv.ToUpperTable
+	for ; i < n; i++ {
 		if table[b[i]] != table[s[i]] {
 			return false
 		}
-		i++
 	}
 	return true
 }
