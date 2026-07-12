@@ -12,9 +12,14 @@ var timerTestMu sync.Mutex
 
 func checkTimeStamp(tb testing.TB, expectedCurrent, actualCurrent uint32) {
 	tb.Helper()
-	// Test with buffer of ±2 seconds for CI environment tolerance
-	require.True(tb, actualCurrent >= expectedCurrent-2 && actualCurrent <= expectedCurrent+2,
-		"Expected timestamp %d (±2s), got %d (diff: %d)", expectedCurrent, actualCurrent, int64(actualCurrent)-int64(expectedCurrent))
+	// Test with buffer of ±2 seconds for CI environment tolerance. The
+	// failure message is built only on failure: boxing require.True's
+	// variadic args allocated on every call, which made the fiber_asserted
+	// benchmark's B/op metric nondeterministic.
+	if actualCurrent < expectedCurrent-2 || actualCurrent > expectedCurrent+2 {
+		tb.Fatalf("Expected timestamp %d (±2s), got %d (diff: %d)",
+			expectedCurrent, actualCurrent, int64(actualCurrent)-int64(expectedCurrent))
+	}
 }
 
 func Test_TimeStampUpdater(t *testing.T) {
