@@ -118,7 +118,7 @@ func IndexFold[S byteSeq](s S, needle string) int {
 		// path +44% on 8-byte misses and +13% to +17% on 32-64B misses
 		// (benchstat -count=10, Go 1.25, Apple M2 Pro). foldPrep keeps the
 		// pair computation in one place for both build sites below.
-		var needleWord, lenMask uint64
+		var fn foldedNeedle
 		built := false
 
 		i := 0
@@ -132,10 +132,10 @@ func IndexFold[S byteSeq](s S, needle string) int {
 				}
 				if k <= 8 {
 					if !built {
-						needleWord, lenMask = foldPrep(needle)
+						fn = foldPrep(needle)
 						built = true
 					}
-					if foldedWindowAt(s, pos, lenMask) == needleWord {
+					if foldedWindowAt(s, pos, fn.mask) == fn.word {
 						return pos
 					}
 				} else if foldEqualAt(s, pos, needle) {
@@ -151,10 +151,10 @@ func IndexFold[S byteSeq](s S, needle string) int {
 		for ; i <= last; i++ {
 			if table[s[i]] == first {
 				if !built {
-					needleWord, lenMask = foldPrep(needle)
+					fn = foldPrep(needle)
 					built = true
 				}
-				if foldedWindowAt(s, i, lenMask) == needleWord {
+				if foldedWindowAt(s, i, fn.mask) == fn.word {
 					return i
 				}
 			}
@@ -178,11 +178,16 @@ outer:
 	return -1
 }
 
-// foldPrep returns the folded needle word and its length mask for the
-// short-needle (k <= 8) verify. It exists so IndexFold's two lazy build
-// sites share one definition of the pair.
-func foldPrep(needle string) (uint64, uint64) {
-	return foldNeedle(needle), ^uint64(0) >> ((8 - len(needle)) * 8)
+// foldedNeedle is the short-needle (k <= 8) verify state: the needle
+// lower-cased into one word plus the mask covering its lanes.
+type foldedNeedle struct {
+	word, mask uint64
+}
+
+// foldPrep builds the foldedNeedle pair; it exists so IndexFold's two lazy
+// build sites share one definition.
+func foldPrep(needle string) foldedNeedle {
+	return foldedNeedle{foldNeedle(needle), ^uint64(0) >> ((8 - len(needle)) * 8)}
 }
 
 // foldNeedle returns needle lower-cased into one little-endian word, lane 0
