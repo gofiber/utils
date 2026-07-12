@@ -84,6 +84,7 @@ func Test_MatchByteMask_Exhaustive(t *testing.T) {
 	// For every needle value and every lane value, the mask must be exact:
 	// 0x80 iff equal, 0 otherwise — including needle 0x00, needle >= 0x80,
 	// and adjacent-lane interference (the borrow-corruption trap).
+	// Plain checks keep the ~1M words fast, as in the range test below.
 	for needle := range 256 {
 		for c := range 256 {
 			for lane := range 8 {
@@ -101,8 +102,10 @@ func Test_MatchByteMask_Exhaustive(t *testing.T) {
 						if lanes[i] == byte(needle) {
 							want = 0x80
 						}
-						require.Equal(t, want, byte(m>>(8*i)),
-							"needle 0x%02x lanes %v lane %d", needle, lanes, i)
+						if got := byte(m >> (8 * i)); got != want {
+							t.Fatalf("needle 0x%02x lanes %v lane %d: got 0x%02x want 0x%02x",
+								needle, lanes, i, got, want)
+						}
 					}
 				}
 			}

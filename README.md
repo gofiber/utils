@@ -18,6 +18,7 @@ cpu: Apple M2 Pro
 
 ```text
 // go test ./... -benchmem -run=^$ -bench=Benchmark_ -count=1
+// (swar's Benchmark_Load8_Fusion, an advisory codegen guard, is deliberately omitted)
 
 # Case Conversion
 Benchmark_ToLowerBytes/empty/fiber-12                              599341221   1.970  ns/op     0  B/op   0  allocs/op
@@ -442,6 +443,22 @@ Benchmark_DefaultXMLDecoder-12                                        309031    
 ```
 
 See all the benchmarks under <https://gofiber.github.io/utils/benchmarks>
+
+## SWAR primitives
+
+The [`swar`](swar/) package exports the SWAR (SIMD within a register)
+building blocks the helpers above are composed from: `Load8`/`Store8`,
+`Broadcast`, `ZeroLanes`, `MatchByteMask`/`MatchRangeMask`,
+`ToLowerWord`/`ToUpperWord`, `FirstLane`/`LastLane`, and the `WordLen`,
+`Ones`, `HighBits`, and `LowSeven` constants. They are exported so
+downstream packages (Fiber itself, middleware) can fuse their own byte
+scans — for example, finding a delimiter while classifying the bytes
+before it — without re-deriving the bit tricks. The contracts (unchecked
+bounds preconditions, `ZeroLanes`' approximate mask, the little-endian
+lane order) and runnable examples live in the package documentation. The
+package's only benchmark, `Benchmark_Load8_Fusion`, is an advisory
+codegen guard rather than an API performance promise, so it is
+deliberately not part of the catalog above.
 
 ## ☕ Supporters
 

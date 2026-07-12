@@ -24,7 +24,8 @@ import (
 const WordLen = swar.WordLen
 
 // FirstUpperIndex returns the index of the first ASCII uppercase byte in b,
-// or -1 if b contains none.
+// or -1 if b contains none. b is only ever read; it may be an unsafe view
+// over immutable string memory.
 func FirstUpperIndex(b []byte) int {
 	n := len(b)
 	i := 0
@@ -53,7 +54,8 @@ func FirstUpperIndex(b []byte) int {
 }
 
 // FirstLowerIndex returns the index of the first ASCII lowercase byte in b,
-// or -1 if b contains none.
+// or -1 if b contains none. b is only ever read; it may be an unsafe view
+// over immutable string memory.
 func FirstLowerIndex(b []byte) int {
 	n := len(b)
 	i := 0
@@ -107,7 +109,9 @@ func ToUpperInPlace(b []byte) {
 
 // ToLowerCopy writes the lower-cased content of src into dst starting at
 // byte offset from. Bytes before from must already be present in dst, and
-// len(dst) must equal len(src).
+// len(dst) must equal len(src). src is only ever read — the strings package
+// passes an unsafe view over a string's immutable backing memory — so no
+// code path here may write through src.
 //
 // from must be a multiple of WordLen and at or below the index of the first
 // byte that lower-casing changes: when len(src) >= WordLen the overlapping
@@ -140,7 +144,7 @@ func ToLowerCopy(dst, src []byte, from int) {
 //
 // from must be a multiple of WordLen and at or below the index of the first
 // byte that upper-casing changes; see ToLowerCopy for why, including the
-// note on the byte-wise tail.
+// note on the byte-wise tail and the requirement that src is never written.
 func ToUpperCopy(dst, src []byte, from int) {
 	n := len(src)
 	i := from

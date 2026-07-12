@@ -207,7 +207,8 @@ func Test_ParseNativeInt(t *testing.T) {
 	}
 
 	if strconv.IntSize == 32 {
-		tests = append(tests,
+		tests = append(
+			tests,
 			struct {
 				in       string
 				val      int
@@ -222,7 +223,8 @@ func Test_ParseNativeInt(t *testing.T) {
 			}{strconv.FormatInt(-large, 10), 0, false, true},
 		)
 	} else {
-		tests = append(tests,
+		tests = append(
+			tests,
 			struct {
 				in       string
 				val      int
@@ -928,7 +930,10 @@ func Test_ParseInt8_ParseUint8_EdgeCases(t *testing.T) {
 
 func Test_Parse8Digits_And_IsEightDigits(t *testing.T) {
 	t.Parallel()
-	for _, v := range []uint64{0, 1, 9, 10, 12345678, 99999999, 10000000, 90000009, 9999990} {
+	// checkParse8 zero-pads v to eight digits and pins both SWAR helpers on
+	// the resulting word.
+	checkParse8 := func(v uint64) {
+		t.Helper()
 		s := FormatUint(v)
 		for len(s) < 8 {
 			s = "0" + s
@@ -936,6 +941,10 @@ func Test_Parse8Digits_And_IsEightDigits(t *testing.T) {
 		w := swar.Load8(s, 0)
 		require.True(t, isEightDigits(w), s)
 		require.Equal(t, v, parse8Digits(w), s)
+	}
+
+	for _, v := range []uint64{0, 1, 9, 10, 12345678, 99999999, 10000000, 90000009, 9999990} {
+		checkParse8(v)
 	}
 	// isEightDigits must reject every byte value outside '0'..'9' in every
 	// lane, including bytes >= 0xFA whose +6 carries into the next lane.
@@ -953,14 +962,7 @@ func Test_Parse8Digits_And_IsEightDigits(t *testing.T) {
 	// full-parser parity loop.
 	rng := rand.New(rand.NewSource(5)) //nolint:gosec // deterministic test data
 	for range 10000 {
-		v := uint64(rng.Intn(100000000))
-		s := FormatUint(v)
-		for len(s) < 8 {
-			s = "0" + s
-		}
-		w := swar.Load8(s, 0)
-		require.True(t, isEightDigits(w), s)
-		require.Equal(t, v, parse8Digits(w), s)
+		checkParse8(uint64(rng.Intn(100000000)))
 	}
 }
 
