@@ -22,8 +22,8 @@ func IndexAny2[S byteSeq](s S, a, b byte) int {
 	if n >= 8 {
 		// The needle broadcasts are hoisted here so sub-word inputs never
 		// pay for the multiplies.
-		bcA := uint64(a) * swar.Ones
-		bcB := uint64(b) * swar.Ones
+		bcA := swar.Broadcast(a)
+		bcB := swar.Broadcast(b)
 		i := 0
 		for ; i+8 <= n; i += 8 {
 			w := swar.Load8(s, i)
@@ -53,9 +53,9 @@ func IndexAny2[S byteSeq](s S, a, b byte) int {
 func IndexAny3[S byteSeq](s S, a, b, c byte) int {
 	n := len(s)
 	if n >= 8 {
-		bcA := uint64(a) * swar.Ones
-		bcB := uint64(b) * swar.Ones
-		bcC := uint64(c) * swar.Ones
+		bcA := swar.Broadcast(a)
+		bcB := swar.Broadcast(b)
+		bcC := swar.Broadcast(c)
 		i := 0
 		for ; i+8 <= n; i += 8 {
 			w := swar.Load8(s, i)
@@ -84,6 +84,8 @@ func IndexAny3[S byteSeq](s S, a, b, c byte) int {
 // of needle in s, or -1 if absent. An empty needle matches at index 0. Only
 // 'A'..'Z'/'a'..'z' fold; every other byte (including >= 0x80) must match
 // exactly, so e.g. "no\rcache" does NOT match the needle "no-cache".
+// The needle is a plain string by design: call sites pass constant tokens,
+// and a []byte needle would cost its callers a conversion either way.
 func IndexFold[S byteSeq](s S, needle string) int {
 	n, k := len(s), len(needle)
 	if k == 0 {
@@ -103,18 +105,19 @@ func IndexFold[S byteSeq](s S, needle string) int {
 		// then verify each candidate. Approximate-mask false positives just
 		// cost a verify; the candidate order stays low-to-high, so the
 		// pos > last cutoff remains a valid global exit.
-		bc1 := uint64(first) * swar.Ones
+		bc1 := swar.Broadcast(first)
 		bc2 := bc1
 		if first >= 'a' && first <= 'z' {
-			bc2 = uint64(first-0x20) * swar.Ones
+			bc2 = swar.Broadcast(first - 0x20)
 		}
 
 		// For needles up to one word the verify is a single masked word
 		// compare against the folded needle, built lazily on the first
-		// candidate; longer needles fold-compare word-at-a-time. The verify
-		// block is deliberately spelled out in both loops below: routing it
-		// through a closure taxes every call with capture setup even on the
-		// no-candidate path, so keep the two copies in sync.
+		// candidate; longer needles fold-compare word-at-a-time. The lazy
+		// build is load-bearing: building eagerly costs the no-candidate
+		// path +44% on 8-byte misses and +13% to +17% on 32-64B misses
+		// (benchstat -count=10, Go 1.25, Apple M2 Pro). foldPrep keeps the
+		// pair computation in one place for both build sites below.
 		var needleWord, lenMask uint64
 		built := false
 
@@ -129,8 +132,7 @@ func IndexFold[S byteSeq](s S, needle string) int {
 				}
 				if k <= 8 {
 					if !built {
-						needleWord = foldNeedle(needle)
-						lenMask = ^uint64(0) >> ((8 - k) * 8)
+						needleWord, lenMask = foldPrep(needle)
 						built = true
 					}
 					if foldedWindowAt(s, pos, lenMask) == needleWord {
@@ -149,8 +151,7 @@ func IndexFold[S byteSeq](s S, needle string) int {
 		for ; i <= last; i++ {
 			if table[s[i]] == first {
 				if !built {
-					needleWord = foldNeedle(needle)
-					lenMask = ^uint64(0) >> ((8 - k) * 8)
+					needleWord, lenMask = foldPrep(needle)
 					built = true
 				}
 				if foldedWindowAt(s, i, lenMask) == needleWord {
@@ -175,6 +176,13 @@ outer:
 		return i
 	}
 	return -1
+}
+
+// foldPrep returns the folded needle word and its length mask for the
+// short-needle (k <= 8) verify. It exists so IndexFold's two lazy build
+// sites share one definition of the pair.
+func foldPrep(needle string) (uint64, uint64) {
+	return foldNeedle(needle), ^uint64(0) >> ((8 - len(needle)) * 8)
 }
 
 // foldNeedle returns needle lower-cased into one little-endian word, lane 0

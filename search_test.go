@@ -82,7 +82,9 @@ func Test_Search_Randomized(t *testing.T) {
 	rng := rand.New(rand.NewSource(7)) //nolint:gosec // deterministic test data
 
 	for range 30000 {
-		n := rng.Intn(41) // lengths 0..40 cover all %8 tails and overlap reads
+		// Lengths 0..100 cover all %8 tails, the overlap reads, and 2+
+		// iterations of IsASCII's 32-byte unrolled loop.
+		n := rng.Intn(101)
 		buf := make([]byte, n)
 		for i := range buf {
 			// Small alphabet so needles hit often, plus occasional raw bytes.
@@ -156,7 +158,7 @@ func Test_IndexFold_Fixed(t *testing.T) {
 	require.Equal(t, 10, IndexFold("max-age=0,No-Cache,private", "no-cache"))
 	require.Equal(t, 4, IndexFold([]byte("xyz BeArEr token"), "bearer"))
 	// Fold must only touch A-Z/a-z lanes: CR|0x20 == '-' would falsely match
-	// with a blanket |0x20 fold. This is the trap case from the handoff.
+	// with a blanket |0x20 fold.
 	require.Equal(t, -1, IndexFold("no\rcache", "no-cache"))
 	require.Equal(t, -1, IndexFold("NO\rCACHE", "no-cache"))
 	// Non-ASCII bytes must match exactly, never fold.

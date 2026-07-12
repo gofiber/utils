@@ -38,7 +38,11 @@ func ParseInt[S byteSeq](s S) (int64, error) {
 		// At most 19 digits fit here, so two 8-digit SWAR steps plus a
 		// scalar remainder can never overflow before the final range check.
 		// A word with a non-digit lane falls through to the scalar loop,
-		// which reports the syntax error.
+		// which reports the syntax error. The body deliberately duplicates
+		// the parseDigitsBig structure: routing through parseDigitsBig
+		// instead costs +22% on the 9-digit shape (benchstat -count=10,
+		// Go 1.25, Apple M2 Pro), mostly digit bookkeeping and the extra
+		// call frame.
 		var n uint64
 		i := 0
 		for ; len(s)-i >= 8; i += 8 {

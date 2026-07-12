@@ -2,14 +2,14 @@ package utils
 
 // Tests and benchmarks for the 8-digit SWAR parse step in ParseUint/ParseInt.
 //
-// Historical gate notes: the IsIPv4/IsIPv6 SWAR pre-validation (handoff P6)
-// was prototyped here and DROPPED — it lost on every shape (+10% to +49%)
-// because the scalar octet parse still has to run after the word checks on
-// <= 15-byte inputs. The scalar-baseline comparison that gated P7 lives in
-// the introducing commit's message; ParseUint won -16% to -27% at 8+ digits
-// with a one-branch cost on 1-digit inputs.
+// A SWAR pre-validation for IsIPv4/IsIPv6 was prototyped alongside this work
+// and dropped: it lost on every shape (+10% to +49%) because the scalar
+// octet parse still has to run after the word checks on <= 15-byte inputs.
+// ParseUint won -16% to -27% at 8+ digits with a one-branch cost on 1-digit
+// inputs; the raw comparison lives in the introducing commit message.
 
 import (
+	"math"
 	"math/rand"
 	"strconv"
 	"testing"
@@ -39,6 +39,20 @@ func Test_Parse8Digits_And_IsEightDigits(t *testing.T) {
 			require.Equal(t, c >= '0' && c <= '9', got, "byte 0x%02x lane %d", c, lane)
 			lanes[lane] = '1'
 		}
+	}
+
+	// Pin parse8Digits itself on random 8-digit words, independent of the
+	// full-parser parity loop.
+	rng := rand.New(rand.NewSource(5)) //nolint:gosec // deterministic test data
+	for range 10000 {
+		v := uint64(rng.Intn(100000000))
+		s := FormatUint(v)
+		for len(s) < 8 {
+			s = "0" + s
+		}
+		w := swar.Load8(s, 0)
+		require.True(t, isEightDigits(w), s)
+		require.Equal(t, v, parse8Digits(w), s)
 	}
 }
 
@@ -122,6 +136,16 @@ func Test_ParseInt_SWARPaths(t *testing.T) {
 	require.Equal(t, int32(-214748364), v32)
 	_, err = ParseInt32("-21474836480")
 	require.Error(t, err)
+
+	// 19-digit boundary on the sign-free fast path: MaxInt64 parses, one
+	// past it is a range error (not a syntax error), matching strconv.
+	maxV, err := ParseInt("9223372036854775807")
+	require.NoError(t, err)
+	require.Equal(t, int64(math.MaxInt64), maxV)
+	_, err = ParseInt("9223372036854775808")
+	var numErr *strconv.NumError
+	require.ErrorAs(t, err, &numErr)
+	require.ErrorIs(t, numErr.Err, strconv.ErrRange)
 }
 
 func Benchmark_ParseUint_DigitRuns(b *testing.B) {

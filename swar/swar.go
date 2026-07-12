@@ -6,10 +6,15 @@
 // e.g. finding a delimiter while simultaneously classifying the bytes before
 // it — without re-deriving the bit tricks.
 //
-// Every operation is carried out independently per byte lane, so results are
-// identical on little- and big-endian platforms. Load8 always assembles words
-// in little-endian lane order: lane 0 (the least significant byte) is the
-// lowest byte index, which is what FirstLane and LastLane assume.
+// Every operation yields per-lane results (exactly for the Match* masks,
+// approximately for ZeroLanes, whose contract allows false positives above
+// the first hit), so results are identical on little- and big-endian
+// platforms. Load8 and Store8 always use little-endian lane order: lane 0
+// (the least significant byte) is the lowest byte index, which is what
+// FirstLane and LastLane assume. The empty-mask sentinels differ on
+// purpose: FirstLane(0) == 8 lets forward scans step past the current word
+// arithmetically, while LastLane(0) == -1 is the conventional not-found
+// result for reverse scans.
 //
 // No unsafe is used anywhere in this package.
 package swar
@@ -51,6 +56,31 @@ func Load8[S ~string | ~[]byte](s S, i int) uint64 {
 		uint64(w[7])<<56
 }
 
+// Store8 writes w into b[i:i+8] in Load8's lane order: lane 0 (the least
+// significant byte) lands at the lowest byte index, so a Load8/Store8 round
+// trip is the identity. The caller must guarantee i+8 <= len(b); the
+// reslice below turns a violation into a bounds panic. Like Load8, the
+// constant-index writes are bounds-check free and fuse into a single 8-byte
+// store on little-endian targets.
+func Store8(b []byte, i int, w uint64) {
+	d := b[i : i+8]
+	d[0] = byte(w)
+	d[1] = byte(w >> 8)
+	d[2] = byte(w >> 16)
+	d[3] = byte(w >> 24)
+	d[4] = byte(w >> 32)
+	d[5] = byte(w >> 40)
+	d[6] = byte(w >> 48)
+	d[7] = byte(w >> 56)
+}
+
+// Broadcast returns a word with c in every byte lane, the needle form that
+// ZeroLanes scans consume. Hoist the result out of word loops; it compiles
+// to a single multiply.
+func Broadcast(c byte) uint64 {
+	return uint64(c) * Ones
+}
+
 // ToLowerWord lower-cases every 'A'..'Z' lane in w. All other bytes,
 // including those >= 0x80, pass through unchanged — bit-identical to the
 // ASCII case-conversion tables used elsewhere in this module.
@@ -68,9 +98,9 @@ func ToUpperWord(w uint64) uint64 {
 // lane of x; higher lanes may carry false positives (borrows propagate
 // strictly upward from true zero lanes), and the mask is zero iff x has no
 // zero byte. It is two ops cheaper than MatchByteMask, which makes it the
-// right primitive for first-match scans — typically as
-// ZeroLanes(w ^ needleBroadcast) with the uint64(c)*Ones broadcast hoisted
-// out of the word loop. Use MatchByteMask when every lane must be exact.
+// right primitive for first-match scans, typically as
+// ZeroLanes(w ^ Broadcast(c)) with the broadcast hoisted out of the word
+// loop. Use MatchByteMask when every lane must be exact.
 func ZeroLanes(x uint64) uint64 {
 	return (x - Ones) &^ x & HighBits
 }

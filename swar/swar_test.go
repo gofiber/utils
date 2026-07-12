@@ -2,6 +2,7 @@ package swar
 
 import (
 	"encoding/binary"
+	"math/rand"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -20,6 +21,29 @@ func Test_Load8_LaneOrder(t *testing.T) {
 	require.Equal(t, want, Load8(string(b), 0))
 	require.Equal(t, uint64(0x0908070605040302), Load8(b, 1))
 	require.Equal(t, uint64(0x0A09080706050403), Load8(string(b), 2))
+}
+
+func Test_Store8_LaneOrder_RoundTrip(t *testing.T) {
+	t.Parallel()
+	b := make([]byte, 12)
+	Store8(b, 2, 0x0807060504030201)
+	require.Equal(t, []byte{0, 0, 1, 2, 3, 4, 5, 6, 7, 8, 0, 0}, b)
+	// Load8/Store8 round trip at every offset, leaving neighbors untouched.
+	src := []byte{0xFF, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0xAA, 0xBB}
+	for i := 0; i+8 <= len(src); i++ {
+		dst := make([]byte, len(src))
+		copy(dst, src)
+		Store8(dst, i, Load8(src, i))
+		require.Equal(t, src, dst, "offset %d", i)
+	}
+}
+
+func Test_Broadcast(t *testing.T) {
+	t.Parallel()
+	for _, c := range []byte{0x00, 0x01, '0', 'a', 0x7F, 0x80, 0xFF} {
+		want := wordFromLanes([8]byte{c, c, c, c, c, c, c, c})
+		require.Equal(t, want, Broadcast(c), "byte 0x%02x", c)
+	}
 }
 
 func Test_ToLowerWord_ToUpperWord_Exhaustive(t *testing.T) {
@@ -88,32 +112,50 @@ func Test_MatchByteMask_Exhaustive(t *testing.T) {
 
 func Test_MatchRangeMask_Exhaustive(t *testing.T) {
 	t.Parallel()
-	ranges := [][2]byte{
-		{'0', '9'},
-		{'a', 'z'},
-		{'A', 'Z'},
-		{0x00, 0x1F},
-		{0x09, 0x0D},
-		{0x00, 0x7F},
-		{0x20, 0x20},
-		{0x7F, 0x7F},
-		{0x00, 0x00},
+	// All valid (lo, hi) pairs, with every byte value rotating through the
+	// lanes. The neighbor lanes hold the range boundaries and both extremes
+	// rather than a constant fill: the carry-freedom claim is exactly about
+	// adjacent-lane interaction. Plain checks keep the ~2M words fast.
+	for lo := 0; lo <= 0x7F; lo++ {
+		for hi := lo; hi <= 0x7F; hi++ {
+			base := [8]byte{0x00, byte(lo), byte(hi), byte(lo) - 1, byte(hi) + 1, 0x7F, 0x80, 0xFF}
+			for c := range 256 {
+				lanes := base
+				lanes[c&7] = byte(c)
+				m := MatchRangeMask(wordFromLanes(lanes), byte(lo), byte(hi))
+				for i, v := range lanes {
+					want := uint64(0)
+					if v >= byte(lo) && v <= byte(hi) && v < 0x80 {
+						want = 0x80
+					}
+					if got := m >> (8 * i) & 0xFF; got != want {
+						t.Fatalf("range [0x%02x,0x%02x] lanes %v lane %d: got 0x%02x want 0x%02x",
+							lo, hi, lanes, i, got, want)
+					}
+				}
+			}
+		}
 	}
-	for _, r := range ranges {
-		lo, hi := r[0], r[1]
-		for c := range 256 {
-			for lane := range 8 {
-				var lanes [8]byte
-				for i := range lanes {
-					lanes[i] = 0xFF // never in range: high bit set
-				}
-				lanes[lane] = byte(c)
-				m := MatchRangeMask(wordFromLanes(lanes), lo, hi)
-				want := uint64(0)
-				if byte(c) >= lo && byte(c) <= hi && c < 0x80 {
-					want = 0x80 << (8 * lane)
-				}
-				require.Equal(t, want, m, "range [0x%02x,0x%02x] byte 0x%02x lane %d", lo, hi, c, lane)
+
+	// Random valid ranges over fully random lanes, as a second angle on
+	// mixed neighbor values.
+	rng := rand.New(rand.NewSource(11)) //nolint:gosec // deterministic test data
+	for range 200000 {
+		lo := byte(rng.Intn(0x80))
+		hi := lo + byte(rng.Intn(0x80-int(lo)))
+		var lanes [8]byte
+		for i := range lanes {
+			lanes[i] = byte(rng.Intn(256))
+		}
+		m := MatchRangeMask(wordFromLanes(lanes), lo, hi)
+		for i, v := range lanes {
+			want := uint64(0)
+			if v >= lo && v <= hi && v < 0x80 {
+				want = 0x80
+			}
+			if got := m >> (8 * i) & 0xFF; got != want {
+				t.Fatalf("range [0x%02x,0x%02x] lanes %v lane %d: got 0x%02x want 0x%02x",
+					lo, hi, lanes, i, got, want)
 			}
 		}
 	}
@@ -136,7 +178,9 @@ func Test_FirstLane_LastLane(t *testing.T) {
 // generic instantiation shows a ~4-8x slower word loop. If this benchmark
 // ever collapses to per-byte speed, the reslice idiom in Load8 has stopped
 // fusing and Load8 needs concrete string/[]byte helpers behind the generic
-// front.
+// front. The guard is advisory only, it cannot fail CI; eyeball it (or
+// benchstat it against the previous toolchain) when touching Load8/Store8
+// or bumping the Go version. The store leg covers Store8's write fusion.
 func Benchmark_Load8_Fusion(b *testing.B) {
 	buf := make([]byte, 4096)
 	for i := range buf {
@@ -162,6 +206,15 @@ func Benchmark_Load8_Fusion(b *testing.B) {
 			}
 		}
 		_ = acc
+	})
+	b.Run("store", func(b *testing.B) {
+		b.SetBytes(int64(len(buf)))
+		w := Broadcast('x')
+		for b.Loop() {
+			for i := 0; i+8 <= len(buf); i += 8 {
+				Store8(buf, i, w)
+			}
+		}
 	})
 }
 

@@ -18,7 +18,9 @@ func Test_SWAR_Randomized(t *testing.T) {
 	rng := rand.New(rand.NewSource(42)) //nolint:gosec // deterministic test data
 
 	for range 20000 {
-		n := rng.Intn(70)
+		// Lengths 0..100 cover sub-word inputs, all %8 tails, and several
+		// full word iterations.
+		n := rng.Intn(101)
 		a := make([]byte, n)
 		b := make([]byte, n)
 		for i := range n {
@@ -115,4 +117,46 @@ func asciiFoldUpper(s string) string {
 
 func asciiFoldUpperB(b []byte) []byte {
 	return []byte(asciiFoldUpper(string(b)))
+}
+
+// Test_CaseCopy_FromOffsets pins the from > 0 contract of ToLowerCopy and
+// ToUpperCopy directly: from is word-aligned and at or below the first byte
+// the conversion changes, so the overlapping tail store may rewrite
+// dst[n-8:from) only as a no-op. The public wrappers exercise this path
+// indirectly; this test does it without them.
+func Test_CaseCopy_FromOffsets(t *testing.T) {
+	t.Parallel()
+	for n := 8; n <= 26; n++ {
+		for from := 0; from < n; from += 8 {
+			// Case-stable filler (digits): bytes before firstChange must not
+			// change under either conversion, or from would be invalid.
+			base := make([]byte, n)
+			for i := range base {
+				base[i] = byte('0' + i%10)
+			}
+			for firstChange := from; firstChange < n; firstChange++ {
+				lsrc := append([]byte(nil), base...)
+				lsrc[firstChange] = 'A' + byte(firstChange%26)
+				if firstChange+1 < n {
+					lsrc[firstChange+1] = 0xE9 // non-ASCII passthrough
+				}
+				dst := make([]byte, n)
+				copy(dst[:from], lsrc[:from])
+				caseconv.ToLowerCopy(dst, lsrc, from)
+				require.Equal(t, asciiFoldLower(string(lsrc)), string(dst),
+					"lower n=%d from=%d change=%d", n, from, firstChange)
+
+				usrc := append([]byte(nil), base...)
+				usrc[firstChange] = 'a' + byte(firstChange%26)
+				if firstChange+1 < n {
+					usrc[firstChange+1] = 0xE9
+				}
+				dst2 := make([]byte, n)
+				copy(dst2[:from], usrc[:from])
+				caseconv.ToUpperCopy(dst2, usrc, from)
+				require.Equal(t, asciiFoldUpper(string(usrc)), string(dst2),
+					"upper n=%d from=%d change=%d", n, from, firstChange)
+			}
+		}
+	}
 }
