@@ -11,7 +11,8 @@ import (
 )
 
 // The benchmarks below compare the SWAR primitives against their stdlib
-// counterparts, mirroring the swar-vs-stdlib benchmarks in the root package.
+// counterparts, using the fiber-vs-default sub-run naming shared with the
+// strings and bytes packages.
 // The primitives are exported as building blocks, so each benchmark measures
 // the canonical loop composed from them (documented in the examples), not a
 // bare primitive call: that is the unit of work a stdlib function performs.
@@ -141,7 +142,7 @@ func benchInput(size, needleAt int, needle byte) []byte {
 
 func Benchmark_Load8(b *testing.B) {
 	buf := benchInput(4096, -1, 0)
-	b.Run("swar", func(b *testing.B) {
+	b.Run("fiber", func(b *testing.B) {
 		b.SetBytes(int64(len(buf)))
 		var acc uint64
 		for b.Loop() {
@@ -151,7 +152,7 @@ func Benchmark_Load8(b *testing.B) {
 		}
 		_ = acc
 	})
-	b.Run("stdlib-binary", func(b *testing.B) {
+	b.Run("default", func(b *testing.B) {
 		b.SetBytes(int64(len(buf)))
 		var acc uint64
 		for b.Loop() {
@@ -166,7 +167,7 @@ func Benchmark_Load8(b *testing.B) {
 func Benchmark_Store8(b *testing.B) {
 	buf := make([]byte, 4096)
 	w := Broadcast('x')
-	b.Run("swar", func(b *testing.B) {
+	b.Run("fiber", func(b *testing.B) {
 		b.SetBytes(int64(len(buf)))
 		for b.Loop() {
 			for i := 0; i+WordLen <= len(buf); i += WordLen {
@@ -174,7 +175,7 @@ func Benchmark_Store8(b *testing.B) {
 			}
 		}
 	})
-	b.Run("stdlib-binary", func(b *testing.B) {
+	b.Run("default", func(b *testing.B) {
 		b.SetBytes(int64(len(buf)))
 		for b.Loop() {
 			for i := 0; i+WordLen <= len(buf); i += WordLen {
@@ -187,7 +188,7 @@ func Benchmark_Store8(b *testing.B) {
 func Benchmark_IndexByte(b *testing.B) {
 	for _, size := range benchSizes {
 		s := string(benchInput(size, size-1, ',')) // worst case: match at the very end
-		b.Run(strconv.Itoa(size)+"B/swar", func(b *testing.B) {
+		b.Run(strconv.Itoa(size)+"B/fiber", func(b *testing.B) {
 			b.SetBytes(int64(size))
 			var r int
 			for b.Loop() {
@@ -195,7 +196,7 @@ func Benchmark_IndexByte(b *testing.B) {
 			}
 			_ = r
 		})
-		b.Run(strconv.Itoa(size)+"B/stdlib-strings", func(b *testing.B) {
+		b.Run(strconv.Itoa(size)+"B/default", func(b *testing.B) {
 			b.SetBytes(int64(size))
 			var r int
 			for b.Loop() {
@@ -209,7 +210,7 @@ func Benchmark_IndexByte(b *testing.B) {
 func Benchmark_LastIndexByte(b *testing.B) {
 	for _, size := range benchSizes {
 		buf := benchInput(size, 0, ',') // worst case for a reverse scan: match at the start
-		b.Run(strconv.Itoa(size)+"B/swar", func(b *testing.B) {
+		b.Run(strconv.Itoa(size)+"B/fiber", func(b *testing.B) {
 			b.SetBytes(int64(size))
 			var r int
 			for b.Loop() {
@@ -217,7 +218,7 @@ func Benchmark_LastIndexByte(b *testing.B) {
 			}
 			_ = r
 		})
-		b.Run(strconv.Itoa(size)+"B/stdlib-bytes", func(b *testing.B) {
+		b.Run(strconv.Itoa(size)+"B/default", func(b *testing.B) {
 			b.SetBytes(int64(size))
 			var r int
 			for b.Loop() {
@@ -231,7 +232,7 @@ func Benchmark_LastIndexByte(b *testing.B) {
 func Benchmark_IndexDigit(b *testing.B) {
 	for _, size := range benchSizes {
 		s := string(benchInput(size, size-1, '7'))
-		b.Run(strconv.Itoa(size)+"B/swar", func(b *testing.B) {
+		b.Run(strconv.Itoa(size)+"B/fiber", func(b *testing.B) {
 			b.SetBytes(int64(size))
 			var r int
 			for b.Loop() {
@@ -239,7 +240,7 @@ func Benchmark_IndexDigit(b *testing.B) {
 			}
 			_ = r
 		})
-		b.Run(strconv.Itoa(size)+"B/stdlib-indexany", func(b *testing.B) {
+		b.Run(strconv.Itoa(size)+"B/default", func(b *testing.B) {
 			b.SetBytes(int64(size))
 			var r int
 			for b.Loop() {
@@ -253,7 +254,7 @@ func Benchmark_IndexDigit(b *testing.B) {
 func Benchmark_ToLowerWord(b *testing.B) {
 	for _, size := range benchSizes {
 		template := bytes.ToUpper(benchInput(size, -1, 0))
-		b.Run(strconv.Itoa(size)+"B/swar", func(b *testing.B) {
+		b.Run(strconv.Itoa(size)+"B/fiber", func(b *testing.B) {
 			b.SetBytes(int64(size))
 			work := make([]byte, len(template))
 			for b.Loop() {
@@ -261,7 +262,7 @@ func Benchmark_ToLowerWord(b *testing.B) {
 				swarToLower(work)
 			}
 		})
-		b.Run(strconv.Itoa(size)+"B/stdlib-bytes", func(b *testing.B) {
+		b.Run(strconv.Itoa(size)+"B/default", func(b *testing.B) {
 			b.SetBytes(int64(size))
 			var r []byte
 			for b.Loop() {
