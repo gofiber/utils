@@ -458,10 +458,24 @@ downstream packages (Fiber itself, middleware) can fuse their own byte
 scans — for example, finding a delimiter while classifying the bytes
 before it — without re-deriving the bit tricks. The contracts (unchecked
 bounds preconditions, `ZeroLanes`' approximate mask, the little-endian
-lane order) and runnable examples live in the package documentation. The
-package's only benchmark, `Benchmark_Load8_Fusion`, is an advisory
-codegen guard rather than an API performance promise, so it is
-deliberately not part of the catalog above.
+lane order) and runnable examples live in the package documentation.
+
+The package benchmarks its primitives against their stdlib counterparts
+the same way the helpers above do, measuring the canonical loops composed
+from them: `Load8`/`Store8` vs `encoding/binary`'s little-endian
+`Uint64`/`PutUint64`, a `ZeroLanes` first-match scan vs
+`strings.IndexByte`, a `MatchByteMask`+`LastLane` reverse scan vs
+`bytes.LastIndexByte`, a `MatchRangeMask` digit scan vs
+`strings.IndexAny`, and an in-place `ToLowerWord` loop vs
+`bytes.ToLower`. The composed loops are pinned to the stdlib results by a
+dedicated test, and the numbers are tracked per commit on the
+[benchmark charts](https://gofiber.github.io/utils/benchmarks/). Note
+that `strings.IndexByte` is hand-written SIMD assembly and overtakes the
+portable SWAR scan on large inputs; the SWAR primitives earn their keep
+on short HTTP-sized inputs and on fused scans the stdlib has no single
+function for. The package's remaining benchmark, `Benchmark_Load8_Fusion`,
+is an advisory codegen guard rather than an API performance promise, so
+it is deliberately not part of the catalog above.
 
 ## ☕ Supporters
 
