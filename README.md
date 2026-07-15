@@ -447,6 +447,21 @@ Benchmark_DefaultXMLDecoder-12                                        309031    
 
 See all the benchmarks under <https://gofiber.github.io/utils/benchmarks>
 
+## Case-insensitive matching helpers
+
+`EqualFold`, `IndexFold`, `ContainsFold`, `HasPrefixFold`, and
+`HasSuffixFold` compare ASCII case-insensitively using the SWAR word
+loops: only `A`..`Z`/`a`..`z` fold, every other byte (including bytes
+>= 0x80) must match exactly. `HasPrefixFold` and `HasSuffixFold` cover
+the header checks Fiber otherwise spells as an allocation-prone
+`ToLower` + `HasPrefix`/`HasSuffix` pair (authorization schemes such as
+`Bearer`, content-type prefixes such as `multipart/form-data`, suffixes
+such as `+json`), and like the other Fold helpers they take the needle
+as a plain string because call sites pass constant tokens. Their
+`Benchmark_HasPrefixFold`/`Benchmark_HasSuffixFold` numbers are tracked
+on the [benchmark charts](https://gofiber.github.io/utils/benchmarks/)
+and join the catalog above on its next regeneration.
+
 ## SWAR primitives
 
 The [`swar`](swar/) package exports the SWAR (SIMD within a register)
@@ -458,10 +473,24 @@ downstream packages (Fiber itself, middleware) can fuse their own byte
 scans — for example, finding a delimiter while classifying the bytes
 before it — without re-deriving the bit tricks. The contracts (unchecked
 bounds preconditions, `ZeroLanes`' approximate mask, the little-endian
-lane order) and runnable examples live in the package documentation. The
-package's only benchmark, `Benchmark_Load8_Fusion`, is an advisory
-codegen guard rather than an API performance promise, so it is
-deliberately not part of the catalog above.
+lane order) and runnable examples live in the package documentation.
+
+The package benchmarks its primitives against their stdlib counterparts
+the same way the helpers above do, measuring the canonical loops composed
+from them: `Load8`/`Store8` vs `encoding/binary`'s little-endian
+`Uint64`/`PutUint64`, a `ZeroLanes` first-match scan vs
+`strings.IndexByte`, a `MatchByteMask`+`LastLane` reverse scan vs
+`bytes.LastIndexByte`, a `MatchRangeMask` digit scan vs
+`strings.IndexAny`, and an in-place `ToLowerWord` loop vs
+`bytes.ToLower`. The composed loops are pinned to the stdlib results by a
+dedicated test, and the numbers are tracked per commit on the
+[benchmark charts](https://gofiber.github.io/utils/benchmarks/). Note
+that `strings.IndexByte` is hand-written SIMD assembly and overtakes the
+portable SWAR scan on large inputs; the SWAR primitives earn their keep
+on short HTTP-sized inputs and on fused scans the stdlib has no single
+function for. The package's remaining benchmark, `Benchmark_Load8_Fusion`,
+is an advisory codegen guard rather than an API performance promise, so
+it is deliberately not part of the catalog above.
 
 ## ☕ Supporters
 

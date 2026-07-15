@@ -45,6 +45,51 @@ func ExampleZeroLanes() {
 	// -1
 }
 
+// ExampleZeroLanes_blockScan shows the multi-word variant of the
+// first-match scan: compute each word's mask independently, test their OR
+// once per block, and resolve the lower word first. Combining is safe for
+// first-match scans because a ZeroLanes mask is zero iff its word has no
+// match and its lowest set lane is exact — so when only the second word
+// matched, its first set lane is still the true first match. Exact masks
+// (MatchByteMask, MatchRangeMask) may be combined the same way, block width
+// is free to grow (four words per branch is common for long inputs), and
+// the resolve ladder extends one `if` per extra word.
+func ExampleZeroLanes_blockScan() {
+	indexByte := func(s string, c byte) int {
+		needle := swar.Broadcast(c)
+		i := 0
+		for ; i+16 <= len(s); i += 16 {
+			m0 := swar.ZeroLanes(swar.Load8(s, i) ^ needle)
+			m1 := swar.ZeroLanes(swar.Load8(s, i+8) ^ needle)
+			if m0|m1 != 0 {
+				if m0 != 0 {
+					return i + swar.FirstLane(m0)
+				}
+				return i + 8 + swar.FirstLane(m1)
+			}
+		}
+		for ; i+8 <= len(s); i += 8 {
+			if m := swar.ZeroLanes(swar.Load8(s, i) ^ needle); m != 0 {
+				return i + swar.FirstLane(m)
+			}
+		}
+		// A scalar tail keeps the example focused on block combining; see
+		// ExampleZeroLanes for the overlapping-word finish.
+		for ; i < len(s); i++ {
+			if s[i] == c {
+				return i
+			}
+		}
+		return -1
+	}
+
+	fmt.Println(indexByte("cache-control: public, max-age=604800, immutable", '=')) //nolint:errcheck // example output
+	fmt.Println(indexByte("cache-control: public", '='))                            //nolint:errcheck // example output
+	// Output:
+	// 30
+	// -1
+}
+
 // ExampleMatchRangeMask classifies one word of input: which lanes hold an
 // ASCII digit, and where the first and last digit sit.
 func ExampleMatchRangeMask() {

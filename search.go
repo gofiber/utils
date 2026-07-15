@@ -25,6 +25,20 @@ func IndexAny2[S byteSeq](s S, a, b byte) int {
 		bcA := swar.Broadcast(a)
 		bcB := swar.Broadcast(b)
 		i := 0
+		// Two words per branch: the masks compute independently, and if only
+		// the second word matched, its first set lane is still exact.
+		for ; i+16 <= n; i += 16 {
+			w0 := swar.Load8(s, i)
+			w1 := swar.Load8(s, i+8)
+			m0 := swar.ZeroLanes(w0^bcA) | swar.ZeroLanes(w0^bcB)
+			m1 := swar.ZeroLanes(w1^bcA) | swar.ZeroLanes(w1^bcB)
+			if m0|m1 != 0 {
+				if m0 != 0 {
+					return i + swar.FirstLane(m0)
+				}
+				return i + 8 + swar.FirstLane(m1)
+			}
+		}
 		for ; i+8 <= n; i += 8 {
 			w := swar.Load8(s, i)
 			if m := swar.ZeroLanes(w^bcA) | swar.ZeroLanes(w^bcB); m != 0 {
@@ -57,6 +71,19 @@ func IndexAny3[S byteSeq](s S, a, b, c byte) int {
 		bcB := swar.Broadcast(b)
 		bcC := swar.Broadcast(c)
 		i := 0
+		// Two words per branch; see IndexAny2.
+		for ; i+16 <= n; i += 16 {
+			w0 := swar.Load8(s, i)
+			w1 := swar.Load8(s, i+8)
+			m0 := swar.ZeroLanes(w0^bcA) | swar.ZeroLanes(w0^bcB) | swar.ZeroLanes(w0^bcC)
+			m1 := swar.ZeroLanes(w1^bcA) | swar.ZeroLanes(w1^bcB) | swar.ZeroLanes(w1^bcC)
+			if m0|m1 != 0 {
+				if m0 != 0 {
+					return i + swar.FirstLane(m0)
+				}
+				return i + 8 + swar.FirstLane(m1)
+			}
+		}
 		for ; i+8 <= n; i += 8 {
 			w := swar.Load8(s, i)
 			if m := swar.ZeroLanes(w^bcA) | swar.ZeroLanes(w^bcB) | swar.ZeroLanes(w^bcC); m != 0 {
@@ -239,4 +266,56 @@ func foldEqualAt[S byteSeq](s S, pos int, needle string) bool {
 // ContainsFold reports whether s contains needle, ASCII case-insensitively.
 func ContainsFold[S byteSeq](s S, needle string) bool {
 	return IndexFold(s, needle) >= 0
+}
+
+// HasPrefixFold reports whether s begins with prefix, ASCII
+// case-insensitively: only 'A'..'Z'/'a'..'z' fold, every other byte
+// (including >= 0x80) must match exactly, mirroring IndexFold. An empty
+// prefix matches any s. Like the other Fold helpers the needle is a plain
+// string, since call sites pass constant tokens.
+func HasPrefixFold[S byteSeq](s S, prefix string) bool {
+	k := len(prefix)
+	if len(s) < k {
+		return false
+	}
+	table := caseconv.ToLowerTable
+	if k >= 8 {
+		// First-byte pre-check: typical misses differ immediately, and two
+		// table loads reject them without the word-compare setup.
+		if table[s[0]] != table[prefix[0]] {
+			return false
+		}
+		return foldEqualAt(s, 0, prefix)
+	}
+	for j := range k {
+		if table[s[j]] != table[prefix[j]] {
+			return false
+		}
+	}
+	return true
+}
+
+// HasSuffixFold reports whether s ends with suffix, ASCII
+// case-insensitively, under the same folding contract as HasPrefixFold.
+// An empty suffix matches any s.
+func HasSuffixFold[S byteSeq](s S, suffix string) bool {
+	k := len(suffix)
+	n := len(s)
+	if n < k {
+		return false
+	}
+	table := caseconv.ToLowerTable
+	if k >= 8 {
+		// Pre-check the last byte; see HasPrefixFold.
+		if table[s[n-1]] != table[suffix[k-1]] {
+			return false
+		}
+		return foldEqualAt(s, n-k, suffix)
+	}
+	for j := range k {
+		if table[s[n-k+j]] != table[suffix[j]] {
+			return false
+		}
+	}
+	return true
 }

@@ -29,6 +29,43 @@ const WordLen = swar.WordLen
 func FirstUpperIndex(b []byte) int {
 	n := len(b)
 	i := 0
+	if n >= 32 {
+		// Check the first word alone: canonical mixed-case values
+		// ("Content-Type") change case right at the start, and that path
+		// must stay one mask.
+		if m := swar.MatchRangeMask(binary.LittleEndian.Uint64(b[0:8]), 'A', 'Z'); m != 0 {
+			return swar.FirstLane(m)
+		}
+		// Then four words per branch: the masks compute independently, so
+		// the common no-uppercase case pays one test per 32 bytes. The
+		// MatchRangeMask computations stay inline so their constant ranges
+		// fold; only the cold hit-resolution ladder is shared, and it
+		// inlines (the no-match loop never reaches it).
+		for i = 8; i+32 <= n; i += 32 {
+			m0 := swar.MatchRangeMask(binary.LittleEndian.Uint64(b[i:i+8]), 'A', 'Z')
+			m1 := swar.MatchRangeMask(binary.LittleEndian.Uint64(b[i+8:i+16]), 'A', 'Z')
+			m2 := swar.MatchRangeMask(binary.LittleEndian.Uint64(b[i+16:i+24]), 'A', 'Z')
+			m3 := swar.MatchRangeMask(binary.LittleEndian.Uint64(b[i+24:i+32]), 'A', 'Z')
+			if m0|m1|m2|m3 != 0 {
+				return firstSetLane32(i, m0, m1, m2, m3)
+			}
+		}
+		if i == n {
+			return -1
+		}
+		// Finish with one overlapping block at n-32. MatchRangeMask is
+		// per-lane exact, so re-scanned lanes are known non-matching and the
+		// first set lane always falls in the new bytes.
+		i = n - 32
+		m0 := swar.MatchRangeMask(binary.LittleEndian.Uint64(b[i:i+8]), 'A', 'Z')
+		m1 := swar.MatchRangeMask(binary.LittleEndian.Uint64(b[i+8:i+16]), 'A', 'Z')
+		m2 := swar.MatchRangeMask(binary.LittleEndian.Uint64(b[i+16:i+24]), 'A', 'Z')
+		m3 := swar.MatchRangeMask(binary.LittleEndian.Uint64(b[i+24:i+32]), 'A', 'Z')
+		if m0|m1|m2|m3 != 0 {
+			return firstSetLane32(i, m0, m1, m2, m3)
+		}
+		return -1
+	}
 	for ; i+8 <= n; i += 8 {
 		if m := swar.MatchRangeMask(binary.LittleEndian.Uint64(b[i:i+8]), 'A', 'Z'); m != 0 {
 			return i + swar.FirstLane(m)
@@ -56,9 +93,54 @@ func FirstUpperIndex(b []byte) int {
 // FirstLowerIndex returns the index of the first ASCII lowercase byte in b,
 // or -1 if b contains none. b is only ever read; it may be an unsafe view
 // over immutable string memory.
+// firstSetLane32 resolves a hit inside a 32-byte block: given the block's
+// four per-word masks, it returns the index of the first marked byte
+// relative to base, the block's starting offset. It runs at most once per
+// scan — only after a block's combined mask tested non-zero — and is small
+// enough to inline, so the hot no-match loops pay nothing for the sharing.
+func firstSetLane32(base int, m0, m1, m2, m3 uint64) int {
+	if m0 != 0 {
+		return base + swar.FirstLane(m0)
+	}
+	if m1 != 0 {
+		return base + 8 + swar.FirstLane(m1)
+	}
+	if m2 != 0 {
+		return base + 16 + swar.FirstLane(m2)
+	}
+	return base + 24 + swar.FirstLane(m3)
+}
+
 func FirstLowerIndex(b []byte) int {
 	n := len(b)
 	i := 0
+	if n >= 32 {
+		// Structure and rationale mirror FirstUpperIndex.
+		if m := swar.MatchRangeMask(binary.LittleEndian.Uint64(b[0:8]), 'a', 'z'); m != 0 {
+			return swar.FirstLane(m)
+		}
+		for i = 8; i+32 <= n; i += 32 {
+			m0 := swar.MatchRangeMask(binary.LittleEndian.Uint64(b[i:i+8]), 'a', 'z')
+			m1 := swar.MatchRangeMask(binary.LittleEndian.Uint64(b[i+8:i+16]), 'a', 'z')
+			m2 := swar.MatchRangeMask(binary.LittleEndian.Uint64(b[i+16:i+24]), 'a', 'z')
+			m3 := swar.MatchRangeMask(binary.LittleEndian.Uint64(b[i+24:i+32]), 'a', 'z')
+			if m0|m1|m2|m3 != 0 {
+				return firstSetLane32(i, m0, m1, m2, m3)
+			}
+		}
+		if i == n {
+			return -1
+		}
+		i = n - 32
+		m0 := swar.MatchRangeMask(binary.LittleEndian.Uint64(b[i:i+8]), 'a', 'z')
+		m1 := swar.MatchRangeMask(binary.LittleEndian.Uint64(b[i+8:i+16]), 'a', 'z')
+		m2 := swar.MatchRangeMask(binary.LittleEndian.Uint64(b[i+16:i+24]), 'a', 'z')
+		m3 := swar.MatchRangeMask(binary.LittleEndian.Uint64(b[i+24:i+32]), 'a', 'z')
+		if m0|m1|m2|m3 != 0 {
+			return firstSetLane32(i, m0, m1, m2, m3)
+		}
+		return -1
+	}
 	for ; i+8 <= n; i += 8 {
 		if m := swar.MatchRangeMask(binary.LittleEndian.Uint64(b[i:i+8]), 'a', 'z'); m != 0 {
 			return i + swar.FirstLane(m)

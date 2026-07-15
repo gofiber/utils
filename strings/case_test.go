@@ -165,6 +165,60 @@ func Benchmark_ToLower(b *testing.B) {
 	}
 }
 
+// Test_Case_FirstChangePositions plants the single case-changing byte at
+// every position of every length up to 100, covering the caseconv scan's
+// 32-byte block loop, the word loop behind it, the overlapping tail, and the
+// identity path, against a byte-wise reference.
+func Test_Case_FirstChangePositions(t *testing.T) {
+	t.Parallel()
+	refLower := func(s string) string {
+		b := []byte(s)
+		for i := range b {
+			if b[i] >= 'A' && b[i] <= 'Z' {
+				b[i] += 'a' - 'A'
+			}
+		}
+		return string(b)
+	}
+	refUpper := func(s string) string {
+		b := []byte(s)
+		for i := range b {
+			if b[i] >= 'a' && b[i] <= 'z' {
+				b[i] -= 'a' - 'A'
+			}
+		}
+		return string(b)
+	}
+	for n := 0; n <= 100; n++ {
+		base := make([]byte, n)
+		for i := range base {
+			base[i] = "40-\xe9/~:9"[i%8] // no letters at all, incl. >= 0x80
+		}
+		// Identity inputs: both directions must return the input itself
+		// (the scans' no-match fast path), not an equal copy.
+		s := string(base)
+		lower, upper := ToLower(s), ToUpper(s)
+		require.Equal(t, s, lower, "identity lower len %d", n)
+		require.Equal(t, s, upper, "identity upper len %d", n)
+		if n > 0 {
+			sb, lb, ub := unsafeconv.UnsafeBytes(s), unsafeconv.UnsafeBytes(lower), unsafeconv.UnsafeBytes(upper)
+			require.Same(t, &sb[0], &lb[0], "identity lower must return the input, len %d", n)
+			require.Same(t, &sb[0], &ub[0], "identity upper must return the input, len %d", n)
+		}
+		for at := 0; at < n; at++ {
+			b := append([]byte(nil), base...)
+			b[at] = 'Q'
+			s := string(b)
+			require.Equal(t, refLower(s), ToLower(s), "lower len %d at %d", n, at)
+			require.Equal(t, refUpper(s), ToUpper(s), "upper len %d at %d", n, at)
+			b[at] = 'q'
+			s = string(b)
+			require.Equal(t, refLower(s), ToLower(s), "lower len %d at %d", n, at)
+			require.Equal(t, refUpper(s), ToUpper(s), "upper len %d at %d", n, at)
+		}
+	}
+}
+
 // Test_Case_PathCoverage exercises every dispatch path of the string case
 // converters in-package: sub-word inputs, word-path inputs, identity
 // returns, and the in-place variants across both length regimes.
