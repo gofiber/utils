@@ -54,6 +54,18 @@ func IsASCII[S byteSeq](s S) bool {
 func IndexNonQuotable[S byteSeq](s S) int {
 	n := len(s)
 	i := 0
+	// Two words per branch: the masks compute independently, and if only the
+	// second word matched, its first set lane is still exact.
+	for ; i+16 <= n; i += 16 {
+		m0 := nonQuotableMask(swar.Load8(s, i))
+		m1 := nonQuotableMask(swar.Load8(s, i+8))
+		if m0|m1 != 0 {
+			if m0 != 0 {
+				return i + swar.FirstLane(m0)
+			}
+			return i + 8 + swar.FirstLane(m1)
+		}
+	}
 	for ; i+8 <= n; i += 8 {
 		if m := nonQuotableMask(swar.Load8(s, i)); m != 0 {
 			return i + swar.FirstLane(m)

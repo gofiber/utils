@@ -165,6 +165,53 @@ func Benchmark_ToLower(b *testing.B) {
 	}
 }
 
+// Test_Case_FirstChangePositions plants the single case-changing byte at
+// every position of every length up to 100, covering the caseconv scan's
+// 32-byte block loop, the word loop behind it, the overlapping tail, and the
+// identity path, against a byte-wise reference.
+func Test_Case_FirstChangePositions(t *testing.T) {
+	t.Parallel()
+	refLower := func(s string) string {
+		b := []byte(s)
+		for i := range b {
+			if b[i] >= 'A' && b[i] <= 'Z' {
+				b[i] += 'a' - 'A'
+			}
+		}
+		return string(b)
+	}
+	refUpper := func(s string) string {
+		b := []byte(s)
+		for i := range b {
+			if b[i] >= 'a' && b[i] <= 'z' {
+				b[i] -= 'a' - 'A'
+			}
+		}
+		return string(b)
+	}
+	for n := 0; n <= 100; n++ {
+		base := make([]byte, n)
+		for i := range base {
+			base[i] = "a0f-\xe9z/~"[i%8] // no case-changing bytes, incl. >= 0x80
+		}
+		// Identity inputs: must come back unchanged (and same backing data).
+		s := string(base)
+		require.Equal(t, refLower(s), ToLower(s), "identity lower len %d", n)
+		require.Equal(t, refUpper(s), ToUpper(s), "identity upper len %d", n)
+		for at := 0; at < n; at++ {
+			b := append([]byte(nil), base...)
+			b[at] = 'Q'
+			s := string(b)
+			require.Equal(t, refLower(s), ToLower(s), "lower len %d at %d", n, at)
+			require.Equal(t, refUpper(s), ToUpper(s), "upper len %d at %d", n, at)
+			b[at] = 'q'
+			s = string(b)
+			require.Equal(t, refLower(s), ToLower(s), "lower len %d at %d", n, at)
+			require.Equal(t, refUpper(s), ToUpper(s), "upper len %d at %d", n, at)
+		}
+	}
+}
+
 // Test_Case_PathCoverage exercises every dispatch path of the string case
 // converters in-package: sub-word inputs, word-path inputs, identity
 // returns, and the in-place variants across both length regimes.
