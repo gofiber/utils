@@ -119,7 +119,10 @@ func Test_BenchLoops_MatchStdlib(t *testing.T) {
 			if at >= 0 {
 				d[at] = '7'
 			}
-			require.Equal(t, bytes.IndexAny(d, "0123456789"), swarIndexDigit(string(d)), "IndexDigit size %d at %d", n, at)
+			// Pin against strings.IndexAny — the same stdlib function the
+			// benchmark's default leg measures.
+			ds := string(d)
+			require.Equal(t, strings.IndexAny(ds, "0123456789"), swarIndexDigit(ds), "IndexDigit size %d at %d", n, at)
 		}
 		lower := append([]byte(nil), src...)
 		swarToLower(lower)
@@ -255,14 +258,20 @@ func Benchmark_ToLowerWord(b *testing.B) {
 	for _, size := range benchSizes {
 		template := bytes.ToUpper(benchInput(size, -1, 0))
 		b.Run(strconv.Itoa(size)+"B/fiber", func(b *testing.B) {
+			b.ReportAllocs()
 			b.SetBytes(int64(size))
 			work := make([]byte, len(template))
+			// The copy is timed on purpose: it resets the in-place buffer
+			// every iteration (as the strings package's fiber/unsafe legs
+			// do) and stands in for the per-iteration allocation the
+			// default leg pays inside bytes.ToLower.
 			for b.Loop() {
 				copy(work, template)
 				swarToLower(work)
 			}
 		})
 		b.Run(strconv.Itoa(size)+"B/default", func(b *testing.B) {
+			b.ReportAllocs()
 			b.SetBytes(int64(size))
 			var r []byte
 			for b.Loop() {

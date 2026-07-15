@@ -192,12 +192,19 @@ func Test_Case_FirstChangePositions(t *testing.T) {
 	for n := 0; n <= 100; n++ {
 		base := make([]byte, n)
 		for i := range base {
-			base[i] = "a0f-\xe9z/~"[i%8] // no case-changing bytes, incl. >= 0x80
+			base[i] = "40-\xe9/~:9"[i%8] // no letters at all, incl. >= 0x80
 		}
-		// Identity inputs: must come back unchanged (and same backing data).
+		// Identity inputs: both directions must return the input itself
+		// (the scans' no-match fast path), not an equal copy.
 		s := string(base)
-		require.Equal(t, refLower(s), ToLower(s), "identity lower len %d", n)
-		require.Equal(t, refUpper(s), ToUpper(s), "identity upper len %d", n)
+		lower, upper := ToLower(s), ToUpper(s)
+		require.Equal(t, s, lower, "identity lower len %d", n)
+		require.Equal(t, s, upper, "identity upper len %d", n)
+		if n > 0 {
+			sb, lb, ub := unsafeconv.UnsafeBytes(s), unsafeconv.UnsafeBytes(lower), unsafeconv.UnsafeBytes(upper)
+			require.Same(t, &sb[0], &lb[0], "identity lower must return the input, len %d", n)
+			require.Same(t, &sb[0], &ub[0], "identity upper must return the input, len %d", n)
+		}
 		for at := 0; at < n; at++ {
 			b := append([]byte(nil), base...)
 			b[at] = 'Q'
