@@ -455,7 +455,7 @@ loops: only `A`..`Z`/`a`..`z` fold, every other byte (including bytes
 >= 0x80) must match exactly. `HasPrefixFold` and `HasSuffixFold` cover
 the header checks Fiber otherwise spells as an allocation-prone
 `ToLower` + `HasPrefix`/`HasSuffix` pair (authorization schemes such as
-`Bearer `, content-type prefixes such as `multipart/form-data`, suffixes
+`Bearer`, content-type prefixes such as `multipart/form-data`, suffixes
 such as `+json`), and like the other Fold helpers they take the needle
 as a plain string because call sites pass constant tokens. Their
 `Benchmark_HasPrefixFold`/`Benchmark_HasSuffixFold` numbers are tracked
