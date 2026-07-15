@@ -194,6 +194,107 @@ func Test_IndexFold_Fixed(t *testing.T) {
 	require.Equal(t, -1, IndexFold("__proxy-authorizaQXYZ", "PROXY-AUTHORIZAT"))
 }
 
+// refHasPrefixFold/refHasSuffixFold reduce to refIndexFold on the clipped
+// window: with len(window) == len(needle) a 0 return means "equal folded".
+func refHasPrefixFold(s, prefix string) bool {
+	return len(s) >= len(prefix) && refIndexFold(s[:len(prefix)], prefix) == 0
+}
+
+func refHasSuffixFold(s, suffix string) bool {
+	return len(s) >= len(suffix) && refIndexFold(s[len(s)-len(suffix):], suffix) == 0
+}
+
+func Test_HasPrefixFold_HasSuffixFold_Fixed(t *testing.T) {
+	t.Parallel()
+	// Empty needles match anything, oversized needles nothing.
+	require.True(t, HasPrefixFold("", ""))
+	require.True(t, HasSuffixFold("", ""))
+	require.True(t, HasPrefixFold("x", ""))
+	require.True(t, HasSuffixFold("x", ""))
+	require.False(t, HasPrefixFold("", "a"))
+	require.False(t, HasSuffixFold("", "a"))
+	require.False(t, HasPrefixFold("bear", "bearer "))
+	require.False(t, HasSuffixFold("zip", "gzip"))
+
+	// Scalar path (needle < 8 bytes), both hit and miss, string and []byte.
+	require.True(t, HasPrefixFold("Bearer abc.def", "bearer "))
+	require.True(t, HasPrefixFold([]byte("BEARER abc.def"), "bearer "))
+	require.False(t, HasPrefixFold("Basic QWxhZGRpbg==", "bearer "))
+	require.True(t, HasSuffixFold("application/vnd.api+JSON", "+json"))
+	require.True(t, HasSuffixFold([]byte("deflate, GZIP"), "gzip"))
+	require.False(t, HasSuffixFold("deflate, GZIPx", "gzip"))
+
+	// Word path (needle >= 8 bytes), including the overlapping tail compare.
+	require.True(t, HasPrefixFold("MULTIPART/FORM-DATA; boundary=X", "multipart/form-data"))
+	require.False(t, HasPrefixFold("multipart/form-datX; boundary=X", "multipart/form-data"))
+	require.True(t, HasPrefixFold("multipart/form-data", "multipart/form-data"))
+	require.True(t, HasSuffixFold("application/ATOM+XML", "atom+xml"))
+	require.False(t, HasSuffixFold("application/atomxxml", "atom+xml"))
+	require.True(t, HasSuffixFold("PROXY-AUTHORIZATION", "proxy-authorization"))
+
+	// Exact-length inputs on the scalar path.
+	require.True(t, HasPrefixFold("GZip", "gzip"))
+	require.True(t, HasSuffixFold("GZip", "gzip"))
+
+	// Only A-Z/a-z fold: CR|0x20 == '-' style false folds must not match,
+	// and non-ASCII bytes must match exactly.
+	require.False(t, HasPrefixFold("no\rcache", "no-cache"))
+	require.False(t, HasSuffixFold("xno\rcache", "no-cache"))
+	require.True(t, HasPrefixFold("\xc9abcdefgh", "\xc9ABCDEFGH"))
+	require.False(t, HasPrefixFold("\xe9abcdefgh", "\xc9abcdefgh"))
+	require.True(t, HasSuffixFold("x\xc9abcdefg", "\xc9ABCDEFG"))
+	require.False(t, HasSuffixFold("x\xe9abcdefg", "\xc9abcdefg"))
+}
+
+func Test_PrefixSuffixFold_Randomized(t *testing.T) {
+	t.Parallel()
+	rng := rand.New(rand.NewSource(13)) //nolint:gosec // deterministic test data
+
+	for range 30000 {
+		n := rng.Intn(41)
+		buf := make([]byte, n)
+		for i := range buf {
+			if rng.Intn(8) == 0 {
+				buf[i] = byte(rng.Intn(256))
+			} else {
+				buf[i] = "abcDEF,\"\\\x00\x7f\xe9\t :."[rng.Intn(15)]
+			}
+		}
+		s := string(buf)
+
+		// Needle: prefix/suffix of s (random-cased, guaranteed hit) or
+		// random bytes (usually a miss), lengths crossing the 8-byte split.
+		k := rng.Intn(min(n, 12) + 1)
+		var needle []byte
+		switch rng.Intn(3) {
+		case 0:
+			needle = []byte(s[:k])
+		case 1:
+			needle = []byte(s[n-k:])
+		default:
+			needle = make([]byte, rng.Intn(12))
+			for i := range needle {
+				needle[i] = byte(rng.Intn(256))
+			}
+		}
+		for i := range needle {
+			if rng.Intn(2) == 0 {
+				if needle[i] >= 'a' && needle[i] <= 'z' {
+					needle[i] -= 'a' - 'A'
+				} else if needle[i] >= 'A' && needle[i] <= 'Z' {
+					needle[i] += 'a' - 'A'
+				}
+			}
+		}
+		nd := string(needle)
+
+		require.Equal(t, refHasPrefixFold(s, nd), HasPrefixFold(s, nd), "HasPrefixFold %q %q", s, nd)
+		require.Equal(t, refHasPrefixFold(s, nd), HasPrefixFold(buf, nd))
+		require.Equal(t, refHasSuffixFold(s, nd), HasSuffixFold(s, nd), "HasSuffixFold %q %q", s, nd)
+		require.Equal(t, refHasSuffixFold(s, nd), HasSuffixFold(buf, nd))
+	}
+}
+
 func Test_IndexNonQuotable_Fixed(t *testing.T) {
 	t.Parallel()
 	require.Equal(t, -1, IndexNonQuotable(""))
@@ -338,6 +439,70 @@ func Benchmark_IndexFold(b *testing.B) {
 			var r int
 			for b.Loop() {
 				r = refIndexFold(s, "proxy-authorization")
+			}
+			_ = r
+		})
+	}
+}
+
+func Benchmark_HasPrefixFold(b *testing.B) {
+	cases := []struct {
+		name   string
+		s      string
+		prefix string
+	}{
+		{"bearer-hit", "Bearer abc.def.ghi.jkl.mno.pqr", "bearer "},
+		{"bearer-miss", "Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==", "bearer "},
+		{"text-hit", "TEXT/HTML; charset=utf-8", "text/"},
+		{"multipart-hit", "MULTIPART/FORM-DATA; boundary=X-BOUNDARY", "multipart/form-data"},
+		{"multipart-miss", "application/x-www-form-urlencoded", "multipart/form-data"},
+	}
+	for _, tc := range cases {
+		b.Run(tc.name+"/fiber", func(b *testing.B) {
+			b.SetBytes(int64(len(tc.prefix)))
+			var r bool
+			for b.Loop() {
+				r = HasPrefixFold(tc.s, tc.prefix)
+			}
+			_ = r
+		})
+		b.Run(tc.name+"/default", func(b *testing.B) {
+			b.SetBytes(int64(len(tc.prefix)))
+			var r bool
+			for b.Loop() {
+				r = len(tc.s) >= len(tc.prefix) && strings.EqualFold(tc.s[:len(tc.prefix)], tc.prefix)
+			}
+			_ = r
+		})
+	}
+}
+
+func Benchmark_HasSuffixFold(b *testing.B) {
+	cases := []struct {
+		name   string
+		s      string
+		suffix string
+	}{
+		{"gzip-hit", "deflate, br, GZIP", "gzip"},
+		{"gzip-miss", "deflate, br, zstd", "gzip"},
+		{"json-hit", "application/vnd.api+JSON", "+json"},
+		{"atomxml-hit", "application/ATOM+XML", "atom+xml"},
+		{"charset-miss", "text/html; charset=utf-8", "charset=iso-8859-1"},
+	}
+	for _, tc := range cases {
+		b.Run(tc.name+"/fiber", func(b *testing.B) {
+			b.SetBytes(int64(len(tc.suffix)))
+			var r bool
+			for b.Loop() {
+				r = HasSuffixFold(tc.s, tc.suffix)
+			}
+			_ = r
+		})
+		b.Run(tc.name+"/default", func(b *testing.B) {
+			b.SetBytes(int64(len(tc.suffix)))
+			var r bool
+			for b.Loop() {
+				r = len(tc.s) >= len(tc.suffix) && strings.EqualFold(tc.s[len(tc.s)-len(tc.suffix):], tc.suffix)
 			}
 			_ = r
 		})

@@ -49,6 +49,27 @@ func FuzzEqualFold(f *testing.F) {
 	})
 }
 
+func FuzzPrefixSuffixFold(f *testing.F) {
+	f.Add("Bearer abc.def", "bearer ")
+	f.Add("no\rcache", "no-cache")
+	f.Add("MULTIPART/FORM-DATA; boundary=X", "multipart/form-data")
+	f.Add("application/ATOM+XML", "atom+xml")
+	f.Add("\xe9abcdefgh", "\xc9abcdefgh")
+	f.Add("", "")
+	f.Fuzz(func(t *testing.T, s, needle string) {
+		if want := refHasPrefixFold(s, needle); HasPrefixFold(s, needle) != want {
+			t.Fatalf("HasPrefixFold(%q, %q) != %v", s, needle, want)
+		} else if HasPrefixFold([]byte(s), needle) != want {
+			t.Fatalf("HasPrefixFold(bytes %q, %q) != %v", s, needle, want)
+		}
+		if want := refHasSuffixFold(s, needle); HasSuffixFold(s, needle) != want {
+			t.Fatalf("HasSuffixFold(%q, %q) != %v", s, needle, want)
+		} else if HasSuffixFold([]byte(s), needle) != want {
+			t.Fatalf("HasSuffixFold(bytes %q, %q) != %v", s, needle, want)
+		}
+	})
+}
+
 func FuzzParse(f *testing.F) {
 	f.Add("9223372036854775807")
 	f.Add("9223372036854775808")
