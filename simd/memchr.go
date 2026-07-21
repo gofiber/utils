@@ -26,7 +26,7 @@ func Memchr2(haystack []byte, needle1, needle2 byte) int {
 	if len(haystack) == 0 {
 		return -1
 	}
-	return memchr2(haystack, needle1, needle2)
+	return memchr2Impl(haystack, needle1, needle2)
 }
 
 // Memchr3 returns the index of the first occurrence in haystack of needle1,
@@ -36,7 +36,7 @@ func Memchr3(haystack []byte, needle1, needle2, needle3 byte) int {
 	if len(haystack) == 0 {
 		return -1
 	}
-	return memchr3(haystack, needle1, needle2, needle3)
+	return memchr3Impl(haystack, needle1, needle2, needle3)
 }
 
 // MemchrPair returns the first index i such that haystack[i] == byte1 and
@@ -58,7 +58,7 @@ func MemchrPair(haystack []byte, byte1, byte2 byte, offset int) int {
 		}
 		return bytes.IndexByte(haystack, byte1)
 	}
-	return memchrPair(haystack, byte1, byte2, offset)
+	return memchrPairImpl(haystack, byte1, byte2, offset)
 }
 
 // memchr2Generic is the portable SWAR fallback for Memchr2: a ZeroLanes

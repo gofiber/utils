@@ -6,7 +6,7 @@
 
 package simd
 
-// memchrDigit uses the portable implementation off amd64.
-func memchrDigit(haystack []byte) int {
+// memchrDigitImpl uses the portable implementation off amd64.
+func memchrDigitImpl(haystack []byte) int {
 	return memchrDigitGeneric(haystack)
 }

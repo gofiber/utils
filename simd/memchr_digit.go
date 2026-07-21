@@ -19,7 +19,7 @@ func MemchrDigit(haystack []byte) int {
 	if len(haystack) == 0 {
 		return -1
 	}
-	return memchrDigit(haystack)
+	return memchrDigitImpl(haystack)
 }
 
 // MemchrDigitAt is MemchrDigit(haystack[at:]) with the result translated

@@ -15,7 +15,7 @@ func MemchrWord(haystack []byte) int {
 	if len(haystack) == 0 {
 		return -1
 	}
-	return memchrWord(haystack)
+	return memchrWordImpl(haystack)
 }
 
 // MemchrNotWord is the complement of MemchrWord: it returns the index of the
@@ -24,7 +24,7 @@ func MemchrNotWord(haystack []byte) int {
 	if len(haystack) == 0 {
 		return -1
 	}
-	return memchrNotWord(haystack)
+	return memchrNotWordImpl(haystack)
 }
 
 // MemchrInTable returns the index of the first byte b of haystack with

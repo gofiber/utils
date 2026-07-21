@@ -15,17 +15,17 @@ func memchrWordAVX2(haystack []byte) int
 //go:noescape
 func memchrNotWordAVX2(haystack []byte) int
 
-// memchrWord dispatches to the AVX2 kernel for inputs large enough to
+// memchrWordImpl dispatches to the AVX2 kernel for inputs large enough to
 // amortize the vector setup. The caller guarantees a non-empty haystack.
-func memchrWord(haystack []byte) int {
+func memchrWordImpl(haystack []byte) int {
 	if hasAVX2 && len(haystack) >= MinLen {
 		return memchrWordAVX2(haystack)
 	}
 	return memchrWordGeneric(haystack)
 }
 
-// memchrNotWord dispatches like memchrWord.
-func memchrNotWord(haystack []byte) int {
+// memchrNotWordImpl dispatches like memchrWordImpl.
+func memchrNotWordImpl(haystack []byte) int {
 	if hasAVX2 && len(haystack) >= MinLen {
 		return memchrNotWordAVX2(haystack)
 	}

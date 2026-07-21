@@ -12,9 +12,9 @@ package simd
 //go:noescape
 func memchrDigitAVX2(haystack []byte) int
 
-// memchrDigit dispatches to the AVX2 kernel for inputs large enough to
+// memchrDigitImpl dispatches to the AVX2 kernel for inputs large enough to
 // amortize the vector setup. The caller guarantees a non-empty haystack.
-func memchrDigit(haystack []byte) int {
+func memchrDigitImpl(haystack []byte) int {
 	if hasAVX2 && len(haystack) >= MinLen {
 		return memchrDigitAVX2(haystack)
 	}

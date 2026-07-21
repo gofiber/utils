@@ -6,7 +6,7 @@
 
 package simd
 
-// isASCII uses the portable SWAR implementation off amd64.
-func isASCII(data []byte) bool {
+// isASCIIImpl uses the portable SWAR implementation off amd64.
+func isASCIIImpl(data []byte) bool {
 	return isASCIIGeneric(data)
 }

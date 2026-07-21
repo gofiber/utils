@@ -11,9 +11,9 @@ package simd
 //go:noescape
 func isASCIIAVX2(data []byte) bool
 
-// isASCII dispatches to the AVX2 kernel for inputs large enough to amortize
+// isASCIIImpl dispatches to the AVX2 kernel for inputs large enough to amortize
 // the vector setup; smaller inputs and pre-AVX2 CPUs take the SWAR path.
-func isASCII(data []byte) bool {
+func isASCIIImpl(data []byte) bool {
 	if hasAVX2 && len(data) >= MinLen {
 		return isASCIIAVX2(data)
 	}

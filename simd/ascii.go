@@ -20,7 +20,7 @@ func IsASCII(data []byte) bool {
 	if len(data) == 0 {
 		return true
 	}
-	return isASCII(data)
+	return isASCIIImpl(data)
 }
 
 // FirstNonASCII returns the index of the first byte >= 0x80 in data, or -1
