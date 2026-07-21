@@ -131,8 +131,9 @@ Benchmark_EqualFold/default-12                                      18314365    
 
 # Search
 // amd64 note: IndexAny2/IndexAny3 dispatch to package simd for 32+ byte
-// inputs; these arm64 rows keep the portable SWAR path. See the simd
-// section below for amd64 numbers.
+// inputs; these arm64 rows keep the portable SWAR path. For amd64 numbers
+// see the Benchmark_Memchr2/Benchmark_Memchr3 rows in the simd section
+// below (the kernels these functions dispatch to).
 Benchmark_IndexAny2/7B/swar-12                                     282163779    4.297  ns/op     0  B/op   0  allocs/op
 Benchmark_IndexAny2/7B/scalar-12                                   314553402    3.826  ns/op     0  B/op   0  allocs/op
 Benchmark_IndexAny2/7B/stdlib-indexany-12                           50085909    23.97  ns/op     0  B/op   0  allocs/op
