@@ -498,9 +498,9 @@ The [`simd`](simd/) package is the vector-width counterpart to `swar`: byte
 searching and validation that dispatches to AVX2 assembly kernels (32 bytes
 per iteration) on amd64 CPUs and falls back to portable SWAR loops
 everywhere else, so it builds and behaves identically on every platform.
-`simd.Accelerated()` reports which mode is active. CPU capability is probed
-with a self-contained `CPUID` check, so the package adds no module
-dependencies.
+`simd.Accelerated()` reports which mode is active. CPU capability detection
+uses [`golang.org/x/sys/cpu`](https://pkg.go.dev/golang.org/x/sys/cpu),
+which also verifies OS support for saving the vector register state.
 
 It exports multi-needle scans (`Memchr2`, `Memchr3`), a paired-byte scan
 (`MemchrPair`), character-class scans (`MemchrDigit`/`MemchrDigitAt`,
