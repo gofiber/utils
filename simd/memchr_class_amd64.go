@@ -18,7 +18,7 @@ func memchrNotWordAVX2(haystack []byte) int
 // memchrWord dispatches to the AVX2 kernel for inputs large enough to
 // amortize the vector setup. The caller guarantees a non-empty haystack.
 func memchrWord(haystack []byte) int {
-	if hasAVX2 && len(haystack) >= 32 {
+	if hasAVX2 && len(haystack) >= MinLen {
 		return memchrWordAVX2(haystack)
 	}
 	return memchrWordGeneric(haystack)
@@ -26,7 +26,7 @@ func memchrWord(haystack []byte) int {
 
 // memchrNotWord dispatches like memchrWord.
 func memchrNotWord(haystack []byte) int {
-	if hasAVX2 && len(haystack) >= 32 {
+	if hasAVX2 && len(haystack) >= MinLen {
 		return memchrNotWordAVX2(haystack)
 	}
 	return memchrNotWordGeneric(haystack)

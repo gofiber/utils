@@ -4,11 +4,13 @@
 
 package simd
 
-// ByteFrequencies holds empirical byte frequency ranks derived from English
+// byteFrequencies holds empirical byte frequency ranks derived from English
 // text, source code, and binary data samples. Lower rank means rarer byte,
 // which makes it a better anchor for a search prefilter. The approach
 // mirrors Rust's memchr crate (https://github.com/BurntSushi/memchr).
-var ByteFrequencies = [256]byte{
+// The table is unexported (read it through ByteRank) so callers cannot
+// mutate the ranking Memmem's prefilter selection depends on.
+var byteFrequencies = [256]byte{
 	// 0x00-0x0F: control characters (generally rare)
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0,
 	// 0x10-0x1F: more control characters
@@ -36,10 +38,11 @@ var ByteFrequencies = [256]byte{
 	5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5,
 }
 
-// ByteRank returns the frequency rank of b. Lower values indicate rarer
-// bytes, which are better anchors for search prefilters.
+// ByteRank returns the empirical frequency rank of b. Lower values indicate
+// rarer bytes, which are better anchors for search prefilters; SelectRareBytes
+// and Memmem rank needle bytes with it.
 func ByteRank(b byte) byte {
-	return ByteFrequencies[b]
+	return byteFrequencies[b]
 }
 
 // RareByteInfo describes the two rarest bytes of a needle, as selected by
@@ -57,7 +60,7 @@ type RareByteInfo struct {
 }
 
 // SelectRareBytes returns the two rarest bytes of needle according to
-// ByteFrequencies, preferring distinct byte values. Memmem feeds the result
+// ByteRank, preferring distinct byte values. Memmem feeds the result
 // to MemchrPair to build a highly selective substring prefilter; it is
 // exported so downstream code can build its own prefilters the same way.
 func SelectRareBytes(needle []byte) RareByteInfo {
@@ -71,19 +74,19 @@ func SelectRareBytes(needle []byte) RareByteInfo {
 
 	byte1, idx1 := needle[0], 0
 	byte2, idx2 := needle[1], 1
-	if ByteFrequencies[byte2] < ByteFrequencies[byte1] {
+	if byteFrequencies[byte2] < byteFrequencies[byte1] {
 		byte1, byte2 = byte2, byte1
 		idx1, idx2 = idx2, idx1
 	}
 
 	for i := 2; i < n; i++ {
 		b := needle[i]
-		rank := ByteFrequencies[b]
+		rank := byteFrequencies[b]
 		switch {
-		case rank < ByteFrequencies[byte1]:
+		case rank < byteFrequencies[byte1]:
 			byte2, idx2 = byte1, idx1
 			byte1, idx1 = b, i
-		case b != byte1 && rank < ByteFrequencies[byte2]:
+		case b != byte1 && rank < byteFrequencies[byte2]:
 			byte2, idx2 = b, i
 		}
 	}

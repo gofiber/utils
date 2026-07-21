@@ -58,6 +58,13 @@ func FuzzMemchrPair(f *testing.F) {
 		if got := MemchrPair(h, b1, b2, offset); got != want {
 			t.Fatalf("MemchrPair(%q, %#x, %#x, %d) = %d, want %d", h, b1, b2, offset, got, want)
 		}
+		// Pin the SWAR fallback directly: through the exported function it
+		// is only reachable below the AVX2 dispatch length on amd64 hosts.
+		if offset >= 1 && len(h) > offset {
+			if got := memchrPairGeneric(h, b1, b2, offset); got != want {
+				t.Fatalf("memchrPairGeneric(%q, %#x, %#x, %d) = %d, want %d", h, b1, b2, offset, got, want)
+			}
+		}
 	})
 }
 
@@ -70,6 +77,20 @@ func FuzzMemmem(f *testing.F) {
 		want := bytes.Index(h, needle)
 		if got := Memmem(h, needle); got != want {
 			t.Fatalf("Memmem(%q, %q) = %d, want %d", h, needle, got, want)
+		}
+		// Drive the prefilter helpers directly so they are fuzzed even
+		// where Memmem's routing (no AVX2, sub-128B haystack) would skip
+		// them; both are pure Go and must match bytes.Index everywhere.
+		if len(needle) >= 2 && len(h) >= len(needle) {
+			info := SelectRareBytes(needle)
+			if got := memmemSingle(h, needle, info.Byte1, info.Index1); got != want {
+				t.Fatalf("memmemSingle(%q, %q) = %d, want %d", h, needle, got, want)
+			}
+			if info.Byte1 != info.Byte2 && info.Index1 != info.Index2 {
+				if got := memmemPaired(h, needle, info); got != want {
+					t.Fatalf("memmemPaired(%q, %q) = %d, want %d", h, needle, got, want)
+				}
+			}
 		}
 	})
 }

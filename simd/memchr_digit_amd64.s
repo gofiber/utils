@@ -94,12 +94,24 @@ loop32:
 	JMP     loop32
 
 handle_tail:
-	// Process remaining bytes (0-31 bytes) with scalar loop
-	// This handles the case where haystack length is not a multiple of 32
-
-	// Check if we've already processed all bytes
+	// Fewer than 32 bytes remain. If any do, rescan the final 32-byte
+	// window ending at the buffer end: lanes before SI were already
+	// resolved as non-digits, so BSF stays exact. Inputs shorter than 32
+	// bytes (unreachable through the Go dispatch) take the scalar loop.
 	CMPQ    SI, R8
 	JAE     not_found                    // If SI >= end, no bytes left
+	CMPQ    DX, $32
+	JB      tail_loop                    // sub-32 direct call: scalar
+
+	LEAQ    -32(R8), SI                  // SI = base of the final window
+	VMOVDQU (SI), Y2
+	VPCMPGTB Y0, Y2, Y3                  // Y3 = (chunk > 0x2F)
+	VPCMPGTB Y1, Y2, Y4                  // Y4 = (chunk > 0x39)
+	VPANDN  Y3, Y4, Y5                   // Y5 = (~Y4) & Y3 = digit mask
+	VPMOVMSKB Y5, CX
+	TESTL   CX, CX
+	JNZ     found_in_vector
+	JMP     not_found
 
 tail_loop:
 	// Load one byte

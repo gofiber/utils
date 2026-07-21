@@ -137,9 +137,15 @@ func Benchmark_MemchrNotWord(b *testing.B) {
 	}
 }
 
+// memmemBenchSizes adds points around the 128-byte bytes.Index crossover
+// that memmemMinHaystack encodes, so the constant's justification is
+// reproducible from this file (bytes.Index wins at 96B, the prefilter from
+// 128B up).
+var memmemBenchSizes = []int{8, 32, 64, 96, 128, 192, 512, 4096}
+
 func Benchmark_Memmem(b *testing.B) {
 	needle := []byte("q7z")
-	for _, n := range benchSizes {
+	for _, n := range memmemBenchSizes {
 		data := benchData(n)
 		b.Run(benchName(n)+"/simd", func(b *testing.B) {
 			b.ReportAllocs()
@@ -158,6 +164,33 @@ func Benchmark_Memmem(b *testing.B) {
 			}
 		})
 	}
+}
+
+// Benchmark_Memmem_Adversarial pins the miss-budget fallback: every
+// haystack position is a rare-byte anchor and the needle mismatches only at
+// its last byte, the shape that used to degrade to O(n*m). With the budget
+// it must track bytes.Index within a constant.
+func Benchmark_Memmem_Adversarial(b *testing.B) {
+	// The mismatch byte must rank as more common than 'z' so the rare-byte
+	// selection anchors on 'z' and every haystack position is a candidate.
+	haystack := bytes.Repeat([]byte{'z'}, 1<<20)
+	needle := append(bytes.Repeat([]byte{'z'}, 999), 'e')
+	b.Run("simd", func(b *testing.B) {
+		b.ReportAllocs()
+		for range b.N {
+			if Memmem(haystack, needle) != -1 {
+				b.Fatal("unexpected match")
+			}
+		}
+	})
+	b.Run("default", func(b *testing.B) {
+		b.ReportAllocs()
+		for range b.N {
+			if bytes.Contains(haystack, needle) {
+				b.Fatal("unexpected match")
+			}
+		}
+	})
 }
 
 func Benchmark_IsASCII(b *testing.B) {

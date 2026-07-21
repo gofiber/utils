@@ -2,12 +2,17 @@
 // primitives for the Fiber ecosystem: multi-needle scans, character-class
 // scans, paired-byte scans, substring search, and ASCII validation.
 //
-// On amd64 CPUs with AVX2, the functions dispatch to assembly kernels that
-// process 32 bytes per iteration; everywhere else they fall back to portable
-// SWAR (SIMD within a register) implementations, so the package builds and
-// behaves identically on every platform. Accelerated reports which mode is
-// active. Single-byte search is deliberately absent: bytes.IndexByte is
-// already vector-accelerated by the Go runtime on all major architectures.
+// Acceleration comes in two tiers. The scan kernels — Memchr2, Memchr3,
+// MemchrPair, MemchrDigit, MemchrWord, MemchrNotWord, IsASCII, and the
+// Memmem prefilter built on them — dispatch to AVX2 assembly processing 32
+// bytes per iteration on amd64 CPUs (for inputs of MinLen+ bytes) and fall
+// back to portable SWAR loops built on the swar package everywhere else.
+// FirstNonASCII and CountNonASCII are SWAR-only (8 bytes per iteration, no
+// assembly kernel), and MemchrInTable/MemchrNotInTable are plain scalar
+// loops, since an arbitrary 256-entry membership test has no cheap vector
+// form. Accelerated reports whether the AVX2 tier is active. Single-byte
+// search is deliberately absent: bytes.IndexByte is already
+// vector-accelerated by the Go runtime on all major architectures.
 //
 // Unlike the top-level utils helpers, this package operates on []byte only —
 // it is the raw engine underneath the generic helpers. Callers holding a
@@ -18,12 +23,13 @@
 // MIT License. See the LICENSE file in this directory for the full text.
 package simd
 
-// SWAR lane constants shared by the portable fallbacks: lo8 carries 0x01 and
-// hi8 carries 0x80 in every byte lane of a 64-bit word.
-const (
-	lo8 = uint64(0x0101010101010101)
-	hi8 = uint64(0x8080808080808080)
-)
+// MinLen is the input length from which the AVX2 kernels engage on amd64:
+// they consume whole 32-byte vectors, and below one vector their setup cost
+// outweighs the win, so shorter inputs take the SWAR fallbacks. Callers
+// that route between their own word loops and this package (as the
+// top-level utils helpers do) should gate on this constant rather than
+// hard-coding 32, so a retune here propagates everywhere.
+const MinLen = 32
 
 // Accelerated reports whether the AVX2 assembly kernels are in use on this
 // CPU. When false, all functions use portable fallback implementations.

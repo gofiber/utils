@@ -6,9 +6,15 @@ package simd
 
 import (
 	"bytes"
-	"encoding/binary"
-	"math/bits"
+
+	"github.com/gofiber/utils/v2/swar"
 )
+
+// The portable fallbacks below are composed from the swar package's
+// primitives rather than re-deriving the bit tricks; see swar's package
+// documentation for the ZeroLanes contract the first-match scans rely on
+// (false positives only above the first true match, so the first set lane
+// is always exact).
 
 // Memchr2 returns the index of the first occurrence in haystack of either
 // needle1 or needle2, or -1 if neither is present. Both needles are checked
@@ -55,12 +61,13 @@ func MemchrPair(haystack []byte, byte1, byte2 byte, offset int) int {
 	return memchrPair(haystack, byte1, byte2, offset)
 }
 
-// memchr2Generic is the portable SWAR fallback for Memchr2. Matching lanes
-// XOR to zero; the zero-lane formula can flag lanes above the first true
-// match, but the trailing-zero pick always lands on a true match.
+// memchr2Generic is the portable SWAR fallback for Memchr2: a ZeroLanes
+// first-match scan over both needle broadcasts, finishing 8+ byte inputs
+// with one overlapping word at n-8 (already-scanned lanes are known
+// non-matching, so the first set lane falls in the new bytes).
 func memchr2Generic(haystack []byte, needle1, needle2 byte) int {
 	n := len(haystack)
-	if n < 8 {
+	if n < swar.WordLen {
 		for i := range n {
 			if haystack[i] == needle1 || haystack[i] == needle2 {
 				return i
@@ -69,39 +76,30 @@ func memchr2Generic(haystack []byte, needle1, needle2 byte) int {
 		return -1
 	}
 
-	mask1 := uint64(needle1) * lo8
-	mask2 := uint64(needle2) * lo8
-
+	bc1 := swar.Broadcast(needle1)
+	bc2 := swar.Broadcast(needle2)
 	i := 0
-	for ; i+8 <= n; i += 8 {
-		chunk := binary.LittleEndian.Uint64(haystack[i:])
-		x1 := chunk ^ mask1
-		x2 := chunk ^ mask2
-		zero := ((x1 - lo8) &^ x1 & hi8) | ((x2 - lo8) &^ x2 & hi8)
-		if zero != 0 {
-			return i + bits.TrailingZeros64(zero)/8
+	for ; i+swar.WordLen <= n; i += swar.WordLen {
+		w := swar.Load8(haystack, i)
+		if m := swar.ZeroLanes(w^bc1) | swar.ZeroLanes(w^bc2); m != 0 {
+			return i + swar.FirstLane(m)
 		}
 	}
 	if i == n {
 		return -1
 	}
-	// Finish with one overlapping word at n-8: lanes already scanned are
-	// known non-matching, so the first set lane falls in the new bytes.
-	chunk := binary.LittleEndian.Uint64(haystack[n-8:])
-	x1 := chunk ^ mask1
-	x2 := chunk ^ mask2
-	zero := ((x1 - lo8) &^ x1 & hi8) | ((x2 - lo8) &^ x2 & hi8)
-	if zero != 0 {
-		return n - 8 + bits.TrailingZeros64(zero)/8
+	w := swar.Load8(haystack, n-swar.WordLen)
+	if m := swar.ZeroLanes(w^bc1) | swar.ZeroLanes(w^bc2); m != 0 {
+		return n - swar.WordLen + swar.FirstLane(m)
 	}
 	return -1
 }
 
 // memchr3Generic is the portable SWAR fallback for Memchr3; see
-// memchr2Generic for the technique.
+// memchr2Generic for the scan shape.
 func memchr3Generic(haystack []byte, needle1, needle2, needle3 byte) int {
 	n := len(haystack)
-	if n < 8 {
+	if n < swar.WordLen {
 		for i := range n {
 			if haystack[i] == needle1 || haystack[i] == needle2 || haystack[i] == needle3 {
 				return i
@@ -110,43 +108,36 @@ func memchr3Generic(haystack []byte, needle1, needle2, needle3 byte) int {
 		return -1
 	}
 
-	mask1 := uint64(needle1) * lo8
-	mask2 := uint64(needle2) * lo8
-	mask3 := uint64(needle3) * lo8
-
+	bc1 := swar.Broadcast(needle1)
+	bc2 := swar.Broadcast(needle2)
+	bc3 := swar.Broadcast(needle3)
 	i := 0
-	for ; i+8 <= n; i += 8 {
-		chunk := binary.LittleEndian.Uint64(haystack[i:])
-		x1 := chunk ^ mask1
-		x2 := chunk ^ mask2
-		x3 := chunk ^ mask3
-		zero := ((x1 - lo8) &^ x1 & hi8) | ((x2 - lo8) &^ x2 & hi8) | ((x3 - lo8) &^ x3 & hi8)
-		if zero != 0 {
-			return i + bits.TrailingZeros64(zero)/8
+	for ; i+swar.WordLen <= n; i += swar.WordLen {
+		w := swar.Load8(haystack, i)
+		if m := swar.ZeroLanes(w^bc1) | swar.ZeroLanes(w^bc2) | swar.ZeroLanes(w^bc3); m != 0 {
+			return i + swar.FirstLane(m)
 		}
 	}
 	if i == n {
 		return -1
 	}
-	chunk := binary.LittleEndian.Uint64(haystack[n-8:])
-	x1 := chunk ^ mask1
-	x2 := chunk ^ mask2
-	x3 := chunk ^ mask3
-	zero := ((x1 - lo8) &^ x1 & hi8) | ((x2 - lo8) &^ x2 & hi8) | ((x3 - lo8) &^ x3 & hi8)
-	if zero != 0 {
-		return n - 8 + bits.TrailingZeros64(zero)/8
+	w := swar.Load8(haystack, n-swar.WordLen)
+	if m := swar.ZeroLanes(w^bc1) | swar.ZeroLanes(w^bc2) | swar.ZeroLanes(w^bc3); m != 0 {
+		return n - swar.WordLen + swar.FirstLane(m)
 	}
 	return -1
 }
 
 // memchrPairGeneric is the portable SWAR fallback for MemchrPair. The two
-// per-position masks are ANDed, so a lane can be flagged without both bytes
-// truly matching (zero-lane false positives no longer sit above a true match
-// after the AND); every candidate is therefore re-verified scalar before
-// being returned. The caller guarantees offset >= 1 and len > offset.
+// per-position ZeroLanes masks are ANDed, and after the AND a flagged lane
+// is no longer guaranteed to sit at or above a true match in both masks, so
+// every candidate is re-verified scalar. ZeroLanes plus this rare verify
+// step beats a pair of exact swar.MatchByteMask masks on the no-candidate
+// fast path, which is the common case. The caller guarantees offset >= 1
+// and len(haystack) > offset.
 func memchrPairGeneric(haystack []byte, byte1, byte2 byte, offset int) int {
 	n := len(haystack)
-	if n < 8+offset {
+	if n < swar.WordLen+offset {
 		for i := 0; i+offset < n; i++ {
 			if haystack[i] == byte1 && haystack[i+offset] == byte2 {
 				return i
@@ -155,18 +146,14 @@ func memchrPairGeneric(haystack []byte, byte1, byte2 byte, offset int) int {
 		return -1
 	}
 
-	mask1 := uint64(byte1) * lo8
-	mask2 := uint64(byte2) * lo8
-
+	bc1 := swar.Broadcast(byte1)
+	bc2 := swar.Broadcast(byte2)
 	i := 0
-	for ; i+8+offset <= n; i += 8 {
-		chunk1 := binary.LittleEndian.Uint64(haystack[i:])
-		chunk2 := binary.LittleEndian.Uint64(haystack[i+offset:])
-		x1 := chunk1 ^ mask1
-		x2 := chunk2 ^ mask2
-		cand := ((x1 - lo8) &^ x1 & hi8) & ((x2 - lo8) &^ x2 & hi8)
+	for ; i+swar.WordLen+offset <= n; i += swar.WordLen {
+		cand := swar.ZeroLanes(swar.Load8(haystack, i)^bc1) &
+			swar.ZeroLanes(swar.Load8(haystack, i+offset)^bc2)
 		for cand != 0 {
-			pos := i + bits.TrailingZeros64(cand)/8
+			pos := i + swar.FirstLane(cand)
 			if haystack[pos] == byte1 && haystack[pos+offset] == byte2 {
 				return pos
 			}

@@ -12,12 +12,11 @@ const (
 	backslashLanes = uint64('\\') * swar.Ones
 )
 
-// simdMinLen is the input length from which the simd package's AVX2 kernels
-// beat the SWAR word loops below (measured crossover; the kernels consume
-// whole 32-byte vectors, and below one vector their setup dominates). The
-// simd.Accelerated() gate is a constant false off amd64, so the accelerated
-// branches compile away entirely there.
-const simdMinLen = 32
+// The dispatch prologues below gate on simd.MinLen — the measured length
+// from which the AVX2 kernels beat these SWAR word loops — so the crossover
+// has a single source of truth in the simd package. The simd.Accelerated()
+// gate is a constant false off amd64, so the accelerated branches compile
+// away entirely there.
 
 // IsASCII reports whether s contains only ASCII bytes (no byte >= 0x80).
 // It ORs four words per iteration where possible (no index is needed, so
@@ -28,7 +27,7 @@ const simdMinLen = 32
 // instead.
 func IsASCII[S byteSeq](s S) bool {
 	n := len(s)
-	if n >= simdMinLen && simd.Accelerated() {
+	if n >= simd.MinLen && simd.Accelerated() {
 		return simd.IsASCII(unsafeconv.Bytes(s))
 	}
 	i := 0

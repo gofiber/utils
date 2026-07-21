@@ -14,7 +14,7 @@ func isASCIIAVX2(data []byte) bool
 // isASCII dispatches to the AVX2 kernel for inputs large enough to amortize
 // the vector setup; smaller inputs and pre-AVX2 CPUs take the SWAR path.
 func isASCII(data []byte) bool {
-	if hasAVX2 && len(data) >= 32 {
+	if hasAVX2 && len(data) >= MinLen {
 		return isASCIIAVX2(data)
 	}
 	return isASCIIGeneric(data)

@@ -4,6 +4,10 @@
 
 package simd
 
+import (
+	"github.com/gofiber/utils/v2/swar"
+)
+
 // MemchrWord returns the index of the first word character — 'A'..'Z',
 // 'a'..'z', '0'..'9', or '_' (the regex \w class) — in haystack, or -1 if
 // none is present.
@@ -24,9 +28,12 @@ func MemchrNotWord(haystack []byte) int {
 }
 
 // MemchrInTable returns the index of the first byte b of haystack with
-// table[b] true, or -1 if none matches or table is nil. It is a
-// general-purpose character-class scan; for the \w class specifically,
-// MemchrWord is faster.
+// table[b] true, or -1 if none matches or table is nil.
+//
+// This is a plain scalar table scan on every architecture — an arbitrary
+// 256-entry membership test has no cheap SIMD or SWAR form — so unlike the
+// rest of this package it carries no acceleration. For the \w class
+// specifically, MemchrWord is much faster.
 func MemchrInTable(haystack []byte, table *[256]bool) int {
 	if table == nil {
 		return -1
@@ -41,7 +48,8 @@ func MemchrInTable(haystack []byte, table *[256]bool) int {
 
 // MemchrNotInTable is the complement of MemchrInTable: it returns the index
 // of the first byte b with table[b] false, or -1 if every byte is in the
-// table or table is nil.
+// table or table is nil. Like MemchrInTable it is a plain scalar loop on
+// every architecture.
 func MemchrNotInTable(haystack []byte, table *[256]bool) int {
 	if table == nil {
 		return -1
@@ -62,22 +70,67 @@ func isWordChar(b byte) bool {
 		b == '_'
 }
 
-// memchrWordGeneric is the portable fallback for MemchrWord.
+// wordMask flags the lanes of w holding word characters. The range masks
+// are exact per lane and bytes >= 0x80 never match, so the composition is
+// exact too.
+func wordMask(w uint64) uint64 {
+	return swar.MatchRangeMask(w, 'A', 'Z') |
+		swar.MatchRangeMask(w, 'a', 'z') |
+		swar.MatchRangeMask(w, '0', '9') |
+		swar.MatchByteMask(w, '_')
+}
+
+// memchrWordGeneric is the portable SWAR fallback for MemchrWord, finishing
+// 8+ byte inputs with one overlapping word at n-8.
 func memchrWordGeneric(haystack []byte) int {
-	for i, b := range haystack {
-		if isWordChar(b) {
-			return i
+	n := len(haystack)
+	if n < swar.WordLen {
+		for i := range n {
+			if isWordChar(haystack[i]) {
+				return i
+			}
 		}
+		return -1
+	}
+	i := 0
+	for ; i+swar.WordLen <= n; i += swar.WordLen {
+		if m := wordMask(swar.Load8(haystack, i)); m != 0 {
+			return i + swar.FirstLane(m)
+		}
+	}
+	if i == n {
+		return -1
+	}
+	if m := wordMask(swar.Load8(haystack, n-swar.WordLen)); m != 0 {
+		return n - swar.WordLen + swar.FirstLane(m)
 	}
 	return -1
 }
 
-// memchrNotWordGeneric is the portable fallback for MemchrNotWord.
+// memchrNotWordGeneric is the portable SWAR fallback for MemchrNotWord.
+// wordMask is exact per lane, so its complement within the 0x80 lane
+// markers is exact as well.
 func memchrNotWordGeneric(haystack []byte) int {
-	for i, b := range haystack {
-		if !isWordChar(b) {
-			return i
+	n := len(haystack)
+	if n < swar.WordLen {
+		for i := range n {
+			if !isWordChar(haystack[i]) {
+				return i
+			}
 		}
+		return -1
+	}
+	i := 0
+	for ; i+swar.WordLen <= n; i += swar.WordLen {
+		if m := swar.HighBits &^ wordMask(swar.Load8(haystack, i)); m != 0 {
+			return i + swar.FirstLane(m)
+		}
+	}
+	if i == n {
+		return -1
+	}
+	if m := swar.HighBits &^ wordMask(swar.Load8(haystack, n-swar.WordLen)); m != 0 {
+		return n - swar.WordLen + swar.FirstLane(m)
 	}
 	return -1
 }

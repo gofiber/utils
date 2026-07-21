@@ -69,10 +69,20 @@ loop32:
 	JMP     loop32
 
 handle_tail:
-	// Process remaining bytes (0-31 bytes) with scalar loop
-	// Check if we've already processed all bytes
+	// Fewer than 32 bytes remain. If any do, retest the final 32-byte
+	// window ending at the buffer end — rescanning bytes already proven
+	// ASCII cannot change the outcome. Inputs shorter than 32 bytes
+	// (unreachable through the Go dispatch) take the scalar loop.
 	CMPQ    SI, R8
 	JAE     all_ascii               // If SI >= end, all bytes processed
+	CMPQ    DX, $32
+	JB      tail_loop               // sub-32 direct call: scalar
+
+	VMOVDQU -32(R8), Y0             // Y0 = data[len-32:len]
+	VPMOVMSKB Y0, AX
+	TESTL   AX, AX
+	JNZ     found_non_ascii
+	JMP     all_ascii
 
 tail_loop:
 	// Load one byte and check high bit

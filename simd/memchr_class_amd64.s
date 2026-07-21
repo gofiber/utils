@@ -117,9 +117,37 @@ word_loop32:
 	JMP     word_loop32
 
 word_handle_tail:
-	// Process remaining bytes with scalar loop
+	// Fewer than 32 bytes remain. If any do, rescan the final 32-byte
+	// window ending at the buffer end: lanes before SI were already
+	// resolved as non-matching, so BSF stays exact. Inputs shorter than
+	// 32 bytes (unreachable through the Go dispatch) take the scalar loop.
 	CMPQ    SI, R8
 	JAE     word_not_found
+	CMPQ    DX, $32
+	JB      word_tail_loop              // sub-32 direct call: scalar
+
+	LEAQ    -32(R8), SI                 // SI = base of the final window
+	VMOVDQU (SI), Y0
+
+	// Same class checks as the main loop
+	VPMINUB Y0, Y9, Y1
+	VPMAXUB Y1, Y8, Y1
+	VPCMPEQB Y0, Y1, Y2                // [A-Z]
+	VPMINUB Y0, Y11, Y1
+	VPMAXUB Y1, Y10, Y1
+	VPCMPEQB Y0, Y1, Y3                // [a-z]
+	VPMINUB Y0, Y13, Y1
+	VPMAXUB Y1, Y12, Y1
+	VPCMPEQB Y0, Y1, Y4                // [0-9]
+	VPCMPEQB Y0, Y14, Y5               // '_'
+	VPOR    Y2, Y3, Y6
+	VPOR    Y4, Y5, Y7
+	VPOR    Y6, Y7, Y6
+
+	VPMOVMSKB Y6, CX
+	TESTL   CX, CX
+	JNZ     word_found_in_vector
+	JMP     word_not_found
 
 word_tail_loop:
 	MOVBLZX (SI), AX                   // AX = byte
@@ -281,9 +309,35 @@ notword_loop32:
 	JMP     notword_loop32
 
 notword_handle_tail:
-	// Process remaining bytes with scalar loop
+	// Overlapping vector tail; see word_handle_tail.
 	CMPQ    SI, R8
 	JAE     notword_not_found
+	CMPQ    DX, $32
+	JB      notword_tail_loop           // sub-32 direct call: scalar
+
+	LEAQ    -32(R8), SI                 // SI = base of the final window
+	VMOVDQU (SI), Y0
+
+	// Same class checks as the main loop, then complement
+	VPMINUB Y0, Y9, Y1
+	VPMAXUB Y1, Y8, Y1
+	VPCMPEQB Y0, Y1, Y2
+	VPMINUB Y0, Y11, Y1
+	VPMAXUB Y1, Y10, Y1
+	VPCMPEQB Y0, Y1, Y3
+	VPMINUB Y0, Y13, Y1
+	VPMAXUB Y1, Y12, Y1
+	VPCMPEQB Y0, Y1, Y4
+	VPCMPEQB Y0, Y14, Y5
+	VPOR    Y2, Y3, Y6
+	VPOR    Y4, Y5, Y7
+	VPOR    Y6, Y7, Y6
+	VPXOR   Y6, Y15, Y6                 // Y6 = NOT(isWord)
+
+	VPMOVMSKB Y6, CX
+	TESTL   CX, CX
+	JNZ     notword_found_in_vector
+	JMP     notword_not_found
 
 notword_tail_loop:
 	MOVBLZX (SI), AX

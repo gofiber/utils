@@ -4,6 +4,10 @@
 
 package simd
 
+import (
+	"github.com/gofiber/utils/v2/swar"
+)
+
 // MemchrDigit returns the index of the first ASCII digit '0'..'9' in
 // haystack, or -1 if no digit is present. Only ASCII digits match; Unicode
 // digit characters do not.
@@ -32,12 +36,30 @@ func MemchrDigitAt(haystack []byte, at int) int {
 	return pos + at
 }
 
-// memchrDigitGeneric is the portable fallback for MemchrDigit.
+// memchrDigitGeneric is the portable SWAR fallback for MemchrDigit: a
+// MatchRangeMask first-match scan (exact per lane; bytes >= 0x80 never
+// match), finishing 8+ byte inputs with one overlapping word at n-8.
 func memchrDigitGeneric(haystack []byte) int {
-	for i, b := range haystack {
-		if b >= '0' && b <= '9' {
-			return i
+	n := len(haystack)
+	if n < swar.WordLen {
+		for i, b := range haystack {
+			if b >= '0' && b <= '9' {
+				return i
+			}
 		}
+		return -1
+	}
+	i := 0
+	for ; i+swar.WordLen <= n; i += swar.WordLen {
+		if m := swar.MatchRangeMask(swar.Load8(haystack, i), '0', '9'); m != 0 {
+			return i + swar.FirstLane(m)
+		}
+	}
+	if i == n {
+		return -1
+	}
+	if m := swar.MatchRangeMask(swar.Load8(haystack, n-swar.WordLen), '0', '9'); m != 0 {
+		return n - swar.WordLen + swar.FirstLane(m)
 	}
 	return -1
 }

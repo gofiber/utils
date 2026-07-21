@@ -2,6 +2,7 @@ package simd
 
 import (
 	"bytes"
+	"os"
 	"strconv"
 	"testing"
 
@@ -399,9 +400,9 @@ func Test_SelectRareBytes(t *testing.T) {
 		require.Equal(t, needle[info.Index2], info.Byte2, "needle %q", needle)
 		// Byte1 is a rarest byte of the whole needle.
 		for _, b := range needle {
-			require.LessOrEqual(t, ByteFrequencies[info.Byte1], ByteFrequencies[b], "needle %q", needle)
+			require.LessOrEqual(t, ByteRank(info.Byte1), ByteRank(b), "needle %q", needle)
 		}
-		require.LessOrEqual(t, ByteFrequencies[info.Byte1], ByteFrequencies[info.Byte2])
+		require.LessOrEqual(t, ByteRank(info.Byte1), ByteRank(info.Byte2))
 	}
 
 	// All-identical needle: no distinct second byte exists.
@@ -412,7 +413,7 @@ func Test_SelectRareBytes(t *testing.T) {
 
 func Test_ByteRank(t *testing.T) {
 	t.Parallel()
-	require.Equal(t, ByteFrequencies['e'], ByteRank('e'))
+	require.Equal(t, byteFrequencies['e'], ByteRank('e'))
 	require.Less(t, ByteRank('z'), ByteRank('e'))
 	require.Equal(t, byte(255), ByteRank(' '))
 }
@@ -476,10 +477,89 @@ func Test_Memmem(t *testing.T) {
 	checkMemmem(t, almost, []byte("ab"))
 }
 
+// checkMemmemInternal drives the prefilter helpers directly, so they are
+// covered on every platform regardless of the hasAVX2 / 128-byte routing
+// inside Memmem.
+func checkMemmemInternal(t *testing.T, h, needle []byte) {
+	t.Helper()
+	want := bytes.Index(h, needle)
+	info := SelectRareBytes(needle)
+	require.Equal(t, want, memmemSingle(h, needle, info.Byte1, info.Index1),
+		"memmemSingle(%d bytes, %q)", len(h), needle)
+	if info.Byte1 != info.Byte2 && info.Index1 != info.Index2 {
+		require.Equal(t, want, memmemPaired(h, needle, info),
+			"memmemPaired(%d bytes, %q)", len(h), needle)
+	}
+}
+
+func Test_Memmem_InternalPaths(t *testing.T) {
+	t.Parallel()
+	// Regular haystacks, planted needles.
+	for _, n := range testSizes {
+		if n == 0 {
+			continue
+		}
+		text := make([]byte, n)
+		for i := range text {
+			text[i] = 'a' + byte((i*7)%26)
+		}
+		for _, needle := range [][]byte{
+			[]byte("zq"), []byte("q7z"), []byte("the quick brown fox"),
+			append(bytes.Repeat([]byte{'a'}, 40), 'b'),
+		} {
+			checkMemmemInternal(t, text, needle)
+			if len(needle) <= n {
+				h := bytes.Clone(text)
+				copy(h[n-len(needle):], needle)
+				checkMemmemInternal(t, h, needle)
+			}
+		}
+	}
+
+	// Miss-budget fallback: every position is a rare-byte anchor, so the
+	// loops exhaust memmemMaxMisses and must hand over to memmemFallback
+	// without missing a late match or returning one out of order.
+	anchors := bytes.Repeat([]byte{'z'}, 400)
+	checkMemmemInternal(t, anchors, append(bytes.Repeat([]byte{'z'}, 50), 'b')) // absent
+	late := bytes.Repeat([]byte{'z'}, 400)
+	copy(late[350:], "zzzzb")
+	checkMemmemInternal(t, late, []byte("zzzzb")) // found only after fallback
+	// Match placed just before the fallback handover region, with a
+	// nonzero anchor index (rare byte not at needle start).
+	h := bytes.Repeat([]byte{'q'}, 300)
+	for i := range 40 {
+		h[i*2] = 'e' // 'e' is common; 'q' stays the rare anchor everywhere
+	}
+	copy(h[60:], "eeq")
+	checkMemmemInternal(t, h, []byte("eeq"))
+}
+
+func Test_Memmem_AdversarialBounded(t *testing.T) {
+	t.Parallel()
+	// The O(n*m) trap from the code review: rare byte everywhere, long
+	// almost-matching needle. The miss budget must keep this exact (equal
+	// to bytes.Index) — timing is covered by Benchmark_Memmem_Adversarial.
+	haystack := bytes.Repeat([]byte{'z'}, 1<<16)
+	needle := append(bytes.Repeat([]byte{'z'}, 999), 'b')
+	checkMemmem(t, haystack, needle)
+	checkMemmemInternal(t, haystack, needle)
+	// Same shape but with the needle present at the very end.
+	present := bytes.Repeat([]byte{'z'}, 1<<16)
+	present[len(present)-1] = 'b'
+	checkMemmem(t, present, needle)
+	checkMemmemInternal(t, present, needle)
+}
+
 func Test_Accelerated(t *testing.T) {
 	t.Parallel()
 	require.Equal(t, hasAVX2, Accelerated())
 	t.Logf("simd.Accelerated() = %v", Accelerated())
+	// CI runners known to have AVX2 can set this to prove the assembly
+	// kernels are actually under test, instead of silently green-lighting
+	// a fallback-only run (QEMU, GOAMD64-baseline VMs, detection bugs).
+	if os.Getenv("GOFIBER_SIMD_REQUIRE_AVX2") == "1" {
+		require.True(t, Accelerated(), "GOFIBER_SIMD_REQUIRE_AVX2=1 but AVX2 kernels are not active")
+	}
 }
 
 func Test_TestSizesCoverDispatchBoundaries(t *testing.T) {

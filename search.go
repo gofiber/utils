@@ -22,7 +22,7 @@ import (
 // dispatch to package simd instead.
 func IndexAny2[S byteSeq](s S, a, b byte) int {
 	n := len(s)
-	if n >= simdMinLen && simd.Accelerated() {
+	if n >= simd.MinLen && simd.Accelerated() {
 		return simd.Memchr2(unsafeconv.Bytes(s), a, b)
 	}
 	if n >= 8 {
@@ -73,7 +73,7 @@ func IndexAny2[S byteSeq](s S, a, b byte) int {
 // dispatch to package simd instead.
 func IndexAny3[S byteSeq](s S, a, b, c byte) int {
 	n := len(s)
-	if n >= simdMinLen && simd.Accelerated() {
+	if n >= simd.MinLen && simd.Accelerated() {
 		return simd.Memchr3(unsafeconv.Bytes(s), a, b, c)
 	}
 	if n >= 8 {

@@ -21,7 +21,7 @@ func memchrPairAVX2(haystack []byte, byte1, byte2 byte, offset int) int
 // memchr2 dispatches to the AVX2 kernel for inputs large enough to amortize
 // the vector setup. The caller guarantees a non-empty haystack.
 func memchr2(haystack []byte, needle1, needle2 byte) int {
-	if hasAVX2 && len(haystack) >= 32 {
+	if hasAVX2 && len(haystack) >= MinLen {
 		return memchr2AVX2(haystack, needle1, needle2)
 	}
 	return memchr2Generic(haystack, needle1, needle2)
@@ -29,7 +29,7 @@ func memchr2(haystack []byte, needle1, needle2 byte) int {
 
 // memchr3 dispatches like memchr2.
 func memchr3(haystack []byte, needle1, needle2, needle3 byte) int {
-	if hasAVX2 && len(haystack) >= 32 {
+	if hasAVX2 && len(haystack) >= MinLen {
 		return memchr3AVX2(haystack, needle1, needle2, needle3)
 	}
 	return memchr3Generic(haystack, needle1, needle2, needle3)
@@ -39,7 +39,7 @@ func memchr3(haystack []byte, needle1, needle2, needle3 byte) int {
 // one 32-byte vector of pair positions. The caller guarantees offset >= 1
 // and len(haystack) > offset.
 func memchrPair(haystack []byte, byte1, byte2 byte, offset int) int {
-	if hasAVX2 && len(haystack) >= 32+offset {
+	if hasAVX2 && len(haystack) >= MinLen+offset {
 		return memchrPairAVX2(haystack, byte1, byte2, offset)
 	}
 	return memchrPairGeneric(haystack, byte1, byte2, offset)
