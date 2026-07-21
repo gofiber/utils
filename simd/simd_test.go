@@ -231,6 +231,10 @@ func Test_FirstNonASCII_CountNonASCII(t *testing.T) {
 	require.Equal(t, -1, FirstNonASCII([]byte("hello")))
 	require.Equal(t, 1, FirstNonASCII([]byte("h\xc3\xa9llo")))
 	require.Equal(t, 2, CountNonASCII([]byte("h\xc3\xa9llo")))
+	// The only non-ASCII byte sits in the overlapping final word (length
+	// not a multiple of 8, clean words before it).
+	require.Equal(t, 12, FirstNonASCII(append(bytes.Repeat([]byte{'a'}, 12), 0x80)))
+	require.Equal(t, -1, FirstNonASCII(bytes.Repeat([]byte{'a'}, 13)))
 	for _, n := range testSizes {
 		h := fill(n, uint64(n)+7)
 		wantFirst := -1
@@ -295,6 +299,8 @@ func Test_MemchrDigitAt(t *testing.T) {
 	require.Equal(t, -1, MemchrDigitAt(h, 100))
 	require.Equal(t, -1, MemchrDigitAt(h, -1))
 	require.Equal(t, -1, MemchrDigitAt(nil, 0))
+	// In-bounds start with no digit at or after it.
+	require.Equal(t, -1, MemchrDigitAt([]byte("abc123xyz"), 6))
 }
 
 func refIsWord(b byte) bool {
