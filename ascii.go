@@ -1,6 +1,8 @@
 package utils
 
 import (
+	"github.com/gofiber/utils/v2/internal/unsafeconv"
+	"github.com/gofiber/utils/v2/simd"
 	"github.com/gofiber/utils/v2/swar"
 )
 
@@ -10,13 +12,24 @@ const (
 	backslashLanes = uint64('\\') * swar.Ones
 )
 
+// The dispatch prologues below gate on simd.MinLen — the measured length
+// from which the AVX2 kernels beat these SWAR word loops — so the crossover
+// has a single source of truth in the simd package. The simd.Accelerated()
+// gate is a constant false off amd64, so the accelerated branches compile
+// away entirely there.
+
 // IsASCII reports whether s contains only ASCII bytes (no byte >= 0x80).
 // It ORs four words per iteration where possible (no index is needed, so
 // detection can be deferred to one test per 32 bytes), then tests word-wise;
 // inputs of 8+ bytes finish with one overlapping word at n-8, shorter ones
 // byte-wise.
+// On amd64 CPUs with AVX2, inputs of 32+ bytes dispatch to package simd
+// instead.
 func IsASCII[S byteSeq](s S) bool {
 	n := len(s)
+	if n >= simd.MinLen && simd.Accelerated() {
+		return simd.IsASCII(unsafeconv.Bytes(s))
+	}
 	i := 0
 	for ; i+32 <= n; i += 32 {
 		acc := swar.Load8(s, i) | swar.Load8(s, i+8) | swar.Load8(s, i+16) | swar.Load8(s, i+24)

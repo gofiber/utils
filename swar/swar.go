@@ -94,11 +94,17 @@ func ToUpperWord(w uint64) uint64 {
 	return w &^ (MatchRangeMask(w, 'a', 'z') >> 2) // clear bit 5 on matched lanes
 }
 
-// ZeroLanes returns a mask whose lowest set lane is the lowest zero-byte
-// lane of x; higher lanes may carry false positives (borrows propagate
-// strictly upward from true zero lanes), and the mask is zero iff x has no
-// zero byte. It is two ops cheaper than MatchByteMask, which makes it the
-// right primitive for first-match scans, typically as
+// ZeroLanes returns a mask flagging the zero-byte lanes of x. Three
+// properties are part of the contract: the mask is zero iff x has no zero
+// byte; the lowest set lane is always the lowest true zero lane; and every
+// true zero lane has its high bit set — a 0x00 lane leaves the subtraction
+// as 0xFF or 0xFE regardless of borrow-in, and &^ x keeps its high bit —
+// so combining masks (OR for multi-needle scans, AND for pair scans, as
+// simd.Memchr2 and simd.MemchrPair's fallbacks do) never loses a true
+// match. Lanes above the first true zero may carry false positives
+// (borrows propagate strictly upward), so anything beyond the lowest set
+// lane must be re-verified. It is two ops cheaper than MatchByteMask,
+// which makes it the right primitive for first-match scans, typically as
 // ZeroLanes(w ^ Broadcast(c)) with the broadcast hoisted out of the word
 // loop. Use MatchByteMask when every lane must be exact.
 func ZeroLanes(x uint64) uint64 {

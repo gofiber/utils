@@ -2,6 +2,8 @@ package utils
 
 import (
 	"github.com/gofiber/utils/v2/internal/caseconv"
+	"github.com/gofiber/utils/v2/internal/unsafeconv"
+	"github.com/gofiber/utils/v2/simd"
 	"github.com/gofiber/utils/v2/swar"
 )
 
@@ -16,9 +18,13 @@ import (
 // Inputs shorter than a word use scalar loops throughout.
 
 // IndexAny2 returns the index of the first occurrence in s of either a or b,
-// or -1 if neither is present.
+// or -1 if neither is present. On amd64 CPUs with AVX2, inputs of 32+ bytes
+// dispatch to package simd instead.
 func IndexAny2[S byteSeq](s S, a, b byte) int {
 	n := len(s)
+	if n >= simd.MinLen && simd.Accelerated() {
+		return simd.Memchr2(unsafeconv.Bytes(s), a, b)
+	}
 	if n >= 8 {
 		// The needle broadcasts are hoisted here so sub-word inputs never
 		// pay for the multiplies.
@@ -63,9 +69,13 @@ func IndexAny2[S byteSeq](s S, a, b byte) int {
 }
 
 // IndexAny3 returns the index of the first occurrence in s of a, b, or c,
-// or -1 if none is present.
+// or -1 if none is present. On amd64 CPUs with AVX2, inputs of 32+ bytes
+// dispatch to package simd instead.
 func IndexAny3[S byteSeq](s S, a, b, c byte) int {
 	n := len(s)
+	if n >= simd.MinLen && simd.Accelerated() {
+		return simd.Memchr3(unsafeconv.Bytes(s), a, b, c)
+	}
 	if n >= 8 {
 		bcA := swar.Broadcast(a)
 		bcB := swar.Broadcast(b)

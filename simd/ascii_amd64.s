@@ -1,0 +1,118 @@
+// Adapted from the coregex project, https://github.com/coregx/coregex
+// (package simd), Copyright (c) 2025 Andrey Kolkov and contributors,
+// MIT License. See the LICENSE file in this directory for the full text.
+// Modified: legacy-SSE MOVD/MOVQ register moves replaced with VEX-encoded
+// VMOVD/VMOVQ to avoid AVX-SSE transition penalties on Intel CPUs, and the
+// scalar tail loop replaced with one overlapping vector at the buffer end
+// for the MinLen+ inputs the Go dispatch guarantees.
+
+//go:build amd64
+
+#include "textflag.h"
+
+// func isASCIIAVX2(data []byte) bool
+//
+// AVX2 implementation of ASCII detection that checks if all bytes are < 0x80.
+// Processes 32 bytes per iteration using 256-bit vector operations.
+//
+// Algorithm:
+//  1. Main loop: load 32 bytes, use VPMOVMSKB to extract high bits
+//  2. If any high bit is set (mask != 0), return false (non-ASCII found)
+//  3. Handle the tail by retesting one overlapping 32-byte window ending
+//     at the buffer end (a scalar loop only for sub-32 direct calls,
+//     unreachable through the Go dispatch)
+//  4. Always call VZEROUPPER before returning (critical for performance)
+//
+// The key insight: ASCII bytes have the high bit (bit 7) clear (0x00-0x7F).
+// VPMOVMSKB extracts bit 7 from each byte into a 32-bit mask.
+// If mask == 0, all 32 bytes are ASCII.
+//
+// Parameters (FP offsets):
+//   data_base+0(FP)  - pointer to data (8 bytes)
+//   data_len+8(FP)   - data length (8 bytes)
+//   data_cap+16(FP)  - data capacity (8 bytes, unused but part of slice)
+//   ret+24(FP)       - return value: bool (1 byte)
+//
+// Total argument frame size: 25 bytes (8+8+8+1)
+TEXT ·isASCIIAVX2(SB), NOSPLIT, $0-25
+	// Load parameters
+	MOVQ    data_base+0(FP), SI     // SI = data pointer
+	MOVQ    data_len+8(FP), DX      // DX = data length
+
+	// Empty data check
+	TESTQ   DX, DX
+	JZ      all_ascii
+
+	// Save start pointer
+	MOVQ    SI, DI                  // DI = data start (preserved)
+
+	// Calculate end pointer
+	LEAQ    (SI)(DX*1), R8          // R8 = SI + length (end pointer)
+
+	// Main loop: process 32 bytes per iteration
+loop32:
+	// Check if we have at least 32 bytes remaining
+	LEAQ    32(SI), R9              // R9 = SI + 32
+	CMPQ    R9, R8                  // Compare with end pointer
+	JA      handle_tail             // If R9 > R8, less than 32 bytes left
+
+	// Load 32 bytes from data (unaligned load is safe and fast with AVX2)
+	VMOVDQU (SI), Y0                // Y0 = data[SI:SI+32]
+
+	// Extract high bit of each byte into 32-bit mask
+	// VPMOVMSKB: bit i in result = bit 7 of byte i in source vector
+	// If any byte >= 0x80, its high bit is 1, so mask != 0
+	VPMOVMSKB Y0, AX                // AX = 32-bit mask of high bits
+
+	// Check if any non-ASCII byte found (mask != 0)
+	TESTL   AX, AX
+	JNZ     found_non_ascii         // Non-zero mask means non-ASCII found
+
+	// All 32 bytes are ASCII, advance to next chunk
+	ADDQ    $32, SI
+	JMP     loop32
+
+handle_tail:
+	// Fewer than 32 bytes remain. If any do, retest the final 32-byte
+	// window ending at the buffer end — rescanning bytes already proven
+	// ASCII cannot change the outcome. Inputs shorter than 32 bytes
+	// (unreachable through the Go dispatch) take the scalar loop.
+	CMPQ    SI, R8
+	JAE     all_ascii               // If SI >= end, all bytes processed
+	CMPQ    DX, $32
+	JB      tail_loop               // sub-32 direct call: scalar
+
+	VMOVDQU -32(R8), Y0             // Y0 = data[len-32:len]
+	VPMOVMSKB Y0, AX
+	TESTL   AX, AX
+	JNZ     found_non_ascii
+	JMP     all_ascii
+
+tail_loop:
+	// Load one byte and check high bit
+	MOVBLZX (SI), AX                // AX = data[SI] (zero-extended)
+	TESTB   $0x80, AL               // Check if high bit is set
+	JNZ     found_non_ascii_scalar  // If set, non-ASCII found
+
+	// Advance to next byte
+	INCQ    SI
+	CMPQ    SI, R8                  // Check if reached end
+	JB      tail_loop               // Continue if SI < end
+
+all_ascii:
+	// All bytes are ASCII
+	MOVB    $1, ret+24(FP)          // Return true
+	VZEROUPPER                      // Clear upper YMM bits (CRITICAL!)
+	RET
+
+found_non_ascii:
+	// Non-ASCII byte found in vector
+	MOVB    $0, ret+24(FP)          // Return false
+	VZEROUPPER                      // Clear upper YMM bits
+	RET
+
+found_non_ascii_scalar:
+	// Non-ASCII byte found in scalar loop
+	MOVB    $0, ret+24(FP)          // Return false
+	VZEROUPPER                      // Clear upper YMM bits
+	RET

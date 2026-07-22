@@ -327,6 +327,24 @@ func Test_IsASCII_Fixed(t *testing.T) {
 	require.False(t, IsASCII("aaaaaaaaaaaaaaa\xff")) // high byte only in the tail
 }
 
+func Test_Search_NamedTypes_SIMDDispatch(t *testing.T) {
+	t.Parallel()
+	// Named byteSeq instantiations at 32+ bytes take the amd64 simd dispatch,
+	// whose zero-copy []byte view assumes the header layouts named types
+	// share with plain string/[]byte.
+	type headerString string
+	type headerBytes []byte
+	long := strings.Repeat("x", 40) + ","
+	require.Equal(t, 40, IndexAny2(headerString(long), ',', '"'))
+	require.Equal(t, 40, IndexAny2(headerBytes(long), ',', '"'))
+	require.Equal(t, 40, IndexAny3(headerString(long), ',', '"', '\\'))
+	require.Equal(t, 40, IndexAny3(headerBytes(long), ',', '"', '\\'))
+	require.True(t, IsASCII(headerString(long)))
+	require.True(t, IsASCII(headerBytes(long)))
+	require.False(t, IsASCII(headerString(long+"\xe9")))
+	require.False(t, IsASCII(headerBytes(long+"\xe9")))
+}
+
 // --- Benchmarks: SWAR vs scalar reference at HTTP-typical sizes ---
 
 var benchSizes = []int{7, 8, 16, 32, 64, 512}

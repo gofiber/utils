@@ -31,6 +31,11 @@ jobs:
         platform: [ubuntu-latest, windows-latest, macos-latest]
     runs-on: ${{ matrix.platform }}
     timeout-minutes: 30
+    env:
+      # All GitHub-hosted amd64 runners provide AVX2; fail loudly if the
+      # simd package silently falls back to the portable tier (see
+      # Test_Accelerated). Non-amd64 builds (e.g. macos arm64) ignore it.
+      GOFIBER_SIMD_REQUIRE_AVX2: "1"
     steps:
       - name: Fetch Repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
