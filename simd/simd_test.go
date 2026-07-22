@@ -419,6 +419,15 @@ func Test_SelectRareBytes(t *testing.T) {
 	require.Equal(t, byte('q'), info.Byte2)
 	require.Equal(t, 3, info.Index2)
 
+	// Byte2's value repeating: Index2 must be its first occurrence. Every
+	// other case's Byte2 value appears exactly once in its needle, so this
+	// is the only case separating first from last occurrence.
+	info = SelectRareBytes([]byte("zzee"))
+	require.Equal(t, byte('z'), info.Byte1)
+	require.Equal(t, 0, info.Index1)
+	require.Equal(t, byte('e'), info.Byte2)
+	require.Equal(t, 2, info.Index2)
+
 	for _, n := range []int{2, 3, 5, 8, 16, 32, 100} {
 		needle := fill(n, uint64(n)+29)
 		info := SelectRareBytes(needle)
