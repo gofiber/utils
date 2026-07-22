@@ -3,8 +3,9 @@
 // MIT License. See the LICENSE file in this directory for the full text.
 // Modified: legacy-SSE MOVD/MOVQ register moves replaced with VEX-encoded
 // VMOVD/VMOVQ to avoid AVX-SSE transition penalties on Intel CPUs, and the
-// scalar tail loops replaced with one overlapping vector at the buffer end
-// for the MinLen+ inputs the Go dispatch guarantees.
+// scalar tail loops replaced with overlapping vector rescans of the final
+// window (a vector pair in memchrPairAVX2) for the MinLen+ inputs the Go
+// dispatch guarantees.
 
 //go:build amd64
 

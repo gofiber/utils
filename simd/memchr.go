@@ -131,11 +131,12 @@ func memchr3Generic(haystack []byte, needle1, needle2, needle3 byte) int {
 // memchrPairGeneric is the portable SWAR fallback for MemchrPair. It leans
 // on ZeroLanes flagging every true zero lane (part of its contract), so
 // ANDing the two per-position masks can never drop a real pair; what the
-// AND does lose is the ordering guarantee — a flagged lane is no longer
-// known to sit at or below the first true match in both masks — so every
-// candidate is re-verified scalar. ZeroLanes plus this rare verify step
-// beats a pair of exact swar.MatchByteMask masks on the no-candidate fast
-// path, which is the common case. The caller guarantees offset >= 1 and
+// AND does lose is lane exactness — a flagged lane may be a false
+// candidate sitting strictly below the first true pair — so every
+// candidate is re-verified scalar and refuted ones are stepped past.
+// ZeroLanes plus this rare verify step beats a pair of exact
+// swar.MatchByteMask masks on the no-candidate fast path, which is the
+// common case. The caller guarantees offset >= 1 and
 // len(haystack) > offset.
 func memchrPairGeneric(haystack []byte, byte1, byte2 byte, offset int) int {
 	n := len(haystack)

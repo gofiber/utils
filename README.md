@@ -541,8 +541,9 @@ The kernels are adapted from the [coregex](https://github.com/coregx/coregex)
 project's `simd` package (MIT License, Copyright (c) 2025 Andrey Kolkov and
 contributors; see [`simd/LICENSE`](simd/LICENSE)), with the legacy-SSE
 register moves in the kernels replaced by VEX-encoded ones to avoid AVX-SSE
-transition stalls, the scalar tail loops replaced by one overlapping vector
-at the buffer end (a 63-byte scan previously cost ~3.7x a 64-byte one), and
+transition stalls, the scalar tail loops replaced by overlapping vector
+rescans at the buffer end (a 63-byte scan previously cost ~3.7x a 64-byte
+one), and
 the fallbacks reworked around the stdlib and the `swar` package as
 described above.
 

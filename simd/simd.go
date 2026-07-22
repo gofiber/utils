@@ -6,9 +6,10 @@
 // MemchrPair, MemchrDigit, MemchrWord, MemchrNotWord, and IsASCII —
 // dispatch to AVX2 assembly processing 32 bytes per iteration on amd64
 // CPUs (for inputs of MinLen+ bytes) and fall back to portable SWAR loops
-// built on the swar package everywhere else. Memmem builds a rare-byte
-// prefilter on those kernels for haystacks of 128+ bytes on amd64 and
-// delegates to bytes.Index in all other cases.
+// built on the swar package everywhere else. Memmem prefilters 128+ byte
+// haystacks on amd64 — short two-value needles through the MemchrPair
+// kernel, longer needles through a single rare-byte bytes.IndexByte scan
+// — and delegates to bytes.Index in all other cases.
 // FirstNonASCII and CountNonASCII are SWAR-only (8 bytes per iteration, no
 // assembly kernel), and MemchrInTable/MemchrNotInTable are plain scalar
 // loops, since an arbitrary 256-entry membership test has no cheap vector

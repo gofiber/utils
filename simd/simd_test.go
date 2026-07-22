@@ -410,6 +410,15 @@ func Test_SelectRareBytes(t *testing.T) {
 	require.Equal(t, byte('e'), info.Byte2)
 	require.Equal(t, 2, info.Index2)
 
+	// Late promotions: 'z' (rank 20) and then 'Z' (rank 10) displace Byte1
+	// in turn, and the direct case must still improve Byte2 to 'q' (rank
+	// 15) afterwards instead of freezing on the demoted 'z'.
+	info = SelectRareBytes([]byte("ezZq"))
+	require.Equal(t, byte('Z'), info.Byte1)
+	require.Equal(t, 2, info.Index1)
+	require.Equal(t, byte('q'), info.Byte2)
+	require.Equal(t, 3, info.Index2)
+
 	for _, n := range []int{2, 3, 5, 8, 16, 32, 100} {
 		needle := fill(n, uint64(n)+29)
 		info := SelectRareBytes(needle)
@@ -423,9 +432,17 @@ func Test_SelectRareBytes(t *testing.T) {
 			require.LessOrEqual(t, ByteRank(info.Byte1), ByteRank(b), "needle %q", needle)
 		}
 		require.LessOrEqual(t, ByteRank(info.Byte1), ByteRank(info.Byte2))
-		// Any needle with two distinct values must yield distinct bytes.
+		// Any needle with two distinct values must yield distinct bytes,
+		// and Byte2 must be a rarest value among those distinct from
+		// Byte1 (ties allowed) — the "rarest distinct second anchor"
+		// clause of the documented contract.
 		if bytes.Count(needle, needle[:1]) != len(needle) {
 			require.NotEqual(t, info.Byte1, info.Byte2, "needle %q", needle)
+		}
+		for _, b := range needle {
+			if b != info.Byte1 {
+				require.LessOrEqual(t, ByteRank(info.Byte2), ByteRank(b), "needle %q", needle)
+			}
 		}
 	}
 

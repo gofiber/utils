@@ -175,11 +175,11 @@ func Benchmark_Memmem(b *testing.B) {
 // distinct rare bytes) breaks even with bytes.Index around the 64B point
 // and wins from 96B up, so 128 carries a conservative margin that also
 // covers the per-call SelectRareBytes cost these direct calls exclude.
-// The single scan (long needle) sees its rare byte recur every ~256
-// bytes on this uniform-random data, so at kilobyte sizes it burns its
-// miss budget and lands on the fallback, tracking bytes.Index within a
-// constant — the documented bounded worst case; its wins come on data
-// where the anchor byte is genuinely rare.
+// The single scan (long needle) anchors on 'q', which benchData's
+// repeating 'a'..'w' cycle yields every 23 bytes, so from a few hundred
+// bytes up it burns its miss budget and lands on the fallback, tracking
+// bytes.Index within a constant — the documented bounded worst case; its
+// wins come on data where the anchor byte is genuinely rare.
 func Benchmark_Memmem_Prefilter(b *testing.B) {
 	pairNeedle := []byte("q7z")
 	pairInfo := SelectRareBytes(pairNeedle)
