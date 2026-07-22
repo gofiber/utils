@@ -3,10 +3,12 @@ package simd
 import (
 	"bytes"
 	"os"
+	"runtime"
 	"strconv"
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"golang.org/x/sys/cpu"
 )
 
 // The tests compare every exported function AND its portable fallback
@@ -398,23 +400,42 @@ func Test_SelectRareBytes(t *testing.T) {
 	require.Equal(t, byte('l'), info.Byte2)
 	require.Equal(t, 3, info.Index2)
 
+	// Duplicated leading rare byte: the distinct-preference rule must pick
+	// the common 'e' over the second 'z' (regression: seeding Byte2 from
+	// needle[1] kept the duplicate 'z' and disqualified such needles from
+	// the paired prefilter).
+	info = SelectRareBytes([]byte("zze"))
+	require.Equal(t, byte('z'), info.Byte1)
+	require.Equal(t, 0, info.Index1)
+	require.Equal(t, byte('e'), info.Byte2)
+	require.Equal(t, 2, info.Index2)
+
 	for _, n := range []int{2, 3, 5, 8, 16, 32, 100} {
 		needle := fill(n, uint64(n)+29)
 		info := SelectRareBytes(needle)
-		// The reported bytes really sit at the reported indices.
-		require.Equal(t, needle[info.Index1], info.Byte1, "needle %q", needle)
-		require.Equal(t, needle[info.Index2], info.Byte2, "needle %q", needle)
+		// The reported bytes really sit at the reported indices, at the
+		// first occurrence of each value (memmemFallback's resume-point
+		// argument depends on the first-occurrence part).
+		require.Equal(t, bytes.IndexByte(needle, info.Byte1), info.Index1, "needle %q", needle)
+		require.Equal(t, bytes.IndexByte(needle, info.Byte2), info.Index2, "needle %q", needle)
 		// Byte1 is a rarest byte of the whole needle.
 		for _, b := range needle {
 			require.LessOrEqual(t, ByteRank(info.Byte1), ByteRank(b), "needle %q", needle)
 		}
 		require.LessOrEqual(t, ByteRank(info.Byte1), ByteRank(info.Byte2))
+		// Any needle with two distinct values must yield distinct bytes.
+		if bytes.Count(needle, needle[:1]) != len(needle) {
+			require.NotEqual(t, info.Byte1, info.Byte2, "needle %q", needle)
+		}
 	}
 
-	// All-identical needle: no distinct second byte exists.
+	// All-identical needle: no distinct second byte exists, and both
+	// slots collapse to the same first occurrence.
 	info = SelectRareBytes(bytes.Repeat([]byte{'a'}, 10))
 	require.Equal(t, byte('a'), info.Byte1)
 	require.Equal(t, byte('a'), info.Byte2)
+	require.Equal(t, 0, info.Index1)
+	require.Equal(t, 0, info.Index2)
 }
 
 func Test_ByteRank(t *testing.T) {
@@ -492,7 +513,7 @@ func checkMemmemInternal(t *testing.T, h, needle []byte) {
 	info := SelectRareBytes(needle)
 	require.Equal(t, want, memmemSingle(h, needle, info.Byte1, info.Index1),
 		"memmemSingle(%d bytes, %q)", len(h), needle)
-	if info.Byte1 != info.Byte2 && info.Index1 != info.Index2 {
+	if info.Byte1 != info.Byte2 {
 		require.Equal(t, want, memmemPaired(h, needle, info),
 			"memmemPaired(%d bytes, %q)", len(h), needle)
 	}
@@ -530,8 +551,22 @@ func Test_Memmem_InternalPaths(t *testing.T) {
 	late := bytes.Repeat([]byte{'z'}, 400)
 	copy(late[350:], "zzzzb")
 	checkMemmemInternal(t, late, []byte("zzzzb")) // found only after fallback
-	// Match placed just before the fallback handover region, with a
-	// nonzero anchor index (rare byte not at needle start).
+	// Paired-path miss budget: a short needle with two distinct rare bytes
+	// over a haystack dense in false ('z','q')-at-offset-1 pairs, so
+	// memmemPaired itself must exhaust memmemMaxMisses and hand over to
+	// memmemFallback on every platform (the all-'z' needles above exercise
+	// only memmemSingle's budget).
+	pairs := bytes.Repeat([]byte("zqf"), 100)
+	checkMemmemInternal(t, pairs, []byte("zqe")) // absent
+	pairsLate := bytes.Repeat([]byte("zqf"), 100)
+	copy(pairsLate[len(pairsLate)-3:], "zqe")
+	checkMemmemInternal(t, pairsLate, []byte("zqe")) // found only after fallback
+	// Nonzero anchor index (rare byte 'q' at needle position 2) with the
+	// match found only by the fallback: pins memmemFallback's translation
+	// from its bytes.Index-relative result back to haystack coordinates.
+	// (The start-anchorIdx resume point itself is defensive — no match can
+	// start inside [start-anchorIdx, start), because start-1 is an anchor
+	// and anchorIdx is the rare byte's first occurrence in the needle.)
 	h := bytes.Repeat([]byte{'q'}, 300)
 	for i := range 40 {
 		h[i*2] = 'e' // 'e' is common; 'q' stays the rare anchor everywhere
@@ -558,12 +593,21 @@ func Test_Memmem_AdversarialBounded(t *testing.T) {
 
 func Test_Accelerated(t *testing.T) {
 	t.Parallel()
-	require.Equal(t, hasAVX2, Accelerated())
+	// Pin the detection source: on amd64 the package must mirror the
+	// x/sys/cpu feature flag it initializes from; everywhere else the
+	// kernels do not exist and Accelerated must report false.
+	if runtime.GOARCH == "amd64" {
+		require.Equal(t, cpu.X86.HasAVX2, Accelerated())
+	} else {
+		require.False(t, Accelerated())
+	}
 	t.Logf("simd.Accelerated() = %v", Accelerated())
-	// CI runners known to have AVX2 can set this to prove the assembly
-	// kernels are actually under test, instead of silently green-lighting
-	// a fallback-only run (QEMU, GOAMD64-baseline VMs, detection bugs).
-	if os.Getenv("GOFIBER_SIMD_REQUIRE_AVX2") == "1" {
+	// The Test workflow sets this so runners known to have AVX2 prove the
+	// assembly kernels are actually under test, instead of silently
+	// green-lighting a fallback-only run (QEMU, GOAMD64-baseline VMs,
+	// detection bugs). Non-amd64 builds ignore it: the fallbacks are the
+	// intended implementation there.
+	if runtime.GOARCH == "amd64" && os.Getenv("GOFIBER_SIMD_REQUIRE_AVX2") == "1" {
 		require.True(t, Accelerated(), "GOFIBER_SIMD_REQUIRE_AVX2=1 but AVX2 kernels are not active")
 	}
 }

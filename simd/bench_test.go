@@ -137,10 +137,12 @@ func Benchmark_MemchrNotWord(b *testing.B) {
 	}
 }
 
-// memmemBenchSizes adds points around the 128-byte bytes.Index crossover
-// that memmemMinHaystack encodes, so the constant's justification is
-// reproducible from this file (bytes.Index wins at 96B, the prefilter from
-// 128B up).
+// memmemBenchSizes brackets the 128-byte crossover that memmemMinHaystack
+// encodes. Benchmark_Memmem measures the exported routing end to end — its
+// sub-128B simd rows run bytes.Index plus dispatch, so they show routing
+// overhead only — while Benchmark_Memmem_Prefilter forces the prefilter
+// helpers at every size, making the crossover itself reproducible from
+// this file.
 var memmemBenchSizes = []int{8, 32, 64, 96, 128, 192, 512, 4096}
 
 func Benchmark_Memmem(b *testing.B) {
@@ -159,6 +161,63 @@ func Benchmark_Memmem(b *testing.B) {
 			b.ReportAllocs()
 			for range b.N {
 				if bytes.Contains(data, needle) {
+					b.Fatal("unexpected match")
+				}
+			}
+		})
+	}
+}
+
+// Benchmark_Memmem_Prefilter drives the prefilter helpers directly,
+// bypassing Memmem's 128-byte routing, so the memmemMinHaystack tradeoff
+// is measurable instead of asserted. Each helper gets the needle shape
+// Memmem actually routes to it: the paired scan (short needle, two
+// distinct rare bytes) breaks even with bytes.Index around the 64B point
+// and wins from 96B up, so 128 carries a conservative margin that also
+// covers the per-call SelectRareBytes cost these direct calls exclude.
+// The single scan (long needle) sees its rare byte recur every ~256
+// bytes on this uniform-random data, so at kilobyte sizes it burns its
+// miss budget and lands on the fallback, tracking bytes.Index within a
+// constant — the documented bounded worst case; its wins come on data
+// where the anchor byte is genuinely rare.
+func Benchmark_Memmem_Prefilter(b *testing.B) {
+	pairNeedle := []byte("q7z")
+	pairInfo := SelectRareBytes(pairNeedle)
+	singleNeedle := []byte("the quick brown fox")
+	singleInfo := SelectRareBytes(singleNeedle)
+	for _, n := range memmemBenchSizes {
+		data := benchData(n)
+		b.Run(benchName(n)+"/paired", func(b *testing.B) {
+			b.ReportAllocs()
+			for range b.N {
+				if memmemPaired(data, pairNeedle, pairInfo) != -1 {
+					b.Fatal("unexpected match")
+				}
+			}
+		})
+		b.Run(benchName(n)+"/paired-stdlib", func(b *testing.B) {
+			b.ReportAllocs()
+			for range b.N {
+				if bytes.Contains(data, pairNeedle) {
+					b.Fatal("unexpected match")
+				}
+			}
+		})
+		if n < len(singleNeedle) {
+			continue
+		}
+		b.Run(benchName(n)+"/single", func(b *testing.B) {
+			b.ReportAllocs()
+			for range b.N {
+				if memmemSingle(data, singleNeedle, singleInfo.Byte1, singleInfo.Index1) != -1 {
+					b.Fatal("unexpected match")
+				}
+			}
+		})
+		b.Run(benchName(n)+"/single-stdlib", func(b *testing.B) {
+			b.ReportAllocs()
+			for range b.N {
+				if bytes.Contains(data, singleNeedle) {
 					b.Fatal("unexpected match")
 				}
 			}

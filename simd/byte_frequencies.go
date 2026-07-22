@@ -46,49 +46,56 @@ func ByteRank(b byte) byte {
 }
 
 // RareByteInfo describes the two rarest bytes of a needle, as selected by
-// SelectRareBytes. For needles shorter than two bytes, or needles whose
-// bytes are all identical, Byte2/Index2 may equal Byte1/Index1.
+// SelectRareBytes. When the needle contains at least two distinct byte
+// values, Byte2 always differs from Byte1; only for empty, single-byte, or
+// all-identical needles do Byte2/Index2 equal Byte1/Index1.
 type RareByteInfo struct {
 	// Byte1 is the rarest byte found in the needle.
 	Byte1 byte
-	// Byte2 is the second-rarest byte, different from Byte1 when possible.
+	// Byte2 is the rarest byte with a value different from Byte1, when the
+	// needle has one; otherwise it equals Byte1.
 	Byte2 byte
-	// Index1 is the position of Byte1 in the needle.
+	// Index1 is the position of Byte1's first occurrence in the needle.
 	Index1 int
-	// Index2 is the position of Byte2 in the needle.
+	// Index2 is the position of Byte2's first occurrence in the needle.
 	Index2 int
 }
 
 // SelectRareBytes returns the two rarest bytes of needle according to
-// ByteRank, preferring distinct byte values. Memmem feeds the result
-// to MemchrPair to build a highly selective substring prefilter; it is
-// exported so downstream code can build its own prefilters the same way.
+// ByteRank, preferring distinct byte values: whenever the needle contains
+// two distinct values, Byte2 is the rarest byte different from Byte1, so
+// duplicated occurrences of the rarest byte never crowd out a usable
+// second anchor. Memmem feeds the result to MemchrPair to build a highly
+// selective substring prefilter; it is exported so downstream code can
+// build its own prefilters the same way.
 func SelectRareBytes(needle []byte) RareByteInfo {
 	n := len(needle)
 	if n == 0 {
 		return RareByteInfo{}
 	}
-	if n == 1 {
-		return RareByteInfo{Byte1: needle[0], Byte2: needle[0]}
-	}
 
 	byte1, idx1 := needle[0], 0
-	byte2, idx2 := needle[1], 1
-	if byteFrequencies[byte2] < byteFrequencies[byte1] {
-		byte1, byte2 = byte2, byte1
-		idx1, idx2 = idx2, idx1
-	}
+	byte2, idx2 := needle[0], 0
+	have2 := false
 
-	for i := 2; i < n; i++ {
+	for i := 1; i < n; i++ {
 		b := needle[i]
-		rank := byteFrequencies[b]
 		switch {
-		case rank < byteFrequencies[byte1]:
+		case byteFrequencies[b] < byteFrequencies[byte1]:
+			// b is strictly rarer than byte1, so it also has a different
+			// value; the demoted byte1 is at least as rare as any previous
+			// byte2 and becomes the second anchor.
 			byte2, idx2 = byte1, idx1
 			byte1, idx1 = b, i
-		case b != byte1 && rank < byteFrequencies[byte2]:
+			have2 = true
+		case b != byte1 && (!have2 || byteFrequencies[b] < byteFrequencies[byte2]):
 			byte2, idx2 = b, i
+			have2 = true
 		}
+	}
+	if !have2 {
+		// All bytes identical: no distinct second anchor exists.
+		byte2, idx2 = byte1, idx1
 	}
 
 	return RareByteInfo{Byte1: byte1, Byte2: byte2, Index1: idx1, Index2: idx2}

@@ -73,6 +73,14 @@ func FuzzMemmem(f *testing.F) {
 	f.Add(bytes.Repeat([]byte("ab"), 100), []byte("aba"))
 	f.Add(bytes.Repeat([]byte{'a'}, 200), []byte("aab"))
 	f.Add([]byte{}, []byte{})
+	// Miss-budget handover seeds: every position is an anchor and the
+	// needle keeps mismatching, so memmemSingle (all-'z' needle) and
+	// memmemPaired ('zqe' over dense false pairs) both reach
+	// memmemFallback from the seed corpus alone — with the match absent
+	// and with it found only by the fallback.
+	f.Add(bytes.Repeat([]byte{'z'}, 200), append(bytes.Repeat([]byte{'z'}, 30), 'b'))
+	f.Add(bytes.Repeat([]byte("zqf"), 40), []byte("zqe"))
+	f.Add(append(bytes.Repeat([]byte("zqf"), 40), 'z', 'q', 'e'), []byte("zqe"))
 	f.Fuzz(func(t *testing.T, h, needle []byte) {
 		want := bytes.Index(h, needle)
 		if got := Memmem(h, needle); got != want {
@@ -86,7 +94,7 @@ func FuzzMemmem(f *testing.F) {
 			if got := memmemSingle(h, needle, info.Byte1, info.Index1); got != want {
 				t.Fatalf("memmemSingle(%q, %q) = %d, want %d", h, needle, got, want)
 			}
-			if info.Byte1 != info.Byte2 && info.Index1 != info.Index2 {
+			if info.Byte1 != info.Byte2 {
 				if got := memmemPaired(h, needle, info); got != want {
 					t.Fatalf("memmemPaired(%q, %q) = %d, want %d", h, needle, got, want)
 				}

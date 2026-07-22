@@ -7,7 +7,8 @@
 package simd
 
 // Assembly kernels implemented in memchr_amd64.s. Each processes 32 bytes
-// per iteration with AVX2 and finishes the tail with a scalar loop.
+// per iteration with AVX2 and finishes the last 1-31 bytes by rescanning
+// one overlapping 32-byte vector at the buffer end.
 //
 //go:noescape
 func memchr2AVX2(haystack []byte, needle1, needle2 byte) int

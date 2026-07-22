@@ -8,11 +8,17 @@ import (
 	"bytes"
 )
 
-// memmemMinHaystack is the haystack size below which bytes.Index wins: the
-// rare-byte selection is a per-call cost that only pays off once the scan
-// itself is long enough to be the dominant term. The crossover sits between
-// the 96B and 128B points of Benchmark_Memmem (bytes.Index wins at 96B,
-// the prefilter from 128B up).
+// memmemMinHaystack is the haystack size below which Memmem skips the
+// prefilter and calls bytes.Index directly: rare-byte selection and scan
+// setup are per-call costs that need enough haystack to amortize. The
+// tradeoff is measurable with Benchmark_Memmem_Prefilter, which forces
+// the prefilter helpers at every size — the paired scan breaks even with
+// bytes.Index around its 64B point — so 128 keeps a conservative margin
+// over that break-even, covering the SelectRareBytes cost the direct
+// calls exclude and the needle shapes that route to the less selective
+// single-byte scan. Benchmark_Memmem shows the resulting end-to-end
+// routing (its sub-128B simd rows measure dispatch overhead only, since
+// both variants run bytes.Index there).
 const memmemMinHaystack = 128
 
 // memmemMaxPairNeedle is the needle length up to which the paired-byte
@@ -33,13 +39,16 @@ const memmemMaxMisses = 16
 // or -1 if needle is not present. An empty needle matches at index 0,
 // mirroring bytes.Index.
 //
-// On amd64 with AVX2 and haystacks of 128+ bytes it scans for the needle's
-// two rarest bytes (per ByteRank) at their exact relative distance and
-// verifies only those candidates, which typically beats bytes.Index by a
-// wide margin on large inputs. In all other cases it delegates to
-// bytes.Index directly, and the prefilter itself falls back to bytes.Index
-// after a bounded number of failed candidate verifications, so the worst
-// case stays within a constant of the stdlib's O(n+m).
+// On amd64 with AVX2 and haystacks of 128+ bytes it prefilters with the
+// needle's rarest bytes (per ByteRank) and verifies only the candidate
+// positions, which typically beats bytes.Index by a wide margin on large
+// inputs: needles of 2-6 bytes containing two distinct byte values are
+// scanned for their two rarest values at the exact relative distance,
+// while longer or single-valued needles are scanned for the single rarest
+// byte. In all other cases it delegates to bytes.Index directly, and the
+// prefilter itself falls back to bytes.Index after a bounded number of
+// failed candidate verifications, so the worst case stays within a
+// constant of the stdlib's O(n+m).
 func Memmem(haystack, needle []byte) int {
 	needleLen := len(needle)
 	if needleLen == 0 {
@@ -56,7 +65,9 @@ func Memmem(haystack, needle []byte) int {
 	}
 
 	info := SelectRareBytes(needle)
-	if needleLen <= memmemMaxPairNeedle && info.Byte1 != info.Byte2 && info.Index1 != info.Index2 {
+	// Distinct byte values imply distinct indices, so Byte1 != Byte2 alone
+	// guarantees the offset MemchrPair needs is >= 1.
+	if needleLen <= memmemMaxPairNeedle && info.Byte1 != info.Byte2 {
 		return memmemPaired(haystack, needle, info)
 	}
 	return memmemSingle(haystack, needle, info.Byte1, info.Index1)
@@ -88,7 +99,7 @@ func memmemPaired(haystack, needle []byte, info RareByteInfo) int {
 			return pos
 		}
 		start += cand + 1
-		if misses++; misses > memmemMaxMisses {
+		if misses++; misses >= memmemMaxMisses {
 			return memmemFallback(haystack, needle, start, idx1)
 		}
 	}
@@ -111,17 +122,21 @@ func memmemSingle(haystack, needle []byte, rareByte byte, rareIdx int) int {
 			return pos
 		}
 		start += cand + 1
-		if misses++; misses > memmemMaxMisses {
+		if misses++; misses >= memmemMaxMisses {
 			return memmemFallback(haystack, needle, start, rareIdx)
 		}
 	}
 }
 
 // memmemFallback finishes a prefiltered search with bytes.Index once the
-// candidate loops exceed their miss budget. Every anchor before start has
+// candidate loops exhaust their miss budget. Every anchor before start has
 // been checked, and any remaining occurrence carries its anchor byte at
 // anchorIdx, so it starts at or after start-anchorIdx; searching from there
-// cannot skip a match or return one out of order.
+// cannot skip a match or return one out of order. The subtraction is in
+// fact defensive: start-1 is always an anchor at handover and anchorIdx is
+// the anchor byte's first occurrence in the needle, so no remaining
+// occurrence can start below start itself — resuming at start-anchorIdx
+// keeps correctness independent of that selection detail.
 func memmemFallback(haystack, needle []byte, start, anchorIdx int) int {
 	from := max(start-anchorIdx, 0)
 	if pos := bytes.Index(haystack[from:], needle); pos >= 0 {

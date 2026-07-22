@@ -12,7 +12,7 @@
 
 // func memchr2AVX2(haystack []byte, needle1, needle2 byte) int
 //
-// AVX2 implementation of memchr2 that searches for either of two bytes.
+// AVX2 kernel behind Memchr2 that searches for either of two bytes.
 // Uses parallel comparison with two broadcast vectors and combines results
 // with VPOR. The final 1-31 bytes are handled with one overlapping 32-byte
 // vector at the buffer end: lanes before it were already resolved as
@@ -130,7 +130,7 @@ found_scalar2:
 
 // func memchr3AVX2(haystack []byte, needle1, needle2, needle3 byte) int
 //
-// AVX2 implementation of memchr3 that searches for any of three bytes.
+// AVX2 kernel behind Memchr3 that searches for any of three bytes.
 // Same structure as memchr2AVX2 (including the overlapping vector tail),
 // with a third broadcast/compare.
 //

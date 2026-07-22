@@ -2,7 +2,9 @@
 // (package simd), Copyright (c) 2025 Andrey Kolkov and contributors,
 // MIT License. See the LICENSE file in this directory for the full text.
 // Modified: legacy-SSE MOVD/MOVQ register moves replaced with VEX-encoded
-// VMOVD/VMOVQ to avoid AVX-SSE transition penalties on Intel CPUs.
+// VMOVD/VMOVQ to avoid AVX-SSE transition penalties on Intel CPUs, and the
+// scalar tail loop replaced with one overlapping vector at the buffer end
+// for the MinLen+ inputs the Go dispatch guarantees.
 
 //go:build amd64
 
@@ -16,7 +18,9 @@
 // Algorithm:
 //  1. Main loop: load 32 bytes, use VPMOVMSKB to extract high bits
 //  2. If any high bit is set (mask != 0), return false (non-ASCII found)
-//  3. Handle tail (< 32 bytes) with scalar loop
+//  3. Handle the tail by retesting one overlapping 32-byte window ending
+//     at the buffer end (a scalar loop only for sub-32 direct calls,
+//     unreachable through the Go dispatch)
 //  4. Always call VZEROUPPER before returning (critical for performance)
 //
 // The key insight: ASCII bytes have the high bit (bit 7) clear (0x00-0x7F).
