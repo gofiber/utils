@@ -2,6 +2,9 @@ package utils
 
 import (
 	"bytes"
+	"encoding/hex"
+	"errors"
+	"net/url"
 	"strconv"
 	"testing"
 )
@@ -103,6 +106,115 @@ func FuzzParse(f *testing.F) {
 			t.Fatalf("ParseInt(%q) = %d, want %d", s, gotI, wantI)
 		case wantErrI != nil && gotI != 0:
 			t.Fatalf("ParseInt(%q) returned %d with error", s, gotI)
+		}
+	})
+}
+
+func FuzzHex(f *testing.F) {
+	f.Add("")
+	f.Add("deadBEEF")
+	f.Add("0123456789abcdefABCDEF")
+	f.Add("abcdefg")
+	f.Add("\xff\x00 hi \x80\x7f")
+	f.Fuzz(func(t *testing.T, s string) {
+		wantEnc := hex.EncodeToString([]byte(s))
+		if got := string(AppendHexEncode(nil, s)); got != wantEnc {
+			t.Fatalf("AppendHexEncode(%q) = %q, want %q", s, got, wantEnc)
+		}
+		if got := string(AppendHexEncode(nil, []byte(s))); got != wantEnc {
+			t.Fatalf("AppendHexEncode(bytes %q) = %q, want %q", s, got, wantEnc)
+		}
+	})
+}
+
+func FuzzURLEscape(f *testing.F) {
+	f.Add("")
+	f.Add("a b&c=d/e?f")
+	f.Add("caf%C3%A9+r%C3%A9sum%C3%A9")
+	f.Add("trailing%")
+	f.Add("trailing%2")
+	f.Add("%zz%1g%%41")
+	f.Add("100%+tax")
+	f.Add("\x00\x1f\x7f\xff")
+	f.Fuzz(func(t *testing.T, s string) {
+		if want := url.QueryEscape(s); want != string(AppendQueryEscape(nil, s)) ||
+			want != string(AppendQueryEscape(nil, []byte(s))) {
+			t.Fatalf("AppendQueryEscape(%q) diverges from net/url (%q)", s, want)
+		}
+		if want := url.PathEscape(s); want != string(AppendPathEscape(nil, s)) ||
+			want != string(AppendPathEscape(nil, []byte(s))) {
+			t.Fatalf("AppendPathEscape(%q) diverges from net/url (%q)", s, want)
+		}
+
+		checkUnescape := func(name, s string, got []byte, err error, want string, wantErr error) {
+			t.Helper()
+			if wantErr != nil {
+				if !errors.Is(err, wantErr) {
+					t.Fatalf("%s(%q) err = %v, want %v", name, s, err, wantErr)
+				}
+				if len(got) != 0 {
+					t.Fatalf("%s(%q) produced output alongside error", name, s)
+				}
+				return
+			}
+			if err != nil {
+				t.Fatalf("%s(%q) err = %v, want nil", name, s, err)
+			}
+			if string(got) != want {
+				t.Fatalf("%s(%q) = %q, want %q", name, s, got, want)
+			}
+		}
+
+		wantQ, wantQErr := url.QueryUnescape(s)
+		gotQ, errQ := AppendQueryUnescape(nil, s)
+		checkUnescape("AppendQueryUnescape", s, gotQ, errQ, wantQ, wantQErr)
+		gotQB, errQB := AppendQueryUnescape(nil, []byte(s))
+		checkUnescape("AppendQueryUnescape(bytes)", s, gotQB, errQB, wantQ, wantQErr)
+
+		wantP, wantPErr := url.PathUnescape(s)
+		gotP, errP := AppendPathUnescape(nil, s)
+		checkUnescape("AppendPathUnescape", s, gotP, errP, wantP, wantPErr)
+	})
+}
+
+func FuzzHTTPDate(f *testing.F) {
+	f.Add("Sun, 06 Nov 1994 08:49:37 GMT")
+	f.Add("Sunday, 06-Nov-94 08:49:37 GMT")
+	f.Add("Sun Nov  6 08:49:37 1994")
+	f.Add("  Tue, 29 Feb 2000 12:00:00 GMT\r\n")
+	f.Add("Tue, 29 Feb 1900 12:00:00 GMT")
+	f.Add("sun, 06 nov 1994 08:49:37 GMT")
+	f.Add("Sun, 06 Nov 1994 08:49:37 UTC")
+	f.Add("Mon, 01 Jan 0001 00:00:00 GMT")
+	f.Add("not a date")
+	f.Fuzz(func(t *testing.T, s string) {
+		want, wantErr := refParseHTTPDate(s)
+		got, err := ParseHTTPDate(s)
+		if (err == nil) != (wantErr == nil) {
+			t.Fatalf("ParseHTTPDate(%q) err = %v, reference err = %v", s, err, wantErr)
+		}
+		if wantErr == nil {
+			if !got.Equal(want) {
+				t.Fatalf("ParseHTTPDate(%q) = %v, want %v", s, got, want)
+			}
+			if got.Location().String() != want.Location().String() {
+				t.Fatalf("ParseHTTPDate(%q) location = %v, want %v", s, got.Location(), want.Location())
+			}
+			// Canonical output re-parses through the fast path to the same
+			// instant, and formatting agrees with the stdlib layout.
+			if want.Year() >= 0 && want.Year() <= 9999 {
+				formatted := FormatHTTPDate(want)
+				if formatted != want.UTC().Format(httpDateLayout) {
+					t.Fatalf("FormatHTTPDate(%v) = %q diverges from stdlib", want, formatted)
+				}
+				round, roundErr := ParseHTTPDate(formatted)
+				if roundErr != nil || !round.Equal(want) {
+					t.Fatalf("round trip of %q failed: %v, %v", formatted, round, roundErr)
+				}
+			}
+		}
+		if gotBytes, errBytes := ParseHTTPDate([]byte(s)); (errBytes == nil) != (err == nil) || (err == nil && !gotBytes.Equal(got)) {
+			t.Fatalf("ParseHTTPDate(bytes %q) diverges from string form", s)
 		}
 	})
 }
