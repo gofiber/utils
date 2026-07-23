@@ -23,3 +23,15 @@ func Bytes[S ~string | ~[]byte](s S) []byte {
 	// #nosec G103
 	return unsafe.Slice(*(**byte)(unsafe.Pointer(&s)), len(s))
 }
+
+// Seq is Bytes' inverse: it returns b viewed as S without allocation, for
+// either instantiation. It relies on the string header being a prefix of
+// the slice header (data pointer, then length), so reinterpreting a slice
+// header yields a valid string view; the []byte instantiation reads the
+// full header back unchanged. The caller must guarantee b is never written
+// again when S's underlying type is string, since the result would alias
+// memory the runtime assumes immutable.
+func Seq[S ~string | ~[]byte](b []byte) S {
+	// #nosec G103
+	return *(*S)(unsafe.Pointer(&b))
+}
