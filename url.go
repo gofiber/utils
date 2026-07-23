@@ -112,7 +112,9 @@ func appendEscape(dst, s []byte, noEscape *[256]bool, mode escapeMode) []byte {
 // is dst with its original length (its backing array may still have been
 // reallocated by growth). Decoding never grows the input, so dst may be
 // s[:0] on a common backing array to decode in place; any other overlap is
-// invalid.
+// invalid. Note that an in-place decode that fails has already overwritten
+// the prefix of s before the malformed escape with decoded bytes — treat s
+// as consumed once an in-place decode starts, error or not.
 func AppendQueryUnescape[S byteSeq](dst []byte, s S) ([]byte, error) {
 	return appendUnescape(dst, unsafeconv.Bytes(s), escapeQuery)
 }

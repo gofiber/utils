@@ -41,9 +41,12 @@ func buildJSONSafeTable() [256]bool {
 // invalid UTF-8 byte becomes the six literal characters \ufffd; and the
 // line separators U+2028/U+2029 become the \u2028 and \u2029 escapes.
 // All other bytes, including multi-byte UTF-8 sequences, are copied
-// verbatim. Clean spans are located with a SWAR scan and copied wholesale,
-// so typical log or header values cost one scan and one copy — with none
-// of encoding/json.Marshal's reflection or allocation.
+// verbatim. dst must not alias s: the output is longer than the input (at
+// minimum by the surrounding quotes), so in-place encoding is impossible
+// and an aliased dst would overwrite bytes before they are read. Clean
+// spans are located with a SWAR scan and copied wholesale, so typical log
+// or header values cost one scan and one copy — with none of
+// encoding/json.Marshal's reflection or allocation.
 func AppendJSONString[S byteSeq](dst []byte, s S) []byte {
 	bs := unsafeconv.Bytes(s)
 	n := len(bs)
