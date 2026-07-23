@@ -2,7 +2,6 @@ package utils
 
 import (
 	"bytes"
-	"encoding/hex"
 	"errors"
 	"net/url"
 	"strconv"
@@ -106,23 +105,6 @@ func FuzzParse(f *testing.F) {
 			t.Fatalf("ParseInt(%q) = %d, want %d", s, gotI, wantI)
 		case wantErrI != nil && gotI != 0:
 			t.Fatalf("ParseInt(%q) returned %d with error", s, gotI)
-		}
-	})
-}
-
-func FuzzHex(f *testing.F) {
-	f.Add("")
-	f.Add("deadBEEF")
-	f.Add("0123456789abcdefABCDEF")
-	f.Add("abcdefg")
-	f.Add("\xff\x00 hi \x80\x7f")
-	f.Fuzz(func(t *testing.T, s string) {
-		wantEnc := hex.EncodeToString([]byte(s))
-		if got := string(AppendHexEncode(nil, s)); got != wantEnc {
-			t.Fatalf("AppendHexEncode(%q) = %q, want %q", s, got, wantEnc)
-		}
-		if got := string(AppendHexEncode(nil, []byte(s))); got != wantEnc {
-			t.Fatalf("AppendHexEncode(bytes %q) = %q, want %q", s, got, wantEnc)
 		}
 	})
 }

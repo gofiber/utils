@@ -499,16 +499,6 @@ never grows the input, so `dst` may be `s[:0]` on a common backing array
 to unescape in place; escaping can grow the input, so there `dst` must
 not alias `s`.
 
-## Hex encoding
-
-`AppendHexEncode` appends the lowercase hexadecimal encoding of a string
-or byte slice, byte-identical to `encoding/hex.AppendEncode`: one SWAR
-word load feeds two branchless nibble-expansion words per iteration
-(16 output bytes). There is deliberately no `AppendHexDecode`:
-`encoding/hex`'s table-driven decoder is already append-capable and a
-SWAR decode kernel measured slower than it, so decoding stays with the
-stdlib.
-
 These helpers were added on an amd64 machine, so like the `simd` numbers
 their benchmarks are recorded separately from the arm64 catalog above and
 join it on its next regeneration:
@@ -520,13 +510,7 @@ pkg: github.com/gofiber/utils/v2
 cpu: Intel(R) Xeon(R) Processor @ 2.80GHz
 
 ```text
-// go test -benchmem -run=^$ -bench='Benchmark_AppendHex|Benchmark_(Append|Parse)HTTPDate|Benchmark_Append(Query|Path)' -count=1 .
-Benchmark_AppendHexEncode/8B/fiber-4                                86259568    13.77  ns/op     0  B/op   0  allocs/op
-Benchmark_AppendHexEncode/8B/default-4                              71828923    15.13  ns/op     0  B/op   0  allocs/op
-Benchmark_AppendHexEncode/64B/fiber-4                               17122260    68.91  ns/op     0  B/op   0  allocs/op
-Benchmark_AppendHexEncode/64B/default-4                             12920773    92.04  ns/op     0  B/op   0  allocs/op
-Benchmark_AppendHexEncode/512B/fiber-4                               2383052    506.0  ns/op     0  B/op   0  allocs/op
-Benchmark_AppendHexEncode/512B/default-4                             1697523    715.3  ns/op     0  B/op   0  allocs/op
+// go test -benchmem -run=^$ -bench='Benchmark_(Append|Parse)HTTPDate|Benchmark_Append(Query|Path)' -count=1 .
 Benchmark_AppendHTTPDate/fiber-4                                    24732448    50.32  ns/op     0  B/op   0  allocs/op
 Benchmark_AppendHTTPDate/default-4                                   7009405    171.2  ns/op     0  B/op   0  allocs/op
 Benchmark_ParseHTTPDate/fiber-4                                     35094189    32.26  ns/op     0  B/op   0  allocs/op
