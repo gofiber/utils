@@ -2,6 +2,7 @@ package utils
 
 import (
 	"bytes"
+	"encoding/binary"
 	"net/netip"
 
 	"github.com/gofiber/utils/v2/internal/unsafeconv"
@@ -120,8 +121,8 @@ func ParseIPv6[S byteSeq](s S) (netip.Addr, bool) {
 			// Every colon-separated field needs at least one digit.
 			return netip.Addr{}, false
 		}
-		ip[off] = byte(val >> 8)
-		ip[off+1] = byte(val)
+		// off is always even and < 16 here, so the two-byte store fits.
+		binary.BigEndian.PutUint16(ip[off:], uint16(val))
 		off += 2
 		if i == end {
 			break
