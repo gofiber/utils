@@ -2,9 +2,13 @@ package utils
 
 import (
 	"bytes"
+	"encoding/json"
 	"errors"
+	"net/http"
+	"net/netip"
 	"net/url"
 	"strconv"
+	"strings"
 	"testing"
 )
 
@@ -197,6 +201,84 @@ func FuzzHTTPDate(f *testing.F) {
 		}
 		if gotBytes, errBytes := ParseHTTPDate([]byte(s)); (errBytes == nil) != (err == nil) || (err == nil && !gotBytes.Equal(got)) {
 			t.Fatalf("ParseHTTPDate(bytes %q) diverges from string form", s)
+		}
+	})
+}
+
+func FuzzAppendJSONString(f *testing.F) {
+	f.Add("plain")
+	f.Add("with \"quotes\" and \\slashes")
+	f.Add("html <&> bits")
+	f.Add("controls \x00\x1f\x7f")
+	f.Add("caf\xc3\xa9 \xe2\x80\xa8 \xe2\x80\xa9")
+	f.Add("broken \xff\xc3( utf8 \xc3")
+	f.Add("")
+	f.Fuzz(func(t *testing.T, s string) {
+		want, err := json.Marshal(s)
+		if err != nil {
+			t.Skipf("json.Marshal(%q) failed: %v", s, err)
+		}
+		if got := string(AppendJSONString(nil, s)); got != string(want) {
+			t.Fatalf("AppendJSONString(%q) = %q, want %q", s, got, want)
+		}
+		if got := string(AppendJSONString(nil, []byte(s))); got != string(want) {
+			t.Fatalf("AppendJSONString(bytes %q) = %q, want %q", s, got, want)
+		}
+	})
+}
+
+func FuzzParseIP(f *testing.F) {
+	f.Add("127.0.0.1")
+	f.Add("01.2.3.4")
+	f.Add("255.255.255.256")
+	f.Add("::ffff:1.2.3.4")
+	f.Add("1:2:3:4:5:6:7::")
+	f.Add("1::2::3")
+	f.Add("fe80::1%eth0")
+	f.Add("12345::")
+	f.Add(":::")
+	f.Add("")
+	f.Fuzz(func(t *testing.T, s string) {
+		want, wantErr := netip.ParseAddr(s)
+		hasColon := strings.ContainsRune(s, ':')
+
+		got4, ok4 := ParseIPv4(s)
+		if want4 := wantErr == nil && !hasColon; ok4 != want4 {
+			t.Fatalf("ParseIPv4(%q) ok = %v, want %v (netip err: %v)", s, ok4, want4, wantErr)
+		} else if want4 && got4 != want {
+			t.Fatalf("ParseIPv4(%q) = %v, want %v", s, got4, want)
+		}
+		if _, okBytes := ParseIPv4([]byte(s)); okBytes != ok4 {
+			t.Fatalf("ParseIPv4(bytes %q) diverges from string form", s)
+		}
+
+		got6, ok6 := ParseIPv6(s)
+		if want6 := wantErr == nil && hasColon; ok6 != want6 {
+			t.Fatalf("ParseIPv6(%q) ok = %v, want %v (netip err: %v)", s, ok6, want6, wantErr)
+		} else if want6 && got6 != want {
+			t.Fatalf("ParseIPv6(%q) = %v, want %v", s, got6, want)
+		}
+		if _, okBytes := ParseIPv6([]byte(s)); okBytes != ok6 {
+			t.Fatalf("ParseIPv6(bytes %q) diverges from string form", s)
+		}
+	})
+}
+
+func FuzzCanonicalHeaderKey(f *testing.F) {
+	f.Add("content-type")
+	f.Add("Content-Type")
+	f.Add("x--double--dash")
+	f.Add("-leading")
+	f.Add("bad key")
+	f.Add("non-ascii-\xc3\xa9")
+	f.Add("")
+	f.Fuzz(func(t *testing.T, s string) {
+		want := http.CanonicalHeaderKey(s)
+		if got := CanonicalHeaderKey(s); got != want {
+			t.Fatalf("CanonicalHeaderKey(%q) = %q, want %q", s, got, want)
+		}
+		if got := string(CanonicalHeaderKey([]byte(s))); got != want {
+			t.Fatalf("CanonicalHeaderKey(bytes %q) = %q, want %q", s, got, want)
 		}
 	})
 }

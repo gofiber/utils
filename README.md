@@ -499,6 +499,37 @@ never grows the input, so `dst` may be `s[:0]` on a common backing array
 to unescape in place; escaping can grow the input, so there `dst` must
 not alias `s`.
 
+## JSON string escaping
+
+`AppendJSONString` appends a value as a double-quoted JSON string,
+byte-identical to `encoding/json.Marshal` of the same string — including
+its default HTML escaping (`<`, `>`, `&`), the `\ufffd` replacement of
+invalid UTF-8 bytes, and the U+2028/U+2029 escapes — without any of
+`Marshal`'s reflection or allocation. Clean spans are located with a SWAR
+scan (the same first-match-mask technique as `IndexNonQuotable`) and
+copied wholesale. This is the building block for hand-rolled JSON hot
+paths such as access-log lines and error bodies.
+
+## IP address parsing
+
+`ParseIPv4` and `ParseIPv6` parse addresses into `netip.Addr`, accepting
+exactly the strings `netip.ParseAddr` accepts for the respective family
+(pinned by fuzzing) while reporting failure with a `bool` instead of a
+constructed error. Both take strings or byte slices, so fasthttp-style
+callers skip the `string` conversion entirely; remote-address and
+trusted-proxy checks parse an IP on every request in Fiber.
+
+## Header key canonicalization
+
+`CanonicalHeaderKey` Title-Cases an HTTP header key exactly like
+`net/http.CanonicalHeaderKey`, including its return-unchanged guard for
+keys containing non-token bytes. Already-canonical keys — the common case
+on receive paths — are validated in a single table pass and returned
+as-is with zero allocations for strings and byte slices alike. Keys that
+do need rewriting cost one allocation; note that for the ~40 header names
+in the stdlib's interning table the stdlib returns a cached string
+without allocating, so this helper's edge there is time, not allocations.
+
 These helpers were added on an amd64 machine, so like the `simd` numbers
 their benchmarks are recorded separately from the arm64 catalog above and
 join it on its next regeneration:
@@ -510,7 +541,7 @@ pkg: github.com/gofiber/utils/v2
 cpu: Intel(R) Xeon(R) Processor @ 2.80GHz
 
 ```text
-// go test -benchmem -run=^$ -bench='Benchmark_(Append|Parse)HTTPDate|Benchmark_Append(Query|Path)' -count=1 .
+// go test -benchmem -run=^$ -bench='Benchmark_(Append|Parse)HTTPDate|Benchmark_Append(Query|Path)|Benchmark_AppendJSONString|Benchmark_ParseIPv[46]|Benchmark_CanonicalHeaderKey' -count=1 .
 Benchmark_AppendHTTPDate/fiber-4                                    24732448    50.32  ns/op     0  B/op   0  allocs/op
 Benchmark_AppendHTTPDate/default-4                                   7009405    171.2  ns/op     0  B/op   0  allocs/op
 Benchmark_ParseHTTPDate/fiber-4                                     35094189    32.26  ns/op     0  B/op   0  allocs/op
@@ -527,6 +558,26 @@ Benchmark_AppendPathUnescape/plain-25B/fiber-4                      74870614    
 Benchmark_AppendPathUnescape/plain-25B/default-4                    11201378    90.13  ns/op     0  B/op   0  allocs/op
 Benchmark_AppendPathUnescape/escaped-31B/fiber-4                    19748607    62.69  ns/op     0  B/op   0  allocs/op
 Benchmark_AppendPathUnescape/escaped-31B/default-4                   6227439    173.6  ns/op    24  B/op   1  allocs/op
+Benchmark_AppendJSONString/clean-16B/fiber-4                        47903053    22.13  ns/op     0  B/op   0  allocs/op
+Benchmark_AppendJSONString/clean-16B/default-4                       7762933    151.9  ns/op    40  B/op   2  allocs/op
+Benchmark_AppendJSONString/clean-64B/fiber-4                        18578377    64.12  ns/op     0  B/op   0  allocs/op
+Benchmark_AppendJSONString/clean-64B/default-4                       3901436    271.8  ns/op    96  B/op   2  allocs/op
+Benchmark_AppendJSONString/escaped-64B/fiber-4                       7056486    165.8  ns/op     0  B/op   0  allocs/op
+Benchmark_AppendJSONString/escaped-64B/default-4                     3842581    319.8  ns/op    96  B/op   2  allocs/op
+Benchmark_AppendJSONString/unicode-64B/fiber-4                       4654760    248.2  ns/op     0  B/op   0  allocs/op
+Benchmark_AppendJSONString/unicode-64B/default-4                     3786951    309.2  ns/op   112  B/op   2  allocs/op
+Benchmark_ParseIPv4/fiber-4                                         52309202    20.02  ns/op     0  B/op   0  allocs/op
+Benchmark_ParseIPv4/default-4                                       42021915    28.74  ns/op     0  B/op   0  allocs/op
+Benchmark_ParseIPv6/compressed/fiber-4                              22675394    51.88  ns/op     0  B/op   0  allocs/op
+Benchmark_ParseIPv6/compressed/default-4                            18522648    64.65  ns/op     0  B/op   0  allocs/op
+Benchmark_ParseIPv6/full/fiber-4                                    20229412    61.40  ns/op     0  B/op   0  allocs/op
+Benchmark_ParseIPv6/full/default-4                                  14830760    83.42  ns/op     0  B/op   0  allocs/op
+Benchmark_CanonicalHeaderKey/canonical/fiber-4                      54643375    22.69  ns/op     0  B/op   0  allocs/op
+Benchmark_CanonicalHeaderKey/canonical/default-4                    36882357    28.46  ns/op     0  B/op   0  allocs/op
+Benchmark_CanonicalHeaderKey/common-lower/fiber-4                   22508378    52.04  ns/op    16  B/op   1  allocs/op
+Benchmark_CanonicalHeaderKey/common-lower/default-4                 21160863    56.48  ns/op     0  B/op   0  allocs/op
+Benchmark_CanonicalHeaderKey/custom-lower/fiber-4                   17017753    73.05  ns/op    24  B/op   1  allocs/op
+Benchmark_CanonicalHeaderKey/custom-lower/default-4                 12678414    102.6  ns/op    24  B/op   1  allocs/op
 ```
 
 ## SWAR primitives
