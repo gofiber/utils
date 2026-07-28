@@ -1,7904 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1785274152976,
+  "lastUpdate": 1785279779816,
   "repoUrl": "https://github.com/gofiber/utils",
   "entries": {
     "Benchmark": [
-      {
-        "commit": {
-          "author": {
-            "email": "rene@gofiber.io",
-            "name": "René",
-            "username": "ReneWerner87"
-          },
-          "committer": {
-            "email": "rene@gofiber.io",
-            "name": "René",
-            "username": "ReneWerner87"
-          },
-          "distinct": true,
-          "id": "248d05f35ac5504943c0222a5a9f6a5ef951668f",
-          "message": "Refactor after-release workflow to use newline-separated repo list for improved readability",
-          "timestamp": "2026-04-19T14:05:41+02:00",
-          "tree_id": "733ef7588e74eed998ec5fa6ec15582606bb9c75",
-          "url": "https://github.com/gofiber/utils/commit/248d05f35ac5504943c0222a5a9f6a5ef951668f"
-        },
-        "date": 1776600817738,
-        "tool": "go",
-        "benches": [
-          {
-            "name": "Benchmark_AddTrailingSlashBytes/empty (github.com/gofiber/utils/v2)",
-            "value": 1.412,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "852346846 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_AddTrailingSlashBytes/empty (github.com/gofiber/utils/v2) - ns/op",
-            "value": 1.412,
-            "unit": "ns/op",
-            "extra": "852346846 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_AddTrailingSlashBytes/empty (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "852346846 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_AddTrailingSlashBytes/empty (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "852346846 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_AddTrailingSlashBytes/slash-only (github.com/gofiber/utils/v2)",
-            "value": 1.766,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "679264436 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_AddTrailingSlashBytes/slash-only (github.com/gofiber/utils/v2) - ns/op",
-            "value": 1.766,
-            "unit": "ns/op",
-            "extra": "679264436 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_AddTrailingSlashBytes/slash-only (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "679264436 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_AddTrailingSlashBytes/slash-only (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "679264436 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_AddTrailingSlashBytes/short-no-slash (github.com/gofiber/utils/v2)",
-            "value": 15.8,
-            "unit": "ns/op\t       4 B/op\t       1 allocs/op",
-            "extra": "75191902 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_AddTrailingSlashBytes/short-no-slash (github.com/gofiber/utils/v2) - ns/op",
-            "value": 15.8,
-            "unit": "ns/op",
-            "extra": "75191902 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_AddTrailingSlashBytes/short-no-slash (github.com/gofiber/utils/v2) - B/op",
-            "value": 4,
-            "unit": "B/op",
-            "extra": "75191902 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_AddTrailingSlashBytes/short-no-slash (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 1,
-            "unit": "allocs/op",
-            "extra": "75191902 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_AddTrailingSlashBytes/short-with-slash (github.com/gofiber/utils/v2)",
-            "value": 1.782,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "680514408 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_AddTrailingSlashBytes/short-with-slash (github.com/gofiber/utils/v2) - ns/op",
-            "value": 1.782,
-            "unit": "ns/op",
-            "extra": "680514408 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_AddTrailingSlashBytes/short-with-slash (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "680514408 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_AddTrailingSlashBytes/short-with-slash (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "680514408 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_AddTrailingSlashBytes/path-no-slash (github.com/gofiber/utils/v2)",
-            "value": 21.14,
-            "unit": "ns/op\t      16 B/op\t       1 allocs/op",
-            "extra": "51242421 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_AddTrailingSlashBytes/path-no-slash (github.com/gofiber/utils/v2) - ns/op",
-            "value": 21.14,
-            "unit": "ns/op",
-            "extra": "51242421 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_AddTrailingSlashBytes/path-no-slash (github.com/gofiber/utils/v2) - B/op",
-            "value": 16,
-            "unit": "B/op",
-            "extra": "51242421 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_AddTrailingSlashBytes/path-no-slash (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 1,
-            "unit": "allocs/op",
-            "extra": "51242421 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_AddTrailingSlashBytes/path-with-slash (github.com/gofiber/utils/v2)",
-            "value": 1.767,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "681872979 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_AddTrailingSlashBytes/path-with-slash (github.com/gofiber/utils/v2) - ns/op",
-            "value": 1.767,
-            "unit": "ns/op",
-            "extra": "681872979 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_AddTrailingSlashBytes/path-with-slash (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "681872979 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_AddTrailingSlashBytes/path-with-slash (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "681872979 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_EqualFoldBytes/fiber (github.com/gofiber/utils/v2)",
-            "value": 45.3,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "26666421 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_EqualFoldBytes/fiber (github.com/gofiber/utils/v2) - ns/op",
-            "value": 45.3,
-            "unit": "ns/op",
-            "extra": "26666421 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_EqualFoldBytes/fiber (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "26666421 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_EqualFoldBytes/fiber (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "26666421 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_EqualFoldBytes/default (github.com/gofiber/utils/v2)",
-            "value": 76.23,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "15699128 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_EqualFoldBytes/default (github.com/gofiber/utils/v2) - ns/op",
-            "value": 76.23,
-            "unit": "ns/op",
-            "extra": "15699128 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_EqualFoldBytes/default (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "15699128 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_EqualFoldBytes/default (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "15699128 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_EqualFold/fiber (github.com/gofiber/utils/v2)",
-            "value": 44.26,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "27173972 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_EqualFold/fiber (github.com/gofiber/utils/v2) - ns/op",
-            "value": 44.26,
-            "unit": "ns/op",
-            "extra": "27173972 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_EqualFold/fiber (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "27173972 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_EqualFold/fiber (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "27173972 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_EqualFold/default (github.com/gofiber/utils/v2)",
-            "value": 75.96,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "15698089 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_EqualFold/default (github.com/gofiber/utils/v2) - ns/op",
-            "value": 75.96,
-            "unit": "ns/op",
-            "extra": "15698089 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_EqualFold/default (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "15698089 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_EqualFold/default (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "15698089 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimRight/fiber (github.com/gofiber/utils/v2)",
-            "value": 2.493,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "485749956 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimRight/fiber (github.com/gofiber/utils/v2) - ns/op",
-            "value": 2.493,
-            "unit": "ns/op",
-            "extra": "485749956 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimRight/fiber (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "485749956 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimRight/fiber (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "485749956 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimRight/default (github.com/gofiber/utils/v2)",
-            "value": 3.525,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "337689583 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimRight/default (github.com/gofiber/utils/v2) - ns/op",
-            "value": 3.525,
-            "unit": "ns/op",
-            "extra": "337689583 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimRight/default (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "337689583 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimRight/default (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "337689583 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimRightBytes/fiber (github.com/gofiber/utils/v2)",
-            "value": 2.82,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "425368728 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimRightBytes/fiber (github.com/gofiber/utils/v2) - ns/op",
-            "value": 2.82,
-            "unit": "ns/op",
-            "extra": "425368728 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimRightBytes/fiber (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "425368728 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimRightBytes/fiber (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "425368728 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimRightBytes/default (github.com/gofiber/utils/v2)",
-            "value": 3.877,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "308483728 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimRightBytes/default (github.com/gofiber/utils/v2) - ns/op",
-            "value": 3.877,
-            "unit": "ns/op",
-            "extra": "308483728 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimRightBytes/default (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "308483728 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimRightBytes/default (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "308483728 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimLeft/fiber (github.com/gofiber/utils/v2)",
-            "value": 2.478,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "487295103 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimLeft/fiber (github.com/gofiber/utils/v2) - ns/op",
-            "value": 2.478,
-            "unit": "ns/op",
-            "extra": "487295103 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimLeft/fiber (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "487295103 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimLeft/fiber (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "487295103 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimLeft/default (github.com/gofiber/utils/v2)",
-            "value": 3.876,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "305720798 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimLeft/default (github.com/gofiber/utils/v2) - ns/op",
-            "value": 3.876,
-            "unit": "ns/op",
-            "extra": "305720798 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimLeft/default (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "305720798 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimLeft/default (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "305720798 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimLeftBytes/fiber (github.com/gofiber/utils/v2)",
-            "value": 3.176,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "378826780 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimLeftBytes/fiber (github.com/gofiber/utils/v2) - ns/op",
-            "value": 3.176,
-            "unit": "ns/op",
-            "extra": "378826780 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimLeftBytes/fiber (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "378826780 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimLeftBytes/fiber (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "378826780 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimLeftBytes/default (github.com/gofiber/utils/v2)",
-            "value": 4.598,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "260694183 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimLeftBytes/default (github.com/gofiber/utils/v2) - ns/op",
-            "value": 4.598,
-            "unit": "ns/op",
-            "extra": "260694183 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimLeftBytes/default (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "260694183 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimLeftBytes/default (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "260694183 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_Trim/fiber (github.com/gofiber/utils/v2)",
-            "value": 4.82,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "259430425 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_Trim/fiber (github.com/gofiber/utils/v2) - ns/op",
-            "value": 4.82,
-            "unit": "ns/op",
-            "extra": "259430425 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_Trim/fiber (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "259430425 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_Trim/fiber (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "259430425 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_Trim/default (github.com/gofiber/utils/v2)",
-            "value": 4.934,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "230959344 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_Trim/default (github.com/gofiber/utils/v2) - ns/op",
-            "value": 4.934,
-            "unit": "ns/op",
-            "extra": "230959344 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_Trim/default (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "230959344 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_Trim/default (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "230959344 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_Trim/default.trimspace (github.com/gofiber/utils/v2)",
-            "value": 7.087,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "164879894 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_Trim/default.trimspace (github.com/gofiber/utils/v2) - ns/op",
-            "value": 7.087,
-            "unit": "ns/op",
-            "extra": "164879894 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_Trim/default.trimspace (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "164879894 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_Trim/default.trimspace (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "164879894 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimBytes/fiber (github.com/gofiber/utils/v2)",
-            "value": 5.644,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "212216750 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimBytes/fiber (github.com/gofiber/utils/v2) - ns/op",
-            "value": 5.644,
-            "unit": "ns/op",
-            "extra": "212216750 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimBytes/fiber (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "212216750 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimBytes/fiber (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "212216750 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimBytes/default (github.com/gofiber/utils/v2)",
-            "value": 5.691,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "210275175 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimBytes/default (github.com/gofiber/utils/v2) - ns/op",
-            "value": 5.691,
-            "unit": "ns/op",
-            "extra": "210275175 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimBytes/default (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "210275175 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimBytes/default (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "210275175 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimBytes/default.trimspace (github.com/gofiber/utils/v2)",
-            "value": 7.756,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "154664358 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimBytes/default.trimspace (github.com/gofiber/utils/v2) - ns/op",
-            "value": 7.756,
-            "unit": "ns/op",
-            "extra": "154664358 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimBytes/default.trimspace (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "154664358 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimBytes/default.trimspace (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "154664358 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpace/fiber/empty (github.com/gofiber/utils/v2)",
-            "value": 0.7041,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "1000000000 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpace/fiber/empty (github.com/gofiber/utils/v2) - ns/op",
-            "value": 0.7041,
-            "unit": "ns/op",
-            "extra": "1000000000 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpace/fiber/empty (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "1000000000 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpace/fiber/empty (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "1000000000 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpace/default/empty (github.com/gofiber/utils/v2)",
-            "value": 3.171,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "378030799 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpace/default/empty (github.com/gofiber/utils/v2) - ns/op",
-            "value": 3.171,
-            "unit": "ns/op",
-            "extra": "378030799 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpace/default/empty (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "378030799 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpace/default/empty (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "378030799 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpace/fiber/spaces (github.com/gofiber/utils/v2)",
-            "value": 4.23,
-            "unit": "ns/op\t 709.28 MB/s\t       0 B/op\t       0 allocs/op",
-            "extra": "283414714 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpace/fiber/spaces (github.com/gofiber/utils/v2) - ns/op",
-            "value": 4.23,
-            "unit": "ns/op",
-            "extra": "283414714 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpace/fiber/spaces (github.com/gofiber/utils/v2) - MB/s",
-            "value": 709.28,
-            "unit": "MB/s",
-            "extra": "283414714 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpace/fiber/spaces (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "283414714 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpace/fiber/spaces (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "283414714 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpace/default/spaces (github.com/gofiber/utils/v2)",
-            "value": 5.634,
-            "unit": "ns/op\t 532.48 MB/s\t       0 B/op\t       0 allocs/op",
-            "extra": "213304616 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpace/default/spaces (github.com/gofiber/utils/v2) - ns/op",
-            "value": 5.634,
-            "unit": "ns/op",
-            "extra": "213304616 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpace/default/spaces (github.com/gofiber/utils/v2) - MB/s",
-            "value": 532.48,
-            "unit": "MB/s",
-            "extra": "213304616 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpace/default/spaces (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "213304616 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpace/default/spaces (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "213304616 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpace/fiber/ascii-word (github.com/gofiber/utils/v2)",
-            "value": 4.595,
-            "unit": "ns/op\t1958.50 MB/s\t       0 B/op\t       0 allocs/op",
-            "extra": "263600126 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpace/fiber/ascii-word (github.com/gofiber/utils/v2) - ns/op",
-            "value": 4.595,
-            "unit": "ns/op",
-            "extra": "263600126 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpace/fiber/ascii-word (github.com/gofiber/utils/v2) - MB/s",
-            "value": 1958.5,
-            "unit": "MB/s",
-            "extra": "263600126 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpace/fiber/ascii-word (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "263600126 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpace/fiber/ascii-word (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "263600126 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpace/default/ascii-word (github.com/gofiber/utils/v2)",
-            "value": 6.928,
-            "unit": "ns/op\t1299.13 MB/s\t       0 B/op\t       0 allocs/op",
-            "extra": "171285916 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpace/default/ascii-word (github.com/gofiber/utils/v2) - ns/op",
-            "value": 6.928,
-            "unit": "ns/op",
-            "extra": "171285916 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpace/default/ascii-word (github.com/gofiber/utils/v2) - MB/s",
-            "value": 1299.13,
-            "unit": "MB/s",
-            "extra": "171285916 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpace/default/ascii-word (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "171285916 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpace/default/ascii-word (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "171285916 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpace/fiber/auth-header-bearer (github.com/gofiber/utils/v2)",
-            "value": 5.29,
-            "unit": "ns/op\t4537.00 MB/s\t       0 B/op\t       0 allocs/op",
-            "extra": "226479889 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpace/fiber/auth-header-bearer (github.com/gofiber/utils/v2) - ns/op",
-            "value": 5.29,
-            "unit": "ns/op",
-            "extra": "226479889 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpace/fiber/auth-header-bearer (github.com/gofiber/utils/v2) - MB/s",
-            "value": 4537,
-            "unit": "MB/s",
-            "extra": "226479889 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpace/fiber/auth-header-bearer (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "226479889 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpace/fiber/auth-header-bearer (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "226479889 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpace/default/auth-header-bearer (github.com/gofiber/utils/v2)",
-            "value": 8.099,
-            "unit": "ns/op\t2963.50 MB/s\t       0 B/op\t       0 allocs/op",
-            "extra": "147714265 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpace/default/auth-header-bearer (github.com/gofiber/utils/v2) - ns/op",
-            "value": 8.099,
-            "unit": "ns/op",
-            "extra": "147714265 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpace/default/auth-header-bearer (github.com/gofiber/utils/v2) - MB/s",
-            "value": 2963.5,
-            "unit": "MB/s",
-            "extra": "147714265 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpace/default/auth-header-bearer (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "147714265 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpace/default/auth-header-bearer (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "147714265 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpace/fiber/auth-header-basic (github.com/gofiber/utils/v2)",
-            "value": 3.882,
-            "unit": "ns/op\t9788.70 MB/s\t       0 B/op\t       0 allocs/op",
-            "extra": "309988485 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpace/fiber/auth-header-basic (github.com/gofiber/utils/v2) - ns/op",
-            "value": 3.882,
-            "unit": "ns/op",
-            "extra": "309988485 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpace/fiber/auth-header-basic (github.com/gofiber/utils/v2) - MB/s",
-            "value": 9788.7,
-            "unit": "MB/s",
-            "extra": "309988485 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpace/fiber/auth-header-basic (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "309988485 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpace/fiber/auth-header-basic (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "309988485 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpace/default/auth-header-basic (github.com/gofiber/utils/v2)",
-            "value": 6.339,
-            "unit": "ns/op\t5994.96 MB/s\t       0 B/op\t       0 allocs/op",
-            "extra": "179248560 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpace/default/auth-header-basic (github.com/gofiber/utils/v2) - ns/op",
-            "value": 6.339,
-            "unit": "ns/op",
-            "extra": "179248560 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpace/default/auth-header-basic (github.com/gofiber/utils/v2) - MB/s",
-            "value": 5994.96,
-            "unit": "MB/s",
-            "extra": "179248560 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpace/default/auth-header-basic (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "179248560 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpace/default/auth-header-basic (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "179248560 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpace/fiber/accept-encoding (github.com/gofiber/utils/v2)",
-            "value": 4.588,
-            "unit": "ns/op\t4576.78 MB/s\t       0 B/op\t       0 allocs/op",
-            "extra": "282917136 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpace/fiber/accept-encoding (github.com/gofiber/utils/v2) - ns/op",
-            "value": 4.588,
-            "unit": "ns/op",
-            "extra": "282917136 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpace/fiber/accept-encoding (github.com/gofiber/utils/v2) - MB/s",
-            "value": 4576.78,
-            "unit": "MB/s",
-            "extra": "282917136 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpace/fiber/accept-encoding (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "282917136 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpace/fiber/accept-encoding (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "282917136 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpace/default/accept-encoding (github.com/gofiber/utils/v2)",
-            "value": 7.057,
-            "unit": "ns/op\t2975.86 MB/s\t       0 B/op\t       0 allocs/op",
-            "extra": "170424070 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpace/default/accept-encoding (github.com/gofiber/utils/v2) - ns/op",
-            "value": 7.057,
-            "unit": "ns/op",
-            "extra": "170424070 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpace/default/accept-encoding (github.com/gofiber/utils/v2) - MB/s",
-            "value": 2975.86,
-            "unit": "MB/s",
-            "extra": "170424070 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpace/default/accept-encoding (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "170424070 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpace/default/accept-encoding (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "170424070 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpace/fiber/content-type (github.com/gofiber/utils/v2)",
-            "value": 4.229,
-            "unit": "ns/op\t4729.57 MB/s\t       0 B/op\t       0 allocs/op",
-            "extra": "283673612 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpace/fiber/content-type (github.com/gofiber/utils/v2) - ns/op",
-            "value": 4.229,
-            "unit": "ns/op",
-            "extra": "283673612 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpace/fiber/content-type (github.com/gofiber/utils/v2) - MB/s",
-            "value": 4729.57,
-            "unit": "MB/s",
-            "extra": "283673612 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpace/fiber/content-type (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "283673612 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpace/fiber/content-type (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "283673612 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpace/default/content-type (github.com/gofiber/utils/v2)",
-            "value": 6.35,
-            "unit": "ns/op\t3149.78 MB/s\t       0 B/op\t       0 allocs/op",
-            "extra": "176975582 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpace/default/content-type (github.com/gofiber/utils/v2) - ns/op",
-            "value": 6.35,
-            "unit": "ns/op",
-            "extra": "176975582 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpace/default/content-type (github.com/gofiber/utils/v2) - MB/s",
-            "value": 3149.78,
-            "unit": "MB/s",
-            "extra": "176975582 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpace/default/content-type (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "176975582 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpace/default/content-type (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "176975582 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpace/fiber/x-forwarded-for (github.com/gofiber/utils/v2)",
-            "value": 3.534,
-            "unit": "ns/op\t7923.92 MB/s\t       0 B/op\t       0 allocs/op",
-            "extra": "338729236 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpace/fiber/x-forwarded-for (github.com/gofiber/utils/v2) - ns/op",
-            "value": 3.534,
-            "unit": "ns/op",
-            "extra": "338729236 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpace/fiber/x-forwarded-for (github.com/gofiber/utils/v2) - MB/s",
-            "value": 7923.92,
-            "unit": "MB/s",
-            "extra": "338729236 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpace/fiber/x-forwarded-for (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "338729236 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpace/fiber/x-forwarded-for (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "338729236 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpace/default/x-forwarded-for (github.com/gofiber/utils/v2)",
-            "value": 5.984,
-            "unit": "ns/op\t4678.88 MB/s\t       0 B/op\t       0 allocs/op",
-            "extra": "206468373 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpace/default/x-forwarded-for (github.com/gofiber/utils/v2) - ns/op",
-            "value": 5.984,
-            "unit": "ns/op",
-            "extra": "206468373 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpace/default/x-forwarded-for (github.com/gofiber/utils/v2) - MB/s",
-            "value": 4678.88,
-            "unit": "MB/s",
-            "extra": "206468373 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpace/default/x-forwarded-for (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "206468373 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpace/default/x-forwarded-for (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "206468373 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpace/fiber/query-params (github.com/gofiber/utils/v2)",
-            "value": 4.229,
-            "unit": "ns/op\t4729.64 MB/s\t       0 B/op\t       0 allocs/op",
-            "extra": "283710042 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpace/fiber/query-params (github.com/gofiber/utils/v2) - ns/op",
-            "value": 4.229,
-            "unit": "ns/op",
-            "extra": "283710042 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpace/fiber/query-params (github.com/gofiber/utils/v2) - MB/s",
-            "value": 4729.64,
-            "unit": "MB/s",
-            "extra": "283710042 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpace/fiber/query-params (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "283710042 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpace/fiber/query-params (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "283710042 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpace/default/query-params (github.com/gofiber/utils/v2)",
-            "value": 6.348,
-            "unit": "ns/op\t3150.79 MB/s\t       0 B/op\t       0 allocs/op",
-            "extra": "188907643 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpace/default/query-params (github.com/gofiber/utils/v2) - ns/op",
-            "value": 6.348,
-            "unit": "ns/op",
-            "extra": "188907643 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpace/default/query-params (github.com/gofiber/utils/v2) - MB/s",
-            "value": 3150.79,
-            "unit": "MB/s",
-            "extra": "188907643 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpace/default/query-params (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "188907643 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpace/default/query-params (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "188907643 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpace/fiber/ascii-long (github.com/gofiber/utils/v2)",
-            "value": 5.637,
-            "unit": "ns/op\t18095.63 MB/s\t       0 B/op\t       0 allocs/op",
-            "extra": "212789620 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpace/fiber/ascii-long (github.com/gofiber/utils/v2) - ns/op",
-            "value": 5.637,
-            "unit": "ns/op",
-            "extra": "212789620 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpace/fiber/ascii-long (github.com/gofiber/utils/v2) - MB/s",
-            "value": 18095.63,
-            "unit": "MB/s",
-            "extra": "212789620 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpace/fiber/ascii-long (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "212789620 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpace/fiber/ascii-long (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "212789620 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpace/default/ascii-long (github.com/gofiber/utils/v2)",
-            "value": 8.461,
-            "unit": "ns/op\t12055.98 MB/s\t       0 B/op\t       0 allocs/op",
-            "extra": "136292443 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpace/default/ascii-long (github.com/gofiber/utils/v2) - ns/op",
-            "value": 8.461,
-            "unit": "ns/op",
-            "extra": "136292443 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpace/default/ascii-long (github.com/gofiber/utils/v2) - MB/s",
-            "value": 12055.98,
-            "unit": "MB/s",
-            "extra": "136292443 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpace/default/ascii-long (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "136292443 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpace/default/ascii-long (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "136292443 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpace/fiber/no-trim (github.com/gofiber/utils/v2)",
-            "value": 0.7264,
-            "unit": "ns/op\t6882.80 MB/s\t       0 B/op\t       0 allocs/op",
-            "extra": "1000000000 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpace/fiber/no-trim (github.com/gofiber/utils/v2) - ns/op",
-            "value": 0.7264,
-            "unit": "ns/op",
-            "extra": "1000000000 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpace/fiber/no-trim (github.com/gofiber/utils/v2) - MB/s",
-            "value": 6882.8,
-            "unit": "MB/s",
-            "extra": "1000000000 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpace/fiber/no-trim (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "1000000000 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpace/fiber/no-trim (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "1000000000 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpace/default/no-trim (github.com/gofiber/utils/v2)",
-            "value": 3.523,
-            "unit": "ns/op\t1419.09 MB/s\t       0 B/op\t       0 allocs/op",
-            "extra": "340248842 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpace/default/no-trim (github.com/gofiber/utils/v2) - ns/op",
-            "value": 3.523,
-            "unit": "ns/op",
-            "extra": "340248842 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpace/default/no-trim (github.com/gofiber/utils/v2) - MB/s",
-            "value": 1419.09,
-            "unit": "MB/s",
-            "extra": "340248842 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpace/default/no-trim (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "340248842 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpace/default/no-trim (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "340248842 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpace/fiber/mixed-whitespace (github.com/gofiber/utils/v2)",
-            "value": 5.586,
-            "unit": "ns/op\t3043.35 MB/s\t       0 B/op\t       0 allocs/op",
-            "extra": "226692775 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpace/fiber/mixed-whitespace (github.com/gofiber/utils/v2) - ns/op",
-            "value": 5.586,
-            "unit": "ns/op",
-            "extra": "226692775 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpace/fiber/mixed-whitespace (github.com/gofiber/utils/v2) - MB/s",
-            "value": 3043.35,
-            "unit": "MB/s",
-            "extra": "226692775 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpace/fiber/mixed-whitespace (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "226692775 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpace/fiber/mixed-whitespace (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "226692775 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpace/default/mixed-whitespace (github.com/gofiber/utils/v2)",
-            "value": 7.751,
-            "unit": "ns/op\t2193.30 MB/s\t       0 B/op\t       0 allocs/op",
-            "extra": "153473934 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpace/default/mixed-whitespace (github.com/gofiber/utils/v2) - ns/op",
-            "value": 7.751,
-            "unit": "ns/op",
-            "extra": "153473934 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpace/default/mixed-whitespace (github.com/gofiber/utils/v2) - MB/s",
-            "value": 2193.3,
-            "unit": "MB/s",
-            "extra": "153473934 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpace/default/mixed-whitespace (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "153473934 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpace/default/mixed-whitespace (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "153473934 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpaceBytes/fiber/empty (github.com/gofiber/utils/v2)",
-            "value": 0.7062,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "1000000000 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpaceBytes/fiber/empty (github.com/gofiber/utils/v2) - ns/op",
-            "value": 0.7062,
-            "unit": "ns/op",
-            "extra": "1000000000 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpaceBytes/fiber/empty (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "1000000000 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpaceBytes/fiber/empty (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "1000000000 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpaceBytes/default/empty (github.com/gofiber/utils/v2)",
-            "value": 2.821,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "425469600 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpaceBytes/default/empty (github.com/gofiber/utils/v2) - ns/op",
-            "value": 2.821,
-            "unit": "ns/op",
-            "extra": "425469600 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpaceBytes/default/empty (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "425469600 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpaceBytes/default/empty (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "425469600 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpaceBytes/fiber/spaces (github.com/gofiber/utils/v2)",
-            "value": 3.617,
-            "unit": "ns/op\t 829.38 MB/s\t       0 B/op\t       0 allocs/op",
-            "extra": "329231746 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpaceBytes/fiber/spaces (github.com/gofiber/utils/v2) - ns/op",
-            "value": 3.617,
-            "unit": "ns/op",
-            "extra": "329231746 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpaceBytes/fiber/spaces (github.com/gofiber/utils/v2) - MB/s",
-            "value": 829.38,
-            "unit": "MB/s",
-            "extra": "329231746 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpaceBytes/fiber/spaces (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "329231746 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpaceBytes/fiber/spaces (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "329231746 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpaceBytes/default/spaces (github.com/gofiber/utils/v2)",
-            "value": 4.966,
-            "unit": "ns/op\t 604.14 MB/s\t       0 B/op\t       0 allocs/op",
-            "extra": "241827186 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpaceBytes/default/spaces (github.com/gofiber/utils/v2) - ns/op",
-            "value": 4.966,
-            "unit": "ns/op",
-            "extra": "241827186 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpaceBytes/default/spaces (github.com/gofiber/utils/v2) - MB/s",
-            "value": 604.14,
-            "unit": "MB/s",
-            "extra": "241827186 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpaceBytes/default/spaces (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "241827186 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpaceBytes/default/spaces (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "241827186 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpaceBytes/fiber/ascii-word (github.com/gofiber/utils/v2)",
-            "value": 3.531,
-            "unit": "ns/op\t2548.82 MB/s\t       0 B/op\t       0 allocs/op",
-            "extra": "340471722 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpaceBytes/fiber/ascii-word (github.com/gofiber/utils/v2) - ns/op",
-            "value": 3.531,
-            "unit": "ns/op",
-            "extra": "340471722 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpaceBytes/fiber/ascii-word (github.com/gofiber/utils/v2) - MB/s",
-            "value": 2548.82,
-            "unit": "MB/s",
-            "extra": "340471722 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpaceBytes/fiber/ascii-word (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "340471722 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpaceBytes/fiber/ascii-word (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "340471722 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpaceBytes/default/ascii-word (github.com/gofiber/utils/v2)",
-            "value": 6.693,
-            "unit": "ns/op\t1344.61 MB/s\t       0 B/op\t       0 allocs/op",
-            "extra": "181338460 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpaceBytes/default/ascii-word (github.com/gofiber/utils/v2) - ns/op",
-            "value": 6.693,
-            "unit": "ns/op",
-            "extra": "181338460 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpaceBytes/default/ascii-word (github.com/gofiber/utils/v2) - MB/s",
-            "value": 1344.61,
-            "unit": "MB/s",
-            "extra": "181338460 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpaceBytes/default/ascii-word (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "181338460 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpaceBytes/default/ascii-word (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "181338460 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpaceBytes/fiber/auth-header-bearer (github.com/gofiber/utils/v2)",
-            "value": 4.42,
-            "unit": "ns/op\t5430.10 MB/s\t       0 B/op\t       0 allocs/op",
-            "extra": "271899855 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpaceBytes/fiber/auth-header-bearer (github.com/gofiber/utils/v2) - ns/op",
-            "value": 4.42,
-            "unit": "ns/op",
-            "extra": "271899855 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpaceBytes/fiber/auth-header-bearer (github.com/gofiber/utils/v2) - MB/s",
-            "value": 5430.1,
-            "unit": "MB/s",
-            "extra": "271899855 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpaceBytes/fiber/auth-header-bearer (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "271899855 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpaceBytes/fiber/auth-header-bearer (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "271899855 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpaceBytes/default/auth-header-bearer (github.com/gofiber/utils/v2)",
-            "value": 7.751,
-            "unit": "ns/op\t3096.31 MB/s\t       0 B/op\t       0 allocs/op",
-            "extra": "154734277 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpaceBytes/default/auth-header-bearer (github.com/gofiber/utils/v2) - ns/op",
-            "value": 7.751,
-            "unit": "ns/op",
-            "extra": "154734277 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpaceBytes/default/auth-header-bearer (github.com/gofiber/utils/v2) - MB/s",
-            "value": 3096.31,
-            "unit": "MB/s",
-            "extra": "154734277 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpaceBytes/default/auth-header-bearer (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "154734277 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpaceBytes/default/auth-header-bearer (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "154734277 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpaceBytes/fiber/auth-header-basic (github.com/gofiber/utils/v2)",
-            "value": 3.713,
-            "unit": "ns/op\t10233.48 MB/s\t       0 B/op\t       0 allocs/op",
-            "extra": "324405199 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpaceBytes/fiber/auth-header-basic (github.com/gofiber/utils/v2) - ns/op",
-            "value": 3.713,
-            "unit": "ns/op",
-            "extra": "324405199 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpaceBytes/fiber/auth-header-basic (github.com/gofiber/utils/v2) - MB/s",
-            "value": 10233.48,
-            "unit": "MB/s",
-            "extra": "324405199 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpaceBytes/fiber/auth-header-basic (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "324405199 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpaceBytes/fiber/auth-header-basic (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "324405199 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpaceBytes/default/auth-header-basic (github.com/gofiber/utils/v2)",
-            "value": 6.349,
-            "unit": "ns/op\t5985.13 MB/s\t       0 B/op\t       0 allocs/op",
-            "extra": "189337810 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpaceBytes/default/auth-header-basic (github.com/gofiber/utils/v2) - ns/op",
-            "value": 6.349,
-            "unit": "ns/op",
-            "extra": "189337810 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpaceBytes/default/auth-header-basic (github.com/gofiber/utils/v2) - MB/s",
-            "value": 5985.13,
-            "unit": "MB/s",
-            "extra": "189337810 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpaceBytes/default/auth-header-basic (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "189337810 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpaceBytes/default/auth-header-basic (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "189337810 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpaceBytes/fiber/accept-encoding (github.com/gofiber/utils/v2)",
-            "value": 3.526,
-            "unit": "ns/op\t5956.27 MB/s\t       0 B/op\t       0 allocs/op",
-            "extra": "338835301 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpaceBytes/fiber/accept-encoding (github.com/gofiber/utils/v2) - ns/op",
-            "value": 3.526,
-            "unit": "ns/op",
-            "extra": "338835301 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpaceBytes/fiber/accept-encoding (github.com/gofiber/utils/v2) - MB/s",
-            "value": 5956.27,
-            "unit": "MB/s",
-            "extra": "338835301 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpaceBytes/fiber/accept-encoding (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "338835301 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpaceBytes/fiber/accept-encoding (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "338835301 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpaceBytes/default/accept-encoding (github.com/gofiber/utils/v2)",
-            "value": 6.335,
-            "unit": "ns/op\t3315.08 MB/s\t       0 B/op\t       0 allocs/op",
-            "extra": "189752816 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpaceBytes/default/accept-encoding (github.com/gofiber/utils/v2) - ns/op",
-            "value": 6.335,
-            "unit": "ns/op",
-            "extra": "189752816 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpaceBytes/default/accept-encoding (github.com/gofiber/utils/v2) - MB/s",
-            "value": 3315.08,
-            "unit": "MB/s",
-            "extra": "189752816 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpaceBytes/default/accept-encoding (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "189752816 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpaceBytes/default/accept-encoding (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "189752816 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpaceBytes/fiber/content-type (github.com/gofiber/utils/v2)",
-            "value": 3.542,
-            "unit": "ns/op\t5646.73 MB/s\t       0 B/op\t       0 allocs/op",
-            "extra": "338366013 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpaceBytes/fiber/content-type (github.com/gofiber/utils/v2) - ns/op",
-            "value": 3.542,
-            "unit": "ns/op",
-            "extra": "338366013 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpaceBytes/fiber/content-type (github.com/gofiber/utils/v2) - MB/s",
-            "value": 5646.73,
-            "unit": "MB/s",
-            "extra": "338366013 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpaceBytes/fiber/content-type (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "338366013 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpaceBytes/fiber/content-type (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "338366013 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpaceBytes/default/content-type (github.com/gofiber/utils/v2)",
-            "value": 6.337,
-            "unit": "ns/op\t3155.95 MB/s\t       0 B/op\t       0 allocs/op",
-            "extra": "188396319 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpaceBytes/default/content-type (github.com/gofiber/utils/v2) - ns/op",
-            "value": 6.337,
-            "unit": "ns/op",
-            "extra": "188396319 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpaceBytes/default/content-type (github.com/gofiber/utils/v2) - MB/s",
-            "value": 3155.95,
-            "unit": "MB/s",
-            "extra": "188396319 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpaceBytes/default/content-type (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "188396319 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpaceBytes/default/content-type (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "188396319 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpaceBytes/fiber/x-forwarded-for (github.com/gofiber/utils/v2)",
-            "value": 3.169,
-            "unit": "ns/op\t8835.41 MB/s\t       0 B/op\t       0 allocs/op",
-            "extra": "377664109 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpaceBytes/fiber/x-forwarded-for (github.com/gofiber/utils/v2) - ns/op",
-            "value": 3.169,
-            "unit": "ns/op",
-            "extra": "377664109 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpaceBytes/fiber/x-forwarded-for (github.com/gofiber/utils/v2) - MB/s",
-            "value": 8835.41,
-            "unit": "MB/s",
-            "extra": "377664109 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpaceBytes/fiber/x-forwarded-for (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "377664109 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpaceBytes/fiber/x-forwarded-for (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "377664109 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpaceBytes/default/x-forwarded-for (github.com/gofiber/utils/v2)",
-            "value": 5.639,
-            "unit": "ns/op\t4965.36 MB/s\t       0 B/op\t       0 allocs/op",
-            "extra": "213303298 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpaceBytes/default/x-forwarded-for (github.com/gofiber/utils/v2) - ns/op",
-            "value": 5.639,
-            "unit": "ns/op",
-            "extra": "213303298 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpaceBytes/default/x-forwarded-for (github.com/gofiber/utils/v2) - MB/s",
-            "value": 4965.36,
-            "unit": "MB/s",
-            "extra": "213303298 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpaceBytes/default/x-forwarded-for (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "213303298 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpaceBytes/default/x-forwarded-for (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "213303298 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpaceBytes/fiber/query-params (github.com/gofiber/utils/v2)",
-            "value": 3.534,
-            "unit": "ns/op\t5659.25 MB/s\t       0 B/op\t       0 allocs/op",
-            "extra": "341164659 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpaceBytes/fiber/query-params (github.com/gofiber/utils/v2) - ns/op",
-            "value": 3.534,
-            "unit": "ns/op",
-            "extra": "341164659 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpaceBytes/fiber/query-params (github.com/gofiber/utils/v2) - MB/s",
-            "value": 5659.25,
-            "unit": "MB/s",
-            "extra": "341164659 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpaceBytes/fiber/query-params (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "341164659 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpaceBytes/fiber/query-params (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "341164659 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpaceBytes/default/query-params (github.com/gofiber/utils/v2)",
-            "value": 6.376,
-            "unit": "ns/op\t3136.78 MB/s\t       0 B/op\t       0 allocs/op",
-            "extra": "185311026 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpaceBytes/default/query-params (github.com/gofiber/utils/v2) - ns/op",
-            "value": 6.376,
-            "unit": "ns/op",
-            "extra": "185311026 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpaceBytes/default/query-params (github.com/gofiber/utils/v2) - MB/s",
-            "value": 3136.78,
-            "unit": "MB/s",
-            "extra": "185311026 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpaceBytes/default/query-params (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "185311026 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpaceBytes/default/query-params (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "185311026 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpaceBytes/fiber/ascii-long (github.com/gofiber/utils/v2)",
-            "value": 4.95,
-            "unit": "ns/op\t20607.61 MB/s\t       0 B/op\t       0 allocs/op",
-            "extra": "243187297 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpaceBytes/fiber/ascii-long (github.com/gofiber/utils/v2) - ns/op",
-            "value": 4.95,
-            "unit": "ns/op",
-            "extra": "243187297 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpaceBytes/fiber/ascii-long (github.com/gofiber/utils/v2) - MB/s",
-            "value": 20607.61,
-            "unit": "MB/s",
-            "extra": "243187297 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpaceBytes/fiber/ascii-long (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "243187297 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpaceBytes/fiber/ascii-long (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "243187297 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpaceBytes/default/ascii-long (github.com/gofiber/utils/v2)",
-            "value": 8.463,
-            "unit": "ns/op\t12052.94 MB/s\t       0 B/op\t       0 allocs/op",
-            "extra": "141830469 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpaceBytes/default/ascii-long (github.com/gofiber/utils/v2) - ns/op",
-            "value": 8.463,
-            "unit": "ns/op",
-            "extra": "141830469 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpaceBytes/default/ascii-long (github.com/gofiber/utils/v2) - MB/s",
-            "value": 12052.94,
-            "unit": "MB/s",
-            "extra": "141830469 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpaceBytes/default/ascii-long (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "141830469 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpaceBytes/default/ascii-long (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "141830469 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpaceBytes/fiber/no-trim (github.com/gofiber/utils/v2)",
-            "value": 0.7051,
-            "unit": "ns/op\t7091.46 MB/s\t       0 B/op\t       0 allocs/op",
-            "extra": "1000000000 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpaceBytes/fiber/no-trim (github.com/gofiber/utils/v2) - ns/op",
-            "value": 0.7051,
-            "unit": "ns/op",
-            "extra": "1000000000 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpaceBytes/fiber/no-trim (github.com/gofiber/utils/v2) - MB/s",
-            "value": 7091.46,
-            "unit": "MB/s",
-            "extra": "1000000000 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpaceBytes/fiber/no-trim (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "1000000000 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpaceBytes/fiber/no-trim (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "1000000000 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpaceBytes/default/no-trim (github.com/gofiber/utils/v2)",
-            "value": 3.523,
-            "unit": "ns/op\t1419.23 MB/s\t       0 B/op\t       0 allocs/op",
-            "extra": "338703640 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpaceBytes/default/no-trim (github.com/gofiber/utils/v2) - ns/op",
-            "value": 3.523,
-            "unit": "ns/op",
-            "extra": "338703640 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpaceBytes/default/no-trim (github.com/gofiber/utils/v2) - MB/s",
-            "value": 1419.23,
-            "unit": "MB/s",
-            "extra": "338703640 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpaceBytes/default/no-trim (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "338703640 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpaceBytes/default/no-trim (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "338703640 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpaceBytes/fiber/mixed-whitespace (github.com/gofiber/utils/v2)",
-            "value": 4.593,
-            "unit": "ns/op\t3700.94 MB/s\t       0 B/op\t       0 allocs/op",
-            "extra": "272393086 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpaceBytes/fiber/mixed-whitespace (github.com/gofiber/utils/v2) - ns/op",
-            "value": 4.593,
-            "unit": "ns/op",
-            "extra": "272393086 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpaceBytes/fiber/mixed-whitespace (github.com/gofiber/utils/v2) - MB/s",
-            "value": 3700.94,
-            "unit": "MB/s",
-            "extra": "272393086 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpaceBytes/fiber/mixed-whitespace (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "272393086 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpaceBytes/fiber/mixed-whitespace (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "272393086 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpaceBytes/default/mixed-whitespace (github.com/gofiber/utils/v2)",
-            "value": 7.749,
-            "unit": "ns/op\t2193.91 MB/s\t       0 B/op\t       0 allocs/op",
-            "extra": "153085700 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpaceBytes/default/mixed-whitespace (github.com/gofiber/utils/v2) - ns/op",
-            "value": 7.749,
-            "unit": "ns/op",
-            "extra": "153085700 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpaceBytes/default/mixed-whitespace (github.com/gofiber/utils/v2) - MB/s",
-            "value": 2193.91,
-            "unit": "MB/s",
-            "extra": "153085700 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpaceBytes/default/mixed-whitespace (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "153085700 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TrimSpaceBytes/default/mixed-whitespace (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "153085700 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ConvertToBytes/fiber (github.com/gofiber/utils/v2)",
-            "value": 4.58,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "261651307 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ConvertToBytes/fiber (github.com/gofiber/utils/v2) - ns/op",
-            "value": 4.58,
-            "unit": "ns/op",
-            "extra": "261651307 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ConvertToBytes/fiber (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "261651307 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ConvertToBytes/fiber (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "261651307 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_GenerateSecureToken/16_bytes (github.com/gofiber/utils/v2)",
-            "value": 112.3,
-            "unit": "ns/op\t      24 B/op\t       1 allocs/op",
-            "extra": "10775631 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_GenerateSecureToken/16_bytes (github.com/gofiber/utils/v2) - ns/op",
-            "value": 112.3,
-            "unit": "ns/op",
-            "extra": "10775631 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_GenerateSecureToken/16_bytes (github.com/gofiber/utils/v2) - B/op",
-            "value": 24,
-            "unit": "B/op",
-            "extra": "10775631 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_GenerateSecureToken/16_bytes (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 1,
-            "unit": "allocs/op",
-            "extra": "10775631 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_GenerateSecureToken/32_bytes (github.com/gofiber/utils/v2)",
-            "value": 174,
-            "unit": "ns/op\t      48 B/op\t       1 allocs/op",
-            "extra": "6861831 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_GenerateSecureToken/32_bytes (github.com/gofiber/utils/v2) - ns/op",
-            "value": 174,
-            "unit": "ns/op",
-            "extra": "6861831 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_GenerateSecureToken/32_bytes (github.com/gofiber/utils/v2) - B/op",
-            "value": 48,
-            "unit": "B/op",
-            "extra": "6861831 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_GenerateSecureToken/32_bytes (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 1,
-            "unit": "allocs/op",
-            "extra": "6861831 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TokenGenerators/UUIDv4 (github.com/gofiber/utils/v2)",
-            "value": 161.2,
-            "unit": "ns/op\t      64 B/op\t       2 allocs/op",
-            "extra": "7385822 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TokenGenerators/UUIDv4 (github.com/gofiber/utils/v2) - ns/op",
-            "value": 161.2,
-            "unit": "ns/op",
-            "extra": "7385822 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TokenGenerators/UUIDv4 (github.com/gofiber/utils/v2) - B/op",
-            "value": 64,
-            "unit": "B/op",
-            "extra": "7385822 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TokenGenerators/UUIDv4 (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 2,
-            "unit": "allocs/op",
-            "extra": "7385822 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TokenGenerators/SecureToken (github.com/gofiber/utils/v2)",
-            "value": 173.4,
-            "unit": "ns/op\t      48 B/op\t       1 allocs/op",
-            "extra": "6908442 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TokenGenerators/SecureToken (github.com/gofiber/utils/v2) - ns/op",
-            "value": 173.4,
-            "unit": "ns/op",
-            "extra": "6908442 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TokenGenerators/SecureToken (github.com/gofiber/utils/v2) - B/op",
-            "value": 48,
-            "unit": "B/op",
-            "extra": "6908442 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_TokenGenerators/SecureToken (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 1,
-            "unit": "allocs/op",
-            "extra": "6908442 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString/int (github.com/gofiber/utils/v2)",
-            "value": 4.225,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "262132849 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString/int (github.com/gofiber/utils/v2) - ns/op",
-            "value": 4.225,
-            "unit": "ns/op",
-            "extra": "262132849 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString/int (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "262132849 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString/int (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "262132849 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString/int8 (github.com/gofiber/utils/v2)",
-            "value": 3.243,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "370652034 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString/int8 (github.com/gofiber/utils/v2) - ns/op",
-            "value": 3.243,
-            "unit": "ns/op",
-            "extra": "370652034 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString/int8 (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "370652034 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString/int8 (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "370652034 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString/int16 (github.com/gofiber/utils/v2)",
-            "value": 4.912,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "244119334 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString/int16 (github.com/gofiber/utils/v2) - ns/op",
-            "value": 4.912,
-            "unit": "ns/op",
-            "extra": "244119334 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString/int16 (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "244119334 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString/int16 (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "244119334 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString/int32 (github.com/gofiber/utils/v2)",
-            "value": 4.922,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "228484404 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString/int32 (github.com/gofiber/utils/v2) - ns/op",
-            "value": 4.922,
-            "unit": "ns/op",
-            "extra": "228484404 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString/int32 (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "228484404 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString/int32 (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "228484404 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString/int64 (github.com/gofiber/utils/v2)",
-            "value": 4.576,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "263041192 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString/int64 (github.com/gofiber/utils/v2) - ns/op",
-            "value": 4.576,
-            "unit": "ns/op",
-            "extra": "263041192 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString/int64 (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "263041192 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString/int64 (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "263041192 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString/uint (github.com/gofiber/utils/v2)",
-            "value": 3.522,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "340746176 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString/uint (github.com/gofiber/utils/v2) - ns/op",
-            "value": 3.522,
-            "unit": "ns/op",
-            "extra": "340746176 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString/uint (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "340746176 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString/uint (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "340746176 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString/uint8 (github.com/gofiber/utils/v2)",
-            "value": 3.519,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "341107161 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString/uint8 (github.com/gofiber/utils/v2) - ns/op",
-            "value": 3.519,
-            "unit": "ns/op",
-            "extra": "341107161 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString/uint8 (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "341107161 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString/uint8 (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "341107161 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString/uint16 (github.com/gofiber/utils/v2)",
-            "value": 3.179,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "340467861 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString/uint16 (github.com/gofiber/utils/v2) - ns/op",
-            "value": 3.179,
-            "unit": "ns/op",
-            "extra": "340467861 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString/uint16 (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "340467861 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString/uint16 (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "340467861 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString/uint32 (github.com/gofiber/utils/v2)",
-            "value": 3.197,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "375568996 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString/uint32 (github.com/gofiber/utils/v2) - ns/op",
-            "value": 3.197,
-            "unit": "ns/op",
-            "extra": "375568996 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString/uint32 (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "375568996 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString/uint32 (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "375568996 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString/uint64 (github.com/gofiber/utils/v2)",
-            "value": 3.523,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "340634709 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString/uint64 (github.com/gofiber/utils/v2) - ns/op",
-            "value": 3.523,
-            "unit": "ns/op",
-            "extra": "340634709 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString/uint64 (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "340634709 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString/uint64 (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "340634709 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString/string (github.com/gofiber/utils/v2)",
-            "value": 3.514,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "376893027 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString/string (github.com/gofiber/utils/v2) - ns/op",
-            "value": 3.514,
-            "unit": "ns/op",
-            "extra": "376893027 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString/string (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "376893027 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString/string (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "376893027 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString/[]uint8 (github.com/gofiber/utils/v2)",
-            "value": 20,
-            "unit": "ns/op\t      16 B/op\t       1 allocs/op",
-            "extra": "54290756 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString/[]uint8 (github.com/gofiber/utils/v2) - ns/op",
-            "value": 20,
-            "unit": "ns/op",
-            "extra": "54290756 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString/[]uint8 (github.com/gofiber/utils/v2) - B/op",
-            "value": 16,
-            "unit": "B/op",
-            "extra": "54290756 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString/[]uint8 (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 1,
-            "unit": "allocs/op",
-            "extra": "54290756 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString/bool (github.com/gofiber/utils/v2)",
-            "value": 3.079,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "370730880 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString/bool (github.com/gofiber/utils/v2) - ns/op",
-            "value": 3.079,
-            "unit": "ns/op",
-            "extra": "370730880 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString/bool (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "370730880 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString/bool (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "370730880 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString/float32 (github.com/gofiber/utils/v2)",
-            "value": 74.53,
-            "unit": "ns/op\t       4 B/op\t       1 allocs/op",
-            "extra": "15728502 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString/float32 (github.com/gofiber/utils/v2) - ns/op",
-            "value": 74.53,
-            "unit": "ns/op",
-            "extra": "15728502 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString/float32 (github.com/gofiber/utils/v2) - B/op",
-            "value": 4,
-            "unit": "B/op",
-            "extra": "15728502 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString/float32 (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 1,
-            "unit": "allocs/op",
-            "extra": "15728502 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString/float64 (github.com/gofiber/utils/v2)",
-            "value": 94.43,
-            "unit": "ns/op\t       4 B/op\t       1 allocs/op",
-            "extra": "12520521 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString/float64 (github.com/gofiber/utils/v2) - ns/op",
-            "value": 94.43,
-            "unit": "ns/op",
-            "extra": "12520521 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString/float64 (github.com/gofiber/utils/v2) - B/op",
-            "value": 4,
-            "unit": "B/op",
-            "extra": "12520521 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString/float64 (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 1,
-            "unit": "allocs/op",
-            "extra": "12520521 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString/time.Time (github.com/gofiber/utils/v2)",
-            "value": 128.8,
-            "unit": "ns/op\t      24 B/op\t       1 allocs/op",
-            "extra": "9217851 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString/time.Time (github.com/gofiber/utils/v2) - ns/op",
-            "value": 128.8,
-            "unit": "ns/op",
-            "extra": "9217851 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString/time.Time (github.com/gofiber/utils/v2) - B/op",
-            "value": 24,
-            "unit": "B/op",
-            "extra": "9217851 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString/time.Time (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 1,
-            "unit": "allocs/op",
-            "extra": "9217851 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString/time.Time#01 (github.com/gofiber/utils/v2)",
-            "value": 128,
-            "unit": "ns/op\t      24 B/op\t       1 allocs/op",
-            "extra": "9329464 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString/time.Time#01 (github.com/gofiber/utils/v2) - ns/op",
-            "value": 128,
-            "unit": "ns/op",
-            "extra": "9329464 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString/time.Time#01 (github.com/gofiber/utils/v2) - B/op",
-            "value": 24,
-            "unit": "B/op",
-            "extra": "9329464 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString/time.Time#01 (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 1,
-            "unit": "allocs/op",
-            "extra": "9329464 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString/[]string (github.com/gofiber/utils/v2)",
-            "value": 38.17,
-            "unit": "ns/op\t      16 B/op\t       1 allocs/op",
-            "extra": "30264801 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString/[]string (github.com/gofiber/utils/v2) - ns/op",
-            "value": 38.17,
-            "unit": "ns/op",
-            "extra": "30264801 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString/[]string (github.com/gofiber/utils/v2) - B/op",
-            "value": 16,
-            "unit": "B/op",
-            "extra": "30264801 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString/[]string (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 1,
-            "unit": "allocs/op",
-            "extra": "30264801 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString/[]int (github.com/gofiber/utils/v2)",
-            "value": 35.08,
-            "unit": "ns/op\t       8 B/op\t       1 allocs/op",
-            "extra": "32471007 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString/[]int (github.com/gofiber/utils/v2) - ns/op",
-            "value": 35.08,
-            "unit": "ns/op",
-            "extra": "32471007 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString/[]int (github.com/gofiber/utils/v2) - B/op",
-            "value": 8,
-            "unit": "B/op",
-            "extra": "32471007 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString/[]int (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 1,
-            "unit": "allocs/op",
-            "extra": "32471007 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString/[2]int (github.com/gofiber/utils/v2)",
-            "value": 62.55,
-            "unit": "ns/op\t      16 B/op\t       1 allocs/op",
-            "extra": "18712042 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString/[2]int (github.com/gofiber/utils/v2) - ns/op",
-            "value": 62.55,
-            "unit": "ns/op",
-            "extra": "18712042 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString/[2]int (github.com/gofiber/utils/v2) - B/op",
-            "value": 16,
-            "unit": "B/op",
-            "extra": "18712042 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString/[2]int (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 1,
-            "unit": "allocs/op",
-            "extra": "18712042 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString/[][]int (github.com/gofiber/utils/v2)",
-            "value": 200.2,
-            "unit": "ns/op\t     112 B/op\t       6 allocs/op",
-            "extra": "5954055 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString/[][]int (github.com/gofiber/utils/v2) - ns/op",
-            "value": 200.2,
-            "unit": "ns/op",
-            "extra": "5954055 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString/[][]int (github.com/gofiber/utils/v2) - B/op",
-            "value": 112,
-            "unit": "B/op",
-            "extra": "5954055 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString/[][]int (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 6,
-            "unit": "allocs/op",
-            "extra": "5954055 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString/[]interface_{} (github.com/gofiber/utils/v2)",
-            "value": 185.9,
-            "unit": "ns/op\t      72 B/op\t       3 allocs/op",
-            "extra": "6331090 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString/[]interface_{} (github.com/gofiber/utils/v2) - ns/op",
-            "value": 185.9,
-            "unit": "ns/op",
-            "extra": "6331090 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString/[]interface_{} (github.com/gofiber/utils/v2) - B/op",
-            "value": 72,
-            "unit": "B/op",
-            "extra": "6331090 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString/[]interface_{} (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 3,
-            "unit": "allocs/op",
-            "extra": "6331090 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString/utils.MyStringer (github.com/gofiber/utils/v2)",
-            "value": 5.286,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "226979500 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString/utils.MyStringer (github.com/gofiber/utils/v2) - ns/op",
-            "value": 5.286,
-            "unit": "ns/op",
-            "extra": "226979500 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString/utils.MyStringer (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "226979500 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString/utils.MyStringer (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "226979500 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString/utils.CustomType (github.com/gofiber/utils/v2)",
-            "value": 165.9,
-            "unit": "ns/op\t      16 B/op\t       1 allocs/op",
-            "extra": "7180285 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString/utils.CustomType (github.com/gofiber/utils/v2) - ns/op",
-            "value": 165.9,
-            "unit": "ns/op",
-            "extra": "7180285 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString/utils.CustomType (github.com/gofiber/utils/v2) - B/op",
-            "value": 16,
-            "unit": "B/op",
-            "extra": "7180285 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString/utils.CustomType (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 1,
-            "unit": "allocs/op",
-            "extra": "7180285 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString_concurrency/int (github.com/gofiber/utils/v2)",
-            "value": 1.945,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "617301891 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString_concurrency/int (github.com/gofiber/utils/v2) - ns/op",
-            "value": 1.945,
-            "unit": "ns/op",
-            "extra": "617301891 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString_concurrency/int (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "617301891 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString_concurrency/int (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "617301891 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString_concurrency/int8 (github.com/gofiber/utils/v2)",
-            "value": 1.413,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "847298841 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString_concurrency/int8 (github.com/gofiber/utils/v2) - ns/op",
-            "value": 1.413,
-            "unit": "ns/op",
-            "extra": "847298841 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString_concurrency/int8 (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "847298841 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString_concurrency/int8 (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "847298841 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString_concurrency/int16 (github.com/gofiber/utils/v2)",
-            "value": 1.943,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "616811584 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString_concurrency/int16 (github.com/gofiber/utils/v2) - ns/op",
-            "value": 1.943,
-            "unit": "ns/op",
-            "extra": "616811584 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString_concurrency/int16 (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "616811584 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString_concurrency/int16 (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "616811584 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString_concurrency/int32 (github.com/gofiber/utils/v2)",
-            "value": 2.119,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "565898307 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString_concurrency/int32 (github.com/gofiber/utils/v2) - ns/op",
-            "value": 2.119,
-            "unit": "ns/op",
-            "extra": "565898307 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString_concurrency/int32 (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "565898307 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString_concurrency/int32 (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "565898307 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString_concurrency/int64 (github.com/gofiber/utils/v2)",
-            "value": 2.036,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "617242492 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString_concurrency/int64 (github.com/gofiber/utils/v2) - ns/op",
-            "value": 2.036,
-            "unit": "ns/op",
-            "extra": "617242492 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString_concurrency/int64 (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "617242492 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString_concurrency/int64 (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "617242492 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString_concurrency/uint (github.com/gofiber/utils/v2)",
-            "value": 1.606,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "753210058 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString_concurrency/uint (github.com/gofiber/utils/v2) - ns/op",
-            "value": 1.606,
-            "unit": "ns/op",
-            "extra": "753210058 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString_concurrency/uint (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "753210058 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString_concurrency/uint (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "753210058 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString_concurrency/uint8 (github.com/gofiber/utils/v2)",
-            "value": 1.413,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "846400426 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString_concurrency/uint8 (github.com/gofiber/utils/v2) - ns/op",
-            "value": 1.413,
-            "unit": "ns/op",
-            "extra": "846400426 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString_concurrency/uint8 (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "846400426 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString_concurrency/uint8 (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "846400426 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString_concurrency/uint16 (github.com/gofiber/utils/v2)",
-            "value": 1.593,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "755234620 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString_concurrency/uint16 (github.com/gofiber/utils/v2) - ns/op",
-            "value": 1.593,
-            "unit": "ns/op",
-            "extra": "755234620 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString_concurrency/uint16 (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "755234620 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString_concurrency/uint16 (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "755234620 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString_concurrency/uint32 (github.com/gofiber/utils/v2)",
-            "value": 1.589,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "753190292 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString_concurrency/uint32 (github.com/gofiber/utils/v2) - ns/op",
-            "value": 1.589,
-            "unit": "ns/op",
-            "extra": "753190292 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString_concurrency/uint32 (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "753190292 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString_concurrency/uint32 (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "753190292 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString_concurrency/uint64 (github.com/gofiber/utils/v2)",
-            "value": 1.592,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "752153338 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString_concurrency/uint64 (github.com/gofiber/utils/v2) - ns/op",
-            "value": 1.592,
-            "unit": "ns/op",
-            "extra": "752153338 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString_concurrency/uint64 (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "752153338 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString_concurrency/uint64 (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "752153338 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString_concurrency/string (github.com/gofiber/utils/v2)",
-            "value": 1.414,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "850094161 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString_concurrency/string (github.com/gofiber/utils/v2) - ns/op",
-            "value": 1.414,
-            "unit": "ns/op",
-            "extra": "850094161 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString_concurrency/string (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "850094161 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString_concurrency/string (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "850094161 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString_concurrency/[]uint8 (github.com/gofiber/utils/v2)",
-            "value": 10.79,
-            "unit": "ns/op\t      16 B/op\t       1 allocs/op",
-            "extra": "111693746 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString_concurrency/[]uint8 (github.com/gofiber/utils/v2) - ns/op",
-            "value": 10.79,
-            "unit": "ns/op",
-            "extra": "111693746 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString_concurrency/[]uint8 (github.com/gofiber/utils/v2) - B/op",
-            "value": 16,
-            "unit": "B/op",
-            "extra": "111693746 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString_concurrency/[]uint8 (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 1,
-            "unit": "allocs/op",
-            "extra": "111693746 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString_concurrency/bool (github.com/gofiber/utils/v2)",
-            "value": 1.502,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "798561444 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString_concurrency/bool (github.com/gofiber/utils/v2) - ns/op",
-            "value": 1.502,
-            "unit": "ns/op",
-            "extra": "798561444 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString_concurrency/bool (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "798561444 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString_concurrency/bool (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "798561444 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString_concurrency/float32 (github.com/gofiber/utils/v2)",
-            "value": 35.69,
-            "unit": "ns/op\t       4 B/op\t       1 allocs/op",
-            "extra": "32855830 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString_concurrency/float32 (github.com/gofiber/utils/v2) - ns/op",
-            "value": 35.69,
-            "unit": "ns/op",
-            "extra": "32855830 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString_concurrency/float32 (github.com/gofiber/utils/v2) - B/op",
-            "value": 4,
-            "unit": "B/op",
-            "extra": "32855830 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString_concurrency/float32 (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 1,
-            "unit": "allocs/op",
-            "extra": "32855830 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString_concurrency/float64 (github.com/gofiber/utils/v2)",
-            "value": 42.47,
-            "unit": "ns/op\t       4 B/op\t       1 allocs/op",
-            "extra": "27761610 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString_concurrency/float64 (github.com/gofiber/utils/v2) - ns/op",
-            "value": 42.47,
-            "unit": "ns/op",
-            "extra": "27761610 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString_concurrency/float64 (github.com/gofiber/utils/v2) - B/op",
-            "value": 4,
-            "unit": "B/op",
-            "extra": "27761610 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString_concurrency/float64 (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 1,
-            "unit": "allocs/op",
-            "extra": "27761610 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString_concurrency/time.Time (github.com/gofiber/utils/v2)",
-            "value": 72.65,
-            "unit": "ns/op\t      24 B/op\t       1 allocs/op",
-            "extra": "16407364 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString_concurrency/time.Time (github.com/gofiber/utils/v2) - ns/op",
-            "value": 72.65,
-            "unit": "ns/op",
-            "extra": "16407364 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString_concurrency/time.Time (github.com/gofiber/utils/v2) - B/op",
-            "value": 24,
-            "unit": "B/op",
-            "extra": "16407364 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString_concurrency/time.Time (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 1,
-            "unit": "allocs/op",
-            "extra": "16407364 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString_concurrency/time.Time#01 (github.com/gofiber/utils/v2)",
-            "value": 65.69,
-            "unit": "ns/op\t      24 B/op\t       1 allocs/op",
-            "extra": "18155593 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString_concurrency/time.Time#01 (github.com/gofiber/utils/v2) - ns/op",
-            "value": 65.69,
-            "unit": "ns/op",
-            "extra": "18155593 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString_concurrency/time.Time#01 (github.com/gofiber/utils/v2) - B/op",
-            "value": 24,
-            "unit": "B/op",
-            "extra": "18155593 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString_concurrency/time.Time#01 (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 1,
-            "unit": "allocs/op",
-            "extra": "18155593 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString_concurrency/[]string (github.com/gofiber/utils/v2)",
-            "value": 18.48,
-            "unit": "ns/op\t      16 B/op\t       1 allocs/op",
-            "extra": "57540441 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString_concurrency/[]string (github.com/gofiber/utils/v2) - ns/op",
-            "value": 18.48,
-            "unit": "ns/op",
-            "extra": "57540441 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString_concurrency/[]string (github.com/gofiber/utils/v2) - B/op",
-            "value": 16,
-            "unit": "B/op",
-            "extra": "57540441 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString_concurrency/[]string (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 1,
-            "unit": "allocs/op",
-            "extra": "57540441 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString_concurrency/[]int (github.com/gofiber/utils/v2)",
-            "value": 16.25,
-            "unit": "ns/op\t       8 B/op\t       1 allocs/op",
-            "extra": "72135174 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString_concurrency/[]int (github.com/gofiber/utils/v2) - ns/op",
-            "value": 16.25,
-            "unit": "ns/op",
-            "extra": "72135174 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString_concurrency/[]int (github.com/gofiber/utils/v2) - B/op",
-            "value": 8,
-            "unit": "B/op",
-            "extra": "72135174 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString_concurrency/[]int (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 1,
-            "unit": "allocs/op",
-            "extra": "72135174 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString_concurrency/[2]int (github.com/gofiber/utils/v2)",
-            "value": 29.76,
-            "unit": "ns/op\t      16 B/op\t       1 allocs/op",
-            "extra": "39886809 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString_concurrency/[2]int (github.com/gofiber/utils/v2) - ns/op",
-            "value": 29.76,
-            "unit": "ns/op",
-            "extra": "39886809 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString_concurrency/[2]int (github.com/gofiber/utils/v2) - B/op",
-            "value": 16,
-            "unit": "B/op",
-            "extra": "39886809 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString_concurrency/[2]int (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 1,
-            "unit": "allocs/op",
-            "extra": "39886809 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString_concurrency/[][]int (github.com/gofiber/utils/v2)",
-            "value": 103.9,
-            "unit": "ns/op\t     112 B/op\t       6 allocs/op",
-            "extra": "11351120 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString_concurrency/[][]int (github.com/gofiber/utils/v2) - ns/op",
-            "value": 103.9,
-            "unit": "ns/op",
-            "extra": "11351120 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString_concurrency/[][]int (github.com/gofiber/utils/v2) - B/op",
-            "value": 112,
-            "unit": "B/op",
-            "extra": "11351120 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString_concurrency/[][]int (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 6,
-            "unit": "allocs/op",
-            "extra": "11351120 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString_concurrency/[]interface_{} (github.com/gofiber/utils/v2)",
-            "value": 87.95,
-            "unit": "ns/op\t      72 B/op\t       3 allocs/op",
-            "extra": "13574973 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString_concurrency/[]interface_{} (github.com/gofiber/utils/v2) - ns/op",
-            "value": 87.95,
-            "unit": "ns/op",
-            "extra": "13574973 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString_concurrency/[]interface_{} (github.com/gofiber/utils/v2) - B/op",
-            "value": 72,
-            "unit": "B/op",
-            "extra": "13574973 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString_concurrency/[]interface_{} (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 3,
-            "unit": "allocs/op",
-            "extra": "13574973 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString_concurrency/utils.MyStringer (github.com/gofiber/utils/v2)",
-            "value": 2.298,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "522200770 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString_concurrency/utils.MyStringer (github.com/gofiber/utils/v2) - ns/op",
-            "value": 2.298,
-            "unit": "ns/op",
-            "extra": "522200770 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString_concurrency/utils.MyStringer (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "522200770 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString_concurrency/utils.MyStringer (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "522200770 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString_concurrency/utils.CustomType (github.com/gofiber/utils/v2)",
-            "value": 82.6,
-            "unit": "ns/op\t      16 B/op\t       1 allocs/op",
-            "extra": "15287817 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString_concurrency/utils.CustomType (github.com/gofiber/utils/v2) - ns/op",
-            "value": 82.6,
-            "unit": "ns/op",
-            "extra": "15287817 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString_concurrency/utils.CustomType (github.com/gofiber/utils/v2) - B/op",
-            "value": 16,
-            "unit": "B/op",
-            "extra": "15287817 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToString_concurrency/utils.CustomType (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 1,
-            "unit": "allocs/op",
-            "extra": "15287817 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_UnsafeBytes/unsafe (github.com/gofiber/utils/v2)",
-            "value": 0.7768,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "1000000000 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_UnsafeBytes/unsafe (github.com/gofiber/utils/v2) - ns/op",
-            "value": 0.7768,
-            "unit": "ns/op",
-            "extra": "1000000000 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_UnsafeBytes/unsafe (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "1000000000 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_UnsafeBytes/unsafe (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "1000000000 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_UnsafeBytes/default (github.com/gofiber/utils/v2)",
-            "value": 22.32,
-            "unit": "ns/op\t      16 B/op\t       1 allocs/op",
-            "extra": "47109078 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_UnsafeBytes/default (github.com/gofiber/utils/v2) - ns/op",
-            "value": 22.32,
-            "unit": "ns/op",
-            "extra": "47109078 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_UnsafeBytes/default (github.com/gofiber/utils/v2) - B/op",
-            "value": 16,
-            "unit": "B/op",
-            "extra": "47109078 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_UnsafeBytes/default (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 1,
-            "unit": "allocs/op",
-            "extra": "47109078 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_UnsafeString/unsafe (github.com/gofiber/utils/v2)",
-            "value": 0.4794,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "1000000000 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_UnsafeString/unsafe (github.com/gofiber/utils/v2) - ns/op",
-            "value": 0.4794,
-            "unit": "ns/op",
-            "extra": "1000000000 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_UnsafeString/unsafe (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "1000000000 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_UnsafeString/unsafe (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "1000000000 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_UnsafeString/default (github.com/gofiber/utils/v2)",
-            "value": 17.77,
-            "unit": "ns/op\t      16 B/op\t       1 allocs/op",
-            "extra": "58258159 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_UnsafeString/default (github.com/gofiber/utils/v2) - ns/op",
-            "value": 17.77,
-            "unit": "ns/op",
-            "extra": "58258159 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_UnsafeString/default (github.com/gofiber/utils/v2) - B/op",
-            "value": 16,
-            "unit": "B/op",
-            "extra": "58258159 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_UnsafeString/default (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 1,
-            "unit": "allocs/op",
-            "extra": "58258159 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ByteSize/0 (github.com/gofiber/utils/v2)",
-            "value": 4.233,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "283543135 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ByteSize/0 (github.com/gofiber/utils/v2) - ns/op",
-            "value": 4.233,
-            "unit": "ns/op",
-            "extra": "283543135 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ByteSize/0 (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "283543135 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ByteSize/0 (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "283543135 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ByteSize/1 (github.com/gofiber/utils/v2)",
-            "value": 25.18,
-            "unit": "ns/op\t      16 B/op\t       1 allocs/op",
-            "extra": "43374717 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ByteSize/1 (github.com/gofiber/utils/v2) - ns/op",
-            "value": 25.18,
-            "unit": "ns/op",
-            "extra": "43374717 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ByteSize/1 (github.com/gofiber/utils/v2) - B/op",
-            "value": 16,
-            "unit": "B/op",
-            "extra": "43374717 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ByteSize/1 (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 1,
-            "unit": "allocs/op",
-            "extra": "43374717 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ByteSize/500 (github.com/gofiber/utils/v2)",
-            "value": 26.87,
-            "unit": "ns/op\t      16 B/op\t       1 allocs/op",
-            "extra": "42084932 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ByteSize/500 (github.com/gofiber/utils/v2) - ns/op",
-            "value": 26.87,
-            "unit": "ns/op",
-            "extra": "42084932 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ByteSize/500 (github.com/gofiber/utils/v2) - B/op",
-            "value": 16,
-            "unit": "B/op",
-            "extra": "42084932 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ByteSize/500 (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 1,
-            "unit": "allocs/op",
-            "extra": "42084932 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ByteSize/1024 (github.com/gofiber/utils/v2)",
-            "value": 26.29,
-            "unit": "ns/op\t      16 B/op\t       1 allocs/op",
-            "extra": "43426387 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ByteSize/1024 (github.com/gofiber/utils/v2) - ns/op",
-            "value": 26.29,
-            "unit": "ns/op",
-            "extra": "43426387 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ByteSize/1024 (github.com/gofiber/utils/v2) - B/op",
-            "value": 16,
-            "unit": "B/op",
-            "extra": "43426387 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ByteSize/1024 (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 1,
-            "unit": "allocs/op",
-            "extra": "43426387 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ByteSize/1126 (github.com/gofiber/utils/v2)",
-            "value": 30.05,
-            "unit": "ns/op\t      16 B/op\t       1 allocs/op",
-            "extra": "36676281 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ByteSize/1126 (github.com/gofiber/utils/v2) - ns/op",
-            "value": 30.05,
-            "unit": "ns/op",
-            "extra": "36676281 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ByteSize/1126 (github.com/gofiber/utils/v2) - B/op",
-            "value": 16,
-            "unit": "B/op",
-            "extra": "36676281 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ByteSize/1126 (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 1,
-            "unit": "allocs/op",
-            "extra": "36676281 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ByteSize/1048576 (github.com/gofiber/utils/v2)",
-            "value": 26.16,
-            "unit": "ns/op\t      16 B/op\t       1 allocs/op",
-            "extra": "43045791 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ByteSize/1048576 (github.com/gofiber/utils/v2) - ns/op",
-            "value": 26.16,
-            "unit": "ns/op",
-            "extra": "43045791 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ByteSize/1048576 (github.com/gofiber/utils/v2) - B/op",
-            "value": 16,
-            "unit": "B/op",
-            "extra": "43045791 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ByteSize/1048576 (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 1,
-            "unit": "allocs/op",
-            "extra": "43045791 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ByteSize/1153024 (github.com/gofiber/utils/v2)",
-            "value": 29.99,
-            "unit": "ns/op\t      16 B/op\t       1 allocs/op",
-            "extra": "37538978 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ByteSize/1153024 (github.com/gofiber/utils/v2) - ns/op",
-            "value": 29.99,
-            "unit": "ns/op",
-            "extra": "37538978 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ByteSize/1153024 (github.com/gofiber/utils/v2) - B/op",
-            "value": 16,
-            "unit": "B/op",
-            "extra": "37538978 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ByteSize/1153024 (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 1,
-            "unit": "allocs/op",
-            "extra": "37538978 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ByteSize/1073741824 (github.com/gofiber/utils/v2)",
-            "value": 25.83,
-            "unit": "ns/op\t      16 B/op\t       1 allocs/op",
-            "extra": "43472835 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ByteSize/1073741824 (github.com/gofiber/utils/v2) - ns/op",
-            "value": 25.83,
-            "unit": "ns/op",
-            "extra": "43472835 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ByteSize/1073741824 (github.com/gofiber/utils/v2) - B/op",
-            "value": 16,
-            "unit": "B/op",
-            "extra": "43472835 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ByteSize/1073741824 (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 1,
-            "unit": "allocs/op",
-            "extra": "43472835 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ByteSize/1180696576 (github.com/gofiber/utils/v2)",
-            "value": 29.98,
-            "unit": "ns/op\t      16 B/op\t       1 allocs/op",
-            "extra": "37913458 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ByteSize/1180696576 (github.com/gofiber/utils/v2) - ns/op",
-            "value": 29.98,
-            "unit": "ns/op",
-            "extra": "37913458 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ByteSize/1180696576 (github.com/gofiber/utils/v2) - B/op",
-            "value": 16,
-            "unit": "B/op",
-            "extra": "37913458 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ByteSize/1180696576 (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 1,
-            "unit": "allocs/op",
-            "extra": "37913458 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ByteSize/1099511627776 (github.com/gofiber/utils/v2)",
-            "value": 25.95,
-            "unit": "ns/op\t      16 B/op\t       1 allocs/op",
-            "extra": "43121636 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ByteSize/1099511627776 (github.com/gofiber/utils/v2) - ns/op",
-            "value": 25.95,
-            "unit": "ns/op",
-            "extra": "43121636 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ByteSize/1099511627776 (github.com/gofiber/utils/v2) - B/op",
-            "value": 16,
-            "unit": "B/op",
-            "extra": "43121636 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ByteSize/1099511627776 (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 1,
-            "unit": "allocs/op",
-            "extra": "43121636 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ByteSize/1209033293824 (github.com/gofiber/utils/v2)",
-            "value": 29.85,
-            "unit": "ns/op\t      16 B/op\t       1 allocs/op",
-            "extra": "38596443 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ByteSize/1209033293824 (github.com/gofiber/utils/v2) - ns/op",
-            "value": 29.85,
-            "unit": "ns/op",
-            "extra": "38596443 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ByteSize/1209033293824 (github.com/gofiber/utils/v2) - B/op",
-            "value": 16,
-            "unit": "B/op",
-            "extra": "38596443 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ByteSize/1209033293824 (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 1,
-            "unit": "allocs/op",
-            "extra": "38596443 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ByteSize/1125899906842624 (github.com/gofiber/utils/v2)",
-            "value": 25.66,
-            "unit": "ns/op\t      16 B/op\t       1 allocs/op",
-            "extra": "43462227 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ByteSize/1125899906842624 (github.com/gofiber/utils/v2) - ns/op",
-            "value": 25.66,
-            "unit": "ns/op",
-            "extra": "43462227 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ByteSize/1125899906842624 (github.com/gofiber/utils/v2) - B/op",
-            "value": 16,
-            "unit": "B/op",
-            "extra": "43462227 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ByteSize/1125899906842624 (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 1,
-            "unit": "allocs/op",
-            "extra": "43462227 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ByteSize/1238050092875776 (github.com/gofiber/utils/v2)",
-            "value": 30.16,
-            "unit": "ns/op\t      16 B/op\t       1 allocs/op",
-            "extra": "38353628 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ByteSize/1238050092875776 (github.com/gofiber/utils/v2) - ns/op",
-            "value": 30.16,
-            "unit": "ns/op",
-            "extra": "38353628 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ByteSize/1238050092875776 (github.com/gofiber/utils/v2) - B/op",
-            "value": 16,
-            "unit": "B/op",
-            "extra": "38353628 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ByteSize/1238050092875776 (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 1,
-            "unit": "allocs/op",
-            "extra": "38353628 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ByteSize/1152921504606846976 (github.com/gofiber/utils/v2)",
-            "value": 25.6,
-            "unit": "ns/op\t      16 B/op\t       1 allocs/op",
-            "extra": "42411300 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ByteSize/1152921504606846976 (github.com/gofiber/utils/v2) - ns/op",
-            "value": 25.6,
-            "unit": "ns/op",
-            "extra": "42411300 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ByteSize/1152921504606846976 (github.com/gofiber/utils/v2) - B/op",
-            "value": 16,
-            "unit": "B/op",
-            "extra": "42411300 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ByteSize/1152921504606846976 (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 1,
-            "unit": "allocs/op",
-            "extra": "42411300 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ByteSize/1267763295104794624 (github.com/gofiber/utils/v2)",
-            "value": 29.6,
-            "unit": "ns/op\t      16 B/op\t       1 allocs/op",
-            "extra": "37990822 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ByteSize/1267763295104794624 (github.com/gofiber/utils/v2) - ns/op",
-            "value": 29.6,
-            "unit": "ns/op",
-            "extra": "37990822 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ByteSize/1267763295104794624 (github.com/gofiber/utils/v2) - B/op",
-            "value": 16,
-            "unit": "B/op",
-            "extra": "37990822 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ByteSize/1267763295104794624 (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 1,
-            "unit": "allocs/op",
-            "extra": "37990822 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_FormatUint/small/fiber (github.com/gofiber/utils/v2)",
-            "value": 0.3522,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "1000000000 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_FormatUint/small/fiber (github.com/gofiber/utils/v2) - ns/op",
-            "value": 0.3522,
-            "unit": "ns/op",
-            "extra": "1000000000 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_FormatUint/small/fiber (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "1000000000 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_FormatUint/small/fiber (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "1000000000 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_FormatUint/small/strconv (github.com/gofiber/utils/v2)",
-            "value": 2.475,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "486766317 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_FormatUint/small/strconv (github.com/gofiber/utils/v2) - ns/op",
-            "value": 2.475,
-            "unit": "ns/op",
-            "extra": "486766317 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_FormatUint/small/strconv (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "486766317 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_FormatUint/small/strconv (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "486766317 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_FormatUint/medium/fiber (github.com/gofiber/utils/v2)",
-            "value": 13.84,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "86782616 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_FormatUint/medium/fiber (github.com/gofiber/utils/v2) - ns/op",
-            "value": 13.84,
-            "unit": "ns/op",
-            "extra": "86782616 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_FormatUint/medium/fiber (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "86782616 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_FormatUint/medium/fiber (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "86782616 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_FormatUint/medium/strconv (github.com/gofiber/utils/v2)",
-            "value": 30.18,
-            "unit": "ns/op\t      16 B/op\t       1 allocs/op",
-            "extra": "36568660 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_FormatUint/medium/strconv (github.com/gofiber/utils/v2) - ns/op",
-            "value": 30.18,
-            "unit": "ns/op",
-            "extra": "36568660 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_FormatUint/medium/strconv (github.com/gofiber/utils/v2) - B/op",
-            "value": 16,
-            "unit": "B/op",
-            "extra": "36568660 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_FormatUint/medium/strconv (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 1,
-            "unit": "allocs/op",
-            "extra": "36568660 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_FormatUint/large/fiber (github.com/gofiber/utils/v2)",
-            "value": 30.44,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "39394078 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_FormatUint/large/fiber (github.com/gofiber/utils/v2) - ns/op",
-            "value": 30.44,
-            "unit": "ns/op",
-            "extra": "39394078 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_FormatUint/large/fiber (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "39394078 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_FormatUint/large/fiber (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "39394078 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_FormatUint/large/strconv (github.com/gofiber/utils/v2)",
-            "value": 42.61,
-            "unit": "ns/op\t      24 B/op\t       1 allocs/op",
-            "extra": "26755856 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_FormatUint/large/strconv (github.com/gofiber/utils/v2) - ns/op",
-            "value": 42.61,
-            "unit": "ns/op",
-            "extra": "26755856 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_FormatUint/large/strconv (github.com/gofiber/utils/v2) - B/op",
-            "value": 24,
-            "unit": "B/op",
-            "extra": "26755856 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_FormatUint/large/strconv (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 1,
-            "unit": "allocs/op",
-            "extra": "26755856 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_FormatInt/small_pos/fiber (github.com/gofiber/utils/v2)",
-            "value": 2.112,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "569567898 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_FormatInt/small_pos/fiber (github.com/gofiber/utils/v2) - ns/op",
-            "value": 2.112,
-            "unit": "ns/op",
-            "extra": "569567898 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_FormatInt/small_pos/fiber (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "569567898 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_FormatInt/small_pos/fiber (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "569567898 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_FormatInt/small_pos/strconv (github.com/gofiber/utils/v2)",
-            "value": 2.816,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "426094339 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_FormatInt/small_pos/strconv (github.com/gofiber/utils/v2) - ns/op",
-            "value": 2.816,
-            "unit": "ns/op",
-            "extra": "426094339 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_FormatInt/small_pos/strconv (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "426094339 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_FormatInt/small_pos/strconv (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "426094339 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_FormatInt/small_neg/fiber (github.com/gofiber/utils/v2)",
-            "value": 2.467,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "485136691 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_FormatInt/small_neg/fiber (github.com/gofiber/utils/v2) - ns/op",
-            "value": 2.467,
-            "unit": "ns/op",
-            "extra": "485136691 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_FormatInt/small_neg/fiber (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "485136691 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_FormatInt/small_neg/fiber (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "485136691 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_FormatInt/small_neg/strconv (github.com/gofiber/utils/v2)",
-            "value": 17.68,
-            "unit": "ns/op\t       3 B/op\t       1 allocs/op",
-            "extra": "61562242 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_FormatInt/small_neg/strconv (github.com/gofiber/utils/v2) - ns/op",
-            "value": 17.68,
-            "unit": "ns/op",
-            "extra": "61562242 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_FormatInt/small_neg/strconv (github.com/gofiber/utils/v2) - B/op",
-            "value": 3,
-            "unit": "B/op",
-            "extra": "61562242 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_FormatInt/small_neg/strconv (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 1,
-            "unit": "allocs/op",
-            "extra": "61562242 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_FormatInt/medium_pos/fiber (github.com/gofiber/utils/v2)",
-            "value": 27.43,
-            "unit": "ns/op\t      16 B/op\t       1 allocs/op",
-            "extra": "41119819 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_FormatInt/medium_pos/fiber (github.com/gofiber/utils/v2) - ns/op",
-            "value": 27.43,
-            "unit": "ns/op",
-            "extra": "41119819 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_FormatInt/medium_pos/fiber (github.com/gofiber/utils/v2) - B/op",
-            "value": 16,
-            "unit": "B/op",
-            "extra": "41119819 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_FormatInt/medium_pos/fiber (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 1,
-            "unit": "allocs/op",
-            "extra": "41119819 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_FormatInt/medium_pos/strconv (github.com/gofiber/utils/v2)",
-            "value": 30.38,
-            "unit": "ns/op\t      16 B/op\t       1 allocs/op",
-            "extra": "37732159 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_FormatInt/medium_pos/strconv (github.com/gofiber/utils/v2) - ns/op",
-            "value": 30.38,
-            "unit": "ns/op",
-            "extra": "37732159 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_FormatInt/medium_pos/strconv (github.com/gofiber/utils/v2) - B/op",
-            "value": 16,
-            "unit": "B/op",
-            "extra": "37732159 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_FormatInt/medium_pos/strconv (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 1,
-            "unit": "allocs/op",
-            "extra": "37732159 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_FormatInt/medium_neg/fiber (github.com/gofiber/utils/v2)",
-            "value": 28.15,
-            "unit": "ns/op\t      16 B/op\t       1 allocs/op",
-            "extra": "40240880 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_FormatInt/medium_neg/fiber (github.com/gofiber/utils/v2) - ns/op",
-            "value": 28.15,
-            "unit": "ns/op",
-            "extra": "40240880 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_FormatInt/medium_neg/fiber (github.com/gofiber/utils/v2) - B/op",
-            "value": 16,
-            "unit": "B/op",
-            "extra": "40240880 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_FormatInt/medium_neg/fiber (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 1,
-            "unit": "allocs/op",
-            "extra": "40240880 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_FormatInt/medium_neg/strconv (github.com/gofiber/utils/v2)",
-            "value": 30.83,
-            "unit": "ns/op\t      16 B/op\t       1 allocs/op",
-            "extra": "36915583 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_FormatInt/medium_neg/strconv (github.com/gofiber/utils/v2) - ns/op",
-            "value": 30.83,
-            "unit": "ns/op",
-            "extra": "36915583 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_FormatInt/medium_neg/strconv (github.com/gofiber/utils/v2) - B/op",
-            "value": 16,
-            "unit": "B/op",
-            "extra": "36915583 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_FormatInt/medium_neg/strconv (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 1,
-            "unit": "allocs/op",
-            "extra": "36915583 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_FormatInt/large_pos/fiber (github.com/gofiber/utils/v2)",
-            "value": 43.34,
-            "unit": "ns/op\t      24 B/op\t       1 allocs/op",
-            "extra": "26789444 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_FormatInt/large_pos/fiber (github.com/gofiber/utils/v2) - ns/op",
-            "value": 43.34,
-            "unit": "ns/op",
-            "extra": "26789444 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_FormatInt/large_pos/fiber (github.com/gofiber/utils/v2) - B/op",
-            "value": 24,
-            "unit": "B/op",
-            "extra": "26789444 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_FormatInt/large_pos/fiber (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 1,
-            "unit": "allocs/op",
-            "extra": "26789444 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_FormatInt/large_pos/strconv (github.com/gofiber/utils/v2)",
-            "value": 42.37,
-            "unit": "ns/op\t      24 B/op\t       1 allocs/op",
-            "extra": "27299786 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_FormatInt/large_pos/strconv (github.com/gofiber/utils/v2) - ns/op",
-            "value": 42.37,
-            "unit": "ns/op",
-            "extra": "27299786 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_FormatInt/large_pos/strconv (github.com/gofiber/utils/v2) - B/op",
-            "value": 24,
-            "unit": "B/op",
-            "extra": "27299786 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_FormatInt/large_pos/strconv (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 1,
-            "unit": "allocs/op",
-            "extra": "27299786 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_FormatInt/large_neg/fiber (github.com/gofiber/utils/v2)",
-            "value": 44.88,
-            "unit": "ns/op\t      24 B/op\t       1 allocs/op",
-            "extra": "25855965 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_FormatInt/large_neg/fiber (github.com/gofiber/utils/v2) - ns/op",
-            "value": 44.88,
-            "unit": "ns/op",
-            "extra": "25855965 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_FormatInt/large_neg/fiber (github.com/gofiber/utils/v2) - B/op",
-            "value": 24,
-            "unit": "B/op",
-            "extra": "25855965 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_FormatInt/large_neg/fiber (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 1,
-            "unit": "allocs/op",
-            "extra": "25855965 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_FormatInt/large_neg/strconv (github.com/gofiber/utils/v2)",
-            "value": 43,
-            "unit": "ns/op\t      24 B/op\t       1 allocs/op",
-            "extra": "26901195 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_FormatInt/large_neg/strconv (github.com/gofiber/utils/v2) - ns/op",
-            "value": 43,
-            "unit": "ns/op",
-            "extra": "26901195 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_FormatInt/large_neg/strconv (github.com/gofiber/utils/v2) - B/op",
-            "value": 24,
-            "unit": "B/op",
-            "extra": "26901195 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_FormatInt/large_neg/strconv (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 1,
-            "unit": "allocs/op",
-            "extra": "26901195 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_FormatUint32/fiber (github.com/gofiber/utils/v2)",
-            "value": 12.93,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "93448867 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_FormatUint32/fiber (github.com/gofiber/utils/v2) - ns/op",
-            "value": 12.93,
-            "unit": "ns/op",
-            "extra": "93448867 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_FormatUint32/fiber (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "93448867 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_FormatUint32/fiber (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "93448867 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_FormatUint32/strconv (github.com/gofiber/utils/v2)",
-            "value": 30.26,
-            "unit": "ns/op\t      16 B/op\t       1 allocs/op",
-            "extra": "37296429 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_FormatUint32/strconv (github.com/gofiber/utils/v2) - ns/op",
-            "value": 30.26,
-            "unit": "ns/op",
-            "extra": "37296429 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_FormatUint32/strconv (github.com/gofiber/utils/v2) - B/op",
-            "value": 16,
-            "unit": "B/op",
-            "extra": "37296429 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_FormatUint32/strconv (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 1,
-            "unit": "allocs/op",
-            "extra": "37296429 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_FormatInt32/fiber (github.com/gofiber/utils/v2)",
-            "value": 27.19,
-            "unit": "ns/op\t      16 B/op\t       1 allocs/op",
-            "extra": "41051557 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_FormatInt32/fiber (github.com/gofiber/utils/v2) - ns/op",
-            "value": 27.19,
-            "unit": "ns/op",
-            "extra": "41051557 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_FormatInt32/fiber (github.com/gofiber/utils/v2) - B/op",
-            "value": 16,
-            "unit": "B/op",
-            "extra": "41051557 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_FormatInt32/fiber (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 1,
-            "unit": "allocs/op",
-            "extra": "41051557 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_FormatInt32/strconv (github.com/gofiber/utils/v2)",
-            "value": 30.89,
-            "unit": "ns/op\t      16 B/op\t       1 allocs/op",
-            "extra": "35451997 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_FormatInt32/strconv (github.com/gofiber/utils/v2) - ns/op",
-            "value": 30.89,
-            "unit": "ns/op",
-            "extra": "35451997 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_FormatInt32/strconv (github.com/gofiber/utils/v2) - B/op",
-            "value": 16,
-            "unit": "B/op",
-            "extra": "35451997 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_FormatInt32/strconv (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 1,
-            "unit": "allocs/op",
-            "extra": "35451997 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_FormatUint16/fiber (github.com/gofiber/utils/v2)",
-            "value": 9.87,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "121738005 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_FormatUint16/fiber (github.com/gofiber/utils/v2) - ns/op",
-            "value": 9.87,
-            "unit": "ns/op",
-            "extra": "121738005 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_FormatUint16/fiber (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "121738005 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_FormatUint16/fiber (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "121738005 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_FormatUint16/strconv (github.com/gofiber/utils/v2)",
-            "value": 22.17,
-            "unit": "ns/op\t       5 B/op\t       1 allocs/op",
-            "extra": "49384130 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_FormatUint16/strconv (github.com/gofiber/utils/v2) - ns/op",
-            "value": 22.17,
-            "unit": "ns/op",
-            "extra": "49384130 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_FormatUint16/strconv (github.com/gofiber/utils/v2) - B/op",
-            "value": 5,
-            "unit": "B/op",
-            "extra": "49384130 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_FormatUint16/strconv (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 1,
-            "unit": "allocs/op",
-            "extra": "49384130 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_FormatInt16/fiber (github.com/gofiber/utils/v2)",
-            "value": 20.12,
-            "unit": "ns/op\t       8 B/op\t       1 allocs/op",
-            "extra": "56066390 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_FormatInt16/fiber (github.com/gofiber/utils/v2) - ns/op",
-            "value": 20.12,
-            "unit": "ns/op",
-            "extra": "56066390 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_FormatInt16/fiber (github.com/gofiber/utils/v2) - B/op",
-            "value": 8,
-            "unit": "B/op",
-            "extra": "56066390 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_FormatInt16/fiber (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 1,
-            "unit": "allocs/op",
-            "extra": "56066390 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_FormatInt16/strconv (github.com/gofiber/utils/v2)",
-            "value": 23.04,
-            "unit": "ns/op\t       8 B/op\t       1 allocs/op",
-            "extra": "46868562 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_FormatInt16/strconv (github.com/gofiber/utils/v2) - ns/op",
-            "value": 23.04,
-            "unit": "ns/op",
-            "extra": "46868562 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_FormatInt16/strconv (github.com/gofiber/utils/v2) - B/op",
-            "value": 8,
-            "unit": "B/op",
-            "extra": "46868562 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_FormatInt16/strconv (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 1,
-            "unit": "allocs/op",
-            "extra": "46868562 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_FormatUint8/fiber (github.com/gofiber/utils/v2)",
-            "value": 0.3532,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "1000000000 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_FormatUint8/fiber (github.com/gofiber/utils/v2) - ns/op",
-            "value": 0.3532,
-            "unit": "ns/op",
-            "extra": "1000000000 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_FormatUint8/fiber (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "1000000000 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_FormatUint8/fiber (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "1000000000 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_FormatUint8/strconv (github.com/gofiber/utils/v2)",
-            "value": 19.36,
-            "unit": "ns/op\t       3 B/op\t       1 allocs/op",
-            "extra": "56057629 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_FormatUint8/strconv (github.com/gofiber/utils/v2) - ns/op",
-            "value": 19.36,
-            "unit": "ns/op",
-            "extra": "56057629 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_FormatUint8/strconv (github.com/gofiber/utils/v2) - B/op",
-            "value": 3,
-            "unit": "B/op",
-            "extra": "56057629 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_FormatUint8/strconv (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 1,
-            "unit": "allocs/op",
-            "extra": "56057629 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_FormatInt8/fiber (github.com/gofiber/utils/v2)",
-            "value": 0.3521,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "1000000000 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_FormatInt8/fiber (github.com/gofiber/utils/v2) - ns/op",
-            "value": 0.3521,
-            "unit": "ns/op",
-            "extra": "1000000000 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_FormatInt8/fiber (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "1000000000 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_FormatInt8/fiber (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "1000000000 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_FormatInt8/strconv (github.com/gofiber/utils/v2)",
-            "value": 19.19,
-            "unit": "ns/op\t       4 B/op\t       1 allocs/op",
-            "extra": "55823437 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_FormatInt8/strconv (github.com/gofiber/utils/v2) - ns/op",
-            "value": 19.19,
-            "unit": "ns/op",
-            "extra": "55823437 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_FormatInt8/strconv (github.com/gofiber/utils/v2) - B/op",
-            "value": 4,
-            "unit": "B/op",
-            "extra": "55823437 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_FormatInt8/strconv (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 1,
-            "unit": "allocs/op",
-            "extra": "55823437 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_AppendUint/fiber (github.com/gofiber/utils/v2)",
-            "value": 13.37,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "89684596 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_AppendUint/fiber (github.com/gofiber/utils/v2) - ns/op",
-            "value": 13.37,
-            "unit": "ns/op",
-            "extra": "89684596 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_AppendUint/fiber (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "89684596 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_AppendUint/fiber (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "89684596 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_AppendUint/strconv (github.com/gofiber/utils/v2)",
-            "value": 16.21,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "73931354 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_AppendUint/strconv (github.com/gofiber/utils/v2) - ns/op",
-            "value": 16.21,
-            "unit": "ns/op",
-            "extra": "73931354 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_AppendUint/strconv (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "73931354 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_AppendUint/strconv (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "73931354 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_AppendInt/small_neg/fiber (github.com/gofiber/utils/v2)",
-            "value": 4.931,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "213175993 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_AppendInt/small_neg/fiber (github.com/gofiber/utils/v2) - ns/op",
-            "value": 4.931,
-            "unit": "ns/op",
-            "extra": "213175993 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_AppendInt/small_neg/fiber (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "213175993 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_AppendInt/small_neg/fiber (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "213175993 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_AppendInt/small_neg/strconv (github.com/gofiber/utils/v2)",
-            "value": 11.29,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "100000000 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_AppendInt/small_neg/strconv (github.com/gofiber/utils/v2) - ns/op",
-            "value": 11.29,
-            "unit": "ns/op",
-            "extra": "100000000 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_AppendInt/small_neg/strconv (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "100000000 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_AppendInt/small_neg/strconv (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "100000000 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_AppendInt/medium_neg/fiber (github.com/gofiber/utils/v2)",
-            "value": 14.33,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "83025033 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_AppendInt/medium_neg/fiber (github.com/gofiber/utils/v2) - ns/op",
-            "value": 14.33,
-            "unit": "ns/op",
-            "extra": "83025033 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_AppendInt/medium_neg/fiber (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "83025033 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_AppendInt/medium_neg/fiber (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "83025033 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_AppendInt/medium_neg/strconv (github.com/gofiber/utils/v2)",
-            "value": 16.57,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "72417535 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_AppendInt/medium_neg/strconv (github.com/gofiber/utils/v2) - ns/op",
-            "value": 16.57,
-            "unit": "ns/op",
-            "extra": "72417535 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_AppendInt/medium_neg/strconv (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "72417535 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_AppendInt/medium_neg/strconv (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "72417535 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_GetMIME/fiber (github.com/gofiber/utils/v2)",
-            "value": 66.12,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "18173044 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_GetMIME/fiber (github.com/gofiber/utils/v2) - ns/op",
-            "value": 66.12,
-            "unit": "ns/op",
-            "extra": "18173044 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_GetMIME/fiber (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "18173044 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_GetMIME/fiber (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "18173044 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_GetMIME/default (github.com/gofiber/utils/v2)",
-            "value": 115.9,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "10372822 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_GetMIME/default (github.com/gofiber/utils/v2) - ns/op",
-            "value": 115.9,
-            "unit": "ns/op",
-            "extra": "10372822 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_GetMIME/default (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "10372822 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_GetMIME/default (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "10372822 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ParseVendorSpecificContentType/vendorContentType (github.com/gofiber/utils/v2)",
-            "value": 13.39,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "89271918 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ParseVendorSpecificContentType/vendorContentType (github.com/gofiber/utils/v2) - ns/op",
-            "value": 13.39,
-            "unit": "ns/op",
-            "extra": "89271918 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ParseVendorSpecificContentType/vendorContentType (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "89271918 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ParseVendorSpecificContentType/vendorContentType (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "89271918 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ParseVendorSpecificContentType/defaultContentType (github.com/gofiber/utils/v2)",
-            "value": 4.933,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "227007687 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ParseVendorSpecificContentType/defaultContentType (github.com/gofiber/utils/v2) - ns/op",
-            "value": 4.933,
-            "unit": "ns/op",
-            "extra": "227007687 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ParseVendorSpecificContentType/defaultContentType (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "227007687 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ParseVendorSpecificContentType/defaultContentType (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "227007687 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_StatusMessage/fiber (github.com/gofiber/utils/v2)",
-            "value": 0.7041,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "1000000000 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_StatusMessage/fiber (github.com/gofiber/utils/v2) - ns/op",
-            "value": 0.7041,
-            "unit": "ns/op",
-            "extra": "1000000000 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_StatusMessage/fiber (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "1000000000 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_StatusMessage/fiber (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "1000000000 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_StatusMessage/default (github.com/gofiber/utils/v2)",
-            "value": 3.523,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "339871892 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_StatusMessage/default (github.com/gofiber/utils/v2) - ns/op",
-            "value": 3.523,
-            "unit": "ns/op",
-            "extra": "339871892 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_StatusMessage/default (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "339871892 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_StatusMessage/default (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "339871892 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_IsIPv4/fiber (github.com/gofiber/utils/v2)",
-            "value": 21.59,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "56857507 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_IsIPv4/fiber (github.com/gofiber/utils/v2) - ns/op",
-            "value": 21.59,
-            "unit": "ns/op",
-            "extra": "56857507 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_IsIPv4/fiber (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "56857507 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_IsIPv4/fiber (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "56857507 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_IsIPv4/default (github.com/gofiber/utils/v2)",
-            "value": 33.85,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "35498236 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_IsIPv4/default (github.com/gofiber/utils/v2) - ns/op",
-            "value": 33.85,
-            "unit": "ns/op",
-            "extra": "35498236 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_IsIPv4/default (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "35498236 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_IsIPv4/default (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "35498236 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_IsIPv6/fiber (github.com/gofiber/utils/v2)",
-            "value": 53.14,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "23020818 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_IsIPv6/fiber (github.com/gofiber/utils/v2) - ns/op",
-            "value": 53.14,
-            "unit": "ns/op",
-            "extra": "23020818 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_IsIPv6/fiber (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "23020818 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_IsIPv6/fiber (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "23020818 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_IsIPv6/default (github.com/gofiber/utils/v2)",
-            "value": 97.29,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "13027250 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_IsIPv6/default (github.com/gofiber/utils/v2) - ns/op",
-            "value": 97.29,
-            "unit": "ns/op",
-            "extra": "13027250 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_IsIPv6/default (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "13027250 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_IsIPv6/default (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "13027250 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ParseUint/fiber (github.com/gofiber/utils/v2)",
-            "value": 11.99,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "99907126 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ParseUint/fiber (github.com/gofiber/utils/v2) - ns/op",
-            "value": 11.99,
-            "unit": "ns/op",
-            "extra": "99907126 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ParseUint/fiber (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "99907126 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ParseUint/fiber (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "99907126 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ParseUint/fiber_bytes (github.com/gofiber/utils/v2)",
-            "value": 13.08,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "91852801 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ParseUint/fiber_bytes (github.com/gofiber/utils/v2) - ns/op",
-            "value": 13.08,
-            "unit": "ns/op",
-            "extra": "91852801 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ParseUint/fiber_bytes (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "91852801 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ParseUint/fiber_bytes (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "91852801 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ParseUint/default (github.com/gofiber/utils/v2)",
-            "value": 20.09,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "57720448 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ParseUint/default (github.com/gofiber/utils/v2) - ns/op",
-            "value": 20.09,
-            "unit": "ns/op",
-            "extra": "57720448 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ParseUint/default (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "57720448 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ParseUint/default (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "57720448 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ParseInt/fiber (github.com/gofiber/utils/v2)",
-            "value": 9.511,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "126112628 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ParseInt/fiber (github.com/gofiber/utils/v2) - ns/op",
-            "value": 9.511,
-            "unit": "ns/op",
-            "extra": "126112628 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ParseInt/fiber (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "126112628 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ParseInt/fiber (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "126112628 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ParseInt/fiber_bytes (github.com/gofiber/utils/v2)",
-            "value": 9.371,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "128210690 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ParseInt/fiber_bytes (github.com/gofiber/utils/v2) - ns/op",
-            "value": 9.371,
-            "unit": "ns/op",
-            "extra": "128210690 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ParseInt/fiber_bytes (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "128210690 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ParseInt/fiber_bytes (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "128210690 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ParseInt/default (github.com/gofiber/utils/v2)",
-            "value": 26.42,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "45420534 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ParseInt/default (github.com/gofiber/utils/v2) - ns/op",
-            "value": 26.42,
-            "unit": "ns/op",
-            "extra": "45420534 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ParseInt/default (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "45420534 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ParseInt/default (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "45420534 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ParseInt32/fiber (github.com/gofiber/utils/v2)",
-            "value": 14.78,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "83110734 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ParseInt32/fiber (github.com/gofiber/utils/v2) - ns/op",
-            "value": 14.78,
-            "unit": "ns/op",
-            "extra": "83110734 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ParseInt32/fiber (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "83110734 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ParseInt32/fiber (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "83110734 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ParseInt32/fiber_bytes (github.com/gofiber/utils/v2)",
-            "value": 17.62,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "68021977 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ParseInt32/fiber_bytes (github.com/gofiber/utils/v2) - ns/op",
-            "value": 17.62,
-            "unit": "ns/op",
-            "extra": "68021977 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ParseInt32/fiber_bytes (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "68021977 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ParseInt32/fiber_bytes (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "68021977 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ParseInt32/default (github.com/gofiber/utils/v2)",
-            "value": 26.43,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "45371300 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ParseInt32/default (github.com/gofiber/utils/v2) - ns/op",
-            "value": 26.43,
-            "unit": "ns/op",
-            "extra": "45371300 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ParseInt32/default (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "45371300 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ParseInt32/default (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "45371300 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ParseInt16/fiber (github.com/gofiber/utils/v2)",
-            "value": 11.63,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "100000000 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ParseInt16/fiber (github.com/gofiber/utils/v2) - ns/op",
-            "value": 11.63,
-            "unit": "ns/op",
-            "extra": "100000000 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ParseInt16/fiber (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "100000000 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ParseInt16/fiber (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "100000000 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ParseInt16/fiber_bytes (github.com/gofiber/utils/v2)",
-            "value": 9.179,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "127720753 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ParseInt16/fiber_bytes (github.com/gofiber/utils/v2) - ns/op",
-            "value": 9.179,
-            "unit": "ns/op",
-            "extra": "127720753 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ParseInt16/fiber_bytes (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "127720753 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ParseInt16/fiber_bytes (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "127720753 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ParseInt16/default (github.com/gofiber/utils/v2)",
-            "value": 18.35,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "72038284 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ParseInt16/default (github.com/gofiber/utils/v2) - ns/op",
-            "value": 18.35,
-            "unit": "ns/op",
-            "extra": "72038284 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ParseInt16/default (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "72038284 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ParseInt16/default (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "72038284 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ParseInt8/fiber (github.com/gofiber/utils/v2)",
-            "value": 6.074,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "200366324 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ParseInt8/fiber (github.com/gofiber/utils/v2) - ns/op",
-            "value": 6.074,
-            "unit": "ns/op",
-            "extra": "200366324 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ParseInt8/fiber (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "200366324 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ParseInt8/fiber (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "200366324 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ParseInt8/fiber_bytes (github.com/gofiber/utils/v2)",
-            "value": 5.635,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "212797796 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ParseInt8/fiber_bytes (github.com/gofiber/utils/v2) - ns/op",
-            "value": 5.635,
-            "unit": "ns/op",
-            "extra": "212797796 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ParseInt8/fiber_bytes (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "212797796 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ParseInt8/fiber_bytes (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "212797796 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ParseInt8/default (github.com/gofiber/utils/v2)",
-            "value": 13.75,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "85315435 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ParseInt8/default (github.com/gofiber/utils/v2) - ns/op",
-            "value": 13.75,
-            "unit": "ns/op",
-            "extra": "85315435 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ParseInt8/default (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "85315435 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ParseInt8/default (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "85315435 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ParseUint32/fiber (github.com/gofiber/utils/v2)",
-            "value": 12.33,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "96840387 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ParseUint32/fiber (github.com/gofiber/utils/v2) - ns/op",
-            "value": 12.33,
-            "unit": "ns/op",
-            "extra": "96840387 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ParseUint32/fiber (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "96840387 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ParseUint32/fiber (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "96840387 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ParseUint32/fiber_bytes (github.com/gofiber/utils/v2)",
-            "value": 12.33,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "96159277 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ParseUint32/fiber_bytes (github.com/gofiber/utils/v2) - ns/op",
-            "value": 12.33,
-            "unit": "ns/op",
-            "extra": "96159277 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ParseUint32/fiber_bytes (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "96159277 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ParseUint32/fiber_bytes (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "96159277 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ParseUint32/default (github.com/gofiber/utils/v2)",
-            "value": 20.43,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "59593183 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ParseUint32/default (github.com/gofiber/utils/v2) - ns/op",
-            "value": 20.43,
-            "unit": "ns/op",
-            "extra": "59593183 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ParseUint32/default (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "59593183 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ParseUint32/default (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "59593183 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ParseUint16/fiber (github.com/gofiber/utils/v2)",
-            "value": 7.752,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "154870384 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ParseUint16/fiber (github.com/gofiber/utils/v2) - ns/op",
-            "value": 7.752,
-            "unit": "ns/op",
-            "extra": "154870384 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ParseUint16/fiber (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "154870384 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ParseUint16/fiber (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "154870384 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ParseUint16/fiber_bytes (github.com/gofiber/utils/v2)",
-            "value": 8.814,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "136293346 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ParseUint16/fiber_bytes (github.com/gofiber/utils/v2) - ns/op",
-            "value": 8.814,
-            "unit": "ns/op",
-            "extra": "136293346 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ParseUint16/fiber_bytes (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "136293346 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ParseUint16/fiber_bytes (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "136293346 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ParseUint16/default (github.com/gofiber/utils/v2)",
-            "value": 13.04,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "91137693 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ParseUint16/default (github.com/gofiber/utils/v2) - ns/op",
-            "value": 13.04,
-            "unit": "ns/op",
-            "extra": "91137693 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ParseUint16/default (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "91137693 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ParseUint16/default (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "91137693 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ParseUint8/fiber (github.com/gofiber/utils/v2)",
-            "value": 4.943,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "243043938 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ParseUint8/fiber (github.com/gofiber/utils/v2) - ns/op",
-            "value": 4.943,
-            "unit": "ns/op",
-            "extra": "243043938 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ParseUint8/fiber (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "243043938 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ParseUint8/fiber (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "243043938 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ParseUint8/fiber_bytes (github.com/gofiber/utils/v2)",
-            "value": 4.935,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "242634590 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ParseUint8/fiber_bytes (github.com/gofiber/utils/v2) - ns/op",
-            "value": 4.935,
-            "unit": "ns/op",
-            "extra": "242634590 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ParseUint8/fiber_bytes (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "242634590 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ParseUint8/fiber_bytes (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "242634590 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ParseUint8/default (github.com/gofiber/utils/v2)",
-            "value": 9.508,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "126135378 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ParseUint8/default (github.com/gofiber/utils/v2) - ns/op",
-            "value": 9.508,
-            "unit": "ns/op",
-            "extra": "126135378 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ParseUint8/default (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "126135378 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ParseUint8/default (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "126135378 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ParseFloat64/fiber (github.com/gofiber/utils/v2)",
-            "value": 15.51,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "77195611 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ParseFloat64/fiber (github.com/gofiber/utils/v2) - ns/op",
-            "value": 15.51,
-            "unit": "ns/op",
-            "extra": "77195611 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ParseFloat64/fiber (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "77195611 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ParseFloat64/fiber (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "77195611 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ParseFloat64/fiber_bytes (github.com/gofiber/utils/v2)",
-            "value": 15.48,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "76959597 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ParseFloat64/fiber_bytes (github.com/gofiber/utils/v2) - ns/op",
-            "value": 15.48,
-            "unit": "ns/op",
-            "extra": "76959597 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ParseFloat64/fiber_bytes (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "76959597 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ParseFloat64/fiber_bytes (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "76959597 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ParseFloat64/default (github.com/gofiber/utils/v2)",
-            "value": 35.95,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "33176384 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ParseFloat64/default (github.com/gofiber/utils/v2) - ns/op",
-            "value": 35.95,
-            "unit": "ns/op",
-            "extra": "33176384 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ParseFloat64/default (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "33176384 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ParseFloat64/default (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "33176384 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ParseFloat32/fiber (github.com/gofiber/utils/v2)",
-            "value": 17.41,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "68613078 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ParseFloat32/fiber (github.com/gofiber/utils/v2) - ns/op",
-            "value": 17.41,
-            "unit": "ns/op",
-            "extra": "68613078 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ParseFloat32/fiber (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "68613078 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ParseFloat32/fiber (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "68613078 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ParseFloat32/fiber_bytes (github.com/gofiber/utils/v2)",
-            "value": 16.93,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "70464139 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ParseFloat32/fiber_bytes (github.com/gofiber/utils/v2) - ns/op",
-            "value": 16.93,
-            "unit": "ns/op",
-            "extra": "70464139 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ParseFloat32/fiber_bytes (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "70464139 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ParseFloat32/fiber_bytes (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "70464139 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ParseFloat32/default (github.com/gofiber/utils/v2)",
-            "value": 39.34,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "30385587 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ParseFloat32/default (github.com/gofiber/utils/v2) - ns/op",
-            "value": 39.34,
-            "unit": "ns/op",
-            "extra": "30385587 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ParseFloat32/default (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "30385587 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ParseFloat32/default (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "30385587 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_AddTrailingSlashString/empty (github.com/gofiber/utils/v2)",
-            "value": 0.3526,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "1000000000 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_AddTrailingSlashString/empty (github.com/gofiber/utils/v2) - ns/op",
-            "value": 0.3526,
-            "unit": "ns/op",
-            "extra": "1000000000 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_AddTrailingSlashString/empty (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "1000000000 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_AddTrailingSlashString/empty (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "1000000000 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_AddTrailingSlashString/slash-only (github.com/gofiber/utils/v2)",
-            "value": 0.5284,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "1000000000 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_AddTrailingSlashString/slash-only (github.com/gofiber/utils/v2) - ns/op",
-            "value": 0.5284,
-            "unit": "ns/op",
-            "extra": "1000000000 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_AddTrailingSlashString/slash-only (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "1000000000 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_AddTrailingSlashString/slash-only (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "1000000000 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_AddTrailingSlashString/short-no-slash (github.com/gofiber/utils/v2)",
-            "value": 15.19,
-            "unit": "ns/op\t       4 B/op\t       1 allocs/op",
-            "extra": "71715458 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_AddTrailingSlashString/short-no-slash (github.com/gofiber/utils/v2) - ns/op",
-            "value": 15.19,
-            "unit": "ns/op",
-            "extra": "71715458 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_AddTrailingSlashString/short-no-slash (github.com/gofiber/utils/v2) - B/op",
-            "value": 4,
-            "unit": "B/op",
-            "extra": "71715458 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_AddTrailingSlashString/short-no-slash (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 1,
-            "unit": "allocs/op",
-            "extra": "71715458 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_AddTrailingSlashString/short-with-slash (github.com/gofiber/utils/v2)",
-            "value": 0.5281,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "1000000000 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_AddTrailingSlashString/short-with-slash (github.com/gofiber/utils/v2) - ns/op",
-            "value": 0.5281,
-            "unit": "ns/op",
-            "extra": "1000000000 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_AddTrailingSlashString/short-with-slash (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "1000000000 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_AddTrailingSlashString/short-with-slash (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "1000000000 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_AddTrailingSlashString/path-no-slash (github.com/gofiber/utils/v2)",
-            "value": 21.7,
-            "unit": "ns/op\t      16 B/op\t       1 allocs/op",
-            "extra": "52904006 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_AddTrailingSlashString/path-no-slash (github.com/gofiber/utils/v2) - ns/op",
-            "value": 21.7,
-            "unit": "ns/op",
-            "extra": "52904006 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_AddTrailingSlashString/path-no-slash (github.com/gofiber/utils/v2) - B/op",
-            "value": 16,
-            "unit": "B/op",
-            "extra": "52904006 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_AddTrailingSlashString/path-no-slash (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 1,
-            "unit": "allocs/op",
-            "extra": "52904006 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_AddTrailingSlashString/path-with-slash (github.com/gofiber/utils/v2)",
-            "value": 0.5284,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "1000000000 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_AddTrailingSlashString/path-with-slash (github.com/gofiber/utils/v2) - ns/op",
-            "value": 0.5284,
-            "unit": "ns/op",
-            "extra": "1000000000 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_AddTrailingSlashString/path-with-slash (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "1000000000 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_AddTrailingSlashString/path-with-slash (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "1000000000 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_CalculateTimestamp/fiber (github.com/gofiber/utils/v2)",
-            "value": 0.7068,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "1000000000 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_CalculateTimestamp/fiber (github.com/gofiber/utils/v2) - ns/op",
-            "value": 0.7068,
-            "unit": "ns/op",
-            "extra": "1000000000 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_CalculateTimestamp/fiber (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "1000000000 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_CalculateTimestamp/fiber (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "1000000000 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_CalculateTimestamp/default (github.com/gofiber/utils/v2)",
-            "value": 59.82,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "20069040 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_CalculateTimestamp/default (github.com/gofiber/utils/v2) - ns/op",
-            "value": 59.82,
-            "unit": "ns/op",
-            "extra": "20069040 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_CalculateTimestamp/default (github.com/gofiber/utils/v2) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "20069040 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_CalculateTimestamp/default (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "20069040 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_CalculateTimestamp/fiber_asserted (github.com/gofiber/utils/v2)",
-            "value": 419.4,
-            "unit": "ns/op\t       8 B/op\t       2 allocs/op",
-            "extra": "2838280 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_CalculateTimestamp/fiber_asserted (github.com/gofiber/utils/v2) - ns/op",
-            "value": 419.4,
-            "unit": "ns/op",
-            "extra": "2838280 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_CalculateTimestamp/fiber_asserted (github.com/gofiber/utils/v2) - B/op",
-            "value": 8,
-            "unit": "B/op",
-            "extra": "2838280 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_CalculateTimestamp/fiber_asserted (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 2,
-            "unit": "allocs/op",
-            "extra": "2838280 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_CalculateTimestamp/default_asserted (github.com/gofiber/utils/v2)",
-            "value": 479.5,
-            "unit": "ns/op\t       8 B/op\t       2 allocs/op",
-            "extra": "2474365 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_CalculateTimestamp/default_asserted (github.com/gofiber/utils/v2) - ns/op",
-            "value": 479.5,
-            "unit": "ns/op",
-            "extra": "2474365 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_CalculateTimestamp/default_asserted (github.com/gofiber/utils/v2) - B/op",
-            "value": 8,
-            "unit": "B/op",
-            "extra": "2474365 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_CalculateTimestamp/default_asserted (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 2,
-            "unit": "allocs/op",
-            "extra": "2474365 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_GolangXMLEncoder (github.com/gofiber/utils/v2)",
-            "value": 2908,
-            "unit": "ns/op\t    4864 B/op\t      12 allocs/op",
-            "extra": "397933 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_GolangXMLEncoder (github.com/gofiber/utils/v2) - ns/op",
-            "value": 2908,
-            "unit": "ns/op",
-            "extra": "397933 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_GolangXMLEncoder (github.com/gofiber/utils/v2) - B/op",
-            "value": 4864,
-            "unit": "B/op",
-            "extra": "397933 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_GolangXMLEncoder (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 12,
-            "unit": "allocs/op",
-            "extra": "397933 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_DefaultXMLEncoder (github.com/gofiber/utils/v2)",
-            "value": 2915,
-            "unit": "ns/op\t    4864 B/op\t      12 allocs/op",
-            "extra": "384715 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_DefaultXMLEncoder (github.com/gofiber/utils/v2) - ns/op",
-            "value": 2915,
-            "unit": "ns/op",
-            "extra": "384715 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_DefaultXMLEncoder (github.com/gofiber/utils/v2) - B/op",
-            "value": 4864,
-            "unit": "B/op",
-            "extra": "384715 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_DefaultXMLEncoder (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 12,
-            "unit": "allocs/op",
-            "extra": "384715 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_DefaultXMLDecoder (github.com/gofiber/utils/v2)",
-            "value": 6050,
-            "unit": "ns/op\t    2885 B/op\t      57 allocs/op",
-            "extra": "199401 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_DefaultXMLDecoder (github.com/gofiber/utils/v2) - ns/op",
-            "value": 6050,
-            "unit": "ns/op",
-            "extra": "199401 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_DefaultXMLDecoder (github.com/gofiber/utils/v2) - B/op",
-            "value": 2885,
-            "unit": "B/op",
-            "extra": "199401 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_DefaultXMLDecoder (github.com/gofiber/utils/v2) - allocs/op",
-            "value": 57,
-            "unit": "allocs/op",
-            "extra": "199401 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLowerBytes/empty/fiber (github.com/gofiber/utils/v2/bytes)",
-            "value": 2.653,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "450256885 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLowerBytes/empty/fiber (github.com/gofiber/utils/v2/bytes) - ns/op",
-            "value": 2.653,
-            "unit": "ns/op",
-            "extra": "450256885 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLowerBytes/empty/fiber (github.com/gofiber/utils/v2/bytes) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "450256885 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLowerBytes/empty/fiber (github.com/gofiber/utils/v2/bytes) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "450256885 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLowerBytes/empty/fiber/unsafe (github.com/gofiber/utils/v2/bytes)",
-            "value": 2.824,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "425113884 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLowerBytes/empty/fiber/unsafe (github.com/gofiber/utils/v2/bytes) - ns/op",
-            "value": 2.824,
-            "unit": "ns/op",
-            "extra": "425113884 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLowerBytes/empty/fiber/unsafe (github.com/gofiber/utils/v2/bytes) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "425113884 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLowerBytes/empty/fiber/unsafe (github.com/gofiber/utils/v2/bytes) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "425113884 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLowerBytes/empty/default (github.com/gofiber/utils/v2/bytes)",
-            "value": 5.987,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "201397147 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLowerBytes/empty/default (github.com/gofiber/utils/v2/bytes) - ns/op",
-            "value": 5.987,
-            "unit": "ns/op",
-            "extra": "201397147 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLowerBytes/empty/default (github.com/gofiber/utils/v2/bytes) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "201397147 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLowerBytes/empty/default (github.com/gofiber/utils/v2/bytes) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "201397147 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLowerBytes/http-get/fiber (github.com/gofiber/utils/v2/bytes)",
-            "value": 4.005,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "300953988 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLowerBytes/http-get/fiber (github.com/gofiber/utils/v2/bytes) - ns/op",
-            "value": 4.005,
-            "unit": "ns/op",
-            "extra": "300953988 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLowerBytes/http-get/fiber (github.com/gofiber/utils/v2/bytes) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "300953988 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLowerBytes/http-get/fiber (github.com/gofiber/utils/v2/bytes) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "300953988 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLowerBytes/http-get/fiber/unsafe (github.com/gofiber/utils/v2/bytes)",
-            "value": 6.376,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "179083200 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLowerBytes/http-get/fiber/unsafe (github.com/gofiber/utils/v2/bytes) - ns/op",
-            "value": 6.376,
-            "unit": "ns/op",
-            "extra": "179083200 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLowerBytes/http-get/fiber/unsafe (github.com/gofiber/utils/v2/bytes) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "179083200 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLowerBytes/http-get/fiber/unsafe (github.com/gofiber/utils/v2/bytes) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "179083200 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLowerBytes/http-get/default (github.com/gofiber/utils/v2/bytes)",
-            "value": 25.88,
-            "unit": "ns/op\t       8 B/op\t       1 allocs/op",
-            "extra": "45637284 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLowerBytes/http-get/default (github.com/gofiber/utils/v2/bytes) - ns/op",
-            "value": 25.88,
-            "unit": "ns/op",
-            "extra": "45637284 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLowerBytes/http-get/default (github.com/gofiber/utils/v2/bytes) - B/op",
-            "value": 8,
-            "unit": "B/op",
-            "extra": "45637284 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLowerBytes/http-get/default (github.com/gofiber/utils/v2/bytes) - allocs/op",
-            "value": 1,
-            "unit": "allocs/op",
-            "extra": "45637284 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLowerBytes/http-get-upper/fiber (github.com/gofiber/utils/v2/bytes)",
-            "value": 16.27,
-            "unit": "ns/op\t       3 B/op\t       1 allocs/op",
-            "extra": "69219816 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLowerBytes/http-get-upper/fiber (github.com/gofiber/utils/v2/bytes) - ns/op",
-            "value": 16.27,
-            "unit": "ns/op",
-            "extra": "69219816 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLowerBytes/http-get-upper/fiber (github.com/gofiber/utils/v2/bytes) - B/op",
-            "value": 3,
-            "unit": "B/op",
-            "extra": "69219816 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLowerBytes/http-get-upper/fiber (github.com/gofiber/utils/v2/bytes) - allocs/op",
-            "value": 1,
-            "unit": "allocs/op",
-            "extra": "69219816 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLowerBytes/http-get-upper/fiber/unsafe (github.com/gofiber/utils/v2/bytes)",
-            "value": 6.376,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "178297984 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLowerBytes/http-get-upper/fiber/unsafe (github.com/gofiber/utils/v2/bytes) - ns/op",
-            "value": 6.376,
-            "unit": "ns/op",
-            "extra": "178297984 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLowerBytes/http-get-upper/fiber/unsafe (github.com/gofiber/utils/v2/bytes) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "178297984 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLowerBytes/http-get-upper/fiber/unsafe (github.com/gofiber/utils/v2/bytes) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "178297984 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLowerBytes/http-get-upper/default (github.com/gofiber/utils/v2/bytes)",
-            "value": 19.14,
-            "unit": "ns/op\t       8 B/op\t       1 allocs/op",
-            "extra": "57592663 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLowerBytes/http-get-upper/default (github.com/gofiber/utils/v2/bytes) - ns/op",
-            "value": 19.14,
-            "unit": "ns/op",
-            "extra": "57592663 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLowerBytes/http-get-upper/default (github.com/gofiber/utils/v2/bytes) - B/op",
-            "value": 8,
-            "unit": "B/op",
-            "extra": "57592663 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLowerBytes/http-get-upper/default (github.com/gofiber/utils/v2/bytes) - allocs/op",
-            "value": 1,
-            "unit": "allocs/op",
-            "extra": "57592663 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLowerBytes/header-content-type-mixed/fiber (github.com/gofiber/utils/v2/bytes)",
-            "value": 44.1,
-            "unit": "ns/op\t      48 B/op\t       1 allocs/op",
-            "extra": "25585786 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLowerBytes/header-content-type-mixed/fiber (github.com/gofiber/utils/v2/bytes) - ns/op",
-            "value": 44.1,
-            "unit": "ns/op",
-            "extra": "25585786 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLowerBytes/header-content-type-mixed/fiber (github.com/gofiber/utils/v2/bytes) - B/op",
-            "value": 48,
-            "unit": "B/op",
-            "extra": "25585786 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLowerBytes/header-content-type-mixed/fiber (github.com/gofiber/utils/v2/bytes) - allocs/op",
-            "value": 1,
-            "unit": "allocs/op",
-            "extra": "25585786 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLowerBytes/header-content-type-mixed/fiber/unsafe (github.com/gofiber/utils/v2/bytes)",
-            "value": 32.69,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "38544129 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLowerBytes/header-content-type-mixed/fiber/unsafe (github.com/gofiber/utils/v2/bytes) - ns/op",
-            "value": 32.69,
-            "unit": "ns/op",
-            "extra": "38544129 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLowerBytes/header-content-type-mixed/fiber/unsafe (github.com/gofiber/utils/v2/bytes) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "38544129 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLowerBytes/header-content-type-mixed/fiber/unsafe (github.com/gofiber/utils/v2/bytes) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "38544129 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLowerBytes/header-content-type-mixed/default (github.com/gofiber/utils/v2/bytes)",
-            "value": 65.33,
-            "unit": "ns/op\t      48 B/op\t       1 allocs/op",
-            "extra": "18247623 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLowerBytes/header-content-type-mixed/default (github.com/gofiber/utils/v2/bytes) - ns/op",
-            "value": 65.33,
-            "unit": "ns/op",
-            "extra": "18247623 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLowerBytes/header-content-type-mixed/default (github.com/gofiber/utils/v2/bytes) - B/op",
-            "value": 48,
-            "unit": "B/op",
-            "extra": "18247623 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLowerBytes/header-content-type-mixed/default (github.com/gofiber/utils/v2/bytes) - allocs/op",
-            "value": 1,
-            "unit": "allocs/op",
-            "extra": "18247623 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLowerBytes/large-lower/fiber (github.com/gofiber/utils/v2/bytes)",
-            "value": 28.92,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "41241922 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLowerBytes/large-lower/fiber (github.com/gofiber/utils/v2/bytes) - ns/op",
-            "value": 28.92,
-            "unit": "ns/op",
-            "extra": "41241922 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLowerBytes/large-lower/fiber (github.com/gofiber/utils/v2/bytes) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "41241922 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLowerBytes/large-lower/fiber (github.com/gofiber/utils/v2/bytes) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "41241922 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLowerBytes/large-lower/fiber/unsafe (github.com/gofiber/utils/v2/bytes)",
-            "value": 45.09,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "24929229 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLowerBytes/large-lower/fiber/unsafe (github.com/gofiber/utils/v2/bytes) - ns/op",
-            "value": 45.09,
-            "unit": "ns/op",
-            "extra": "24929229 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLowerBytes/large-lower/fiber/unsafe (github.com/gofiber/utils/v2/bytes) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "24929229 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLowerBytes/large-lower/fiber/unsafe (github.com/gofiber/utils/v2/bytes) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "24929229 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLowerBytes/large-lower/default (github.com/gofiber/utils/v2/bytes)",
-            "value": 85.67,
-            "unit": "ns/op\t      64 B/op\t       1 allocs/op",
-            "extra": "12736306 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLowerBytes/large-lower/default (github.com/gofiber/utils/v2/bytes) - ns/op",
-            "value": 85.67,
-            "unit": "ns/op",
-            "extra": "12736306 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLowerBytes/large-lower/default (github.com/gofiber/utils/v2/bytes) - B/op",
-            "value": 64,
-            "unit": "B/op",
-            "extra": "12736306 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLowerBytes/large-lower/default (github.com/gofiber/utils/v2/bytes) - allocs/op",
-            "value": 1,
-            "unit": "allocs/op",
-            "extra": "12736306 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLowerBytes/large-upper/fiber (github.com/gofiber/utils/v2/bytes)",
-            "value": 55.54,
-            "unit": "ns/op\t      64 B/op\t       1 allocs/op",
-            "extra": "21024502 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLowerBytes/large-upper/fiber (github.com/gofiber/utils/v2/bytes) - ns/op",
-            "value": 55.54,
-            "unit": "ns/op",
-            "extra": "21024502 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLowerBytes/large-upper/fiber (github.com/gofiber/utils/v2/bytes) - B/op",
-            "value": 64,
-            "unit": "B/op",
-            "extra": "21024502 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLowerBytes/large-upper/fiber (github.com/gofiber/utils/v2/bytes) - allocs/op",
-            "value": 1,
-            "unit": "allocs/op",
-            "extra": "21024502 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLowerBytes/large-upper/fiber/unsafe (github.com/gofiber/utils/v2/bytes)",
-            "value": 47.51,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "23856633 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLowerBytes/large-upper/fiber/unsafe (github.com/gofiber/utils/v2/bytes) - ns/op",
-            "value": 47.51,
-            "unit": "ns/op",
-            "extra": "23856633 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLowerBytes/large-upper/fiber/unsafe (github.com/gofiber/utils/v2/bytes) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "23856633 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLowerBytes/large-upper/fiber/unsafe (github.com/gofiber/utils/v2/bytes) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "23856633 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLowerBytes/large-upper/default (github.com/gofiber/utils/v2/bytes)",
-            "value": 100.8,
-            "unit": "ns/op\t      64 B/op\t       1 allocs/op",
-            "extra": "11810538 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLowerBytes/large-upper/default (github.com/gofiber/utils/v2/bytes) - ns/op",
-            "value": 100.8,
-            "unit": "ns/op",
-            "extra": "11810538 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLowerBytes/large-upper/default (github.com/gofiber/utils/v2/bytes) - B/op",
-            "value": 64,
-            "unit": "B/op",
-            "extra": "11810538 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLowerBytes/large-upper/default (github.com/gofiber/utils/v2/bytes) - allocs/op",
-            "value": 1,
-            "unit": "allocs/op",
-            "extra": "11810538 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLowerBytes/large-mixed/fiber (github.com/gofiber/utils/v2/bytes)",
-            "value": 54.49,
-            "unit": "ns/op\t      64 B/op\t       1 allocs/op",
-            "extra": "21966043 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLowerBytes/large-mixed/fiber (github.com/gofiber/utils/v2/bytes) - ns/op",
-            "value": 54.49,
-            "unit": "ns/op",
-            "extra": "21966043 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLowerBytes/large-mixed/fiber (github.com/gofiber/utils/v2/bytes) - B/op",
-            "value": 64,
-            "unit": "B/op",
-            "extra": "21966043 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLowerBytes/large-mixed/fiber (github.com/gofiber/utils/v2/bytes) - allocs/op",
-            "value": 1,
-            "unit": "allocs/op",
-            "extra": "21966043 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLowerBytes/large-mixed/fiber/unsafe (github.com/gofiber/utils/v2/bytes)",
-            "value": 47.28,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "25564250 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLowerBytes/large-mixed/fiber/unsafe (github.com/gofiber/utils/v2/bytes) - ns/op",
-            "value": 47.28,
-            "unit": "ns/op",
-            "extra": "25564250 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLowerBytes/large-mixed/fiber/unsafe (github.com/gofiber/utils/v2/bytes) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "25564250 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLowerBytes/large-mixed/fiber/unsafe (github.com/gofiber/utils/v2/bytes) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "25564250 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLowerBytes/large-mixed/default (github.com/gofiber/utils/v2/bytes)",
-            "value": 106.8,
-            "unit": "ns/op\t      64 B/op\t       1 allocs/op",
-            "extra": "11039184 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLowerBytes/large-mixed/default (github.com/gofiber/utils/v2/bytes) - ns/op",
-            "value": 106.8,
-            "unit": "ns/op",
-            "extra": "11039184 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLowerBytes/large-mixed/default (github.com/gofiber/utils/v2/bytes) - B/op",
-            "value": 64,
-            "unit": "B/op",
-            "extra": "11039184 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLowerBytes/large-mixed/default (github.com/gofiber/utils/v2/bytes) - allocs/op",
-            "value": 1,
-            "unit": "allocs/op",
-            "extra": "11039184 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpperBytes/empty/fiber (github.com/gofiber/utils/v2/bytes)",
-            "value": 2.65,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "451878625 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpperBytes/empty/fiber (github.com/gofiber/utils/v2/bytes) - ns/op",
-            "value": 2.65,
-            "unit": "ns/op",
-            "extra": "451878625 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpperBytes/empty/fiber (github.com/gofiber/utils/v2/bytes) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "451878625 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpperBytes/empty/fiber (github.com/gofiber/utils/v2/bytes) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "451878625 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpperBytes/empty/fiber/unsafe (github.com/gofiber/utils/v2/bytes)",
-            "value": 2.82,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "424680402 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpperBytes/empty/fiber/unsafe (github.com/gofiber/utils/v2/bytes) - ns/op",
-            "value": 2.82,
-            "unit": "ns/op",
-            "extra": "424680402 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpperBytes/empty/fiber/unsafe (github.com/gofiber/utils/v2/bytes) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "424680402 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpperBytes/empty/fiber/unsafe (github.com/gofiber/utils/v2/bytes) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "424680402 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpperBytes/empty/default (github.com/gofiber/utils/v2/bytes)",
-            "value": 5.279,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "237165343 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpperBytes/empty/default (github.com/gofiber/utils/v2/bytes) - ns/op",
-            "value": 5.279,
-            "unit": "ns/op",
-            "extra": "237165343 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpperBytes/empty/default (github.com/gofiber/utils/v2/bytes) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "237165343 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpperBytes/empty/default (github.com/gofiber/utils/v2/bytes) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "237165343 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpperBytes/http-get/fiber (github.com/gofiber/utils/v2/bytes)",
-            "value": 15.88,
-            "unit": "ns/op\t       3 B/op\t       1 allocs/op",
-            "extra": "67689327 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpperBytes/http-get/fiber (github.com/gofiber/utils/v2/bytes) - ns/op",
-            "value": 15.88,
-            "unit": "ns/op",
-            "extra": "67689327 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpperBytes/http-get/fiber (github.com/gofiber/utils/v2/bytes) - B/op",
-            "value": 3,
-            "unit": "B/op",
-            "extra": "67689327 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpperBytes/http-get/fiber (github.com/gofiber/utils/v2/bytes) - allocs/op",
-            "value": 1,
-            "unit": "allocs/op",
-            "extra": "67689327 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpperBytes/http-get/fiber/unsafe (github.com/gofiber/utils/v2/bytes)",
-            "value": 5.668,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "211684525 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpperBytes/http-get/fiber/unsafe (github.com/gofiber/utils/v2/bytes) - ns/op",
-            "value": 5.668,
-            "unit": "ns/op",
-            "extra": "211684525 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpperBytes/http-get/fiber/unsafe (github.com/gofiber/utils/v2/bytes) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "211684525 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpperBytes/http-get/fiber/unsafe (github.com/gofiber/utils/v2/bytes) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "211684525 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpperBytes/http-get/default (github.com/gofiber/utils/v2/bytes)",
-            "value": 18.83,
-            "unit": "ns/op\t       8 B/op\t       1 allocs/op",
-            "extra": "59032442 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpperBytes/http-get/default (github.com/gofiber/utils/v2/bytes) - ns/op",
-            "value": 18.83,
-            "unit": "ns/op",
-            "extra": "59032442 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpperBytes/http-get/default (github.com/gofiber/utils/v2/bytes) - B/op",
-            "value": 8,
-            "unit": "B/op",
-            "extra": "59032442 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpperBytes/http-get/default (github.com/gofiber/utils/v2/bytes) - allocs/op",
-            "value": 1,
-            "unit": "allocs/op",
-            "extra": "59032442 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpperBytes/http-get-upper/fiber (github.com/gofiber/utils/v2/bytes)",
-            "value": 3.805,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "315104917 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpperBytes/http-get-upper/fiber (github.com/gofiber/utils/v2/bytes) - ns/op",
-            "value": 3.805,
-            "unit": "ns/op",
-            "extra": "315104917 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpperBytes/http-get-upper/fiber (github.com/gofiber/utils/v2/bytes) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "315104917 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpperBytes/http-get-upper/fiber (github.com/gofiber/utils/v2/bytes) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "315104917 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpperBytes/http-get-upper/fiber/unsafe (github.com/gofiber/utils/v2/bytes)",
-            "value": 5.679,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "211420537 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpperBytes/http-get-upper/fiber/unsafe (github.com/gofiber/utils/v2/bytes) - ns/op",
-            "value": 5.679,
-            "unit": "ns/op",
-            "extra": "211420537 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpperBytes/http-get-upper/fiber/unsafe (github.com/gofiber/utils/v2/bytes) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "211420537 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpperBytes/http-get-upper/fiber/unsafe (github.com/gofiber/utils/v2/bytes) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "211420537 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpperBytes/http-get-upper/default (github.com/gofiber/utils/v2/bytes)",
-            "value": 26.54,
-            "unit": "ns/op\t       8 B/op\t       1 allocs/op",
-            "extra": "42216150 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpperBytes/http-get-upper/default (github.com/gofiber/utils/v2/bytes) - ns/op",
-            "value": 26.54,
-            "unit": "ns/op",
-            "extra": "42216150 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpperBytes/http-get-upper/default (github.com/gofiber/utils/v2/bytes) - B/op",
-            "value": 8,
-            "unit": "B/op",
-            "extra": "42216150 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpperBytes/http-get-upper/default (github.com/gofiber/utils/v2/bytes) - allocs/op",
-            "value": 1,
-            "unit": "allocs/op",
-            "extra": "42216150 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpperBytes/header-content-type-mixed/fiber (github.com/gofiber/utils/v2/bytes)",
-            "value": 42.5,
-            "unit": "ns/op\t      48 B/op\t       1 allocs/op",
-            "extra": "27868911 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpperBytes/header-content-type-mixed/fiber (github.com/gofiber/utils/v2/bytes) - ns/op",
-            "value": 42.5,
-            "unit": "ns/op",
-            "extra": "27868911 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpperBytes/header-content-type-mixed/fiber (github.com/gofiber/utils/v2/bytes) - B/op",
-            "value": 48,
-            "unit": "B/op",
-            "extra": "27868911 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpperBytes/header-content-type-mixed/fiber (github.com/gofiber/utils/v2/bytes) - allocs/op",
-            "value": 1,
-            "unit": "allocs/op",
-            "extra": "27868911 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpperBytes/header-content-type-mixed/fiber/unsafe (github.com/gofiber/utils/v2/bytes)",
-            "value": 27.32,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "46086068 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpperBytes/header-content-type-mixed/fiber/unsafe (github.com/gofiber/utils/v2/bytes) - ns/op",
-            "value": 27.32,
-            "unit": "ns/op",
-            "extra": "46086068 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpperBytes/header-content-type-mixed/fiber/unsafe (github.com/gofiber/utils/v2/bytes) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "46086068 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpperBytes/header-content-type-mixed/fiber/unsafe (github.com/gofiber/utils/v2/bytes) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "46086068 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpperBytes/header-content-type-mixed/default (github.com/gofiber/utils/v2/bytes)",
-            "value": 71.55,
-            "unit": "ns/op\t      48 B/op\t       1 allocs/op",
-            "extra": "16981995 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpperBytes/header-content-type-mixed/default (github.com/gofiber/utils/v2/bytes) - ns/op",
-            "value": 71.55,
-            "unit": "ns/op",
-            "extra": "16981995 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpperBytes/header-content-type-mixed/default (github.com/gofiber/utils/v2/bytes) - B/op",
-            "value": 48,
-            "unit": "B/op",
-            "extra": "16981995 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpperBytes/header-content-type-mixed/default (github.com/gofiber/utils/v2/bytes) - allocs/op",
-            "value": 1,
-            "unit": "allocs/op",
-            "extra": "16981995 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpperBytes/large-lower/fiber (github.com/gofiber/utils/v2/bytes)",
-            "value": 55.03,
-            "unit": "ns/op\t      64 B/op\t       1 allocs/op",
-            "extra": "21801110 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpperBytes/large-lower/fiber (github.com/gofiber/utils/v2/bytes) - ns/op",
-            "value": 55.03,
-            "unit": "ns/op",
-            "extra": "21801110 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpperBytes/large-lower/fiber (github.com/gofiber/utils/v2/bytes) - B/op",
-            "value": 64,
-            "unit": "B/op",
-            "extra": "21801110 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpperBytes/large-lower/fiber (github.com/gofiber/utils/v2/bytes) - allocs/op",
-            "value": 1,
-            "unit": "allocs/op",
-            "extra": "21801110 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpperBytes/large-lower/fiber/unsafe (github.com/gofiber/utils/v2/bytes)",
-            "value": 45.27,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "33685440 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpperBytes/large-lower/fiber/unsafe (github.com/gofiber/utils/v2/bytes) - ns/op",
-            "value": 45.27,
-            "unit": "ns/op",
-            "extra": "33685440 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpperBytes/large-lower/fiber/unsafe (github.com/gofiber/utils/v2/bytes) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "33685440 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpperBytes/large-lower/fiber/unsafe (github.com/gofiber/utils/v2/bytes) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "33685440 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpperBytes/large-lower/default (github.com/gofiber/utils/v2/bytes)",
-            "value": 100.4,
-            "unit": "ns/op\t      64 B/op\t       1 allocs/op",
-            "extra": "11634064 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpperBytes/large-lower/default (github.com/gofiber/utils/v2/bytes) - ns/op",
-            "value": 100.4,
-            "unit": "ns/op",
-            "extra": "11634064 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpperBytes/large-lower/default (github.com/gofiber/utils/v2/bytes) - B/op",
-            "value": 64,
-            "unit": "B/op",
-            "extra": "11634064 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpperBytes/large-lower/default (github.com/gofiber/utils/v2/bytes) - allocs/op",
-            "value": 1,
-            "unit": "allocs/op",
-            "extra": "11634064 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpperBytes/large-upper/fiber (github.com/gofiber/utils/v2/bytes)",
-            "value": 28.68,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "42122313 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpperBytes/large-upper/fiber (github.com/gofiber/utils/v2/bytes) - ns/op",
-            "value": 28.68,
-            "unit": "ns/op",
-            "extra": "42122313 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpperBytes/large-upper/fiber (github.com/gofiber/utils/v2/bytes) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "42122313 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpperBytes/large-upper/fiber (github.com/gofiber/utils/v2/bytes) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "42122313 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpperBytes/large-upper/fiber/unsafe (github.com/gofiber/utils/v2/bytes)",
-            "value": 38.76,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "29829025 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpperBytes/large-upper/fiber/unsafe (github.com/gofiber/utils/v2/bytes) - ns/op",
-            "value": 38.76,
-            "unit": "ns/op",
-            "extra": "29829025 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpperBytes/large-upper/fiber/unsafe (github.com/gofiber/utils/v2/bytes) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "29829025 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpperBytes/large-upper/fiber/unsafe (github.com/gofiber/utils/v2/bytes) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "29829025 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpperBytes/large-upper/default (github.com/gofiber/utils/v2/bytes)",
-            "value": 121.3,
-            "unit": "ns/op\t      64 B/op\t       1 allocs/op",
-            "extra": "9808082 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpperBytes/large-upper/default (github.com/gofiber/utils/v2/bytes) - ns/op",
-            "value": 121.3,
-            "unit": "ns/op",
-            "extra": "9808082 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpperBytes/large-upper/default (github.com/gofiber/utils/v2/bytes) - B/op",
-            "value": 64,
-            "unit": "B/op",
-            "extra": "9808082 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpperBytes/large-upper/default (github.com/gofiber/utils/v2/bytes) - allocs/op",
-            "value": 1,
-            "unit": "allocs/op",
-            "extra": "9808082 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpperBytes/large-mixed/fiber (github.com/gofiber/utils/v2/bytes)",
-            "value": 55.07,
-            "unit": "ns/op\t      64 B/op\t       1 allocs/op",
-            "extra": "21096360 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpperBytes/large-mixed/fiber (github.com/gofiber/utils/v2/bytes) - ns/op",
-            "value": 55.07,
-            "unit": "ns/op",
-            "extra": "21096360 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpperBytes/large-mixed/fiber (github.com/gofiber/utils/v2/bytes) - B/op",
-            "value": 64,
-            "unit": "B/op",
-            "extra": "21096360 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpperBytes/large-mixed/fiber (github.com/gofiber/utils/v2/bytes) - allocs/op",
-            "value": 1,
-            "unit": "allocs/op",
-            "extra": "21096360 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpperBytes/large-mixed/fiber/unsafe (github.com/gofiber/utils/v2/bytes)",
-            "value": 39.2,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "30799086 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpperBytes/large-mixed/fiber/unsafe (github.com/gofiber/utils/v2/bytes) - ns/op",
-            "value": 39.2,
-            "unit": "ns/op",
-            "extra": "30799086 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpperBytes/large-mixed/fiber/unsafe (github.com/gofiber/utils/v2/bytes) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "30799086 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpperBytes/large-mixed/fiber/unsafe (github.com/gofiber/utils/v2/bytes) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "30799086 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpperBytes/large-mixed/default (github.com/gofiber/utils/v2/bytes)",
-            "value": 105.9,
-            "unit": "ns/op\t      64 B/op\t       1 allocs/op",
-            "extra": "10991242 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpperBytes/large-mixed/default (github.com/gofiber/utils/v2/bytes) - ns/op",
-            "value": 105.9,
-            "unit": "ns/op",
-            "extra": "10991242 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpperBytes/large-mixed/default (github.com/gofiber/utils/v2/bytes) - B/op",
-            "value": 64,
-            "unit": "B/op",
-            "extra": "10991242 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpperBytes/large-mixed/default (github.com/gofiber/utils/v2/bytes) - allocs/op",
-            "value": 1,
-            "unit": "allocs/op",
-            "extra": "10991242 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpper/empty/fiber (github.com/gofiber/utils/v2/strings)",
-            "value": 2.202,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "548759286 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpper/empty/fiber (github.com/gofiber/utils/v2/strings) - ns/op",
-            "value": 2.202,
-            "unit": "ns/op",
-            "extra": "548759286 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpper/empty/fiber (github.com/gofiber/utils/v2/strings) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "548759286 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpper/empty/fiber (github.com/gofiber/utils/v2/strings) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "548759286 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpper/empty/fiber/unsafe (github.com/gofiber/utils/v2/strings)",
-            "value": 2.839,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "426008568 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpper/empty/fiber/unsafe (github.com/gofiber/utils/v2/strings) - ns/op",
-            "value": 2.839,
-            "unit": "ns/op",
-            "extra": "426008568 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpper/empty/fiber/unsafe (github.com/gofiber/utils/v2/strings) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "426008568 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpper/empty/fiber/unsafe (github.com/gofiber/utils/v2/strings) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "426008568 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpper/empty/default (github.com/gofiber/utils/v2/strings)",
-            "value": 3.518,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "341855037 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpper/empty/default (github.com/gofiber/utils/v2/strings) - ns/op",
-            "value": 3.518,
-            "unit": "ns/op",
-            "extra": "341855037 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpper/empty/default (github.com/gofiber/utils/v2/strings) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "341855037 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpper/empty/default (github.com/gofiber/utils/v2/strings) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "341855037 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpper/http-get/fiber (github.com/gofiber/utils/v2/strings)",
-            "value": 16.21,
-            "unit": "ns/op\t       3 B/op\t       1 allocs/op",
-            "extra": "69559394 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpper/http-get/fiber (github.com/gofiber/utils/v2/strings) - ns/op",
-            "value": 16.21,
-            "unit": "ns/op",
-            "extra": "69559394 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpper/http-get/fiber (github.com/gofiber/utils/v2/strings) - B/op",
-            "value": 3,
-            "unit": "B/op",
-            "extra": "69559394 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpper/http-get/fiber (github.com/gofiber/utils/v2/strings) - allocs/op",
-            "value": 1,
-            "unit": "allocs/op",
-            "extra": "69559394 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpper/http-get/fiber/unsafe (github.com/gofiber/utils/v2/strings)",
-            "value": 5.58,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "217851429 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpper/http-get/fiber/unsafe (github.com/gofiber/utils/v2/strings) - ns/op",
-            "value": 5.58,
-            "unit": "ns/op",
-            "extra": "217851429 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpper/http-get/fiber/unsafe (github.com/gofiber/utils/v2/strings) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "217851429 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpper/http-get/fiber/unsafe (github.com/gofiber/utils/v2/strings) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "217851429 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpper/http-get/default (github.com/gofiber/utils/v2/strings)",
-            "value": 30.83,
-            "unit": "ns/op\t       8 B/op\t       1 allocs/op",
-            "extra": "36622430 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpper/http-get/default (github.com/gofiber/utils/v2/strings) - ns/op",
-            "value": 30.83,
-            "unit": "ns/op",
-            "extra": "36622430 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpper/http-get/default (github.com/gofiber/utils/v2/strings) - B/op",
-            "value": 8,
-            "unit": "B/op",
-            "extra": "36622430 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpper/http-get/default (github.com/gofiber/utils/v2/strings) - allocs/op",
-            "value": 1,
-            "unit": "allocs/op",
-            "extra": "36622430 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpper/http-get-upper/fiber (github.com/gofiber/utils/v2/strings)",
-            "value": 4.236,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "281248316 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpper/http-get-upper/fiber (github.com/gofiber/utils/v2/strings) - ns/op",
-            "value": 4.236,
-            "unit": "ns/op",
-            "extra": "281248316 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpper/http-get-upper/fiber (github.com/gofiber/utils/v2/strings) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "281248316 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpper/http-get-upper/fiber (github.com/gofiber/utils/v2/strings) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "281248316 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpper/http-get-upper/fiber/unsafe (github.com/gofiber/utils/v2/strings)",
-            "value": 5.687,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "211498910 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpper/http-get-upper/fiber/unsafe (github.com/gofiber/utils/v2/strings) - ns/op",
-            "value": 5.687,
-            "unit": "ns/op",
-            "extra": "211498910 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpper/http-get-upper/fiber/unsafe (github.com/gofiber/utils/v2/strings) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "211498910 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpper/http-get-upper/fiber/unsafe (github.com/gofiber/utils/v2/strings) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "211498910 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpper/http-get-upper/default (github.com/gofiber/utils/v2/strings)",
-            "value": 7.488,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "163504726 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpper/http-get-upper/default (github.com/gofiber/utils/v2/strings) - ns/op",
-            "value": 7.488,
-            "unit": "ns/op",
-            "extra": "163504726 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpper/http-get-upper/default (github.com/gofiber/utils/v2/strings) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "163504726 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpper/http-get-upper/default (github.com/gofiber/utils/v2/strings) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "163504726 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpper/header-content-type-mixed/fiber (github.com/gofiber/utils/v2/strings)",
-            "value": 43.29,
-            "unit": "ns/op\t      48 B/op\t       1 allocs/op",
-            "extra": "28187109 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpper/header-content-type-mixed/fiber (github.com/gofiber/utils/v2/strings) - ns/op",
-            "value": 43.29,
-            "unit": "ns/op",
-            "extra": "28187109 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpper/header-content-type-mixed/fiber (github.com/gofiber/utils/v2/strings) - B/op",
-            "value": 48,
-            "unit": "B/op",
-            "extra": "28187109 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpper/header-content-type-mixed/fiber (github.com/gofiber/utils/v2/strings) - allocs/op",
-            "value": 1,
-            "unit": "allocs/op",
-            "extra": "28187109 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpper/header-content-type-mixed/fiber/unsafe (github.com/gofiber/utils/v2/strings)",
-            "value": 28.49,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "41454632 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpper/header-content-type-mixed/fiber/unsafe (github.com/gofiber/utils/v2/strings) - ns/op",
-            "value": 28.49,
-            "unit": "ns/op",
-            "extra": "41454632 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpper/header-content-type-mixed/fiber/unsafe (github.com/gofiber/utils/v2/strings) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "41454632 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpper/header-content-type-mixed/fiber/unsafe (github.com/gofiber/utils/v2/strings) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "41454632 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpper/header-content-type-mixed/default (github.com/gofiber/utils/v2/strings)",
-            "value": 148.3,
-            "unit": "ns/op\t      48 B/op\t       1 allocs/op",
-            "extra": "8008962 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpper/header-content-type-mixed/default (github.com/gofiber/utils/v2/strings) - ns/op",
-            "value": 148.3,
-            "unit": "ns/op",
-            "extra": "8008962 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpper/header-content-type-mixed/default (github.com/gofiber/utils/v2/strings) - B/op",
-            "value": 48,
-            "unit": "B/op",
-            "extra": "8008962 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpper/header-content-type-mixed/default (github.com/gofiber/utils/v2/strings) - allocs/op",
-            "value": 1,
-            "unit": "allocs/op",
-            "extra": "8008962 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpper/large-lower/fiber (github.com/gofiber/utils/v2/strings)",
-            "value": 54.76,
-            "unit": "ns/op\t      64 B/op\t       1 allocs/op",
-            "extra": "20577763 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpper/large-lower/fiber (github.com/gofiber/utils/v2/strings) - ns/op",
-            "value": 54.76,
-            "unit": "ns/op",
-            "extra": "20577763 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpper/large-lower/fiber (github.com/gofiber/utils/v2/strings) - B/op",
-            "value": 64,
-            "unit": "B/op",
-            "extra": "20577763 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpper/large-lower/fiber (github.com/gofiber/utils/v2/strings) - allocs/op",
-            "value": 1,
-            "unit": "allocs/op",
-            "extra": "20577763 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpper/large-lower/fiber/unsafe (github.com/gofiber/utils/v2/strings)",
-            "value": 37.73,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "32220372 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpper/large-lower/fiber/unsafe (github.com/gofiber/utils/v2/strings) - ns/op",
-            "value": 37.73,
-            "unit": "ns/op",
-            "extra": "32220372 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpper/large-lower/fiber/unsafe (github.com/gofiber/utils/v2/strings) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "32220372 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpper/large-lower/fiber/unsafe (github.com/gofiber/utils/v2/strings) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "32220372 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpper/large-lower/default (github.com/gofiber/utils/v2/strings)",
-            "value": 233.3,
-            "unit": "ns/op\t      64 B/op\t       1 allocs/op",
-            "extra": "5118583 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpper/large-lower/default (github.com/gofiber/utils/v2/strings) - ns/op",
-            "value": 233.3,
-            "unit": "ns/op",
-            "extra": "5118583 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpper/large-lower/default (github.com/gofiber/utils/v2/strings) - B/op",
-            "value": 64,
-            "unit": "B/op",
-            "extra": "5118583 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpper/large-lower/default (github.com/gofiber/utils/v2/strings) - allocs/op",
-            "value": 1,
-            "unit": "allocs/op",
-            "extra": "5118583 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpper/large-upper/fiber (github.com/gofiber/utils/v2/strings)",
-            "value": 47.28,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "25422825 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpper/large-upper/fiber (github.com/gofiber/utils/v2/strings) - ns/op",
-            "value": 47.28,
-            "unit": "ns/op",
-            "extra": "25422825 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpper/large-upper/fiber (github.com/gofiber/utils/v2/strings) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "25422825 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpper/large-upper/fiber (github.com/gofiber/utils/v2/strings) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "25422825 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpper/large-upper/fiber/unsafe (github.com/gofiber/utils/v2/strings)",
-            "value": 37.83,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "32590375 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpper/large-upper/fiber/unsafe (github.com/gofiber/utils/v2/strings) - ns/op",
-            "value": 37.83,
-            "unit": "ns/op",
-            "extra": "32590375 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpper/large-upper/fiber/unsafe (github.com/gofiber/utils/v2/strings) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "32590375 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpper/large-upper/fiber/unsafe (github.com/gofiber/utils/v2/strings) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "32590375 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpper/large-upper/default (github.com/gofiber/utils/v2/strings)",
-            "value": 92.78,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "13546128 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpper/large-upper/default (github.com/gofiber/utils/v2/strings) - ns/op",
-            "value": 92.78,
-            "unit": "ns/op",
-            "extra": "13546128 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpper/large-upper/default (github.com/gofiber/utils/v2/strings) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "13546128 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpper/large-upper/default (github.com/gofiber/utils/v2/strings) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "13546128 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpper/large-mixed/fiber (github.com/gofiber/utils/v2/strings)",
-            "value": 53.59,
-            "unit": "ns/op\t      64 B/op\t       1 allocs/op",
-            "extra": "21839656 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpper/large-mixed/fiber (github.com/gofiber/utils/v2/strings) - ns/op",
-            "value": 53.59,
-            "unit": "ns/op",
-            "extra": "21839656 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpper/large-mixed/fiber (github.com/gofiber/utils/v2/strings) - B/op",
-            "value": 64,
-            "unit": "B/op",
-            "extra": "21839656 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpper/large-mixed/fiber (github.com/gofiber/utils/v2/strings) - allocs/op",
-            "value": 1,
-            "unit": "allocs/op",
-            "extra": "21839656 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpper/large-mixed/fiber/unsafe (github.com/gofiber/utils/v2/strings)",
-            "value": 36.93,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "32092189 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpper/large-mixed/fiber/unsafe (github.com/gofiber/utils/v2/strings) - ns/op",
-            "value": 36.93,
-            "unit": "ns/op",
-            "extra": "32092189 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpper/large-mixed/fiber/unsafe (github.com/gofiber/utils/v2/strings) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "32092189 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpper/large-mixed/fiber/unsafe (github.com/gofiber/utils/v2/strings) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "32092189 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpper/large-mixed/default (github.com/gofiber/utils/v2/strings)",
-            "value": 247.6,
-            "unit": "ns/op\t      64 B/op\t       1 allocs/op",
-            "extra": "4852868 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpper/large-mixed/default (github.com/gofiber/utils/v2/strings) - ns/op",
-            "value": 247.6,
-            "unit": "ns/op",
-            "extra": "4852868 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpper/large-mixed/default (github.com/gofiber/utils/v2/strings) - B/op",
-            "value": 64,
-            "unit": "B/op",
-            "extra": "4852868 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToUpper/large-mixed/default (github.com/gofiber/utils/v2/strings) - allocs/op",
-            "value": 1,
-            "unit": "allocs/op",
-            "extra": "4852868 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLower/empty/fiber (github.com/gofiber/utils/v2/strings)",
-            "value": 2.224,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "488760973 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLower/empty/fiber (github.com/gofiber/utils/v2/strings) - ns/op",
-            "value": 2.224,
-            "unit": "ns/op",
-            "extra": "488760973 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLower/empty/fiber (github.com/gofiber/utils/v2/strings) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "488760973 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLower/empty/fiber (github.com/gofiber/utils/v2/strings) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "488760973 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLower/empty/fiber/unsafe (github.com/gofiber/utils/v2/strings)",
-            "value": 2.82,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "425320741 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLower/empty/fiber/unsafe (github.com/gofiber/utils/v2/strings) - ns/op",
-            "value": 2.82,
-            "unit": "ns/op",
-            "extra": "425320741 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLower/empty/fiber/unsafe (github.com/gofiber/utils/v2/strings) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "425320741 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLower/empty/fiber/unsafe (github.com/gofiber/utils/v2/strings) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "425320741 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLower/empty/default (github.com/gofiber/utils/v2/strings)",
-            "value": 2.82,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "378798708 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLower/empty/default (github.com/gofiber/utils/v2/strings) - ns/op",
-            "value": 2.82,
-            "unit": "ns/op",
-            "extra": "378798708 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLower/empty/default (github.com/gofiber/utils/v2/strings) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "378798708 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLower/empty/default (github.com/gofiber/utils/v2/strings) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "378798708 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLower/http-get/fiber (github.com/gofiber/utils/v2/strings)",
-            "value": 4.585,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "261617216 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLower/http-get/fiber (github.com/gofiber/utils/v2/strings) - ns/op",
-            "value": 4.585,
-            "unit": "ns/op",
-            "extra": "261617216 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLower/http-get/fiber (github.com/gofiber/utils/v2/strings) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "261617216 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLower/http-get/fiber (github.com/gofiber/utils/v2/strings) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "261617216 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLower/http-get/fiber/unsafe (github.com/gofiber/utils/v2/strings)",
-            "value": 6.677,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "179525644 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLower/http-get/fiber/unsafe (github.com/gofiber/utils/v2/strings) - ns/op",
-            "value": 6.677,
-            "unit": "ns/op",
-            "extra": "179525644 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLower/http-get/fiber/unsafe (github.com/gofiber/utils/v2/strings) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "179525644 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLower/http-get/fiber/unsafe (github.com/gofiber/utils/v2/strings) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "179525644 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLower/http-get/default (github.com/gofiber/utils/v2/strings)",
-            "value": 5.624,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "214011025 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLower/http-get/default (github.com/gofiber/utils/v2/strings) - ns/op",
-            "value": 5.624,
-            "unit": "ns/op",
-            "extra": "214011025 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLower/http-get/default (github.com/gofiber/utils/v2/strings) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "214011025 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLower/http-get/default (github.com/gofiber/utils/v2/strings) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "214011025 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLower/http-get-upper/fiber (github.com/gofiber/utils/v2/strings)",
-            "value": 16.64,
-            "unit": "ns/op\t       3 B/op\t       1 allocs/op",
-            "extra": "70653535 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLower/http-get-upper/fiber (github.com/gofiber/utils/v2/strings) - ns/op",
-            "value": 16.64,
-            "unit": "ns/op",
-            "extra": "70653535 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLower/http-get-upper/fiber (github.com/gofiber/utils/v2/strings) - B/op",
-            "value": 3,
-            "unit": "B/op",
-            "extra": "70653535 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLower/http-get-upper/fiber (github.com/gofiber/utils/v2/strings) - allocs/op",
-            "value": 1,
-            "unit": "allocs/op",
-            "extra": "70653535 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLower/http-get-upper/fiber/unsafe (github.com/gofiber/utils/v2/strings)",
-            "value": 6.692,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "179532213 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLower/http-get-upper/fiber/unsafe (github.com/gofiber/utils/v2/strings) - ns/op",
-            "value": 6.692,
-            "unit": "ns/op",
-            "extra": "179532213 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLower/http-get-upper/fiber/unsafe (github.com/gofiber/utils/v2/strings) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "179532213 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLower/http-get-upper/fiber/unsafe (github.com/gofiber/utils/v2/strings) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "179532213 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLower/http-get-upper/default (github.com/gofiber/utils/v2/strings)",
-            "value": 29.95,
-            "unit": "ns/op\t       8 B/op\t       1 allocs/op",
-            "extra": "37669987 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLower/http-get-upper/default (github.com/gofiber/utils/v2/strings) - ns/op",
-            "value": 29.95,
-            "unit": "ns/op",
-            "extra": "37669987 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLower/http-get-upper/default (github.com/gofiber/utils/v2/strings) - B/op",
-            "value": 8,
-            "unit": "B/op",
-            "extra": "37669987 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLower/http-get-upper/default (github.com/gofiber/utils/v2/strings) - allocs/op",
-            "value": 1,
-            "unit": "allocs/op",
-            "extra": "37669987 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLower/header-content-type-mixed/fiber (github.com/gofiber/utils/v2/strings)",
-            "value": 41.28,
-            "unit": "ns/op\t      48 B/op\t       1 allocs/op",
-            "extra": "27124665 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLower/header-content-type-mixed/fiber (github.com/gofiber/utils/v2/strings) - ns/op",
-            "value": 41.28,
-            "unit": "ns/op",
-            "extra": "27124665 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLower/header-content-type-mixed/fiber (github.com/gofiber/utils/v2/strings) - B/op",
-            "value": 48,
-            "unit": "B/op",
-            "extra": "27124665 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLower/header-content-type-mixed/fiber (github.com/gofiber/utils/v2/strings) - allocs/op",
-            "value": 1,
-            "unit": "allocs/op",
-            "extra": "27124665 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLower/header-content-type-mixed/fiber/unsafe (github.com/gofiber/utils/v2/strings)",
-            "value": 28.9,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "42696712 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLower/header-content-type-mixed/fiber/unsafe (github.com/gofiber/utils/v2/strings) - ns/op",
-            "value": 28.9,
-            "unit": "ns/op",
-            "extra": "42696712 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLower/header-content-type-mixed/fiber/unsafe (github.com/gofiber/utils/v2/strings) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "42696712 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLower/header-content-type-mixed/fiber/unsafe (github.com/gofiber/utils/v2/strings) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "42696712 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLower/header-content-type-mixed/default (github.com/gofiber/utils/v2/strings)",
-            "value": 91.48,
-            "unit": "ns/op\t      48 B/op\t       1 allocs/op",
-            "extra": "12891033 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLower/header-content-type-mixed/default (github.com/gofiber/utils/v2/strings) - ns/op",
-            "value": 91.48,
-            "unit": "ns/op",
-            "extra": "12891033 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLower/header-content-type-mixed/default (github.com/gofiber/utils/v2/strings) - B/op",
-            "value": 48,
-            "unit": "B/op",
-            "extra": "12891033 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLower/header-content-type-mixed/default (github.com/gofiber/utils/v2/strings) - allocs/op",
-            "value": 1,
-            "unit": "allocs/op",
-            "extra": "12891033 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLower/large-lower/fiber (github.com/gofiber/utils/v2/strings)",
-            "value": 47.64,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "24928974 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLower/large-lower/fiber (github.com/gofiber/utils/v2/strings) - ns/op",
-            "value": 47.64,
-            "unit": "ns/op",
-            "extra": "24928974 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLower/large-lower/fiber (github.com/gofiber/utils/v2/strings) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "24928974 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLower/large-lower/fiber (github.com/gofiber/utils/v2/strings) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "24928974 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLower/large-lower/fiber/unsafe (github.com/gofiber/utils/v2/strings)",
-            "value": 37.81,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "32120588 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLower/large-lower/fiber/unsafe (github.com/gofiber/utils/v2/strings) - ns/op",
-            "value": 37.81,
-            "unit": "ns/op",
-            "extra": "32120588 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLower/large-lower/fiber/unsafe (github.com/gofiber/utils/v2/strings) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "32120588 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLower/large-lower/fiber/unsafe (github.com/gofiber/utils/v2/strings) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "32120588 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLower/large-lower/default (github.com/gofiber/utils/v2/strings)",
-            "value": 53.41,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "21231934 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLower/large-lower/default (github.com/gofiber/utils/v2/strings) - ns/op",
-            "value": 53.41,
-            "unit": "ns/op",
-            "extra": "21231934 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLower/large-lower/default (github.com/gofiber/utils/v2/strings) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "21231934 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLower/large-lower/default (github.com/gofiber/utils/v2/strings) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "21231934 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLower/large-upper/fiber (github.com/gofiber/utils/v2/strings)",
-            "value": 53.93,
-            "unit": "ns/op\t      64 B/op\t       1 allocs/op",
-            "extra": "21696394 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLower/large-upper/fiber (github.com/gofiber/utils/v2/strings) - ns/op",
-            "value": 53.93,
-            "unit": "ns/op",
-            "extra": "21696394 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLower/large-upper/fiber (github.com/gofiber/utils/v2/strings) - B/op",
-            "value": 64,
-            "unit": "B/op",
-            "extra": "21696394 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLower/large-upper/fiber (github.com/gofiber/utils/v2/strings) - allocs/op",
-            "value": 1,
-            "unit": "allocs/op",
-            "extra": "21696394 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLower/large-upper/fiber/unsafe (github.com/gofiber/utils/v2/strings)",
-            "value": 37.57,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "32751056 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLower/large-upper/fiber/unsafe (github.com/gofiber/utils/v2/strings) - ns/op",
-            "value": 37.57,
-            "unit": "ns/op",
-            "extra": "32751056 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLower/large-upper/fiber/unsafe (github.com/gofiber/utils/v2/strings) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "32751056 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLower/large-upper/fiber/unsafe (github.com/gofiber/utils/v2/strings) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "32751056 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLower/large-upper/default (github.com/gofiber/utils/v2/strings)",
-            "value": 196.3,
-            "unit": "ns/op\t      64 B/op\t       1 allocs/op",
-            "extra": "6032936 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLower/large-upper/default (github.com/gofiber/utils/v2/strings) - ns/op",
-            "value": 196.3,
-            "unit": "ns/op",
-            "extra": "6032936 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLower/large-upper/default (github.com/gofiber/utils/v2/strings) - B/op",
-            "value": 64,
-            "unit": "B/op",
-            "extra": "6032936 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLower/large-upper/default (github.com/gofiber/utils/v2/strings) - allocs/op",
-            "value": 1,
-            "unit": "allocs/op",
-            "extra": "6032936 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLower/large-mixed/fiber (github.com/gofiber/utils/v2/strings)",
-            "value": 53.87,
-            "unit": "ns/op\t      64 B/op\t       1 allocs/op",
-            "extra": "21999260 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLower/large-mixed/fiber (github.com/gofiber/utils/v2/strings) - ns/op",
-            "value": 53.87,
-            "unit": "ns/op",
-            "extra": "21999260 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLower/large-mixed/fiber (github.com/gofiber/utils/v2/strings) - B/op",
-            "value": 64,
-            "unit": "B/op",
-            "extra": "21999260 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLower/large-mixed/fiber (github.com/gofiber/utils/v2/strings) - allocs/op",
-            "value": 1,
-            "unit": "allocs/op",
-            "extra": "21999260 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLower/large-mixed/fiber/unsafe (github.com/gofiber/utils/v2/strings)",
-            "value": 36.94,
-            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
-            "extra": "32684092 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLower/large-mixed/fiber/unsafe (github.com/gofiber/utils/v2/strings) - ns/op",
-            "value": 36.94,
-            "unit": "ns/op",
-            "extra": "32684092 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLower/large-mixed/fiber/unsafe (github.com/gofiber/utils/v2/strings) - B/op",
-            "value": 0,
-            "unit": "B/op",
-            "extra": "32684092 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLower/large-mixed/fiber/unsafe (github.com/gofiber/utils/v2/strings) - allocs/op",
-            "value": 0,
-            "unit": "allocs/op",
-            "extra": "32684092 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLower/large-mixed/default (github.com/gofiber/utils/v2/strings)",
-            "value": 240.1,
-            "unit": "ns/op\t      64 B/op\t       1 allocs/op",
-            "extra": "4959842 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLower/large-mixed/default (github.com/gofiber/utils/v2/strings) - ns/op",
-            "value": 240.1,
-            "unit": "ns/op",
-            "extra": "4959842 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLower/large-mixed/default (github.com/gofiber/utils/v2/strings) - B/op",
-            "value": 64,
-            "unit": "B/op",
-            "extra": "4959842 times\n4 procs"
-          },
-          {
-            "name": "Benchmark_ToLower/large-mixed/default (github.com/gofiber/utils/v2/strings) - allocs/op",
-            "value": 1,
-            "unit": "allocs/op",
-            "extra": "4959842 times\n4 procs"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -519388,6 +511492,15852 @@ window.BENCHMARK_DATA = {
             "value": 0,
             "unit": "allocs/op",
             "extra": "2100607 times\n6 procs"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "rene@gofiber.io",
+            "name": "René",
+            "username": "ReneWerner87"
+          },
+          "committer": {
+            "email": "rene@gofiber.io",
+            "name": "René",
+            "username": "ReneWerner87"
+          },
+          "distinct": true,
+          "id": "23e0dc77b8fec6f0f2bf5b1ac32138a2bb7501e5",
+          "message": "feat(benchmark): configure benchmark sharding to optimize run times",
+          "timestamp": "2026-07-29T00:56:32+02:00",
+          "tree_id": "011b06ddc8697c9f0d660d816721f1612b8c790e",
+          "url": "https://github.com/gofiber/utils/commit/23e0dc77b8fec6f0f2bf5b1ac32138a2bb7501e5"
+        },
+        "date": 1785279779156,
+        "tool": "go",
+        "benches": [
+          {
+            "name": "Benchmark_AddTrailingSlashBytes/empty (github.com/gofiber/utils/v2)",
+            "value": 0.4078,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AddTrailingSlashBytes/empty (github.com/gofiber/utils/v2) - ns/op",
+            "value": 0.4078,
+            "unit": "ns/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AddTrailingSlashBytes/empty (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AddTrailingSlashBytes/empty (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AddTrailingSlashBytes/slash-only (github.com/gofiber/utils/v2)",
+            "value": 0.6131,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AddTrailingSlashBytes/slash-only (github.com/gofiber/utils/v2) - ns/op",
+            "value": 0.6131,
+            "unit": "ns/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AddTrailingSlashBytes/slash-only (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AddTrailingSlashBytes/slash-only (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AddTrailingSlashBytes/short-no-slash (github.com/gofiber/utils/v2)",
+            "value": 8.64,
+            "unit": "ns/op\t       4 B/op\t       1 allocs/op",
+            "extra": "163527453 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AddTrailingSlashBytes/short-no-slash (github.com/gofiber/utils/v2) - ns/op",
+            "value": 8.64,
+            "unit": "ns/op",
+            "extra": "163527453 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AddTrailingSlashBytes/short-no-slash (github.com/gofiber/utils/v2) - B/op",
+            "value": 4,
+            "unit": "B/op",
+            "extra": "163527453 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AddTrailingSlashBytes/short-no-slash (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 1,
+            "unit": "allocs/op",
+            "extra": "163527453 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AddTrailingSlashBytes/short-with-slash (github.com/gofiber/utils/v2)",
+            "value": 0.5919,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AddTrailingSlashBytes/short-with-slash (github.com/gofiber/utils/v2) - ns/op",
+            "value": 0.5919,
+            "unit": "ns/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AddTrailingSlashBytes/short-with-slash (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AddTrailingSlashBytes/short-with-slash (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AddTrailingSlashBytes/path-no-slash (github.com/gofiber/utils/v2)",
+            "value": 9.949,
+            "unit": "ns/op\t      16 B/op\t       1 allocs/op",
+            "extra": "122370973 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AddTrailingSlashBytes/path-no-slash (github.com/gofiber/utils/v2) - ns/op",
+            "value": 9.949,
+            "unit": "ns/op",
+            "extra": "122370973 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AddTrailingSlashBytes/path-no-slash (github.com/gofiber/utils/v2) - B/op",
+            "value": 16,
+            "unit": "B/op",
+            "extra": "122370973 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AddTrailingSlashBytes/path-no-slash (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 1,
+            "unit": "allocs/op",
+            "extra": "122370973 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AddTrailingSlashBytes/path-with-slash (github.com/gofiber/utils/v2)",
+            "value": 0.596,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AddTrailingSlashBytes/path-with-slash (github.com/gofiber/utils/v2) - ns/op",
+            "value": 0.596,
+            "unit": "ns/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AddTrailingSlashBytes/path-with-slash (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AddTrailingSlashBytes/path-with-slash (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_EqualFoldBytes/fiber (github.com/gofiber/utils/v2)",
+            "value": 18.14,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "66157770 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_EqualFoldBytes/fiber (github.com/gofiber/utils/v2) - ns/op",
+            "value": 18.14,
+            "unit": "ns/op",
+            "extra": "66157770 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_EqualFoldBytes/fiber (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "66157770 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_EqualFoldBytes/fiber (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "66157770 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_EqualFoldBytes/default (github.com/gofiber/utils/v2)",
+            "value": 35.39,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "33485581 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_EqualFoldBytes/default (github.com/gofiber/utils/v2) - ns/op",
+            "value": 35.39,
+            "unit": "ns/op",
+            "extra": "33485581 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_EqualFoldBytes/default (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "33485581 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_EqualFoldBytes/default (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "33485581 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimRight/fiber (github.com/gofiber/utils/v2)",
+            "value": 0.7728,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimRight/fiber (github.com/gofiber/utils/v2) - ns/op",
+            "value": 0.7728,
+            "unit": "ns/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimRight/fiber (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimRight/fiber (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimRight/default (github.com/gofiber/utils/v2)",
+            "value": 1.593,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "678454396 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimRight/default (github.com/gofiber/utils/v2) - ns/op",
+            "value": 1.593,
+            "unit": "ns/op",
+            "extra": "678454396 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimRight/default (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "678454396 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimRight/default (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "678454396 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Trim/fiber (github.com/gofiber/utils/v2)",
+            "value": 1.591,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "748135113 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Trim/fiber (github.com/gofiber/utils/v2) - ns/op",
+            "value": 1.591,
+            "unit": "ns/op",
+            "extra": "748135113 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Trim/fiber (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "748135113 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Trim/fiber (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "748135113 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Trim/default (github.com/gofiber/utils/v2)",
+            "value": 2.276,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "523823050 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Trim/default (github.com/gofiber/utils/v2) - ns/op",
+            "value": 2.276,
+            "unit": "ns/op",
+            "extra": "523823050 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Trim/default (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "523823050 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Trim/default (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "523823050 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Trim/default.trimspace (github.com/gofiber/utils/v2)",
+            "value": 2.846,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "414142654 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Trim/default.trimspace (github.com/gofiber/utils/v2) - ns/op",
+            "value": 2.846,
+            "unit": "ns/op",
+            "extra": "414142654 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Trim/default.trimspace (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "414142654 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Trim/default.trimspace (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "414142654 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ConvertToBytes/fiber (github.com/gofiber/utils/v2)",
+            "value": 1.926,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "573531120 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ConvertToBytes/fiber (github.com/gofiber/utils/v2) - ns/op",
+            "value": 1.926,
+            "unit": "ns/op",
+            "extra": "573531120 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ConvertToBytes/fiber (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "573531120 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ConvertToBytes/fiber (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "573531120 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_UnsafeBytes/unsafe (github.com/gofiber/utils/v2)",
+            "value": 0.5901,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_UnsafeBytes/unsafe (github.com/gofiber/utils/v2) - ns/op",
+            "value": 0.5901,
+            "unit": "ns/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_UnsafeBytes/unsafe (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_UnsafeBytes/unsafe (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_UnsafeBytes/default (github.com/gofiber/utils/v2)",
+            "value": 10.5,
+            "unit": "ns/op\t      16 B/op\t       1 allocs/op",
+            "extra": "100000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_UnsafeBytes/default (github.com/gofiber/utils/v2) - ns/op",
+            "value": 10.5,
+            "unit": "ns/op",
+            "extra": "100000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_UnsafeBytes/default (github.com/gofiber/utils/v2) - B/op",
+            "value": 16,
+            "unit": "B/op",
+            "extra": "100000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_UnsafeBytes/default (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 1,
+            "unit": "allocs/op",
+            "extra": "100000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_FormatUint8/fiber (github.com/gofiber/utils/v2)",
+            "value": 1,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_FormatUint8/fiber (github.com/gofiber/utils/v2) - ns/op",
+            "value": 1,
+            "unit": "ns/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_FormatUint8/fiber (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_FormatUint8/fiber (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_FormatUint8/strconv (github.com/gofiber/utils/v2)",
+            "value": 11.1,
+            "unit": "ns/op\t       3 B/op\t       1 allocs/op",
+            "extra": "100000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_FormatUint8/strconv (github.com/gofiber/utils/v2) - ns/op",
+            "value": 11.1,
+            "unit": "ns/op",
+            "extra": "100000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_FormatUint8/strconv (github.com/gofiber/utils/v2) - B/op",
+            "value": 3,
+            "unit": "B/op",
+            "extra": "100000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_FormatUint8/strconv (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 1,
+            "unit": "allocs/op",
+            "extra": "100000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_FormatInt8/fiber (github.com/gofiber/utils/v2)",
+            "value": 1,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_FormatInt8/fiber (github.com/gofiber/utils/v2) - ns/op",
+            "value": 1,
+            "unit": "ns/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_FormatInt8/fiber (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_FormatInt8/fiber (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_FormatInt8/strconv (github.com/gofiber/utils/v2)",
+            "value": 9.383,
+            "unit": "ns/op\t       4 B/op\t       1 allocs/op",
+            "extra": "127724217 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_FormatInt8/strconv (github.com/gofiber/utils/v2) - ns/op",
+            "value": 9.383,
+            "unit": "ns/op",
+            "extra": "127724217 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_FormatInt8/strconv (github.com/gofiber/utils/v2) - B/op",
+            "value": 4,
+            "unit": "B/op",
+            "extra": "127724217 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_FormatInt8/strconv (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 1,
+            "unit": "allocs/op",
+            "extra": "127724217 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AppendUint/fiber (github.com/gofiber/utils/v2)",
+            "value": 7.311,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "164854126 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AppendUint/fiber (github.com/gofiber/utils/v2) - ns/op",
+            "value": 7.311,
+            "unit": "ns/op",
+            "extra": "164854126 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AppendUint/fiber (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "164854126 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AppendUint/fiber (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "164854126 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AppendUint/strconv (github.com/gofiber/utils/v2)",
+            "value": 8.147,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "147133881 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AppendUint/strconv (github.com/gofiber/utils/v2) - ns/op",
+            "value": 8.147,
+            "unit": "ns/op",
+            "extra": "147133881 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AppendUint/strconv (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "147133881 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AppendUint/strconv (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "147133881 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_StatusMessage/fiber (github.com/gofiber/utils/v2)",
+            "value": 0.1974,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_StatusMessage/fiber (github.com/gofiber/utils/v2) - ns/op",
+            "value": 0.1974,
+            "unit": "ns/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_StatusMessage/fiber (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_StatusMessage/fiber (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_StatusMessage/default (github.com/gofiber/utils/v2)",
+            "value": 1.424,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "826549969 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_StatusMessage/default (github.com/gofiber/utils/v2) - ns/op",
+            "value": 1.424,
+            "unit": "ns/op",
+            "extra": "826549969 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_StatusMessage/default (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "826549969 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_StatusMessage/default (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "826549969 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseIPv4/fiber (github.com/gofiber/utils/v2)",
+            "value": 8.466,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "141841033 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseIPv4/fiber (github.com/gofiber/utils/v2) - ns/op",
+            "value": 8.466,
+            "unit": "ns/op",
+            "extra": "141841033 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseIPv4/fiber (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "141841033 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseIPv4/fiber (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "141841033 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseIPv4/default (github.com/gofiber/utils/v2)",
+            "value": 11.11,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "100000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseIPv4/default (github.com/gofiber/utils/v2) - ns/op",
+            "value": 11.11,
+            "unit": "ns/op",
+            "extra": "100000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseIPv4/default (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "100000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseIPv4/default (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "100000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IsIPv6/fiber (github.com/gofiber/utils/v2)",
+            "value": 24.8,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "48535639 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IsIPv6/fiber (github.com/gofiber/utils/v2) - ns/op",
+            "value": 24.8,
+            "unit": "ns/op",
+            "extra": "48535639 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IsIPv6/fiber (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "48535639 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IsIPv6/fiber (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "48535639 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IsIPv6/default (github.com/gofiber/utils/v2)",
+            "value": 35.25,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "32035956 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IsIPv6/default (github.com/gofiber/utils/v2) - ns/op",
+            "value": 35.25,
+            "unit": "ns/op",
+            "extra": "32035956 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IsIPv6/default (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "32035956 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IsIPv6/default (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "32035956 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AppendJSONString/clean-16B/fiber (github.com/gofiber/utils/v2)",
+            "value": 8.782,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "137214367 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AppendJSONString/clean-16B/fiber (github.com/gofiber/utils/v2) - ns/op",
+            "value": 8.782,
+            "unit": "ns/op",
+            "extra": "137214367 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AppendJSONString/clean-16B/fiber (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "137214367 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AppendJSONString/clean-16B/fiber (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "137214367 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AppendJSONString/clean-16B/default (github.com/gofiber/utils/v2)",
+            "value": 57.32,
+            "unit": "ns/op\t      40 B/op\t       2 allocs/op",
+            "extra": "21331875 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AppendJSONString/clean-16B/default (github.com/gofiber/utils/v2) - ns/op",
+            "value": 57.32,
+            "unit": "ns/op",
+            "extra": "21331875 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AppendJSONString/clean-16B/default (github.com/gofiber/utils/v2) - B/op",
+            "value": 40,
+            "unit": "B/op",
+            "extra": "21331875 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AppendJSONString/clean-16B/default (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 2,
+            "unit": "allocs/op",
+            "extra": "21331875 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AppendJSONString/clean-64B/fiber (github.com/gofiber/utils/v2)",
+            "value": 29.74,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "41178819 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AppendJSONString/clean-64B/fiber (github.com/gofiber/utils/v2) - ns/op",
+            "value": 29.74,
+            "unit": "ns/op",
+            "extra": "41178819 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AppendJSONString/clean-64B/fiber (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "41178819 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AppendJSONString/clean-64B/fiber (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "41178819 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AppendJSONString/clean-64B/default (github.com/gofiber/utils/v2)",
+            "value": 93.54,
+            "unit": "ns/op\t      96 B/op\t       2 allocs/op",
+            "extra": "12924003 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AppendJSONString/clean-64B/default (github.com/gofiber/utils/v2) - ns/op",
+            "value": 93.54,
+            "unit": "ns/op",
+            "extra": "12924003 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AppendJSONString/clean-64B/default (github.com/gofiber/utils/v2) - B/op",
+            "value": 96,
+            "unit": "B/op",
+            "extra": "12924003 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AppendJSONString/clean-64B/default (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 2,
+            "unit": "allocs/op",
+            "extra": "12924003 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AppendJSONString/escaped-64B/fiber (github.com/gofiber/utils/v2)",
+            "value": 81.64,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "14825320 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AppendJSONString/escaped-64B/fiber (github.com/gofiber/utils/v2) - ns/op",
+            "value": 81.64,
+            "unit": "ns/op",
+            "extra": "14825320 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AppendJSONString/escaped-64B/fiber (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "14825320 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AppendJSONString/escaped-64B/fiber (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "14825320 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AppendJSONString/escaped-64B/default (github.com/gofiber/utils/v2)",
+            "value": 124.4,
+            "unit": "ns/op\t      96 B/op\t       2 allocs/op",
+            "extra": "8795535 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AppendJSONString/escaped-64B/default (github.com/gofiber/utils/v2) - ns/op",
+            "value": 124.4,
+            "unit": "ns/op",
+            "extra": "8795535 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AppendJSONString/escaped-64B/default (github.com/gofiber/utils/v2) - B/op",
+            "value": 96,
+            "unit": "B/op",
+            "extra": "8795535 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AppendJSONString/escaped-64B/default (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 2,
+            "unit": "allocs/op",
+            "extra": "8795535 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AppendJSONString/unicode-64B/fiber (github.com/gofiber/utils/v2)",
+            "value": 116.6,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "10164284 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AppendJSONString/unicode-64B/fiber (github.com/gofiber/utils/v2) - ns/op",
+            "value": 116.6,
+            "unit": "ns/op",
+            "extra": "10164284 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AppendJSONString/unicode-64B/fiber (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "10164284 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AppendJSONString/unicode-64B/fiber (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "10164284 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AppendJSONString/unicode-64B/default (github.com/gofiber/utils/v2)",
+            "value": 125.6,
+            "unit": "ns/op\t     112 B/op\t       2 allocs/op",
+            "extra": "9295791 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AppendJSONString/unicode-64B/default (github.com/gofiber/utils/v2) - ns/op",
+            "value": 125.6,
+            "unit": "ns/op",
+            "extra": "9295791 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AppendJSONString/unicode-64B/default (github.com/gofiber/utils/v2) - B/op",
+            "value": 112,
+            "unit": "B/op",
+            "extra": "9295791 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AppendJSONString/unicode-64B/default (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 2,
+            "unit": "allocs/op",
+            "extra": "9295791 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseInt32/fiber (github.com/gofiber/utils/v2)",
+            "value": 4.117,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "303576130 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseInt32/fiber (github.com/gofiber/utils/v2) - ns/op",
+            "value": 4.117,
+            "unit": "ns/op",
+            "extra": "303576130 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseInt32/fiber (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "303576130 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseInt32/fiber (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "303576130 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseInt32/fiber_bytes (github.com/gofiber/utils/v2)",
+            "value": 4.807,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "256000551 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseInt32/fiber_bytes (github.com/gofiber/utils/v2) - ns/op",
+            "value": 4.807,
+            "unit": "ns/op",
+            "extra": "256000551 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseInt32/fiber_bytes (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "256000551 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseInt32/fiber_bytes (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "256000551 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseInt32/default (github.com/gofiber/utils/v2)",
+            "value": 10.02,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "120934500 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseInt32/default (github.com/gofiber/utils/v2) - ns/op",
+            "value": 10.02,
+            "unit": "ns/op",
+            "extra": "120934500 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseInt32/default (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "120934500 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseInt32/default (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "120934500 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseUint32/fiber (github.com/gofiber/utils/v2)",
+            "value": 3.725,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "326453541 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseUint32/fiber (github.com/gofiber/utils/v2) - ns/op",
+            "value": 3.725,
+            "unit": "ns/op",
+            "extra": "326453541 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseUint32/fiber (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "326453541 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseUint32/fiber (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "326453541 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseUint32/fiber_bytes (github.com/gofiber/utils/v2)",
+            "value": 4.116,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "295345458 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseUint32/fiber_bytes (github.com/gofiber/utils/v2) - ns/op",
+            "value": 4.116,
+            "unit": "ns/op",
+            "extra": "295345458 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseUint32/fiber_bytes (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "295345458 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseUint32/fiber_bytes (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "295345458 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseUint32/default (github.com/gofiber/utils/v2)",
+            "value": 7.507,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "153211413 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseUint32/default (github.com/gofiber/utils/v2) - ns/op",
+            "value": 7.507,
+            "unit": "ns/op",
+            "extra": "153211413 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseUint32/default (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "153211413 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseUint32/default (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "153211413 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexFold/miss-32B/swar (github.com/gofiber/utils/v2)",
+            "value": 5.957,
+            "unit": "ns/op\t5371.43 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "201002071 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexFold/miss-32B/swar (github.com/gofiber/utils/v2) - ns/op",
+            "value": 5.957,
+            "unit": "ns/op",
+            "extra": "201002071 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexFold/miss-32B/swar (github.com/gofiber/utils/v2) - MB/s",
+            "value": 5371.43,
+            "unit": "MB/s",
+            "extra": "201002071 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexFold/miss-32B/swar (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "201002071 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexFold/miss-32B/swar (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "201002071 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexFold/miss-32B/scalar (github.com/gofiber/utils/v2)",
+            "value": 17.35,
+            "unit": "ns/op\t1844.38 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "79043530 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexFold/miss-32B/scalar (github.com/gofiber/utils/v2) - ns/op",
+            "value": 17.35,
+            "unit": "ns/op",
+            "extra": "79043530 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexFold/miss-32B/scalar (github.com/gofiber/utils/v2) - MB/s",
+            "value": 1844.38,
+            "unit": "MB/s",
+            "extra": "79043530 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexFold/miss-32B/scalar (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "79043530 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexFold/miss-32B/scalar (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "79043530 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexFold/hit-32B/swar (github.com/gofiber/utils/v2)",
+            "value": 7.402,
+            "unit": "ns/op\t4323.21 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "163693525 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexFold/hit-32B/swar (github.com/gofiber/utils/v2) - ns/op",
+            "value": 7.402,
+            "unit": "ns/op",
+            "extra": "163693525 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexFold/hit-32B/swar (github.com/gofiber/utils/v2) - MB/s",
+            "value": 4323.21,
+            "unit": "MB/s",
+            "extra": "163693525 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexFold/hit-32B/swar (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "163693525 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexFold/hit-32B/swar (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "163693525 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexFold/hit-32B/scalar (github.com/gofiber/utils/v2)",
+            "value": 18.11,
+            "unit": "ns/op\t1767.37 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "74988451 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexFold/hit-32B/scalar (github.com/gofiber/utils/v2) - ns/op",
+            "value": 18.11,
+            "unit": "ns/op",
+            "extra": "74988451 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexFold/hit-32B/scalar (github.com/gofiber/utils/v2) - MB/s",
+            "value": 1767.37,
+            "unit": "MB/s",
+            "extra": "74988451 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexFold/hit-32B/scalar (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "74988451 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexFold/hit-32B/scalar (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "74988451 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexFold/hit-tail/swar (github.com/gofiber/utils/v2)",
+            "value": 10.86,
+            "unit": "ns/op\t5710.69 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "100000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexFold/hit-tail/swar (github.com/gofiber/utils/v2) - ns/op",
+            "value": 10.86,
+            "unit": "ns/op",
+            "extra": "100000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexFold/hit-tail/swar (github.com/gofiber/utils/v2) - MB/s",
+            "value": 5710.69,
+            "unit": "MB/s",
+            "extra": "100000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexFold/hit-tail/swar (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "100000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexFold/hit-tail/swar (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "100000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexFold/hit-tail/scalar (github.com/gofiber/utils/v2)",
+            "value": 45.13,
+            "unit": "ns/op\t1373.80 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "26889474 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexFold/hit-tail/scalar (github.com/gofiber/utils/v2) - ns/op",
+            "value": 45.13,
+            "unit": "ns/op",
+            "extra": "26889474 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexFold/hit-tail/scalar (github.com/gofiber/utils/v2) - MB/s",
+            "value": 1373.8,
+            "unit": "MB/s",
+            "extra": "26889474 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexFold/hit-tail/scalar (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "26889474 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexFold/hit-tail/scalar (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "26889474 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexFold/miss-64B/swar (github.com/gofiber/utils/v2)",
+            "value": 10.48,
+            "unit": "ns/op\t6107.64 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "100000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexFold/miss-64B/swar (github.com/gofiber/utils/v2) - ns/op",
+            "value": 10.48,
+            "unit": "ns/op",
+            "extra": "100000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexFold/miss-64B/swar (github.com/gofiber/utils/v2) - MB/s",
+            "value": 6107.64,
+            "unit": "MB/s",
+            "extra": "100000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexFold/miss-64B/swar (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "100000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexFold/miss-64B/swar (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "100000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexFold/miss-64B/scalar (github.com/gofiber/utils/v2)",
+            "value": 38.06,
+            "unit": "ns/op\t1681.58 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "30256834 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexFold/miss-64B/scalar (github.com/gofiber/utils/v2) - ns/op",
+            "value": 38.06,
+            "unit": "ns/op",
+            "extra": "30256834 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexFold/miss-64B/scalar (github.com/gofiber/utils/v2) - MB/s",
+            "value": 1681.58,
+            "unit": "MB/s",
+            "extra": "30256834 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexFold/miss-64B/scalar (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "30256834 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexFold/miss-64B/scalar (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "30256834 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexFold/miss-512B/swar (github.com/gofiber/utils/v2)",
+            "value": 67.3,
+            "unit": "ns/op\t7607.87 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "17744713 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexFold/miss-512B/swar (github.com/gofiber/utils/v2) - ns/op",
+            "value": 67.3,
+            "unit": "ns/op",
+            "extra": "17744713 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexFold/miss-512B/swar (github.com/gofiber/utils/v2) - MB/s",
+            "value": 7607.87,
+            "unit": "MB/s",
+            "extra": "17744713 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexFold/miss-512B/swar (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "17744713 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexFold/miss-512B/swar (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "17744713 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexFold/miss-512B/scalar (github.com/gofiber/utils/v2)",
+            "value": 284.9,
+            "unit": "ns/op\t1797.11 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "4226452 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexFold/miss-512B/scalar (github.com/gofiber/utils/v2) - ns/op",
+            "value": 284.9,
+            "unit": "ns/op",
+            "extra": "4226452 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexFold/miss-512B/scalar (github.com/gofiber/utils/v2) - MB/s",
+            "value": 1797.11,
+            "unit": "MB/s",
+            "extra": "4226452 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexFold/miss-512B/scalar (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "4226452 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexFold/miss-512B/scalar (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "4226452 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexFold/miss-8B/swar (github.com/gofiber/utils/v2)",
+            "value": 2.831,
+            "unit": "ns/op\t2825.90 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "419150102 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexFold/miss-8B/swar (github.com/gofiber/utils/v2) - ns/op",
+            "value": 2.831,
+            "unit": "ns/op",
+            "extra": "419150102 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexFold/miss-8B/swar (github.com/gofiber/utils/v2) - MB/s",
+            "value": 2825.9,
+            "unit": "MB/s",
+            "extra": "419150102 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexFold/miss-8B/swar (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "419150102 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexFold/miss-8B/swar (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "419150102 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexFold/miss-8B/scalar (github.com/gofiber/utils/v2)",
+            "value": 1.658,
+            "unit": "ns/op\t4826.28 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "748360206 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexFold/miss-8B/scalar (github.com/gofiber/utils/v2) - ns/op",
+            "value": 1.658,
+            "unit": "ns/op",
+            "extra": "748360206 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexFold/miss-8B/scalar (github.com/gofiber/utils/v2) - MB/s",
+            "value": 4826.28,
+            "unit": "MB/s",
+            "extra": "748360206 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexFold/miss-8B/scalar (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "748360206 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexFold/miss-8B/scalar (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "748360206 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexFold/long-hit-64B/swar (github.com/gofiber/utils/v2)",
+            "value": 10.86,
+            "unit": "ns/op\t5524.33 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "100000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexFold/long-hit-64B/swar (github.com/gofiber/utils/v2) - ns/op",
+            "value": 10.86,
+            "unit": "ns/op",
+            "extra": "100000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexFold/long-hit-64B/swar (github.com/gofiber/utils/v2) - MB/s",
+            "value": 5524.33,
+            "unit": "MB/s",
+            "extra": "100000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexFold/long-hit-64B/swar (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "100000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexFold/long-hit-64B/swar (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "100000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexFold/long-hit-64B/scalar (github.com/gofiber/utils/v2)",
+            "value": 26.55,
+            "unit": "ns/op\t2259.94 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "44831040 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexFold/long-hit-64B/scalar (github.com/gofiber/utils/v2) - ns/op",
+            "value": 26.55,
+            "unit": "ns/op",
+            "extra": "44831040 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexFold/long-hit-64B/scalar (github.com/gofiber/utils/v2) - MB/s",
+            "value": 2259.94,
+            "unit": "MB/s",
+            "extra": "44831040 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexFold/long-hit-64B/scalar (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "44831040 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexFold/long-hit-64B/scalar (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "44831040 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexFold/long-miss-64B/swar (github.com/gofiber/utils/v2)",
+            "value": 10.09,
+            "unit": "ns/op\t6345.10 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "100000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexFold/long-miss-64B/swar (github.com/gofiber/utils/v2) - ns/op",
+            "value": 10.09,
+            "unit": "ns/op",
+            "extra": "100000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexFold/long-miss-64B/swar (github.com/gofiber/utils/v2) - MB/s",
+            "value": 6345.1,
+            "unit": "MB/s",
+            "extra": "100000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexFold/long-miss-64B/swar (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "100000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexFold/long-miss-64B/swar (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "100000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexFold/long-miss-64B/scalar (github.com/gofiber/utils/v2)",
+            "value": 32.19,
+            "unit": "ns/op\t1988.14 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "37687508 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexFold/long-miss-64B/scalar (github.com/gofiber/utils/v2) - ns/op",
+            "value": 32.19,
+            "unit": "ns/op",
+            "extra": "37687508 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexFold/long-miss-64B/scalar (github.com/gofiber/utils/v2) - MB/s",
+            "value": 1988.14,
+            "unit": "MB/s",
+            "extra": "37687508 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexFold/long-miss-64B/scalar (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "37687508 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexFold/long-miss-64B/scalar (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "37687508 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_HasPrefixFold/bearer-hit/fiber (github.com/gofiber/utils/v2)",
+            "value": 3.183,
+            "unit": "ns/op\t2199.35 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "377789548 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_HasPrefixFold/bearer-hit/fiber (github.com/gofiber/utils/v2) - ns/op",
+            "value": 3.183,
+            "unit": "ns/op",
+            "extra": "377789548 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_HasPrefixFold/bearer-hit/fiber (github.com/gofiber/utils/v2) - MB/s",
+            "value": 2199.35,
+            "unit": "MB/s",
+            "extra": "377789548 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_HasPrefixFold/bearer-hit/fiber (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "377789548 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_HasPrefixFold/bearer-hit/fiber (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "377789548 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_HasPrefixFold/bearer-hit/default (github.com/gofiber/utils/v2)",
+            "value": 3.129,
+            "unit": "ns/op\t2237.11 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "389513889 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_HasPrefixFold/bearer-hit/default (github.com/gofiber/utils/v2) - ns/op",
+            "value": 3.129,
+            "unit": "ns/op",
+            "extra": "389513889 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_HasPrefixFold/bearer-hit/default (github.com/gofiber/utils/v2) - MB/s",
+            "value": 2237.11,
+            "unit": "MB/s",
+            "extra": "389513889 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_HasPrefixFold/bearer-hit/default (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "389513889 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_HasPrefixFold/bearer-hit/default (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "389513889 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_HasPrefixFold/bearer-miss/fiber (github.com/gofiber/utils/v2)",
+            "value": 1.561,
+            "unit": "ns/op\t4485.25 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "757303171 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_HasPrefixFold/bearer-miss/fiber (github.com/gofiber/utils/v2) - ns/op",
+            "value": 1.561,
+            "unit": "ns/op",
+            "extra": "757303171 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_HasPrefixFold/bearer-miss/fiber (github.com/gofiber/utils/v2) - MB/s",
+            "value": 4485.25,
+            "unit": "MB/s",
+            "extra": "757303171 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_HasPrefixFold/bearer-miss/fiber (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "757303171 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_HasPrefixFold/bearer-miss/fiber (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "757303171 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_HasPrefixFold/bearer-miss/default (github.com/gofiber/utils/v2)",
+            "value": 1.672,
+            "unit": "ns/op\t4187.29 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "708747229 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_HasPrefixFold/bearer-miss/default (github.com/gofiber/utils/v2) - ns/op",
+            "value": 1.672,
+            "unit": "ns/op",
+            "extra": "708747229 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_HasPrefixFold/bearer-miss/default (github.com/gofiber/utils/v2) - MB/s",
+            "value": 4187.29,
+            "unit": "MB/s",
+            "extra": "708747229 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_HasPrefixFold/bearer-miss/default (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "708747229 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_HasPrefixFold/bearer-miss/default (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "708747229 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_HasPrefixFold/text-hit/fiber (github.com/gofiber/utils/v2)",
+            "value": 2.441,
+            "unit": "ns/op\t2048.62 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "503447416 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_HasPrefixFold/text-hit/fiber (github.com/gofiber/utils/v2) - ns/op",
+            "value": 2.441,
+            "unit": "ns/op",
+            "extra": "503447416 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_HasPrefixFold/text-hit/fiber (github.com/gofiber/utils/v2) - MB/s",
+            "value": 2048.62,
+            "unit": "MB/s",
+            "extra": "503447416 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_HasPrefixFold/text-hit/fiber (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "503447416 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_HasPrefixFold/text-hit/fiber (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "503447416 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_HasPrefixFold/text-hit/default (github.com/gofiber/utils/v2)",
+            "value": 3.095,
+            "unit": "ns/op\t1615.68 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "397019823 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_HasPrefixFold/text-hit/default (github.com/gofiber/utils/v2) - ns/op",
+            "value": 3.095,
+            "unit": "ns/op",
+            "extra": "397019823 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_HasPrefixFold/text-hit/default (github.com/gofiber/utils/v2) - MB/s",
+            "value": 1615.68,
+            "unit": "MB/s",
+            "extra": "397019823 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_HasPrefixFold/text-hit/default (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "397019823 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_HasPrefixFold/text-hit/default (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "397019823 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_HasPrefixFold/multipart-hit/fiber (github.com/gofiber/utils/v2)",
+            "value": 6.379,
+            "unit": "ns/op\t2978.31 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "189443293 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_HasPrefixFold/multipart-hit/fiber (github.com/gofiber/utils/v2) - ns/op",
+            "value": 6.379,
+            "unit": "ns/op",
+            "extra": "189443293 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_HasPrefixFold/multipart-hit/fiber (github.com/gofiber/utils/v2) - MB/s",
+            "value": 2978.31,
+            "unit": "MB/s",
+            "extra": "189443293 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_HasPrefixFold/multipart-hit/fiber (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "189443293 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_HasPrefixFold/multipart-hit/fiber (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "189443293 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_HasPrefixFold/multipart-hit/default (github.com/gofiber/utils/v2)",
+            "value": 9.853,
+            "unit": "ns/op\t1928.29 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "123647731 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_HasPrefixFold/multipart-hit/default (github.com/gofiber/utils/v2) - ns/op",
+            "value": 9.853,
+            "unit": "ns/op",
+            "extra": "123647731 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_HasPrefixFold/multipart-hit/default (github.com/gofiber/utils/v2) - MB/s",
+            "value": 1928.29,
+            "unit": "MB/s",
+            "extra": "123647731 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_HasPrefixFold/multipart-hit/default (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "123647731 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_HasPrefixFold/multipart-hit/default (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "123647731 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_HasPrefixFold/multipart-miss/fiber (github.com/gofiber/utils/v2)",
+            "value": 1.343,
+            "unit": "ns/op\t14148.00 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "835486258 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_HasPrefixFold/multipart-miss/fiber (github.com/gofiber/utils/v2) - ns/op",
+            "value": 1.343,
+            "unit": "ns/op",
+            "extra": "835486258 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_HasPrefixFold/multipart-miss/fiber (github.com/gofiber/utils/v2) - MB/s",
+            "value": 14148,
+            "unit": "MB/s",
+            "extra": "835486258 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_HasPrefixFold/multipart-miss/fiber (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "835486258 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_HasPrefixFold/multipart-miss/fiber (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "835486258 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_HasPrefixFold/multipart-miss/default (github.com/gofiber/utils/v2)",
+            "value": 1.281,
+            "unit": "ns/op\t14827.38 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "921117373 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_HasPrefixFold/multipart-miss/default (github.com/gofiber/utils/v2) - ns/op",
+            "value": 1.281,
+            "unit": "ns/op",
+            "extra": "921117373 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_HasPrefixFold/multipart-miss/default (github.com/gofiber/utils/v2) - MB/s",
+            "value": 14827.38,
+            "unit": "MB/s",
+            "extra": "921117373 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_HasPrefixFold/multipart-miss/default (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "921117373 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_HasPrefixFold/multipart-miss/default (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "921117373 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_MemchrNotWord/8B/simd (github.com/gofiber/utils/v2/simd)",
+            "value": 4.205,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "291061684 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_MemchrNotWord/8B/simd (github.com/gofiber/utils/v2/simd) - ns/op",
+            "value": 4.205,
+            "unit": "ns/op",
+            "extra": "291061684 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_MemchrNotWord/8B/simd (github.com/gofiber/utils/v2/simd) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "291061684 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_MemchrNotWord/8B/simd (github.com/gofiber/utils/v2/simd) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "291061684 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_MemchrNotWord/8B/scalar (github.com/gofiber/utils/v2/simd)",
+            "value": 3.634,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "346555672 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_MemchrNotWord/8B/scalar (github.com/gofiber/utils/v2/simd) - ns/op",
+            "value": 3.634,
+            "unit": "ns/op",
+            "extra": "346555672 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_MemchrNotWord/8B/scalar (github.com/gofiber/utils/v2/simd) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "346555672 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_MemchrNotWord/8B/scalar (github.com/gofiber/utils/v2/simd) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "346555672 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_MemchrNotWord/32B/simd (github.com/gofiber/utils/v2/simd)",
+            "value": 2.509,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "462045223 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_MemchrNotWord/32B/simd (github.com/gofiber/utils/v2/simd) - ns/op",
+            "value": 2.509,
+            "unit": "ns/op",
+            "extra": "462045223 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_MemchrNotWord/32B/simd (github.com/gofiber/utils/v2/simd) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "462045223 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_MemchrNotWord/32B/simd (github.com/gofiber/utils/v2/simd) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "462045223 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_MemchrNotWord/32B/scalar (github.com/gofiber/utils/v2/simd)",
+            "value": 10.49,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "100000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_MemchrNotWord/32B/scalar (github.com/gofiber/utils/v2/simd) - ns/op",
+            "value": 10.49,
+            "unit": "ns/op",
+            "extra": "100000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_MemchrNotWord/32B/scalar (github.com/gofiber/utils/v2/simd) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "100000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_MemchrNotWord/32B/scalar (github.com/gofiber/utils/v2/simd) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "100000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_MemchrNotWord/64B/simd (github.com/gofiber/utils/v2/simd)",
+            "value": 3.257,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "353418598 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_MemchrNotWord/64B/simd (github.com/gofiber/utils/v2/simd) - ns/op",
+            "value": 3.257,
+            "unit": "ns/op",
+            "extra": "353418598 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_MemchrNotWord/64B/simd (github.com/gofiber/utils/v2/simd) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "353418598 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_MemchrNotWord/64B/simd (github.com/gofiber/utils/v2/simd) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "353418598 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_MemchrNotWord/64B/scalar (github.com/gofiber/utils/v2/simd)",
+            "value": 19.43,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "60181246 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_MemchrNotWord/64B/scalar (github.com/gofiber/utils/v2/simd) - ns/op",
+            "value": 19.43,
+            "unit": "ns/op",
+            "extra": "60181246 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_MemchrNotWord/64B/scalar (github.com/gofiber/utils/v2/simd) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "60181246 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_MemchrNotWord/64B/scalar (github.com/gofiber/utils/v2/simd) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "60181246 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_MemchrNotWord/512B/simd (github.com/gofiber/utils/v2/simd)",
+            "value": 11.6,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "100000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_MemchrNotWord/512B/simd (github.com/gofiber/utils/v2/simd) - ns/op",
+            "value": 11.6,
+            "unit": "ns/op",
+            "extra": "100000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_MemchrNotWord/512B/simd (github.com/gofiber/utils/v2/simd) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "100000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_MemchrNotWord/512B/simd (github.com/gofiber/utils/v2/simd) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "100000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_MemchrNotWord/512B/scalar (github.com/gofiber/utils/v2/simd)",
+            "value": 155,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "7597773 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_MemchrNotWord/512B/scalar (github.com/gofiber/utils/v2/simd) - ns/op",
+            "value": 155,
+            "unit": "ns/op",
+            "extra": "7597773 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_MemchrNotWord/512B/scalar (github.com/gofiber/utils/v2/simd) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "7597773 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_MemchrNotWord/512B/scalar (github.com/gofiber/utils/v2/simd) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "7597773 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_MemchrNotWord/4096B/simd (github.com/gofiber/utils/v2/simd)",
+            "value": 86.96,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "13703097 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_MemchrNotWord/4096B/simd (github.com/gofiber/utils/v2/simd) - ns/op",
+            "value": 86.96,
+            "unit": "ns/op",
+            "extra": "13703097 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_MemchrNotWord/4096B/simd (github.com/gofiber/utils/v2/simd) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "13703097 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_MemchrNotWord/4096B/simd (github.com/gofiber/utils/v2/simd) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "13703097 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_MemchrNotWord/4096B/scalar (github.com/gofiber/utils/v2/simd)",
+            "value": 1184,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "940472 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_MemchrNotWord/4096B/scalar (github.com/gofiber/utils/v2/simd) - ns/op",
+            "value": 1184,
+            "unit": "ns/op",
+            "extra": "940472 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_MemchrNotWord/4096B/scalar (github.com/gofiber/utils/v2/simd) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "940472 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_MemchrNotWord/4096B/scalar (github.com/gofiber/utils/v2/simd) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "940472 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem_Prefilter/8B/paired (github.com/gofiber/utils/v2/simd)",
+            "value": 5.793,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "201832579 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem_Prefilter/8B/paired (github.com/gofiber/utils/v2/simd) - ns/op",
+            "value": 5.793,
+            "unit": "ns/op",
+            "extra": "201832579 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem_Prefilter/8B/paired (github.com/gofiber/utils/v2/simd) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "201832579 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem_Prefilter/8B/paired (github.com/gofiber/utils/v2/simd) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "201832579 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem_Prefilter/8B/paired-stdlib (github.com/gofiber/utils/v2/simd)",
+            "value": 3.254,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "378760747 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem_Prefilter/8B/paired-stdlib (github.com/gofiber/utils/v2/simd) - ns/op",
+            "value": 3.254,
+            "unit": "ns/op",
+            "extra": "378760747 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem_Prefilter/8B/paired-stdlib (github.com/gofiber/utils/v2/simd) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "378760747 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem_Prefilter/8B/paired-stdlib (github.com/gofiber/utils/v2/simd) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "378760747 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem_Prefilter/32B/paired (github.com/gofiber/utils/v2/simd)",
+            "value": 9.322,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "128785081 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem_Prefilter/32B/paired (github.com/gofiber/utils/v2/simd) - ns/op",
+            "value": 9.322,
+            "unit": "ns/op",
+            "extra": "128785081 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem_Prefilter/32B/paired (github.com/gofiber/utils/v2/simd) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "128785081 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem_Prefilter/32B/paired (github.com/gofiber/utils/v2/simd) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "128785081 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem_Prefilter/32B/paired-stdlib (github.com/gofiber/utils/v2/simd)",
+            "value": 4.114,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "290027157 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem_Prefilter/32B/paired-stdlib (github.com/gofiber/utils/v2/simd) - ns/op",
+            "value": 4.114,
+            "unit": "ns/op",
+            "extra": "290027157 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem_Prefilter/32B/paired-stdlib (github.com/gofiber/utils/v2/simd) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "290027157 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem_Prefilter/32B/paired-stdlib (github.com/gofiber/utils/v2/simd) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "290027157 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem_Prefilter/32B/single (github.com/gofiber/utils/v2/simd)",
+            "value": 6.277,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "199565080 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem_Prefilter/32B/single (github.com/gofiber/utils/v2/simd) - ns/op",
+            "value": 6.277,
+            "unit": "ns/op",
+            "extra": "199565080 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem_Prefilter/32B/single (github.com/gofiber/utils/v2/simd) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "199565080 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem_Prefilter/32B/single (github.com/gofiber/utils/v2/simd) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "199565080 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem_Prefilter/32B/single-stdlib (github.com/gofiber/utils/v2/simd)",
+            "value": 6.535,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "184217502 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem_Prefilter/32B/single-stdlib (github.com/gofiber/utils/v2/simd) - ns/op",
+            "value": 6.535,
+            "unit": "ns/op",
+            "extra": "184217502 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem_Prefilter/32B/single-stdlib (github.com/gofiber/utils/v2/simd) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "184217502 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem_Prefilter/32B/single-stdlib (github.com/gofiber/utils/v2/simd) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "184217502 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem_Prefilter/64B/paired (github.com/gofiber/utils/v2/simd)",
+            "value": 5.073,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "226412434 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem_Prefilter/64B/paired (github.com/gofiber/utils/v2/simd) - ns/op",
+            "value": 5.073,
+            "unit": "ns/op",
+            "extra": "226412434 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem_Prefilter/64B/paired (github.com/gofiber/utils/v2/simd) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "226412434 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem_Prefilter/64B/paired (github.com/gofiber/utils/v2/simd) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "226412434 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem_Prefilter/64B/paired-stdlib (github.com/gofiber/utils/v2/simd)",
+            "value": 5.823,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "206239539 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem_Prefilter/64B/paired-stdlib (github.com/gofiber/utils/v2/simd) - ns/op",
+            "value": 5.823,
+            "unit": "ns/op",
+            "extra": "206239539 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem_Prefilter/64B/paired-stdlib (github.com/gofiber/utils/v2/simd) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "206239539 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem_Prefilter/64B/paired-stdlib (github.com/gofiber/utils/v2/simd) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "206239539 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem_Prefilter/64B/single (github.com/gofiber/utils/v2/simd)",
+            "value": 13.17,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "88830352 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem_Prefilter/64B/single (github.com/gofiber/utils/v2/simd) - ns/op",
+            "value": 13.17,
+            "unit": "ns/op",
+            "extra": "88830352 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem_Prefilter/64B/single (github.com/gofiber/utils/v2/simd) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "88830352 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem_Prefilter/64B/single (github.com/gofiber/utils/v2/simd) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "88830352 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem_Prefilter/64B/single-stdlib (github.com/gofiber/utils/v2/simd)",
+            "value": 13.14,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "96786892 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem_Prefilter/64B/single-stdlib (github.com/gofiber/utils/v2/simd) - ns/op",
+            "value": 13.14,
+            "unit": "ns/op",
+            "extra": "96786892 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem_Prefilter/64B/single-stdlib (github.com/gofiber/utils/v2/simd) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "96786892 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem_Prefilter/64B/single-stdlib (github.com/gofiber/utils/v2/simd) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "96786892 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem_Prefilter/96B/paired (github.com/gofiber/utils/v2/simd)",
+            "value": 5.369,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "220121493 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem_Prefilter/96B/paired (github.com/gofiber/utils/v2/simd) - ns/op",
+            "value": 5.369,
+            "unit": "ns/op",
+            "extra": "220121493 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem_Prefilter/96B/paired (github.com/gofiber/utils/v2/simd) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "220121493 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem_Prefilter/96B/paired (github.com/gofiber/utils/v2/simd) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "220121493 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem_Prefilter/96B/paired-stdlib (github.com/gofiber/utils/v2/simd)",
+            "value": 20.94,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "59669145 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem_Prefilter/96B/paired-stdlib (github.com/gofiber/utils/v2/simd) - ns/op",
+            "value": 20.94,
+            "unit": "ns/op",
+            "extra": "59669145 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem_Prefilter/96B/paired-stdlib (github.com/gofiber/utils/v2/simd) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "59669145 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem_Prefilter/96B/paired-stdlib (github.com/gofiber/utils/v2/simd) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "59669145 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem_Prefilter/96B/single (github.com/gofiber/utils/v2/simd)",
+            "value": 17.32,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "68948814 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem_Prefilter/96B/single (github.com/gofiber/utils/v2/simd) - ns/op",
+            "value": 17.32,
+            "unit": "ns/op",
+            "extra": "68948814 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem_Prefilter/96B/single (github.com/gofiber/utils/v2/simd) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "68948814 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem_Prefilter/96B/single (github.com/gofiber/utils/v2/simd) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "68948814 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem_Prefilter/96B/single-stdlib (github.com/gofiber/utils/v2/simd)",
+            "value": 15.83,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "75638106 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem_Prefilter/96B/single-stdlib (github.com/gofiber/utils/v2/simd) - ns/op",
+            "value": 15.83,
+            "unit": "ns/op",
+            "extra": "75638106 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem_Prefilter/96B/single-stdlib (github.com/gofiber/utils/v2/simd) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "75638106 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem_Prefilter/96B/single-stdlib (github.com/gofiber/utils/v2/simd) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "75638106 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem_Prefilter/128B/paired (github.com/gofiber/utils/v2/simd)",
+            "value": 5.568,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "215351252 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem_Prefilter/128B/paired (github.com/gofiber/utils/v2/simd) - ns/op",
+            "value": 5.568,
+            "unit": "ns/op",
+            "extra": "215351252 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem_Prefilter/128B/paired (github.com/gofiber/utils/v2/simd) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "215351252 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem_Prefilter/128B/paired (github.com/gofiber/utils/v2/simd) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "215351252 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem_Prefilter/128B/paired-stdlib (github.com/gofiber/utils/v2/simd)",
+            "value": 25.14,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "46077265 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem_Prefilter/128B/paired-stdlib (github.com/gofiber/utils/v2/simd) - ns/op",
+            "value": 25.14,
+            "unit": "ns/op",
+            "extra": "46077265 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem_Prefilter/128B/paired-stdlib (github.com/gofiber/utils/v2/simd) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "46077265 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem_Prefilter/128B/paired-stdlib (github.com/gofiber/utils/v2/simd) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "46077265 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem_Prefilter/128B/single (github.com/gofiber/utils/v2/simd)",
+            "value": 24.49,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "48461175 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem_Prefilter/128B/single (github.com/gofiber/utils/v2/simd) - ns/op",
+            "value": 24.49,
+            "unit": "ns/op",
+            "extra": "48461175 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem_Prefilter/128B/single (github.com/gofiber/utils/v2/simd) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "48461175 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem_Prefilter/128B/single (github.com/gofiber/utils/v2/simd) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "48461175 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem_Prefilter/128B/single-stdlib (github.com/gofiber/utils/v2/simd)",
+            "value": 21.27,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "55218822 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem_Prefilter/128B/single-stdlib (github.com/gofiber/utils/v2/simd) - ns/op",
+            "value": 21.27,
+            "unit": "ns/op",
+            "extra": "55218822 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem_Prefilter/128B/single-stdlib (github.com/gofiber/utils/v2/simd) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "55218822 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem_Prefilter/128B/single-stdlib (github.com/gofiber/utils/v2/simd) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "55218822 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem_Prefilter/192B/paired (github.com/gofiber/utils/v2/simd)",
+            "value": 6.351,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "191371006 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem_Prefilter/192B/paired (github.com/gofiber/utils/v2/simd) - ns/op",
+            "value": 6.351,
+            "unit": "ns/op",
+            "extra": "191371006 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem_Prefilter/192B/paired (github.com/gofiber/utils/v2/simd) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "191371006 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem_Prefilter/192B/paired (github.com/gofiber/utils/v2/simd) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "191371006 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem_Prefilter/192B/paired-stdlib (github.com/gofiber/utils/v2/simd)",
+            "value": 40.74,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "29536615 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem_Prefilter/192B/paired-stdlib (github.com/gofiber/utils/v2/simd) - ns/op",
+            "value": 40.74,
+            "unit": "ns/op",
+            "extra": "29536615 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem_Prefilter/192B/paired-stdlib (github.com/gofiber/utils/v2/simd) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "29536615 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem_Prefilter/192B/paired-stdlib (github.com/gofiber/utils/v2/simd) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "29536615 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem_Prefilter/192B/single (github.com/gofiber/utils/v2/simd)",
+            "value": 38.08,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "33122744 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem_Prefilter/192B/single (github.com/gofiber/utils/v2/simd) - ns/op",
+            "value": 38.08,
+            "unit": "ns/op",
+            "extra": "33122744 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem_Prefilter/192B/single (github.com/gofiber/utils/v2/simd) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "33122744 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem_Prefilter/192B/single (github.com/gofiber/utils/v2/simd) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "33122744 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem_Prefilter/192B/single-stdlib (github.com/gofiber/utils/v2/simd)",
+            "value": 34.93,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "33700592 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem_Prefilter/192B/single-stdlib (github.com/gofiber/utils/v2/simd) - ns/op",
+            "value": 34.93,
+            "unit": "ns/op",
+            "extra": "33700592 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem_Prefilter/192B/single-stdlib (github.com/gofiber/utils/v2/simd) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "33700592 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem_Prefilter/192B/single-stdlib (github.com/gofiber/utils/v2/simd) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "33700592 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem_Prefilter/512B/paired (github.com/gofiber/utils/v2/simd)",
+            "value": 9.143,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "124491763 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem_Prefilter/512B/paired (github.com/gofiber/utils/v2/simd) - ns/op",
+            "value": 9.143,
+            "unit": "ns/op",
+            "extra": "124491763 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem_Prefilter/512B/paired (github.com/gofiber/utils/v2/simd) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "124491763 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem_Prefilter/512B/paired (github.com/gofiber/utils/v2/simd) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "124491763 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem_Prefilter/512B/paired-stdlib (github.com/gofiber/utils/v2/simd)",
+            "value": 117.1,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "9613832 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem_Prefilter/512B/paired-stdlib (github.com/gofiber/utils/v2/simd) - ns/op",
+            "value": 117.1,
+            "unit": "ns/op",
+            "extra": "9613832 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem_Prefilter/512B/paired-stdlib (github.com/gofiber/utils/v2/simd) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "9613832 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem_Prefilter/512B/paired-stdlib (github.com/gofiber/utils/v2/simd) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "9613832 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem_Prefilter/512B/single (github.com/gofiber/utils/v2/simd)",
+            "value": 107.5,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "11258442 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem_Prefilter/512B/single (github.com/gofiber/utils/v2/simd) - ns/op",
+            "value": 107.5,
+            "unit": "ns/op",
+            "extra": "11258442 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem_Prefilter/512B/single (github.com/gofiber/utils/v2/simd) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "11258442 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem_Prefilter/512B/single (github.com/gofiber/utils/v2/simd) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "11258442 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem_Prefilter/512B/single-stdlib (github.com/gofiber/utils/v2/simd)",
+            "value": 114.5,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "9941827 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem_Prefilter/512B/single-stdlib (github.com/gofiber/utils/v2/simd) - ns/op",
+            "value": 114.5,
+            "unit": "ns/op",
+            "extra": "9941827 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem_Prefilter/512B/single-stdlib (github.com/gofiber/utils/v2/simd) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "9941827 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem_Prefilter/512B/single-stdlib (github.com/gofiber/utils/v2/simd) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "9941827 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem_Prefilter/4096B/paired (github.com/gofiber/utils/v2/simd)",
+            "value": 43.37,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "26072048 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem_Prefilter/4096B/paired (github.com/gofiber/utils/v2/simd) - ns/op",
+            "value": 43.37,
+            "unit": "ns/op",
+            "extra": "26072048 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem_Prefilter/4096B/paired (github.com/gofiber/utils/v2/simd) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "26072048 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem_Prefilter/4096B/paired (github.com/gofiber/utils/v2/simd) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "26072048 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem_Prefilter/4096B/paired-stdlib (github.com/gofiber/utils/v2/simd)",
+            "value": 934.5,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "1296498 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem_Prefilter/4096B/paired-stdlib (github.com/gofiber/utils/v2/simd) - ns/op",
+            "value": 934.5,
+            "unit": "ns/op",
+            "extra": "1296498 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem_Prefilter/4096B/paired-stdlib (github.com/gofiber/utils/v2/simd) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "1296498 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem_Prefilter/4096B/paired-stdlib (github.com/gofiber/utils/v2/simd) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "1296498 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem_Prefilter/4096B/single (github.com/gofiber/utils/v2/simd)",
+            "value": 934.1,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "1246918 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem_Prefilter/4096B/single (github.com/gofiber/utils/v2/simd) - ns/op",
+            "value": 934.1,
+            "unit": "ns/op",
+            "extra": "1246918 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem_Prefilter/4096B/single (github.com/gofiber/utils/v2/simd) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "1246918 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem_Prefilter/4096B/single (github.com/gofiber/utils/v2/simd) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "1246918 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem_Prefilter/4096B/single-stdlib (github.com/gofiber/utils/v2/simd)",
+            "value": 919.2,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "1305691 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem_Prefilter/4096B/single-stdlib (github.com/gofiber/utils/v2/simd) - ns/op",
+            "value": 919.2,
+            "unit": "ns/op",
+            "extra": "1305691 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem_Prefilter/4096B/single-stdlib (github.com/gofiber/utils/v2/simd) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "1305691 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem_Prefilter/4096B/single-stdlib (github.com/gofiber/utils/v2/simd) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "1305691 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IsASCII/8B/simd (github.com/gofiber/utils/v2/simd)",
+            "value": 2.365,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "499918165 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IsASCII/8B/simd (github.com/gofiber/utils/v2/simd) - ns/op",
+            "value": 2.365,
+            "unit": "ns/op",
+            "extra": "499918165 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IsASCII/8B/simd (github.com/gofiber/utils/v2/simd) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "499918165 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IsASCII/8B/simd (github.com/gofiber/utils/v2/simd) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "499918165 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IsASCII/8B/swar (github.com/gofiber/utils/v2/simd)",
+            "value": 1.383,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "841597369 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IsASCII/8B/swar (github.com/gofiber/utils/v2/simd) - ns/op",
+            "value": 1.383,
+            "unit": "ns/op",
+            "extra": "841597369 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IsASCII/8B/swar (github.com/gofiber/utils/v2/simd) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "841597369 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IsASCII/8B/swar (github.com/gofiber/utils/v2/simd) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "841597369 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IsASCII/32B/simd (github.com/gofiber/utils/v2/simd)",
+            "value": 1.958,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "678260911 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IsASCII/32B/simd (github.com/gofiber/utils/v2/simd) - ns/op",
+            "value": 1.958,
+            "unit": "ns/op",
+            "extra": "678260911 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IsASCII/32B/simd (github.com/gofiber/utils/v2/simd) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "678260911 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IsASCII/32B/simd (github.com/gofiber/utils/v2/simd) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "678260911 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IsASCII/32B/swar (github.com/gofiber/utils/v2/simd)",
+            "value": 2.328,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "522756186 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IsASCII/32B/swar (github.com/gofiber/utils/v2/simd) - ns/op",
+            "value": 2.328,
+            "unit": "ns/op",
+            "extra": "522756186 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IsASCII/32B/swar (github.com/gofiber/utils/v2/simd) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "522756186 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IsASCII/32B/swar (github.com/gofiber/utils/v2/simd) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "522756186 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IsASCII/64B/simd (github.com/gofiber/utils/v2/simd)",
+            "value": 2.11,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "557899064 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IsASCII/64B/simd (github.com/gofiber/utils/v2/simd) - ns/op",
+            "value": 2.11,
+            "unit": "ns/op",
+            "extra": "557899064 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IsASCII/64B/simd (github.com/gofiber/utils/v2/simd) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "557899064 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IsASCII/64B/simd (github.com/gofiber/utils/v2/simd) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "557899064 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IsASCII/64B/swar (github.com/gofiber/utils/v2/simd)",
+            "value": 3.995,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "294499947 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IsASCII/64B/swar (github.com/gofiber/utils/v2/simd) - ns/op",
+            "value": 3.995,
+            "unit": "ns/op",
+            "extra": "294499947 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IsASCII/64B/swar (github.com/gofiber/utils/v2/simd) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "294499947 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IsASCII/64B/swar (github.com/gofiber/utils/v2/simd) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "294499947 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IsASCII/512B/simd (github.com/gofiber/utils/v2/simd)",
+            "value": 5.041,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "246839067 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IsASCII/512B/simd (github.com/gofiber/utils/v2/simd) - ns/op",
+            "value": 5.041,
+            "unit": "ns/op",
+            "extra": "246839067 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IsASCII/512B/simd (github.com/gofiber/utils/v2/simd) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "246839067 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IsASCII/512B/simd (github.com/gofiber/utils/v2/simd) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "246839067 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IsASCII/512B/swar (github.com/gofiber/utils/v2/simd)",
+            "value": 26.5,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "43587475 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IsASCII/512B/swar (github.com/gofiber/utils/v2/simd) - ns/op",
+            "value": 26.5,
+            "unit": "ns/op",
+            "extra": "43587475 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IsASCII/512B/swar (github.com/gofiber/utils/v2/simd) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "43587475 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IsASCII/512B/swar (github.com/gofiber/utils/v2/simd) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "43587475 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IsASCII/4096B/simd (github.com/gofiber/utils/v2/simd)",
+            "value": 27.48,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "43509985 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IsASCII/4096B/simd (github.com/gofiber/utils/v2/simd) - ns/op",
+            "value": 27.48,
+            "unit": "ns/op",
+            "extra": "43509985 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IsASCII/4096B/simd (github.com/gofiber/utils/v2/simd) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "43509985 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IsASCII/4096B/simd (github.com/gofiber/utils/v2/simd) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "43509985 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IsASCII/4096B/swar (github.com/gofiber/utils/v2/simd)",
+            "value": 203,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "5631241 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IsASCII/4096B/swar (github.com/gofiber/utils/v2/simd) - ns/op",
+            "value": 203,
+            "unit": "ns/op",
+            "extra": "5631241 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IsASCII/4096B/swar (github.com/gofiber/utils/v2/simd) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "5631241 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IsASCII/4096B/swar (github.com/gofiber/utils/v2/simd) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "5631241 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Store8/fiber (github.com/gofiber/utils/v2/swar)",
+            "value": 473.3,
+            "unit": "ns/op\t8653.60 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "2600077 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Store8/fiber (github.com/gofiber/utils/v2/swar) - ns/op",
+            "value": 473.3,
+            "unit": "ns/op",
+            "extra": "2600077 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Store8/fiber (github.com/gofiber/utils/v2/swar) - MB/s",
+            "value": 8653.6,
+            "unit": "MB/s",
+            "extra": "2600077 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Store8/fiber (github.com/gofiber/utils/v2/swar) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "2600077 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Store8/fiber (github.com/gofiber/utils/v2/swar) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "2600077 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Store8/default (github.com/gofiber/utils/v2/swar)",
+            "value": 507.5,
+            "unit": "ns/op\t8070.82 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "2362406 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Store8/default (github.com/gofiber/utils/v2/swar) - ns/op",
+            "value": 507.5,
+            "unit": "ns/op",
+            "extra": "2362406 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Store8/default (github.com/gofiber/utils/v2/swar) - MB/s",
+            "value": 8070.82,
+            "unit": "MB/s",
+            "extra": "2362406 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Store8/default (github.com/gofiber/utils/v2/swar) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "2362406 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Store8/default (github.com/gofiber/utils/v2/swar) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "2362406 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexDigit/7B/fiber (github.com/gofiber/utils/v2/swar)",
+            "value": 2.686,
+            "unit": "ns/op\t2606.35 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "445997463 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexDigit/7B/fiber (github.com/gofiber/utils/v2/swar) - ns/op",
+            "value": 2.686,
+            "unit": "ns/op",
+            "extra": "445997463 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexDigit/7B/fiber (github.com/gofiber/utils/v2/swar) - MB/s",
+            "value": 2606.35,
+            "unit": "MB/s",
+            "extra": "445997463 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexDigit/7B/fiber (github.com/gofiber/utils/v2/swar) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "445997463 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexDigit/7B/fiber (github.com/gofiber/utils/v2/swar) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "445997463 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexDigit/7B/default (github.com/gofiber/utils/v2/swar)",
+            "value": 17.63,
+            "unit": "ns/op\t 397.01 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "67531610 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexDigit/7B/default (github.com/gofiber/utils/v2/swar) - ns/op",
+            "value": 17.63,
+            "unit": "ns/op",
+            "extra": "67531610 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexDigit/7B/default (github.com/gofiber/utils/v2/swar) - MB/s",
+            "value": 397.01,
+            "unit": "MB/s",
+            "extra": "67531610 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexDigit/7B/default (github.com/gofiber/utils/v2/swar) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "67531610 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexDigit/7B/default (github.com/gofiber/utils/v2/swar) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "67531610 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexDigit/8B/fiber (github.com/gofiber/utils/v2/swar)",
+            "value": 1.283,
+            "unit": "ns/op\t6233.64 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "962827044 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexDigit/8B/fiber (github.com/gofiber/utils/v2/swar) - ns/op",
+            "value": 1.283,
+            "unit": "ns/op",
+            "extra": "962827044 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexDigit/8B/fiber (github.com/gofiber/utils/v2/swar) - MB/s",
+            "value": 6233.64,
+            "unit": "MB/s",
+            "extra": "962827044 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexDigit/8B/fiber (github.com/gofiber/utils/v2/swar) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "962827044 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexDigit/8B/fiber (github.com/gofiber/utils/v2/swar) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "962827044 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexDigit/8B/default (github.com/gofiber/utils/v2/swar)",
+            "value": 20.42,
+            "unit": "ns/op\t 391.69 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "57731236 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexDigit/8B/default (github.com/gofiber/utils/v2/swar) - ns/op",
+            "value": 20.42,
+            "unit": "ns/op",
+            "extra": "57731236 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexDigit/8B/default (github.com/gofiber/utils/v2/swar) - MB/s",
+            "value": 391.69,
+            "unit": "MB/s",
+            "extra": "57731236 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexDigit/8B/default (github.com/gofiber/utils/v2/swar) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "57731236 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexDigit/8B/default (github.com/gofiber/utils/v2/swar) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "57731236 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexDigit/16B/fiber (github.com/gofiber/utils/v2/swar)",
+            "value": 2.012,
+            "unit": "ns/op\t7953.60 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "572554524 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexDigit/16B/fiber (github.com/gofiber/utils/v2/swar) - ns/op",
+            "value": 2.012,
+            "unit": "ns/op",
+            "extra": "572554524 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexDigit/16B/fiber (github.com/gofiber/utils/v2/swar) - MB/s",
+            "value": 7953.6,
+            "unit": "MB/s",
+            "extra": "572554524 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexDigit/16B/fiber (github.com/gofiber/utils/v2/swar) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "572554524 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexDigit/16B/fiber (github.com/gofiber/utils/v2/swar) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "572554524 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexDigit/16B/default (github.com/gofiber/utils/v2/swar)",
+            "value": 25.67,
+            "unit": "ns/op\t 623.29 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "51272313 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexDigit/16B/default (github.com/gofiber/utils/v2/swar) - ns/op",
+            "value": 25.67,
+            "unit": "ns/op",
+            "extra": "51272313 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexDigit/16B/default (github.com/gofiber/utils/v2/swar) - MB/s",
+            "value": 623.29,
+            "unit": "MB/s",
+            "extra": "51272313 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexDigit/16B/default (github.com/gofiber/utils/v2/swar) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "51272313 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexDigit/16B/default (github.com/gofiber/utils/v2/swar) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "51272313 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexDigit/32B/fiber (github.com/gofiber/utils/v2/swar)",
+            "value": 3.789,
+            "unit": "ns/op\t8446.18 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "319929795 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexDigit/32B/fiber (github.com/gofiber/utils/v2/swar) - ns/op",
+            "value": 3.789,
+            "unit": "ns/op",
+            "extra": "319929795 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexDigit/32B/fiber (github.com/gofiber/utils/v2/swar) - MB/s",
+            "value": 8446.18,
+            "unit": "MB/s",
+            "extra": "319929795 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexDigit/32B/fiber (github.com/gofiber/utils/v2/swar) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "319929795 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexDigit/32B/fiber (github.com/gofiber/utils/v2/swar) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "319929795 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexDigit/32B/default (github.com/gofiber/utils/v2/swar)",
+            "value": 19.69,
+            "unit": "ns/op\t1624.86 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "62207984 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexDigit/32B/default (github.com/gofiber/utils/v2/swar) - ns/op",
+            "value": 19.69,
+            "unit": "ns/op",
+            "extra": "62207984 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexDigit/32B/default (github.com/gofiber/utils/v2/swar) - MB/s",
+            "value": 1624.86,
+            "unit": "MB/s",
+            "extra": "62207984 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexDigit/32B/default (github.com/gofiber/utils/v2/swar) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "62207984 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexDigit/32B/default (github.com/gofiber/utils/v2/swar) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "62207984 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexDigit/64B/fiber (github.com/gofiber/utils/v2/swar)",
+            "value": 6.295,
+            "unit": "ns/op\t10167.58 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "190301660 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexDigit/64B/fiber (github.com/gofiber/utils/v2/swar) - ns/op",
+            "value": 6.295,
+            "unit": "ns/op",
+            "extra": "190301660 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexDigit/64B/fiber (github.com/gofiber/utils/v2/swar) - MB/s",
+            "value": 10167.58,
+            "unit": "MB/s",
+            "extra": "190301660 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexDigit/64B/fiber (github.com/gofiber/utils/v2/swar) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "190301660 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexDigit/64B/fiber (github.com/gofiber/utils/v2/swar) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "190301660 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexDigit/64B/default (github.com/gofiber/utils/v2/swar)",
+            "value": 34.28,
+            "unit": "ns/op\t1866.86 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "32555907 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexDigit/64B/default (github.com/gofiber/utils/v2/swar) - ns/op",
+            "value": 34.28,
+            "unit": "ns/op",
+            "extra": "32555907 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexDigit/64B/default (github.com/gofiber/utils/v2/swar) - MB/s",
+            "value": 1866.86,
+            "unit": "MB/s",
+            "extra": "32555907 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexDigit/64B/default (github.com/gofiber/utils/v2/swar) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "32555907 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexDigit/64B/default (github.com/gofiber/utils/v2/swar) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "32555907 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexDigit/512B/fiber (github.com/gofiber/utils/v2/swar)",
+            "value": 45.73,
+            "unit": "ns/op\t11195.53 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "26298870 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexDigit/512B/fiber (github.com/gofiber/utils/v2/swar) - ns/op",
+            "value": 45.73,
+            "unit": "ns/op",
+            "extra": "26298870 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexDigit/512B/fiber (github.com/gofiber/utils/v2/swar) - MB/s",
+            "value": 11195.53,
+            "unit": "MB/s",
+            "extra": "26298870 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexDigit/512B/fiber (github.com/gofiber/utils/v2/swar) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "26298870 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexDigit/512B/fiber (github.com/gofiber/utils/v2/swar) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "26298870 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexDigit/512B/default (github.com/gofiber/utils/v2/swar)",
+            "value": 219.4,
+            "unit": "ns/op\t2333.44 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "5423307 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexDigit/512B/default (github.com/gofiber/utils/v2/swar) - ns/op",
+            "value": 219.4,
+            "unit": "ns/op",
+            "extra": "5423307 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexDigit/512B/default (github.com/gofiber/utils/v2/swar) - MB/s",
+            "value": 2333.44,
+            "unit": "MB/s",
+            "extra": "5423307 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexDigit/512B/default (github.com/gofiber/utils/v2/swar) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "5423307 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexDigit/512B/default (github.com/gofiber/utils/v2/swar) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "5423307 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimRightBytes/fiber (github.com/gofiber/utils/v2)",
+            "value": 0.7638,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimRightBytes/fiber (github.com/gofiber/utils/v2) - ns/op",
+            "value": 0.7638,
+            "unit": "ns/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimRightBytes/fiber (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimRightBytes/fiber (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimRightBytes/default (github.com/gofiber/utils/v2)",
+            "value": 1.846,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "695699215 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimRightBytes/default (github.com/gofiber/utils/v2) - ns/op",
+            "value": 1.846,
+            "unit": "ns/op",
+            "extra": "695699215 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimRightBytes/default (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "695699215 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimRightBytes/default (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "695699215 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimBytes/fiber (github.com/gofiber/utils/v2)",
+            "value": 1.958,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "647934697 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimBytes/fiber (github.com/gofiber/utils/v2) - ns/op",
+            "value": 1.958,
+            "unit": "ns/op",
+            "extra": "647934697 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimBytes/fiber (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "647934697 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimBytes/fiber (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "647934697 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimBytes/default (github.com/gofiber/utils/v2)",
+            "value": 2.388,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "522302553 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimBytes/default (github.com/gofiber/utils/v2) - ns/op",
+            "value": 2.388,
+            "unit": "ns/op",
+            "extra": "522302553 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimBytes/default (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "522302553 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimBytes/default (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "522302553 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimBytes/default.trimspace (github.com/gofiber/utils/v2)",
+            "value": 3.158,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "392121487 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimBytes/default.trimspace (github.com/gofiber/utils/v2) - ns/op",
+            "value": 3.158,
+            "unit": "ns/op",
+            "extra": "392121487 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimBytes/default.trimspace (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "392121487 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimBytes/default.trimspace (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "392121487 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_GenerateSecureToken/16_bytes (github.com/gofiber/utils/v2)",
+            "value": 162.9,
+            "unit": "ns/op\t      24 B/op\t       1 allocs/op",
+            "extra": "7117873 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_GenerateSecureToken/16_bytes (github.com/gofiber/utils/v2) - ns/op",
+            "value": 162.9,
+            "unit": "ns/op",
+            "extra": "7117873 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_GenerateSecureToken/16_bytes (github.com/gofiber/utils/v2) - B/op",
+            "value": 24,
+            "unit": "B/op",
+            "extra": "7117873 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_GenerateSecureToken/16_bytes (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 1,
+            "unit": "allocs/op",
+            "extra": "7117873 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_GenerateSecureToken/32_bytes (github.com/gofiber/utils/v2)",
+            "value": 171.4,
+            "unit": "ns/op\t      48 B/op\t       1 allocs/op",
+            "extra": "6218116 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_GenerateSecureToken/32_bytes (github.com/gofiber/utils/v2) - ns/op",
+            "value": 171.4,
+            "unit": "ns/op",
+            "extra": "6218116 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_GenerateSecureToken/32_bytes (github.com/gofiber/utils/v2) - B/op",
+            "value": 48,
+            "unit": "B/op",
+            "extra": "6218116 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_GenerateSecureToken/32_bytes (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 1,
+            "unit": "allocs/op",
+            "extra": "6218116 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString/int (github.com/gofiber/utils/v2)",
+            "value": 2.453,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "485803716 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString/int (github.com/gofiber/utils/v2) - ns/op",
+            "value": 2.453,
+            "unit": "ns/op",
+            "extra": "485803716 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString/int (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "485803716 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString/int (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "485803716 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString/int8 (github.com/gofiber/utils/v2)",
+            "value": 1.712,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "708209223 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString/int8 (github.com/gofiber/utils/v2) - ns/op",
+            "value": 1.712,
+            "unit": "ns/op",
+            "extra": "708209223 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString/int8 (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "708209223 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString/int8 (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "708209223 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString/int16 (github.com/gofiber/utils/v2)",
+            "value": 2.479,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "473627044 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString/int16 (github.com/gofiber/utils/v2) - ns/op",
+            "value": 2.479,
+            "unit": "ns/op",
+            "extra": "473627044 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString/int16 (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "473627044 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString/int16 (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "473627044 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString/int32 (github.com/gofiber/utils/v2)",
+            "value": 2.204,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "545008546 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString/int32 (github.com/gofiber/utils/v2) - ns/op",
+            "value": 2.204,
+            "unit": "ns/op",
+            "extra": "545008546 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString/int32 (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "545008546 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString/int32 (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "545008546 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString/int64 (github.com/gofiber/utils/v2)",
+            "value": 2.403,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "468202102 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString/int64 (github.com/gofiber/utils/v2) - ns/op",
+            "value": 2.403,
+            "unit": "ns/op",
+            "extra": "468202102 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString/int64 (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "468202102 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString/int64 (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "468202102 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString/uint (github.com/gofiber/utils/v2)",
+            "value": 1.674,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "715969717 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString/uint (github.com/gofiber/utils/v2) - ns/op",
+            "value": 1.674,
+            "unit": "ns/op",
+            "extra": "715969717 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString/uint (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "715969717 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString/uint (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "715969717 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString/uint8 (github.com/gofiber/utils/v2)",
+            "value": 1.565,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "763526122 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString/uint8 (github.com/gofiber/utils/v2) - ns/op",
+            "value": 1.565,
+            "unit": "ns/op",
+            "extra": "763526122 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString/uint8 (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "763526122 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString/uint8 (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "763526122 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString/uint16 (github.com/gofiber/utils/v2)",
+            "value": 1.834,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "662819158 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString/uint16 (github.com/gofiber/utils/v2) - ns/op",
+            "value": 1.834,
+            "unit": "ns/op",
+            "extra": "662819158 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString/uint16 (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "662819158 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString/uint16 (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "662819158 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString/uint32 (github.com/gofiber/utils/v2)",
+            "value": 2.087,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "617349073 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString/uint32 (github.com/gofiber/utils/v2) - ns/op",
+            "value": 2.087,
+            "unit": "ns/op",
+            "extra": "617349073 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString/uint32 (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "617349073 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString/uint32 (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "617349073 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString/uint64 (github.com/gofiber/utils/v2)",
+            "value": 1.951,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "692067876 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString/uint64 (github.com/gofiber/utils/v2) - ns/op",
+            "value": 1.951,
+            "unit": "ns/op",
+            "extra": "692067876 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString/uint64 (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "692067876 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString/uint64 (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "692067876 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString/string (github.com/gofiber/utils/v2)",
+            "value": 1.746,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "702790207 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString/string (github.com/gofiber/utils/v2) - ns/op",
+            "value": 1.746,
+            "unit": "ns/op",
+            "extra": "702790207 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString/string (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "702790207 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString/string (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "702790207 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString/[]uint8 (github.com/gofiber/utils/v2)",
+            "value": 11.73,
+            "unit": "ns/op\t      16 B/op\t       1 allocs/op",
+            "extra": "94978328 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString/[]uint8 (github.com/gofiber/utils/v2) - ns/op",
+            "value": 11.73,
+            "unit": "ns/op",
+            "extra": "94978328 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString/[]uint8 (github.com/gofiber/utils/v2) - B/op",
+            "value": 16,
+            "unit": "B/op",
+            "extra": "94978328 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString/[]uint8 (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 1,
+            "unit": "allocs/op",
+            "extra": "94978328 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString/bool (github.com/gofiber/utils/v2)",
+            "value": 1.923,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "695135762 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString/bool (github.com/gofiber/utils/v2) - ns/op",
+            "value": 1.923,
+            "unit": "ns/op",
+            "extra": "695135762 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString/bool (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "695135762 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString/bool (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "695135762 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString/float32 (github.com/gofiber/utils/v2)",
+            "value": 42.7,
+            "unit": "ns/op\t       4 B/op\t       1 allocs/op",
+            "extra": "26620448 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString/float32 (github.com/gofiber/utils/v2) - ns/op",
+            "value": 42.7,
+            "unit": "ns/op",
+            "extra": "26620448 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString/float32 (github.com/gofiber/utils/v2) - B/op",
+            "value": 4,
+            "unit": "B/op",
+            "extra": "26620448 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString/float32 (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 1,
+            "unit": "allocs/op",
+            "extra": "26620448 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString/float64 (github.com/gofiber/utils/v2)",
+            "value": 52.33,
+            "unit": "ns/op\t       4 B/op\t       1 allocs/op",
+            "extra": "24374116 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString/float64 (github.com/gofiber/utils/v2) - ns/op",
+            "value": 52.33,
+            "unit": "ns/op",
+            "extra": "24374116 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString/float64 (github.com/gofiber/utils/v2) - B/op",
+            "value": 4,
+            "unit": "B/op",
+            "extra": "24374116 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString/float64 (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 1,
+            "unit": "allocs/op",
+            "extra": "24374116 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString/time.Time (github.com/gofiber/utils/v2)",
+            "value": 70.61,
+            "unit": "ns/op\t      24 B/op\t       1 allocs/op",
+            "extra": "19629964 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString/time.Time (github.com/gofiber/utils/v2) - ns/op",
+            "value": 70.61,
+            "unit": "ns/op",
+            "extra": "19629964 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString/time.Time (github.com/gofiber/utils/v2) - B/op",
+            "value": 24,
+            "unit": "B/op",
+            "extra": "19629964 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString/time.Time (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 1,
+            "unit": "allocs/op",
+            "extra": "19629964 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString/time.Time#01 (github.com/gofiber/utils/v2)",
+            "value": 78.47,
+            "unit": "ns/op\t      24 B/op\t       1 allocs/op",
+            "extra": "15433879 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString/time.Time#01 (github.com/gofiber/utils/v2) - ns/op",
+            "value": 78.47,
+            "unit": "ns/op",
+            "extra": "15433879 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString/time.Time#01 (github.com/gofiber/utils/v2) - B/op",
+            "value": 24,
+            "unit": "B/op",
+            "extra": "15433879 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString/time.Time#01 (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 1,
+            "unit": "allocs/op",
+            "extra": "15433879 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString/[]string (github.com/gofiber/utils/v2)",
+            "value": 17.82,
+            "unit": "ns/op\t      16 B/op\t       1 allocs/op",
+            "extra": "83947326 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString/[]string (github.com/gofiber/utils/v2) - ns/op",
+            "value": 17.82,
+            "unit": "ns/op",
+            "extra": "83947326 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString/[]string (github.com/gofiber/utils/v2) - B/op",
+            "value": 16,
+            "unit": "B/op",
+            "extra": "83947326 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString/[]string (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 1,
+            "unit": "allocs/op",
+            "extra": "83947326 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString/[]int (github.com/gofiber/utils/v2)",
+            "value": 17.01,
+            "unit": "ns/op\t       8 B/op\t       1 allocs/op",
+            "extra": "59061829 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString/[]int (github.com/gofiber/utils/v2) - ns/op",
+            "value": 17.01,
+            "unit": "ns/op",
+            "extra": "59061829 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString/[]int (github.com/gofiber/utils/v2) - B/op",
+            "value": 8,
+            "unit": "B/op",
+            "extra": "59061829 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString/[]int (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 1,
+            "unit": "allocs/op",
+            "extra": "59061829 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString/[2]int (github.com/gofiber/utils/v2)",
+            "value": 36.37,
+            "unit": "ns/op\t      16 B/op\t       1 allocs/op",
+            "extra": "31245291 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString/[2]int (github.com/gofiber/utils/v2) - ns/op",
+            "value": 36.37,
+            "unit": "ns/op",
+            "extra": "31245291 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString/[2]int (github.com/gofiber/utils/v2) - B/op",
+            "value": 16,
+            "unit": "B/op",
+            "extra": "31245291 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString/[2]int (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 1,
+            "unit": "allocs/op",
+            "extra": "31245291 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString/[][]int (github.com/gofiber/utils/v2)",
+            "value": 125.8,
+            "unit": "ns/op\t     112 B/op\t       6 allocs/op",
+            "extra": "10143151 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString/[][]int (github.com/gofiber/utils/v2) - ns/op",
+            "value": 125.8,
+            "unit": "ns/op",
+            "extra": "10143151 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString/[][]int (github.com/gofiber/utils/v2) - B/op",
+            "value": 112,
+            "unit": "B/op",
+            "extra": "10143151 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString/[][]int (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 6,
+            "unit": "allocs/op",
+            "extra": "10143151 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString/[]interface_{} (github.com/gofiber/utils/v2)",
+            "value": 105.8,
+            "unit": "ns/op\t      72 B/op\t       3 allocs/op",
+            "extra": "10562803 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString/[]interface_{} (github.com/gofiber/utils/v2) - ns/op",
+            "value": 105.8,
+            "unit": "ns/op",
+            "extra": "10562803 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString/[]interface_{} (github.com/gofiber/utils/v2) - B/op",
+            "value": 72,
+            "unit": "B/op",
+            "extra": "10562803 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString/[]interface_{} (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 3,
+            "unit": "allocs/op",
+            "extra": "10562803 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString/utils.MyStringer (github.com/gofiber/utils/v2)",
+            "value": 3.006,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "416577432 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString/utils.MyStringer (github.com/gofiber/utils/v2) - ns/op",
+            "value": 3.006,
+            "unit": "ns/op",
+            "extra": "416577432 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString/utils.MyStringer (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "416577432 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString/utils.MyStringer (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "416577432 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString/utils.CustomType (github.com/gofiber/utils/v2)",
+            "value": 80.72,
+            "unit": "ns/op\t      16 B/op\t       1 allocs/op",
+            "extra": "14672382 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString/utils.CustomType (github.com/gofiber/utils/v2) - ns/op",
+            "value": 80.72,
+            "unit": "ns/op",
+            "extra": "14672382 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString/utils.CustomType (github.com/gofiber/utils/v2) - B/op",
+            "value": 16,
+            "unit": "B/op",
+            "extra": "14672382 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString/utils.CustomType (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 1,
+            "unit": "allocs/op",
+            "extra": "14672382 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_UnsafeString/unsafe (github.com/gofiber/utils/v2)",
+            "value": 0.2577,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_UnsafeString/unsafe (github.com/gofiber/utils/v2) - ns/op",
+            "value": 0.2577,
+            "unit": "ns/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_UnsafeString/unsafe (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_UnsafeString/unsafe (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_UnsafeString/default (github.com/gofiber/utils/v2)",
+            "value": 8.125,
+            "unit": "ns/op\t      16 B/op\t       1 allocs/op",
+            "extra": "127630861 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_UnsafeString/default (github.com/gofiber/utils/v2) - ns/op",
+            "value": 8.125,
+            "unit": "ns/op",
+            "extra": "127630861 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_UnsafeString/default (github.com/gofiber/utils/v2) - B/op",
+            "value": 16,
+            "unit": "B/op",
+            "extra": "127630861 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_UnsafeString/default (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 1,
+            "unit": "allocs/op",
+            "extra": "127630861 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ByteSize/0 (github.com/gofiber/utils/v2)",
+            "value": 1.85,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "616092480 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ByteSize/0 (github.com/gofiber/utils/v2) - ns/op",
+            "value": 1.85,
+            "unit": "ns/op",
+            "extra": "616092480 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ByteSize/0 (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "616092480 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ByteSize/0 (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "616092480 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ByteSize/1 (github.com/gofiber/utils/v2)",
+            "value": 11.65,
+            "unit": "ns/op\t      16 B/op\t       1 allocs/op",
+            "extra": "100000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ByteSize/1 (github.com/gofiber/utils/v2) - ns/op",
+            "value": 11.65,
+            "unit": "ns/op",
+            "extra": "100000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ByteSize/1 (github.com/gofiber/utils/v2) - B/op",
+            "value": 16,
+            "unit": "B/op",
+            "extra": "100000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ByteSize/1 (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 1,
+            "unit": "allocs/op",
+            "extra": "100000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ByteSize/500 (github.com/gofiber/utils/v2)",
+            "value": 13.03,
+            "unit": "ns/op\t      16 B/op\t       1 allocs/op",
+            "extra": "97855735 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ByteSize/500 (github.com/gofiber/utils/v2) - ns/op",
+            "value": 13.03,
+            "unit": "ns/op",
+            "extra": "97855735 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ByteSize/500 (github.com/gofiber/utils/v2) - B/op",
+            "value": 16,
+            "unit": "B/op",
+            "extra": "97855735 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ByteSize/500 (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 1,
+            "unit": "allocs/op",
+            "extra": "97855735 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ByteSize/1024 (github.com/gofiber/utils/v2)",
+            "value": 14.12,
+            "unit": "ns/op\t      16 B/op\t       1 allocs/op",
+            "extra": "86657677 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ByteSize/1024 (github.com/gofiber/utils/v2) - ns/op",
+            "value": 14.12,
+            "unit": "ns/op",
+            "extra": "86657677 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ByteSize/1024 (github.com/gofiber/utils/v2) - B/op",
+            "value": 16,
+            "unit": "B/op",
+            "extra": "86657677 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ByteSize/1024 (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 1,
+            "unit": "allocs/op",
+            "extra": "86657677 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ByteSize/1126 (github.com/gofiber/utils/v2)",
+            "value": 16.12,
+            "unit": "ns/op\t      16 B/op\t       1 allocs/op",
+            "extra": "77756209 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ByteSize/1126 (github.com/gofiber/utils/v2) - ns/op",
+            "value": 16.12,
+            "unit": "ns/op",
+            "extra": "77756209 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ByteSize/1126 (github.com/gofiber/utils/v2) - B/op",
+            "value": 16,
+            "unit": "B/op",
+            "extra": "77756209 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ByteSize/1126 (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 1,
+            "unit": "allocs/op",
+            "extra": "77756209 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ByteSize/1048576 (github.com/gofiber/utils/v2)",
+            "value": 17.26,
+            "unit": "ns/op\t      16 B/op\t       1 allocs/op",
+            "extra": "88132094 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ByteSize/1048576 (github.com/gofiber/utils/v2) - ns/op",
+            "value": 17.26,
+            "unit": "ns/op",
+            "extra": "88132094 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ByteSize/1048576 (github.com/gofiber/utils/v2) - B/op",
+            "value": 16,
+            "unit": "B/op",
+            "extra": "88132094 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ByteSize/1048576 (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 1,
+            "unit": "allocs/op",
+            "extra": "88132094 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ByteSize/1153024 (github.com/gofiber/utils/v2)",
+            "value": 23.62,
+            "unit": "ns/op\t      16 B/op\t       1 allocs/op",
+            "extra": "58797447 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ByteSize/1153024 (github.com/gofiber/utils/v2) - ns/op",
+            "value": 23.62,
+            "unit": "ns/op",
+            "extra": "58797447 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ByteSize/1153024 (github.com/gofiber/utils/v2) - B/op",
+            "value": 16,
+            "unit": "B/op",
+            "extra": "58797447 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ByteSize/1153024 (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 1,
+            "unit": "allocs/op",
+            "extra": "58797447 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ByteSize/1073741824 (github.com/gofiber/utils/v2)",
+            "value": 16.21,
+            "unit": "ns/op\t      16 B/op\t       1 allocs/op",
+            "extra": "75779642 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ByteSize/1073741824 (github.com/gofiber/utils/v2) - ns/op",
+            "value": 16.21,
+            "unit": "ns/op",
+            "extra": "75779642 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ByteSize/1073741824 (github.com/gofiber/utils/v2) - B/op",
+            "value": 16,
+            "unit": "B/op",
+            "extra": "75779642 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ByteSize/1073741824 (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 1,
+            "unit": "allocs/op",
+            "extra": "75779642 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ByteSize/1180696576 (github.com/gofiber/utils/v2)",
+            "value": 18.03,
+            "unit": "ns/op\t      16 B/op\t       1 allocs/op",
+            "extra": "60331329 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ByteSize/1180696576 (github.com/gofiber/utils/v2) - ns/op",
+            "value": 18.03,
+            "unit": "ns/op",
+            "extra": "60331329 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ByteSize/1180696576 (github.com/gofiber/utils/v2) - B/op",
+            "value": 16,
+            "unit": "B/op",
+            "extra": "60331329 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ByteSize/1180696576 (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 1,
+            "unit": "allocs/op",
+            "extra": "60331329 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ByteSize/1099511627776 (github.com/gofiber/utils/v2)",
+            "value": 14.07,
+            "unit": "ns/op\t      16 B/op\t       1 allocs/op",
+            "extra": "85692470 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ByteSize/1099511627776 (github.com/gofiber/utils/v2) - ns/op",
+            "value": 14.07,
+            "unit": "ns/op",
+            "extra": "85692470 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ByteSize/1099511627776 (github.com/gofiber/utils/v2) - B/op",
+            "value": 16,
+            "unit": "B/op",
+            "extra": "85692470 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ByteSize/1099511627776 (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 1,
+            "unit": "allocs/op",
+            "extra": "85692470 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ByteSize/1209033293824 (github.com/gofiber/utils/v2)",
+            "value": 18.6,
+            "unit": "ns/op\t      16 B/op\t       1 allocs/op",
+            "extra": "72964890 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ByteSize/1209033293824 (github.com/gofiber/utils/v2) - ns/op",
+            "value": 18.6,
+            "unit": "ns/op",
+            "extra": "72964890 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ByteSize/1209033293824 (github.com/gofiber/utils/v2) - B/op",
+            "value": 16,
+            "unit": "B/op",
+            "extra": "72964890 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ByteSize/1209033293824 (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 1,
+            "unit": "allocs/op",
+            "extra": "72964890 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ByteSize/1125899906842624 (github.com/gofiber/utils/v2)",
+            "value": 16.94,
+            "unit": "ns/op\t      16 B/op\t       1 allocs/op",
+            "extra": "73770344 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ByteSize/1125899906842624 (github.com/gofiber/utils/v2) - ns/op",
+            "value": 16.94,
+            "unit": "ns/op",
+            "extra": "73770344 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ByteSize/1125899906842624 (github.com/gofiber/utils/v2) - B/op",
+            "value": 16,
+            "unit": "B/op",
+            "extra": "73770344 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ByteSize/1125899906842624 (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 1,
+            "unit": "allocs/op",
+            "extra": "73770344 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ByteSize/1238050092875776 (github.com/gofiber/utils/v2)",
+            "value": 18.7,
+            "unit": "ns/op\t      16 B/op\t       1 allocs/op",
+            "extra": "67600868 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ByteSize/1238050092875776 (github.com/gofiber/utils/v2) - ns/op",
+            "value": 18.7,
+            "unit": "ns/op",
+            "extra": "67600868 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ByteSize/1238050092875776 (github.com/gofiber/utils/v2) - B/op",
+            "value": 16,
+            "unit": "B/op",
+            "extra": "67600868 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ByteSize/1238050092875776 (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 1,
+            "unit": "allocs/op",
+            "extra": "67600868 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ByteSize/1152921504606846976 (github.com/gofiber/utils/v2)",
+            "value": 19.1,
+            "unit": "ns/op\t      16 B/op\t       1 allocs/op",
+            "extra": "53715574 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ByteSize/1152921504606846976 (github.com/gofiber/utils/v2) - ns/op",
+            "value": 19.1,
+            "unit": "ns/op",
+            "extra": "53715574 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ByteSize/1152921504606846976 (github.com/gofiber/utils/v2) - B/op",
+            "value": 16,
+            "unit": "B/op",
+            "extra": "53715574 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ByteSize/1152921504606846976 (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 1,
+            "unit": "allocs/op",
+            "extra": "53715574 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ByteSize/1267763295104794624 (github.com/gofiber/utils/v2)",
+            "value": 24.58,
+            "unit": "ns/op\t      16 B/op\t       1 allocs/op",
+            "extra": "67339458 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ByteSize/1267763295104794624 (github.com/gofiber/utils/v2) - ns/op",
+            "value": 24.58,
+            "unit": "ns/op",
+            "extra": "67339458 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ByteSize/1267763295104794624 (github.com/gofiber/utils/v2) - B/op",
+            "value": 16,
+            "unit": "B/op",
+            "extra": "67339458 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ByteSize/1267763295104794624 (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 1,
+            "unit": "allocs/op",
+            "extra": "67339458 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_FormatUint/small/fiber (github.com/gofiber/utils/v2)",
+            "value": 1.053,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_FormatUint/small/fiber (github.com/gofiber/utils/v2) - ns/op",
+            "value": 1.053,
+            "unit": "ns/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_FormatUint/small/fiber (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_FormatUint/small/fiber (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_FormatUint/small/strconv (github.com/gofiber/utils/v2)",
+            "value": 1.137,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "921576384 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_FormatUint/small/strconv (github.com/gofiber/utils/v2) - ns/op",
+            "value": 1.137,
+            "unit": "ns/op",
+            "extra": "921576384 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_FormatUint/small/strconv (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "921576384 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_FormatUint/small/strconv (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "921576384 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_FormatUint/medium/fiber (github.com/gofiber/utils/v2)",
+            "value": 22.09,
+            "unit": "ns/op\t      16 B/op\t       1 allocs/op",
+            "extra": "57175345 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_FormatUint/medium/fiber (github.com/gofiber/utils/v2) - ns/op",
+            "value": 22.09,
+            "unit": "ns/op",
+            "extra": "57175345 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_FormatUint/medium/fiber (github.com/gofiber/utils/v2) - B/op",
+            "value": 16,
+            "unit": "B/op",
+            "extra": "57175345 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_FormatUint/medium/fiber (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 1,
+            "unit": "allocs/op",
+            "extra": "57175345 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_FormatUint/medium/strconv (github.com/gofiber/utils/v2)",
+            "value": 23.38,
+            "unit": "ns/op\t      16 B/op\t       1 allocs/op",
+            "extra": "50800659 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_FormatUint/medium/strconv (github.com/gofiber/utils/v2) - ns/op",
+            "value": 23.38,
+            "unit": "ns/op",
+            "extra": "50800659 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_FormatUint/medium/strconv (github.com/gofiber/utils/v2) - B/op",
+            "value": 16,
+            "unit": "B/op",
+            "extra": "50800659 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_FormatUint/medium/strconv (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 1,
+            "unit": "allocs/op",
+            "extra": "50800659 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_FormatUint/large/fiber (github.com/gofiber/utils/v2)",
+            "value": 33.53,
+            "unit": "ns/op\t      24 B/op\t       1 allocs/op",
+            "extra": "33644629 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_FormatUint/large/fiber (github.com/gofiber/utils/v2) - ns/op",
+            "value": 33.53,
+            "unit": "ns/op",
+            "extra": "33644629 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_FormatUint/large/fiber (github.com/gofiber/utils/v2) - B/op",
+            "value": 24,
+            "unit": "B/op",
+            "extra": "33644629 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_FormatUint/large/fiber (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 1,
+            "unit": "allocs/op",
+            "extra": "33644629 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_FormatUint/large/strconv (github.com/gofiber/utils/v2)",
+            "value": 30.07,
+            "unit": "ns/op\t      24 B/op\t       1 allocs/op",
+            "extra": "42885723 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_FormatUint/large/strconv (github.com/gofiber/utils/v2) - ns/op",
+            "value": 30.07,
+            "unit": "ns/op",
+            "extra": "42885723 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_FormatUint/large/strconv (github.com/gofiber/utils/v2) - B/op",
+            "value": 24,
+            "unit": "B/op",
+            "extra": "42885723 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_FormatUint/large/strconv (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 1,
+            "unit": "allocs/op",
+            "extra": "42885723 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_FormatInt/small_pos/fiber (github.com/gofiber/utils/v2)",
+            "value": 1.231,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "962033923 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_FormatInt/small_pos/fiber (github.com/gofiber/utils/v2) - ns/op",
+            "value": 1.231,
+            "unit": "ns/op",
+            "extra": "962033923 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_FormatInt/small_pos/fiber (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "962033923 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_FormatInt/small_pos/fiber (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "962033923 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_FormatInt/small_pos/strconv (github.com/gofiber/utils/v2)",
+            "value": 1.373,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_FormatInt/small_pos/strconv (github.com/gofiber/utils/v2) - ns/op",
+            "value": 1.373,
+            "unit": "ns/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_FormatInt/small_pos/strconv (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_FormatInt/small_pos/strconv (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_FormatInt/small_neg/fiber (github.com/gofiber/utils/v2)",
+            "value": 1.247,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "965207790 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_FormatInt/small_neg/fiber (github.com/gofiber/utils/v2) - ns/op",
+            "value": 1.247,
+            "unit": "ns/op",
+            "extra": "965207790 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_FormatInt/small_neg/fiber (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "965207790 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_FormatInt/small_neg/fiber (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "965207790 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_FormatInt/small_neg/strconv (github.com/gofiber/utils/v2)",
+            "value": 10.03,
+            "unit": "ns/op\t       3 B/op\t       1 allocs/op",
+            "extra": "100000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_FormatInt/small_neg/strconv (github.com/gofiber/utils/v2) - ns/op",
+            "value": 10.03,
+            "unit": "ns/op",
+            "extra": "100000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_FormatInt/small_neg/strconv (github.com/gofiber/utils/v2) - B/op",
+            "value": 3,
+            "unit": "B/op",
+            "extra": "100000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_FormatInt/small_neg/strconv (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 1,
+            "unit": "allocs/op",
+            "extra": "100000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_FormatInt/medium_pos/fiber (github.com/gofiber/utils/v2)",
+            "value": 22.61,
+            "unit": "ns/op\t      16 B/op\t       1 allocs/op",
+            "extra": "52698770 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_FormatInt/medium_pos/fiber (github.com/gofiber/utils/v2) - ns/op",
+            "value": 22.61,
+            "unit": "ns/op",
+            "extra": "52698770 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_FormatInt/medium_pos/fiber (github.com/gofiber/utils/v2) - B/op",
+            "value": 16,
+            "unit": "B/op",
+            "extra": "52698770 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_FormatInt/medium_pos/fiber (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 1,
+            "unit": "allocs/op",
+            "extra": "52698770 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_FormatInt/medium_pos/strconv (github.com/gofiber/utils/v2)",
+            "value": 21.96,
+            "unit": "ns/op\t      16 B/op\t       1 allocs/op",
+            "extra": "58771945 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_FormatInt/medium_pos/strconv (github.com/gofiber/utils/v2) - ns/op",
+            "value": 21.96,
+            "unit": "ns/op",
+            "extra": "58771945 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_FormatInt/medium_pos/strconv (github.com/gofiber/utils/v2) - B/op",
+            "value": 16,
+            "unit": "B/op",
+            "extra": "58771945 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_FormatInt/medium_pos/strconv (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 1,
+            "unit": "allocs/op",
+            "extra": "58771945 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_FormatInt/medium_neg/fiber (github.com/gofiber/utils/v2)",
+            "value": 19.6,
+            "unit": "ns/op\t      16 B/op\t       1 allocs/op",
+            "extra": "53078146 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_FormatInt/medium_neg/fiber (github.com/gofiber/utils/v2) - ns/op",
+            "value": 19.6,
+            "unit": "ns/op",
+            "extra": "53078146 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_FormatInt/medium_neg/fiber (github.com/gofiber/utils/v2) - B/op",
+            "value": 16,
+            "unit": "B/op",
+            "extra": "53078146 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_FormatInt/medium_neg/fiber (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 1,
+            "unit": "allocs/op",
+            "extra": "53078146 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_FormatInt/medium_neg/strconv (github.com/gofiber/utils/v2)",
+            "value": 18.68,
+            "unit": "ns/op\t      16 B/op\t       1 allocs/op",
+            "extra": "53762421 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_FormatInt/medium_neg/strconv (github.com/gofiber/utils/v2) - ns/op",
+            "value": 18.68,
+            "unit": "ns/op",
+            "extra": "53762421 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_FormatInt/medium_neg/strconv (github.com/gofiber/utils/v2) - B/op",
+            "value": 16,
+            "unit": "B/op",
+            "extra": "53762421 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_FormatInt/medium_neg/strconv (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 1,
+            "unit": "allocs/op",
+            "extra": "53762421 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_FormatInt/large_pos/fiber (github.com/gofiber/utils/v2)",
+            "value": 25.72,
+            "unit": "ns/op\t      24 B/op\t       1 allocs/op",
+            "extra": "45078330 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_FormatInt/large_pos/fiber (github.com/gofiber/utils/v2) - ns/op",
+            "value": 25.72,
+            "unit": "ns/op",
+            "extra": "45078330 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_FormatInt/large_pos/fiber (github.com/gofiber/utils/v2) - B/op",
+            "value": 24,
+            "unit": "B/op",
+            "extra": "45078330 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_FormatInt/large_pos/fiber (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 1,
+            "unit": "allocs/op",
+            "extra": "45078330 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_FormatInt/large_pos/strconv (github.com/gofiber/utils/v2)",
+            "value": 26.04,
+            "unit": "ns/op\t      24 B/op\t       1 allocs/op",
+            "extra": "48835820 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_FormatInt/large_pos/strconv (github.com/gofiber/utils/v2) - ns/op",
+            "value": 26.04,
+            "unit": "ns/op",
+            "extra": "48835820 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_FormatInt/large_pos/strconv (github.com/gofiber/utils/v2) - B/op",
+            "value": 24,
+            "unit": "B/op",
+            "extra": "48835820 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_FormatInt/large_pos/strconv (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 1,
+            "unit": "allocs/op",
+            "extra": "48835820 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_FormatInt/large_neg/fiber (github.com/gofiber/utils/v2)",
+            "value": 24.65,
+            "unit": "ns/op\t      24 B/op\t       1 allocs/op",
+            "extra": "46498018 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_FormatInt/large_neg/fiber (github.com/gofiber/utils/v2) - ns/op",
+            "value": 24.65,
+            "unit": "ns/op",
+            "extra": "46498018 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_FormatInt/large_neg/fiber (github.com/gofiber/utils/v2) - B/op",
+            "value": 24,
+            "unit": "B/op",
+            "extra": "46498018 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_FormatInt/large_neg/fiber (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 1,
+            "unit": "allocs/op",
+            "extra": "46498018 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_FormatInt/large_neg/strconv (github.com/gofiber/utils/v2)",
+            "value": 23.43,
+            "unit": "ns/op\t      24 B/op\t       1 allocs/op",
+            "extra": "52894491 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_FormatInt/large_neg/strconv (github.com/gofiber/utils/v2) - ns/op",
+            "value": 23.43,
+            "unit": "ns/op",
+            "extra": "52894491 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_FormatInt/large_neg/strconv (github.com/gofiber/utils/v2) - B/op",
+            "value": 24,
+            "unit": "B/op",
+            "extra": "52894491 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_FormatInt/large_neg/strconv (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 1,
+            "unit": "allocs/op",
+            "extra": "52894491 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseIPv6/compressed/fiber (github.com/gofiber/utils/v2)",
+            "value": 19.59,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "62486516 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseIPv6/compressed/fiber (github.com/gofiber/utils/v2) - ns/op",
+            "value": 19.59,
+            "unit": "ns/op",
+            "extra": "62486516 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseIPv6/compressed/fiber (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "62486516 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseIPv6/compressed/fiber (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "62486516 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseIPv6/compressed/default (github.com/gofiber/utils/v2)",
+            "value": 24.38,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "50373927 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseIPv6/compressed/default (github.com/gofiber/utils/v2) - ns/op",
+            "value": 24.38,
+            "unit": "ns/op",
+            "extra": "50373927 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseIPv6/compressed/default (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "50373927 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseIPv6/compressed/default (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "50373927 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseIPv6/full/fiber (github.com/gofiber/utils/v2)",
+            "value": 25.08,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "46999117 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseIPv6/full/fiber (github.com/gofiber/utils/v2) - ns/op",
+            "value": 25.08,
+            "unit": "ns/op",
+            "extra": "46999117 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseIPv6/full/fiber (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "46999117 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseIPv6/full/fiber (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "46999117 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseIPv6/full/default (github.com/gofiber/utils/v2)",
+            "value": 32.86,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "37822419 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseIPv6/full/default (github.com/gofiber/utils/v2) - ns/op",
+            "value": 32.86,
+            "unit": "ns/op",
+            "extra": "37822419 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseIPv6/full/default (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "37822419 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseIPv6/full/default (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "37822419 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseInt8/fiber (github.com/gofiber/utils/v2)",
+            "value": 2.357,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "495725079 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseInt8/fiber (github.com/gofiber/utils/v2) - ns/op",
+            "value": 2.357,
+            "unit": "ns/op",
+            "extra": "495725079 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseInt8/fiber (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "495725079 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseInt8/fiber (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "495725079 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseInt8/fiber_bytes (github.com/gofiber/utils/v2)",
+            "value": 2.693,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "484454526 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseInt8/fiber_bytes (github.com/gofiber/utils/v2) - ns/op",
+            "value": 2.693,
+            "unit": "ns/op",
+            "extra": "484454526 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseInt8/fiber_bytes (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "484454526 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseInt8/fiber_bytes (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "484454526 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseInt8/default (github.com/gofiber/utils/v2)",
+            "value": 5.862,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "223753784 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseInt8/default (github.com/gofiber/utils/v2) - ns/op",
+            "value": 5.862,
+            "unit": "ns/op",
+            "extra": "223753784 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseInt8/default (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "223753784 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseInt8/default (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "223753784 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseUint8/fiber (github.com/gofiber/utils/v2)",
+            "value": 2.353,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "554171082 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseUint8/fiber (github.com/gofiber/utils/v2) - ns/op",
+            "value": 2.353,
+            "unit": "ns/op",
+            "extra": "554171082 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseUint8/fiber (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "554171082 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseUint8/fiber (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "554171082 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseUint8/fiber_bytes (github.com/gofiber/utils/v2)",
+            "value": 2.287,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "577456310 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseUint8/fiber_bytes (github.com/gofiber/utils/v2) - ns/op",
+            "value": 2.287,
+            "unit": "ns/op",
+            "extra": "577456310 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseUint8/fiber_bytes (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "577456310 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseUint8/fiber_bytes (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "577456310 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseUint8/default (github.com/gofiber/utils/v2)",
+            "value": 3.931,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "288664581 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseUint8/default (github.com/gofiber/utils/v2) - ns/op",
+            "value": 3.931,
+            "unit": "ns/op",
+            "extra": "288664581 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseUint8/default (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "288664581 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseUint8/default (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "288664581 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseFloat32/fiber (github.com/gofiber/utils/v2)",
+            "value": 9.264,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "135529891 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseFloat32/fiber (github.com/gofiber/utils/v2) - ns/op",
+            "value": 9.264,
+            "unit": "ns/op",
+            "extra": "135529891 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseFloat32/fiber (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "135529891 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseFloat32/fiber (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "135529891 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseFloat32/fiber_bytes (github.com/gofiber/utils/v2)",
+            "value": 10.14,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "100000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseFloat32/fiber_bytes (github.com/gofiber/utils/v2) - ns/op",
+            "value": 10.14,
+            "unit": "ns/op",
+            "extra": "100000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseFloat32/fiber_bytes (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "100000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseFloat32/fiber_bytes (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "100000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseFloat32/default (github.com/gofiber/utils/v2)",
+            "value": 18.63,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "64231809 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseFloat32/default (github.com/gofiber/utils/v2) - ns/op",
+            "value": 18.63,
+            "unit": "ns/op",
+            "extra": "64231809 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseFloat32/default (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "64231809 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseFloat32/default (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "64231809 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_HasSuffixFold/gzip-hit/fiber (github.com/gofiber/utils/v2)",
+            "value": 2.483,
+            "unit": "ns/op\t1610.76 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "466561550 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_HasSuffixFold/gzip-hit/fiber (github.com/gofiber/utils/v2) - ns/op",
+            "value": 2.483,
+            "unit": "ns/op",
+            "extra": "466561550 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_HasSuffixFold/gzip-hit/fiber (github.com/gofiber/utils/v2) - MB/s",
+            "value": 1610.76,
+            "unit": "MB/s",
+            "extra": "466561550 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_HasSuffixFold/gzip-hit/fiber (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "466561550 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_HasSuffixFold/gzip-hit/fiber (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "466561550 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_HasSuffixFold/gzip-hit/default (github.com/gofiber/utils/v2)",
+            "value": 3.221,
+            "unit": "ns/op\t1241.98 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "373629583 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_HasSuffixFold/gzip-hit/default (github.com/gofiber/utils/v2) - ns/op",
+            "value": 3.221,
+            "unit": "ns/op",
+            "extra": "373629583 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_HasSuffixFold/gzip-hit/default (github.com/gofiber/utils/v2) - MB/s",
+            "value": 1241.98,
+            "unit": "MB/s",
+            "extra": "373629583 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_HasSuffixFold/gzip-hit/default (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "373629583 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_HasSuffixFold/gzip-hit/default (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "373629583 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_HasSuffixFold/gzip-miss/fiber (github.com/gofiber/utils/v2)",
+            "value": 1.348,
+            "unit": "ns/op\t2966.88 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "900877188 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_HasSuffixFold/gzip-miss/fiber (github.com/gofiber/utils/v2) - ns/op",
+            "value": 1.348,
+            "unit": "ns/op",
+            "extra": "900877188 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_HasSuffixFold/gzip-miss/fiber (github.com/gofiber/utils/v2) - MB/s",
+            "value": 2966.88,
+            "unit": "MB/s",
+            "extra": "900877188 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_HasSuffixFold/gzip-miss/fiber (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "900877188 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_HasSuffixFold/gzip-miss/fiber (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "900877188 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_HasSuffixFold/gzip-miss/default (github.com/gofiber/utils/v2)",
+            "value": 1.547,
+            "unit": "ns/op\t2585.05 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "776071501 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_HasSuffixFold/gzip-miss/default (github.com/gofiber/utils/v2) - ns/op",
+            "value": 1.547,
+            "unit": "ns/op",
+            "extra": "776071501 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_HasSuffixFold/gzip-miss/default (github.com/gofiber/utils/v2) - MB/s",
+            "value": 2585.05,
+            "unit": "MB/s",
+            "extra": "776071501 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_HasSuffixFold/gzip-miss/default (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "776071501 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_HasSuffixFold/gzip-miss/default (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "776071501 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_HasSuffixFold/json-hit/fiber (github.com/gofiber/utils/v2)",
+            "value": 2.95,
+            "unit": "ns/op\t1694.65 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "426740602 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_HasSuffixFold/json-hit/fiber (github.com/gofiber/utils/v2) - ns/op",
+            "value": 2.95,
+            "unit": "ns/op",
+            "extra": "426740602 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_HasSuffixFold/json-hit/fiber (github.com/gofiber/utils/v2) - MB/s",
+            "value": 1694.65,
+            "unit": "MB/s",
+            "extra": "426740602 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_HasSuffixFold/json-hit/fiber (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "426740602 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_HasSuffixFold/json-hit/fiber (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "426740602 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_HasSuffixFold/json-hit/default (github.com/gofiber/utils/v2)",
+            "value": 4.008,
+            "unit": "ns/op\t1247.66 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "317162107 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_HasSuffixFold/json-hit/default (github.com/gofiber/utils/v2) - ns/op",
+            "value": 4.008,
+            "unit": "ns/op",
+            "extra": "317162107 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_HasSuffixFold/json-hit/default (github.com/gofiber/utils/v2) - MB/s",
+            "value": 1247.66,
+            "unit": "MB/s",
+            "extra": "317162107 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_HasSuffixFold/json-hit/default (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "317162107 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_HasSuffixFold/json-hit/default (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "317162107 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_HasSuffixFold/atomxml-hit/fiber (github.com/gofiber/utils/v2)",
+            "value": 3.052,
+            "unit": "ns/op\t2620.83 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "389004073 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_HasSuffixFold/atomxml-hit/fiber (github.com/gofiber/utils/v2) - ns/op",
+            "value": 3.052,
+            "unit": "ns/op",
+            "extra": "389004073 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_HasSuffixFold/atomxml-hit/fiber (github.com/gofiber/utils/v2) - MB/s",
+            "value": 2620.83,
+            "unit": "MB/s",
+            "extra": "389004073 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_HasSuffixFold/atomxml-hit/fiber (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "389004073 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_HasSuffixFold/atomxml-hit/fiber (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "389004073 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_HasSuffixFold/atomxml-hit/default (github.com/gofiber/utils/v2)",
+            "value": 5.919,
+            "unit": "ns/op\t1351.49 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "201098088 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_HasSuffixFold/atomxml-hit/default (github.com/gofiber/utils/v2) - ns/op",
+            "value": 5.919,
+            "unit": "ns/op",
+            "extra": "201098088 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_HasSuffixFold/atomxml-hit/default (github.com/gofiber/utils/v2) - MB/s",
+            "value": 1351.49,
+            "unit": "MB/s",
+            "extra": "201098088 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_HasSuffixFold/atomxml-hit/default (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "201098088 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_HasSuffixFold/atomxml-hit/default (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "201098088 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_HasSuffixFold/charset-miss/fiber (github.com/gofiber/utils/v2)",
+            "value": 1.302,
+            "unit": "ns/op\t13822.49 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "923751957 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_HasSuffixFold/charset-miss/fiber (github.com/gofiber/utils/v2) - ns/op",
+            "value": 1.302,
+            "unit": "ns/op",
+            "extra": "923751957 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_HasSuffixFold/charset-miss/fiber (github.com/gofiber/utils/v2) - MB/s",
+            "value": 13822.49,
+            "unit": "MB/s",
+            "extra": "923751957 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_HasSuffixFold/charset-miss/fiber (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "923751957 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_HasSuffixFold/charset-miss/fiber (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "923751957 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_HasSuffixFold/charset-miss/default (github.com/gofiber/utils/v2)",
+            "value": 1.621,
+            "unit": "ns/op\t11105.67 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "725607216 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_HasSuffixFold/charset-miss/default (github.com/gofiber/utils/v2) - ns/op",
+            "value": 1.621,
+            "unit": "ns/op",
+            "extra": "725607216 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_HasSuffixFold/charset-miss/default (github.com/gofiber/utils/v2) - MB/s",
+            "value": 11105.67,
+            "unit": "MB/s",
+            "extra": "725607216 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_HasSuffixFold/charset-miss/default (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "725607216 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_HasSuffixFold/charset-miss/default (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "725607216 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexNonQuotable/7B/swar (github.com/gofiber/utils/v2)",
+            "value": 4.732,
+            "unit": "ns/op\t1479.14 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "239886520 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexNonQuotable/7B/swar (github.com/gofiber/utils/v2) - ns/op",
+            "value": 4.732,
+            "unit": "ns/op",
+            "extra": "239886520 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexNonQuotable/7B/swar (github.com/gofiber/utils/v2) - MB/s",
+            "value": 1479.14,
+            "unit": "MB/s",
+            "extra": "239886520 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexNonQuotable/7B/swar (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "239886520 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexNonQuotable/7B/swar (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "239886520 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexNonQuotable/7B/scalar (github.com/gofiber/utils/v2)",
+            "value": 3.923,
+            "unit": "ns/op\t1784.40 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "309847090 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexNonQuotable/7B/scalar (github.com/gofiber/utils/v2) - ns/op",
+            "value": 3.923,
+            "unit": "ns/op",
+            "extra": "309847090 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexNonQuotable/7B/scalar (github.com/gofiber/utils/v2) - MB/s",
+            "value": 1784.4,
+            "unit": "MB/s",
+            "extra": "309847090 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexNonQuotable/7B/scalar (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "309847090 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexNonQuotable/7B/scalar (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "309847090 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexNonQuotable/8B/swar (github.com/gofiber/utils/v2)",
+            "value": 2.632,
+            "unit": "ns/op\t3039.69 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "458890555 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexNonQuotable/8B/swar (github.com/gofiber/utils/v2) - ns/op",
+            "value": 2.632,
+            "unit": "ns/op",
+            "extra": "458890555 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexNonQuotable/8B/swar (github.com/gofiber/utils/v2) - MB/s",
+            "value": 3039.69,
+            "unit": "MB/s",
+            "extra": "458890555 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexNonQuotable/8B/swar (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "458890555 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexNonQuotable/8B/swar (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "458890555 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexNonQuotable/8B/scalar (github.com/gofiber/utils/v2)",
+            "value": 4.998,
+            "unit": "ns/op\t1600.49 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "289146085 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexNonQuotable/8B/scalar (github.com/gofiber/utils/v2) - ns/op",
+            "value": 4.998,
+            "unit": "ns/op",
+            "extra": "289146085 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexNonQuotable/8B/scalar (github.com/gofiber/utils/v2) - MB/s",
+            "value": 1600.49,
+            "unit": "MB/s",
+            "extra": "289146085 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexNonQuotable/8B/scalar (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "289146085 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexNonQuotable/8B/scalar (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "289146085 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexNonQuotable/16B/swar (github.com/gofiber/utils/v2)",
+            "value": 4.276,
+            "unit": "ns/op\t3742.20 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "285435729 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexNonQuotable/16B/swar (github.com/gofiber/utils/v2) - ns/op",
+            "value": 4.276,
+            "unit": "ns/op",
+            "extra": "285435729 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexNonQuotable/16B/swar (github.com/gofiber/utils/v2) - MB/s",
+            "value": 3742.2,
+            "unit": "MB/s",
+            "extra": "285435729 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexNonQuotable/16B/swar (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "285435729 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexNonQuotable/16B/swar (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "285435729 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexNonQuotable/16B/scalar (github.com/gofiber/utils/v2)",
+            "value": 8.215,
+            "unit": "ns/op\t1947.56 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "145088670 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexNonQuotable/16B/scalar (github.com/gofiber/utils/v2) - ns/op",
+            "value": 8.215,
+            "unit": "ns/op",
+            "extra": "145088670 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexNonQuotable/16B/scalar (github.com/gofiber/utils/v2) - MB/s",
+            "value": 1947.56,
+            "unit": "MB/s",
+            "extra": "145088670 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexNonQuotable/16B/scalar (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "145088670 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexNonQuotable/16B/scalar (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "145088670 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexNonQuotable/32B/swar (github.com/gofiber/utils/v2)",
+            "value": 8.331,
+            "unit": "ns/op\t3840.99 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "144410772 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexNonQuotable/32B/swar (github.com/gofiber/utils/v2) - ns/op",
+            "value": 8.331,
+            "unit": "ns/op",
+            "extra": "144410772 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexNonQuotable/32B/swar (github.com/gofiber/utils/v2) - MB/s",
+            "value": 3840.99,
+            "unit": "MB/s",
+            "extra": "144410772 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexNonQuotable/32B/swar (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "144410772 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexNonQuotable/32B/swar (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "144410772 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexNonQuotable/32B/scalar (github.com/gofiber/utils/v2)",
+            "value": 20.12,
+            "unit": "ns/op\t1590.63 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "69088732 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexNonQuotable/32B/scalar (github.com/gofiber/utils/v2) - ns/op",
+            "value": 20.12,
+            "unit": "ns/op",
+            "extra": "69088732 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexNonQuotable/32B/scalar (github.com/gofiber/utils/v2) - MB/s",
+            "value": 1590.63,
+            "unit": "MB/s",
+            "extra": "69088732 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexNonQuotable/32B/scalar (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "69088732 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexNonQuotable/32B/scalar (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "69088732 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexNonQuotable/64B/swar (github.com/gofiber/utils/v2)",
+            "value": 17.1,
+            "unit": "ns/op\t3743.35 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "68491418 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexNonQuotable/64B/swar (github.com/gofiber/utils/v2) - ns/op",
+            "value": 17.1,
+            "unit": "ns/op",
+            "extra": "68491418 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexNonQuotable/64B/swar (github.com/gofiber/utils/v2) - MB/s",
+            "value": 3743.35,
+            "unit": "MB/s",
+            "extra": "68491418 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexNonQuotable/64B/swar (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "68491418 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexNonQuotable/64B/swar (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "68491418 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexNonQuotable/64B/scalar (github.com/gofiber/utils/v2)",
+            "value": 32.64,
+            "unit": "ns/op\t1961.08 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "37403772 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexNonQuotable/64B/scalar (github.com/gofiber/utils/v2) - ns/op",
+            "value": 32.64,
+            "unit": "ns/op",
+            "extra": "37403772 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexNonQuotable/64B/scalar (github.com/gofiber/utils/v2) - MB/s",
+            "value": 1961.08,
+            "unit": "MB/s",
+            "extra": "37403772 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexNonQuotable/64B/scalar (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "37403772 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexNonQuotable/64B/scalar (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "37403772 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexNonQuotable/512B/swar (github.com/gofiber/utils/v2)",
+            "value": 106.6,
+            "unit": "ns/op\t4803.91 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "10872700 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexNonQuotable/512B/swar (github.com/gofiber/utils/v2) - ns/op",
+            "value": 106.6,
+            "unit": "ns/op",
+            "extra": "10872700 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexNonQuotable/512B/swar (github.com/gofiber/utils/v2) - MB/s",
+            "value": 4803.91,
+            "unit": "MB/s",
+            "extra": "10872700 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexNonQuotable/512B/swar (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "10872700 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexNonQuotable/512B/swar (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "10872700 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexNonQuotable/512B/scalar (github.com/gofiber/utils/v2)",
+            "value": 211.4,
+            "unit": "ns/op\t2421.80 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "5736553 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexNonQuotable/512B/scalar (github.com/gofiber/utils/v2) - ns/op",
+            "value": 211.4,
+            "unit": "ns/op",
+            "extra": "5736553 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexNonQuotable/512B/scalar (github.com/gofiber/utils/v2) - MB/s",
+            "value": 2421.8,
+            "unit": "MB/s",
+            "extra": "5736553 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexNonQuotable/512B/scalar (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "5736553 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexNonQuotable/512B/scalar (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "5736553 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AddTrailingSlashString/empty (github.com/gofiber/utils/v2)",
+            "value": 0.1951,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AddTrailingSlashString/empty (github.com/gofiber/utils/v2) - ns/op",
+            "value": 0.1951,
+            "unit": "ns/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AddTrailingSlashString/empty (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AddTrailingSlashString/empty (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AddTrailingSlashString/slash-only (github.com/gofiber/utils/v2)",
+            "value": 0.1998,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AddTrailingSlashString/slash-only (github.com/gofiber/utils/v2) - ns/op",
+            "value": 0.1998,
+            "unit": "ns/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AddTrailingSlashString/slash-only (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AddTrailingSlashString/slash-only (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AddTrailingSlashString/short-no-slash (github.com/gofiber/utils/v2)",
+            "value": 7.12,
+            "unit": "ns/op\t       4 B/op\t       1 allocs/op",
+            "extra": "165807001 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AddTrailingSlashString/short-no-slash (github.com/gofiber/utils/v2) - ns/op",
+            "value": 7.12,
+            "unit": "ns/op",
+            "extra": "165807001 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AddTrailingSlashString/short-no-slash (github.com/gofiber/utils/v2) - B/op",
+            "value": 4,
+            "unit": "B/op",
+            "extra": "165807001 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AddTrailingSlashString/short-no-slash (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 1,
+            "unit": "allocs/op",
+            "extra": "165807001 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AddTrailingSlashString/short-with-slash (github.com/gofiber/utils/v2)",
+            "value": 0.2086,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AddTrailingSlashString/short-with-slash (github.com/gofiber/utils/v2) - ns/op",
+            "value": 0.2086,
+            "unit": "ns/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AddTrailingSlashString/short-with-slash (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AddTrailingSlashString/short-with-slash (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AddTrailingSlashString/path-no-slash (github.com/gofiber/utils/v2)",
+            "value": 12.93,
+            "unit": "ns/op\t      16 B/op\t       1 allocs/op",
+            "extra": "119757885 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AddTrailingSlashString/path-no-slash (github.com/gofiber/utils/v2) - ns/op",
+            "value": 12.93,
+            "unit": "ns/op",
+            "extra": "119757885 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AddTrailingSlashString/path-no-slash (github.com/gofiber/utils/v2) - B/op",
+            "value": 16,
+            "unit": "B/op",
+            "extra": "119757885 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AddTrailingSlashString/path-no-slash (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 1,
+            "unit": "allocs/op",
+            "extra": "119757885 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AddTrailingSlashString/path-with-slash (github.com/gofiber/utils/v2)",
+            "value": 0.2041,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AddTrailingSlashString/path-with-slash (github.com/gofiber/utils/v2) - ns/op",
+            "value": 0.2041,
+            "unit": "ns/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AddTrailingSlashString/path-with-slash (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AddTrailingSlashString/path-with-slash (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AppendPathUnescape/plain-25B/fiber (github.com/gofiber/utils/v2)",
+            "value": 4.806,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "248043964 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AppendPathUnescape/plain-25B/fiber (github.com/gofiber/utils/v2) - ns/op",
+            "value": 4.806,
+            "unit": "ns/op",
+            "extra": "248043964 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AppendPathUnescape/plain-25B/fiber (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "248043964 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AppendPathUnescape/plain-25B/fiber (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "248043964 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AppendPathUnescape/plain-25B/default (github.com/gofiber/utils/v2)",
+            "value": 23.05,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "59248263 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AppendPathUnescape/plain-25B/default (github.com/gofiber/utils/v2) - ns/op",
+            "value": 23.05,
+            "unit": "ns/op",
+            "extra": "59248263 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AppendPathUnescape/plain-25B/default (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "59248263 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AppendPathUnescape/plain-25B/default (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "59248263 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AppendPathUnescape/escaped-31B/fiber (github.com/gofiber/utils/v2)",
+            "value": 23.24,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "52571370 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AppendPathUnescape/escaped-31B/fiber (github.com/gofiber/utils/v2) - ns/op",
+            "value": 23.24,
+            "unit": "ns/op",
+            "extra": "52571370 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AppendPathUnescape/escaped-31B/fiber (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "52571370 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AppendPathUnescape/escaped-31B/fiber (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "52571370 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AppendPathUnescape/escaped-31B/default (github.com/gofiber/utils/v2)",
+            "value": 54.77,
+            "unit": "ns/op\t      24 B/op\t       1 allocs/op",
+            "extra": "21491232 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AppendPathUnescape/escaped-31B/default (github.com/gofiber/utils/v2) - ns/op",
+            "value": 54.77,
+            "unit": "ns/op",
+            "extra": "21491232 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AppendPathUnescape/escaped-31B/default (github.com/gofiber/utils/v2) - B/op",
+            "value": 24,
+            "unit": "B/op",
+            "extra": "21491232 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AppendPathUnescape/escaped-31B/default (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 1,
+            "unit": "allocs/op",
+            "extra": "21491232 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_DefaultXMLDecoder (github.com/gofiber/utils/v2)",
+            "value": 2941,
+            "unit": "ns/op\t    2850 B/op\t      57 allocs/op",
+            "extra": "418278 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_DefaultXMLDecoder (github.com/gofiber/utils/v2) - ns/op",
+            "value": 2941,
+            "unit": "ns/op",
+            "extra": "418278 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_DefaultXMLDecoder (github.com/gofiber/utils/v2) - B/op",
+            "value": 2850,
+            "unit": "B/op",
+            "extra": "418278 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_DefaultXMLDecoder (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 57,
+            "unit": "allocs/op",
+            "extra": "418278 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memchr2/8B/simd (github.com/gofiber/utils/v2/simd)",
+            "value": 2.927,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "474039637 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memchr2/8B/simd (github.com/gofiber/utils/v2/simd) - ns/op",
+            "value": 2.927,
+            "unit": "ns/op",
+            "extra": "474039637 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memchr2/8B/simd (github.com/gofiber/utils/v2/simd) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "474039637 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memchr2/8B/simd (github.com/gofiber/utils/v2/simd) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "474039637 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memchr2/8B/default (github.com/gofiber/utils/v2/simd)",
+            "value": 15.53,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "80261415 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memchr2/8B/default (github.com/gofiber/utils/v2/simd) - ns/op",
+            "value": 15.53,
+            "unit": "ns/op",
+            "extra": "80261415 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memchr2/8B/default (github.com/gofiber/utils/v2/simd) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "80261415 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memchr2/8B/default (github.com/gofiber/utils/v2/simd) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "80261415 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memchr2/32B/simd (github.com/gofiber/utils/v2/simd)",
+            "value": 2.194,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "577758510 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memchr2/32B/simd (github.com/gofiber/utils/v2/simd) - ns/op",
+            "value": 2.194,
+            "unit": "ns/op",
+            "extra": "577758510 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memchr2/32B/simd (github.com/gofiber/utils/v2/simd) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "577758510 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memchr2/32B/simd (github.com/gofiber/utils/v2/simd) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "577758510 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memchr2/32B/default (github.com/gofiber/utils/v2/simd)",
+            "value": 15.21,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "73643260 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memchr2/32B/default (github.com/gofiber/utils/v2/simd) - ns/op",
+            "value": 15.21,
+            "unit": "ns/op",
+            "extra": "73643260 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memchr2/32B/default (github.com/gofiber/utils/v2/simd) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "73643260 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memchr2/32B/default (github.com/gofiber/utils/v2/simd) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "73643260 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memchr2/64B/simd (github.com/gofiber/utils/v2/simd)",
+            "value": 2.386,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "515132462 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memchr2/64B/simd (github.com/gofiber/utils/v2/simd) - ns/op",
+            "value": 2.386,
+            "unit": "ns/op",
+            "extra": "515132462 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memchr2/64B/simd (github.com/gofiber/utils/v2/simd) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "515132462 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memchr2/64B/simd (github.com/gofiber/utils/v2/simd) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "515132462 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memchr2/64B/default (github.com/gofiber/utils/v2/simd)",
+            "value": 27.07,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "44500148 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memchr2/64B/default (github.com/gofiber/utils/v2/simd) - ns/op",
+            "value": 27.07,
+            "unit": "ns/op",
+            "extra": "44500148 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memchr2/64B/default (github.com/gofiber/utils/v2/simd) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "44500148 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memchr2/64B/default (github.com/gofiber/utils/v2/simd) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "44500148 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memchr2/512B/simd (github.com/gofiber/utils/v2/simd)",
+            "value": 7.12,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "161369520 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memchr2/512B/simd (github.com/gofiber/utils/v2/simd) - ns/op",
+            "value": 7.12,
+            "unit": "ns/op",
+            "extra": "161369520 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memchr2/512B/simd (github.com/gofiber/utils/v2/simd) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "161369520 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memchr2/512B/simd (github.com/gofiber/utils/v2/simd) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "161369520 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memchr2/512B/default (github.com/gofiber/utils/v2/simd)",
+            "value": 175.5,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "7030123 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memchr2/512B/default (github.com/gofiber/utils/v2/simd) - ns/op",
+            "value": 175.5,
+            "unit": "ns/op",
+            "extra": "7030123 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memchr2/512B/default (github.com/gofiber/utils/v2/simd) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "7030123 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memchr2/512B/default (github.com/gofiber/utils/v2/simd) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "7030123 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memchr2/4096B/simd (github.com/gofiber/utils/v2/simd)",
+            "value": 36.3,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "33629221 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memchr2/4096B/simd (github.com/gofiber/utils/v2/simd) - ns/op",
+            "value": 36.3,
+            "unit": "ns/op",
+            "extra": "33629221 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memchr2/4096B/simd (github.com/gofiber/utils/v2/simd) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "33629221 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memchr2/4096B/simd (github.com/gofiber/utils/v2/simd) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "33629221 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memchr2/4096B/default (github.com/gofiber/utils/v2/simd)",
+            "value": 1282,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "835754 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memchr2/4096B/default (github.com/gofiber/utils/v2/simd) - ns/op",
+            "value": 1282,
+            "unit": "ns/op",
+            "extra": "835754 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memchr2/4096B/default (github.com/gofiber/utils/v2/simd) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "835754 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memchr2/4096B/default (github.com/gofiber/utils/v2/simd) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "835754 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_MemchrPair/8B/simd (github.com/gofiber/utils/v2/simd)",
+            "value": 5.044,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "255114145 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_MemchrPair/8B/simd (github.com/gofiber/utils/v2/simd) - ns/op",
+            "value": 5.044,
+            "unit": "ns/op",
+            "extra": "255114145 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_MemchrPair/8B/simd (github.com/gofiber/utils/v2/simd) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "255114145 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_MemchrPair/8B/simd (github.com/gofiber/utils/v2/simd) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "255114145 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_MemchrPair/8B/scalar (github.com/gofiber/utils/v2/simd)",
+            "value": 1.793,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "677436487 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_MemchrPair/8B/scalar (github.com/gofiber/utils/v2/simd) - ns/op",
+            "value": 1.793,
+            "unit": "ns/op",
+            "extra": "677436487 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_MemchrPair/8B/scalar (github.com/gofiber/utils/v2/simd) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "677436487 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_MemchrPair/8B/scalar (github.com/gofiber/utils/v2/simd) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "677436487 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_MemchrPair/32B/simd (github.com/gofiber/utils/v2/simd)",
+            "value": 7.59,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "157719120 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_MemchrPair/32B/simd (github.com/gofiber/utils/v2/simd) - ns/op",
+            "value": 7.59,
+            "unit": "ns/op",
+            "extra": "157719120 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_MemchrPair/32B/simd (github.com/gofiber/utils/v2/simd) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "157719120 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_MemchrPair/32B/simd (github.com/gofiber/utils/v2/simd) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "157719120 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_MemchrPair/32B/scalar (github.com/gofiber/utils/v2/simd)",
+            "value": 6.742,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "178163906 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_MemchrPair/32B/scalar (github.com/gofiber/utils/v2/simd) - ns/op",
+            "value": 6.742,
+            "unit": "ns/op",
+            "extra": "178163906 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_MemchrPair/32B/scalar (github.com/gofiber/utils/v2/simd) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "178163906 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_MemchrPair/32B/scalar (github.com/gofiber/utils/v2/simd) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "178163906 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_MemchrPair/64B/simd (github.com/gofiber/utils/v2/simd)",
+            "value": 3.5,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "331390999 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_MemchrPair/64B/simd (github.com/gofiber/utils/v2/simd) - ns/op",
+            "value": 3.5,
+            "unit": "ns/op",
+            "extra": "331390999 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_MemchrPair/64B/simd (github.com/gofiber/utils/v2/simd) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "331390999 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_MemchrPair/64B/simd (github.com/gofiber/utils/v2/simd) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "331390999 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_MemchrPair/64B/scalar (github.com/gofiber/utils/v2/simd)",
+            "value": 13.63,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "88669702 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_MemchrPair/64B/scalar (github.com/gofiber/utils/v2/simd) - ns/op",
+            "value": 13.63,
+            "unit": "ns/op",
+            "extra": "88669702 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_MemchrPair/64B/scalar (github.com/gofiber/utils/v2/simd) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "88669702 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_MemchrPair/64B/scalar (github.com/gofiber/utils/v2/simd) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "88669702 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_MemchrPair/512B/simd (github.com/gofiber/utils/v2/simd)",
+            "value": 8.105,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "159420912 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_MemchrPair/512B/simd (github.com/gofiber/utils/v2/simd) - ns/op",
+            "value": 8.105,
+            "unit": "ns/op",
+            "extra": "159420912 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_MemchrPair/512B/simd (github.com/gofiber/utils/v2/simd) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "159420912 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_MemchrPair/512B/simd (github.com/gofiber/utils/v2/simd) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "159420912 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_MemchrPair/512B/scalar (github.com/gofiber/utils/v2/simd)",
+            "value": 111.6,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "10428969 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_MemchrPair/512B/scalar (github.com/gofiber/utils/v2/simd) - ns/op",
+            "value": 111.6,
+            "unit": "ns/op",
+            "extra": "10428969 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_MemchrPair/512B/scalar (github.com/gofiber/utils/v2/simd) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "10428969 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_MemchrPair/512B/scalar (github.com/gofiber/utils/v2/simd) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "10428969 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_MemchrPair/4096B/simd (github.com/gofiber/utils/v2/simd)",
+            "value": 40.16,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "29145577 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_MemchrPair/4096B/simd (github.com/gofiber/utils/v2/simd) - ns/op",
+            "value": 40.16,
+            "unit": "ns/op",
+            "extra": "29145577 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_MemchrPair/4096B/simd (github.com/gofiber/utils/v2/simd) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "29145577 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_MemchrPair/4096B/simd (github.com/gofiber/utils/v2/simd) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "29145577 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_MemchrPair/4096B/scalar (github.com/gofiber/utils/v2/simd)",
+            "value": 813.2,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "1418258 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_MemchrPair/4096B/scalar (github.com/gofiber/utils/v2/simd) - ns/op",
+            "value": 813.2,
+            "unit": "ns/op",
+            "extra": "1418258 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_MemchrPair/4096B/scalar (github.com/gofiber/utils/v2/simd) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "1418258 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_MemchrPair/4096B/scalar (github.com/gofiber/utils/v2/simd) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "1418258 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLower/empty/fiber (github.com/gofiber/utils/v2/strings)",
+            "value": 1.434,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "868985464 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLower/empty/fiber (github.com/gofiber/utils/v2/strings) - ns/op",
+            "value": 1.434,
+            "unit": "ns/op",
+            "extra": "868985464 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLower/empty/fiber (github.com/gofiber/utils/v2/strings) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "868985464 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLower/empty/fiber (github.com/gofiber/utils/v2/strings) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "868985464 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLower/empty/fiber/unsafe (github.com/gofiber/utils/v2/strings)",
+            "value": 1.257,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLower/empty/fiber/unsafe (github.com/gofiber/utils/v2/strings) - ns/op",
+            "value": 1.257,
+            "unit": "ns/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLower/empty/fiber/unsafe (github.com/gofiber/utils/v2/strings) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLower/empty/fiber/unsafe (github.com/gofiber/utils/v2/strings) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLower/empty/default (github.com/gofiber/utils/v2/strings)",
+            "value": 1.544,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "875505706 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLower/empty/default (github.com/gofiber/utils/v2/strings) - ns/op",
+            "value": 1.544,
+            "unit": "ns/op",
+            "extra": "875505706 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLower/empty/default (github.com/gofiber/utils/v2/strings) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "875505706 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLower/empty/default (github.com/gofiber/utils/v2/strings) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "875505706 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLower/http-get/fiber (github.com/gofiber/utils/v2/strings)",
+            "value": 1.905,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "613304336 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLower/http-get/fiber (github.com/gofiber/utils/v2/strings) - ns/op",
+            "value": 1.905,
+            "unit": "ns/op",
+            "extra": "613304336 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLower/http-get/fiber (github.com/gofiber/utils/v2/strings) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "613304336 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLower/http-get/fiber (github.com/gofiber/utils/v2/strings) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "613304336 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLower/http-get/fiber/unsafe (github.com/gofiber/utils/v2/strings)",
+            "value": 2.768,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "461867145 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLower/http-get/fiber/unsafe (github.com/gofiber/utils/v2/strings) - ns/op",
+            "value": 2.768,
+            "unit": "ns/op",
+            "extra": "461867145 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLower/http-get/fiber/unsafe (github.com/gofiber/utils/v2/strings) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "461867145 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLower/http-get/fiber/unsafe (github.com/gofiber/utils/v2/strings) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "461867145 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLower/http-get/default (github.com/gofiber/utils/v2/strings)",
+            "value": 2.159,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "504842428 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLower/http-get/default (github.com/gofiber/utils/v2/strings) - ns/op",
+            "value": 2.159,
+            "unit": "ns/op",
+            "extra": "504842428 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLower/http-get/default (github.com/gofiber/utils/v2/strings) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "504842428 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLower/http-get/default (github.com/gofiber/utils/v2/strings) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "504842428 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLower/http-get-upper/fiber (github.com/gofiber/utils/v2/strings)",
+            "value": 7.214,
+            "unit": "ns/op\t       3 B/op\t       1 allocs/op",
+            "extra": "165639696 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLower/http-get-upper/fiber (github.com/gofiber/utils/v2/strings) - ns/op",
+            "value": 7.214,
+            "unit": "ns/op",
+            "extra": "165639696 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLower/http-get-upper/fiber (github.com/gofiber/utils/v2/strings) - B/op",
+            "value": 3,
+            "unit": "B/op",
+            "extra": "165639696 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLower/http-get-upper/fiber (github.com/gofiber/utils/v2/strings) - allocs/op",
+            "value": 1,
+            "unit": "allocs/op",
+            "extra": "165639696 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLower/http-get-upper/fiber/unsafe (github.com/gofiber/utils/v2/strings)",
+            "value": 2.651,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "455287672 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLower/http-get-upper/fiber/unsafe (github.com/gofiber/utils/v2/strings) - ns/op",
+            "value": 2.651,
+            "unit": "ns/op",
+            "extra": "455287672 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLower/http-get-upper/fiber/unsafe (github.com/gofiber/utils/v2/strings) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "455287672 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLower/http-get-upper/fiber/unsafe (github.com/gofiber/utils/v2/strings) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "455287672 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLower/http-get-upper/default (github.com/gofiber/utils/v2/strings)",
+            "value": 13.63,
+            "unit": "ns/op\t       8 B/op\t       1 allocs/op",
+            "extra": "86330599 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLower/http-get-upper/default (github.com/gofiber/utils/v2/strings) - ns/op",
+            "value": 13.63,
+            "unit": "ns/op",
+            "extra": "86330599 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLower/http-get-upper/default (github.com/gofiber/utils/v2/strings) - B/op",
+            "value": 8,
+            "unit": "B/op",
+            "extra": "86330599 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLower/http-get-upper/default (github.com/gofiber/utils/v2/strings) - allocs/op",
+            "value": 1,
+            "unit": "allocs/op",
+            "extra": "86330599 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLower/header-content-type-mixed/fiber (github.com/gofiber/utils/v2/strings)",
+            "value": 19.25,
+            "unit": "ns/op\t      48 B/op\t       1 allocs/op",
+            "extra": "61199019 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLower/header-content-type-mixed/fiber (github.com/gofiber/utils/v2/strings) - ns/op",
+            "value": 19.25,
+            "unit": "ns/op",
+            "extra": "61199019 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLower/header-content-type-mixed/fiber (github.com/gofiber/utils/v2/strings) - B/op",
+            "value": 48,
+            "unit": "B/op",
+            "extra": "61199019 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLower/header-content-type-mixed/fiber (github.com/gofiber/utils/v2/strings) - allocs/op",
+            "value": 1,
+            "unit": "allocs/op",
+            "extra": "61199019 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLower/header-content-type-mixed/fiber/unsafe (github.com/gofiber/utils/v2/strings)",
+            "value": 8.768,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "136832258 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLower/header-content-type-mixed/fiber/unsafe (github.com/gofiber/utils/v2/strings) - ns/op",
+            "value": 8.768,
+            "unit": "ns/op",
+            "extra": "136832258 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLower/header-content-type-mixed/fiber/unsafe (github.com/gofiber/utils/v2/strings) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "136832258 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLower/header-content-type-mixed/fiber/unsafe (github.com/gofiber/utils/v2/strings) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "136832258 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLower/header-content-type-mixed/default (github.com/gofiber/utils/v2/strings)",
+            "value": 38.15,
+            "unit": "ns/op\t      48 B/op\t       1 allocs/op",
+            "extra": "30016888 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLower/header-content-type-mixed/default (github.com/gofiber/utils/v2/strings) - ns/op",
+            "value": 38.15,
+            "unit": "ns/op",
+            "extra": "30016888 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLower/header-content-type-mixed/default (github.com/gofiber/utils/v2/strings) - B/op",
+            "value": 48,
+            "unit": "B/op",
+            "extra": "30016888 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLower/header-content-type-mixed/default (github.com/gofiber/utils/v2/strings) - allocs/op",
+            "value": 1,
+            "unit": "allocs/op",
+            "extra": "30016888 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLower/large-lower/fiber (github.com/gofiber/utils/v2/strings)",
+            "value": 7.668,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "156939739 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLower/large-lower/fiber (github.com/gofiber/utils/v2/strings) - ns/op",
+            "value": 7.668,
+            "unit": "ns/op",
+            "extra": "156939739 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLower/large-lower/fiber (github.com/gofiber/utils/v2/strings) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "156939739 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLower/large-lower/fiber (github.com/gofiber/utils/v2/strings) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "156939739 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLower/large-lower/fiber/unsafe (github.com/gofiber/utils/v2/strings)",
+            "value": 9.734,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "121653034 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLower/large-lower/fiber/unsafe (github.com/gofiber/utils/v2/strings) - ns/op",
+            "value": 9.734,
+            "unit": "ns/op",
+            "extra": "121653034 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLower/large-lower/fiber/unsafe (github.com/gofiber/utils/v2/strings) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "121653034 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLower/large-lower/fiber/unsafe (github.com/gofiber/utils/v2/strings) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "121653034 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLower/large-lower/default (github.com/gofiber/utils/v2/strings)",
+            "value": 25.58,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "46462033 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLower/large-lower/default (github.com/gofiber/utils/v2/strings) - ns/op",
+            "value": 25.58,
+            "unit": "ns/op",
+            "extra": "46462033 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLower/large-lower/default (github.com/gofiber/utils/v2/strings) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "46462033 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLower/large-lower/default (github.com/gofiber/utils/v2/strings) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "46462033 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLower/large-upper/fiber (github.com/gofiber/utils/v2/strings)",
+            "value": 23.45,
+            "unit": "ns/op\t      64 B/op\t       1 allocs/op",
+            "extra": "51702594 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLower/large-upper/fiber (github.com/gofiber/utils/v2/strings) - ns/op",
+            "value": 23.45,
+            "unit": "ns/op",
+            "extra": "51702594 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLower/large-upper/fiber (github.com/gofiber/utils/v2/strings) - B/op",
+            "value": 64,
+            "unit": "B/op",
+            "extra": "51702594 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLower/large-upper/fiber (github.com/gofiber/utils/v2/strings) - allocs/op",
+            "value": 1,
+            "unit": "allocs/op",
+            "extra": "51702594 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLower/large-upper/fiber/unsafe (github.com/gofiber/utils/v2/strings)",
+            "value": 10.38,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "100000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLower/large-upper/fiber/unsafe (github.com/gofiber/utils/v2/strings) - ns/op",
+            "value": 10.38,
+            "unit": "ns/op",
+            "extra": "100000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLower/large-upper/fiber/unsafe (github.com/gofiber/utils/v2/strings) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "100000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLower/large-upper/fiber/unsafe (github.com/gofiber/utils/v2/strings) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "100000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLower/large-upper/default (github.com/gofiber/utils/v2/strings)",
+            "value": 108.1,
+            "unit": "ns/op\t      64 B/op\t       1 allocs/op",
+            "extra": "10674416 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLower/large-upper/default (github.com/gofiber/utils/v2/strings) - ns/op",
+            "value": 108.1,
+            "unit": "ns/op",
+            "extra": "10674416 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLower/large-upper/default (github.com/gofiber/utils/v2/strings) - B/op",
+            "value": 64,
+            "unit": "B/op",
+            "extra": "10674416 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLower/large-upper/default (github.com/gofiber/utils/v2/strings) - allocs/op",
+            "value": 1,
+            "unit": "allocs/op",
+            "extra": "10674416 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLower/large-mixed/fiber (github.com/gofiber/utils/v2/strings)",
+            "value": 24.15,
+            "unit": "ns/op\t      64 B/op\t       1 allocs/op",
+            "extra": "48655386 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLower/large-mixed/fiber (github.com/gofiber/utils/v2/strings) - ns/op",
+            "value": 24.15,
+            "unit": "ns/op",
+            "extra": "48655386 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLower/large-mixed/fiber (github.com/gofiber/utils/v2/strings) - B/op",
+            "value": 64,
+            "unit": "B/op",
+            "extra": "48655386 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLower/large-mixed/fiber (github.com/gofiber/utils/v2/strings) - allocs/op",
+            "value": 1,
+            "unit": "allocs/op",
+            "extra": "48655386 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLower/large-mixed/fiber/unsafe (github.com/gofiber/utils/v2/strings)",
+            "value": 10.35,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "100000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLower/large-mixed/fiber/unsafe (github.com/gofiber/utils/v2/strings) - ns/op",
+            "value": 10.35,
+            "unit": "ns/op",
+            "extra": "100000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLower/large-mixed/fiber/unsafe (github.com/gofiber/utils/v2/strings) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "100000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLower/large-mixed/fiber/unsafe (github.com/gofiber/utils/v2/strings) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "100000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLower/large-mixed/default (github.com/gofiber/utils/v2/strings)",
+            "value": 119.1,
+            "unit": "ns/op\t      64 B/op\t       1 allocs/op",
+            "extra": "9698452 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLower/large-mixed/default (github.com/gofiber/utils/v2/strings) - ns/op",
+            "value": 119.1,
+            "unit": "ns/op",
+            "extra": "9698452 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLower/large-mixed/default (github.com/gofiber/utils/v2/strings) - B/op",
+            "value": 64,
+            "unit": "B/op",
+            "extra": "9698452 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLower/large-mixed/default (github.com/gofiber/utils/v2/strings) - allocs/op",
+            "value": 1,
+            "unit": "allocs/op",
+            "extra": "9698452 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_LastIndexByte/7B/fiber (github.com/gofiber/utils/v2/swar)",
+            "value": 3.382,
+            "unit": "ns/op\t2069.51 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "386956698 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_LastIndexByte/7B/fiber (github.com/gofiber/utils/v2/swar) - ns/op",
+            "value": 3.382,
+            "unit": "ns/op",
+            "extra": "386956698 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_LastIndexByte/7B/fiber (github.com/gofiber/utils/v2/swar) - MB/s",
+            "value": 2069.51,
+            "unit": "MB/s",
+            "extra": "386956698 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_LastIndexByte/7B/fiber (github.com/gofiber/utils/v2/swar) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "386956698 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_LastIndexByte/7B/fiber (github.com/gofiber/utils/v2/swar) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "386956698 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_LastIndexByte/7B/default (github.com/gofiber/utils/v2/swar)",
+            "value": 2.535,
+            "unit": "ns/op\t2761.83 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "570985980 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_LastIndexByte/7B/default (github.com/gofiber/utils/v2/swar) - ns/op",
+            "value": 2.535,
+            "unit": "ns/op",
+            "extra": "570985980 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_LastIndexByte/7B/default (github.com/gofiber/utils/v2/swar) - MB/s",
+            "value": 2761.83,
+            "unit": "MB/s",
+            "extra": "570985980 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_LastIndexByte/7B/default (github.com/gofiber/utils/v2/swar) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "570985980 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_LastIndexByte/7B/default (github.com/gofiber/utils/v2/swar) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "570985980 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_LastIndexByte/8B/fiber (github.com/gofiber/utils/v2/swar)",
+            "value": 1.556,
+            "unit": "ns/op\t5140.27 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "718261728 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_LastIndexByte/8B/fiber (github.com/gofiber/utils/v2/swar) - ns/op",
+            "value": 1.556,
+            "unit": "ns/op",
+            "extra": "718261728 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_LastIndexByte/8B/fiber (github.com/gofiber/utils/v2/swar) - MB/s",
+            "value": 5140.27,
+            "unit": "MB/s",
+            "extra": "718261728 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_LastIndexByte/8B/fiber (github.com/gofiber/utils/v2/swar) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "718261728 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_LastIndexByte/8B/fiber (github.com/gofiber/utils/v2/swar) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "718261728 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_LastIndexByte/8B/default (github.com/gofiber/utils/v2/swar)",
+            "value": 2.162,
+            "unit": "ns/op\t3700.74 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "605226481 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_LastIndexByte/8B/default (github.com/gofiber/utils/v2/swar) - ns/op",
+            "value": 2.162,
+            "unit": "ns/op",
+            "extra": "605226481 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_LastIndexByte/8B/default (github.com/gofiber/utils/v2/swar) - MB/s",
+            "value": 3700.74,
+            "unit": "MB/s",
+            "extra": "605226481 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_LastIndexByte/8B/default (github.com/gofiber/utils/v2/swar) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "605226481 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_LastIndexByte/8B/default (github.com/gofiber/utils/v2/swar) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "605226481 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_LastIndexByte/16B/fiber (github.com/gofiber/utils/v2/swar)",
+            "value": 2.35,
+            "unit": "ns/op\t6808.16 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "506579247 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_LastIndexByte/16B/fiber (github.com/gofiber/utils/v2/swar) - ns/op",
+            "value": 2.35,
+            "unit": "ns/op",
+            "extra": "506579247 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_LastIndexByte/16B/fiber (github.com/gofiber/utils/v2/swar) - MB/s",
+            "value": 6808.16,
+            "unit": "MB/s",
+            "extra": "506579247 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_LastIndexByte/16B/fiber (github.com/gofiber/utils/v2/swar) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "506579247 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_LastIndexByte/16B/fiber (github.com/gofiber/utils/v2/swar) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "506579247 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_LastIndexByte/16B/default (github.com/gofiber/utils/v2/swar)",
+            "value": 3.605,
+            "unit": "ns/op\t4438.49 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "341270668 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_LastIndexByte/16B/default (github.com/gofiber/utils/v2/swar) - ns/op",
+            "value": 3.605,
+            "unit": "ns/op",
+            "extra": "341270668 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_LastIndexByte/16B/default (github.com/gofiber/utils/v2/swar) - MB/s",
+            "value": 4438.49,
+            "unit": "MB/s",
+            "extra": "341270668 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_LastIndexByte/16B/default (github.com/gofiber/utils/v2/swar) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "341270668 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_LastIndexByte/16B/default (github.com/gofiber/utils/v2/swar) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "341270668 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_LastIndexByte/32B/fiber (github.com/gofiber/utils/v2/swar)",
+            "value": 4.303,
+            "unit": "ns/op\t7435.84 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "300905802 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_LastIndexByte/32B/fiber (github.com/gofiber/utils/v2/swar) - ns/op",
+            "value": 4.303,
+            "unit": "ns/op",
+            "extra": "300905802 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_LastIndexByte/32B/fiber (github.com/gofiber/utils/v2/swar) - MB/s",
+            "value": 7435.84,
+            "unit": "MB/s",
+            "extra": "300905802 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_LastIndexByte/32B/fiber (github.com/gofiber/utils/v2/swar) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "300905802 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_LastIndexByte/32B/fiber (github.com/gofiber/utils/v2/swar) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "300905802 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_LastIndexByte/32B/default (github.com/gofiber/utils/v2/swar)",
+            "value": 7.927,
+            "unit": "ns/op\t4036.85 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "150897224 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_LastIndexByte/32B/default (github.com/gofiber/utils/v2/swar) - ns/op",
+            "value": 7.927,
+            "unit": "ns/op",
+            "extra": "150897224 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_LastIndexByte/32B/default (github.com/gofiber/utils/v2/swar) - MB/s",
+            "value": 4036.85,
+            "unit": "MB/s",
+            "extra": "150897224 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_LastIndexByte/32B/default (github.com/gofiber/utils/v2/swar) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "150897224 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_LastIndexByte/32B/default (github.com/gofiber/utils/v2/swar) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "150897224 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_LastIndexByte/64B/fiber (github.com/gofiber/utils/v2/swar)",
+            "value": 7.717,
+            "unit": "ns/op\t8292.91 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "155064934 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_LastIndexByte/64B/fiber (github.com/gofiber/utils/v2/swar) - ns/op",
+            "value": 7.717,
+            "unit": "ns/op",
+            "extra": "155064934 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_LastIndexByte/64B/fiber (github.com/gofiber/utils/v2/swar) - MB/s",
+            "value": 8292.91,
+            "unit": "MB/s",
+            "extra": "155064934 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_LastIndexByte/64B/fiber (github.com/gofiber/utils/v2/swar) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "155064934 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_LastIndexByte/64B/fiber (github.com/gofiber/utils/v2/swar) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "155064934 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_LastIndexByte/64B/default (github.com/gofiber/utils/v2/swar)",
+            "value": 10.9,
+            "unit": "ns/op\t5872.57 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "100000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_LastIndexByte/64B/default (github.com/gofiber/utils/v2/swar) - ns/op",
+            "value": 10.9,
+            "unit": "ns/op",
+            "extra": "100000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_LastIndexByte/64B/default (github.com/gofiber/utils/v2/swar) - MB/s",
+            "value": 5872.57,
+            "unit": "MB/s",
+            "extra": "100000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_LastIndexByte/64B/default (github.com/gofiber/utils/v2/swar) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "100000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_LastIndexByte/64B/default (github.com/gofiber/utils/v2/swar) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "100000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_LastIndexByte/512B/fiber (github.com/gofiber/utils/v2/swar)",
+            "value": 54.79,
+            "unit": "ns/op\t9344.41 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "22084988 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_LastIndexByte/512B/fiber (github.com/gofiber/utils/v2/swar) - ns/op",
+            "value": 54.79,
+            "unit": "ns/op",
+            "extra": "22084988 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_LastIndexByte/512B/fiber (github.com/gofiber/utils/v2/swar) - MB/s",
+            "value": 9344.41,
+            "unit": "MB/s",
+            "extra": "22084988 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_LastIndexByte/512B/fiber (github.com/gofiber/utils/v2/swar) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "22084988 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_LastIndexByte/512B/fiber (github.com/gofiber/utils/v2/swar) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "22084988 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_LastIndexByte/512B/default (github.com/gofiber/utils/v2/swar)",
+            "value": 108.2,
+            "unit": "ns/op\t4731.53 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "10969734 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_LastIndexByte/512B/default (github.com/gofiber/utils/v2/swar) - ns/op",
+            "value": 108.2,
+            "unit": "ns/op",
+            "extra": "10969734 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_LastIndexByte/512B/default (github.com/gofiber/utils/v2/swar) - MB/s",
+            "value": 4731.53,
+            "unit": "MB/s",
+            "extra": "10969734 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_LastIndexByte/512B/default (github.com/gofiber/utils/v2/swar) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "10969734 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_LastIndexByte/512B/default (github.com/gofiber/utils/v2/swar) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "10969734 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerWord/7B/fiber (github.com/gofiber/utils/v2/swar)",
+            "value": 4.257,
+            "unit": "ns/op\t1644.37 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "281637690 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerWord/7B/fiber (github.com/gofiber/utils/v2/swar) - ns/op",
+            "value": 4.257,
+            "unit": "ns/op",
+            "extra": "281637690 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerWord/7B/fiber (github.com/gofiber/utils/v2/swar) - MB/s",
+            "value": 1644.37,
+            "unit": "MB/s",
+            "extra": "281637690 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerWord/7B/fiber (github.com/gofiber/utils/v2/swar) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "281637690 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerWord/7B/fiber (github.com/gofiber/utils/v2/swar) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "281637690 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerWord/7B/default (github.com/gofiber/utils/v2/swar)",
+            "value": 10.19,
+            "unit": "ns/op\t 686.91 MB/s\t       8 B/op\t       1 allocs/op",
+            "extra": "117249966 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerWord/7B/default (github.com/gofiber/utils/v2/swar) - ns/op",
+            "value": 10.19,
+            "unit": "ns/op",
+            "extra": "117249966 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerWord/7B/default (github.com/gofiber/utils/v2/swar) - MB/s",
+            "value": 686.91,
+            "unit": "MB/s",
+            "extra": "117249966 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerWord/7B/default (github.com/gofiber/utils/v2/swar) - B/op",
+            "value": 8,
+            "unit": "B/op",
+            "extra": "117249966 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerWord/7B/default (github.com/gofiber/utils/v2/swar) - allocs/op",
+            "value": 1,
+            "unit": "allocs/op",
+            "extra": "117249966 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerWord/8B/fiber (github.com/gofiber/utils/v2/swar)",
+            "value": 2.44,
+            "unit": "ns/op\t3278.31 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "531782967 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerWord/8B/fiber (github.com/gofiber/utils/v2/swar) - ns/op",
+            "value": 2.44,
+            "unit": "ns/op",
+            "extra": "531782967 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerWord/8B/fiber (github.com/gofiber/utils/v2/swar) - MB/s",
+            "value": 3278.31,
+            "unit": "MB/s",
+            "extra": "531782967 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerWord/8B/fiber (github.com/gofiber/utils/v2/swar) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "531782967 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerWord/8B/fiber (github.com/gofiber/utils/v2/swar) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "531782967 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerWord/8B/default (github.com/gofiber/utils/v2/swar)",
+            "value": 11.04,
+            "unit": "ns/op\t 724.33 MB/s\t       8 B/op\t       1 allocs/op",
+            "extra": "100000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerWord/8B/default (github.com/gofiber/utils/v2/swar) - ns/op",
+            "value": 11.04,
+            "unit": "ns/op",
+            "extra": "100000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerWord/8B/default (github.com/gofiber/utils/v2/swar) - MB/s",
+            "value": 724.33,
+            "unit": "MB/s",
+            "extra": "100000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerWord/8B/default (github.com/gofiber/utils/v2/swar) - B/op",
+            "value": 8,
+            "unit": "B/op",
+            "extra": "100000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerWord/8B/default (github.com/gofiber/utils/v2/swar) - allocs/op",
+            "value": 1,
+            "unit": "allocs/op",
+            "extra": "100000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerWord/16B/fiber (github.com/gofiber/utils/v2/swar)",
+            "value": 3.702,
+            "unit": "ns/op\t4321.96 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "347928132 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerWord/16B/fiber (github.com/gofiber/utils/v2/swar) - ns/op",
+            "value": 3.702,
+            "unit": "ns/op",
+            "extra": "347928132 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerWord/16B/fiber (github.com/gofiber/utils/v2/swar) - MB/s",
+            "value": 4321.96,
+            "unit": "MB/s",
+            "extra": "347928132 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerWord/16B/fiber (github.com/gofiber/utils/v2/swar) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "347928132 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerWord/16B/fiber (github.com/gofiber/utils/v2/swar) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "347928132 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerWord/16B/default (github.com/gofiber/utils/v2/swar)",
+            "value": 20.35,
+            "unit": "ns/op\t 786.34 MB/s\t      16 B/op\t       1 allocs/op",
+            "extra": "50018116 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerWord/16B/default (github.com/gofiber/utils/v2/swar) - ns/op",
+            "value": 20.35,
+            "unit": "ns/op",
+            "extra": "50018116 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerWord/16B/default (github.com/gofiber/utils/v2/swar) - MB/s",
+            "value": 786.34,
+            "unit": "MB/s",
+            "extra": "50018116 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerWord/16B/default (github.com/gofiber/utils/v2/swar) - B/op",
+            "value": 16,
+            "unit": "B/op",
+            "extra": "50018116 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerWord/16B/default (github.com/gofiber/utils/v2/swar) - allocs/op",
+            "value": 1,
+            "unit": "allocs/op",
+            "extra": "50018116 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerWord/32B/fiber (github.com/gofiber/utils/v2/swar)",
+            "value": 6.538,
+            "unit": "ns/op\t4894.52 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "185981529 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerWord/32B/fiber (github.com/gofiber/utils/v2/swar) - ns/op",
+            "value": 6.538,
+            "unit": "ns/op",
+            "extra": "185981529 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerWord/32B/fiber (github.com/gofiber/utils/v2/swar) - MB/s",
+            "value": 4894.52,
+            "unit": "MB/s",
+            "extra": "185981529 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerWord/32B/fiber (github.com/gofiber/utils/v2/swar) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "185981529 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerWord/32B/fiber (github.com/gofiber/utils/v2/swar) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "185981529 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerWord/32B/default (github.com/gofiber/utils/v2/swar)",
+            "value": 34.79,
+            "unit": "ns/op\t 919.70 MB/s\t      32 B/op\t       1 allocs/op",
+            "extra": "31333287 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerWord/32B/default (github.com/gofiber/utils/v2/swar) - ns/op",
+            "value": 34.79,
+            "unit": "ns/op",
+            "extra": "31333287 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerWord/32B/default (github.com/gofiber/utils/v2/swar) - MB/s",
+            "value": 919.7,
+            "unit": "MB/s",
+            "extra": "31333287 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerWord/32B/default (github.com/gofiber/utils/v2/swar) - B/op",
+            "value": 32,
+            "unit": "B/op",
+            "extra": "31333287 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerWord/32B/default (github.com/gofiber/utils/v2/swar) - allocs/op",
+            "value": 1,
+            "unit": "allocs/op",
+            "extra": "31333287 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerWord/64B/fiber (github.com/gofiber/utils/v2/swar)",
+            "value": 9.858,
+            "unit": "ns/op\t6492.25 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "121305693 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerWord/64B/fiber (github.com/gofiber/utils/v2/swar) - ns/op",
+            "value": 9.858,
+            "unit": "ns/op",
+            "extra": "121305693 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerWord/64B/fiber (github.com/gofiber/utils/v2/swar) - MB/s",
+            "value": 6492.25,
+            "unit": "MB/s",
+            "extra": "121305693 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerWord/64B/fiber (github.com/gofiber/utils/v2/swar) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "121305693 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerWord/64B/fiber (github.com/gofiber/utils/v2/swar) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "121305693 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerWord/64B/default (github.com/gofiber/utils/v2/swar)",
+            "value": 53.61,
+            "unit": "ns/op\t1193.80 MB/s\t      64 B/op\t       1 allocs/op",
+            "extra": "21261265 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerWord/64B/default (github.com/gofiber/utils/v2/swar) - ns/op",
+            "value": 53.61,
+            "unit": "ns/op",
+            "extra": "21261265 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerWord/64B/default (github.com/gofiber/utils/v2/swar) - MB/s",
+            "value": 1193.8,
+            "unit": "MB/s",
+            "extra": "21261265 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerWord/64B/default (github.com/gofiber/utils/v2/swar) - B/op",
+            "value": 64,
+            "unit": "B/op",
+            "extra": "21261265 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerWord/64B/default (github.com/gofiber/utils/v2/swar) - allocs/op",
+            "value": 1,
+            "unit": "allocs/op",
+            "extra": "21261265 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerWord/512B/fiber (github.com/gofiber/utils/v2/swar)",
+            "value": 63.17,
+            "unit": "ns/op\t8105.10 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "19163971 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerWord/512B/fiber (github.com/gofiber/utils/v2/swar) - ns/op",
+            "value": 63.17,
+            "unit": "ns/op",
+            "extra": "19163971 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerWord/512B/fiber (github.com/gofiber/utils/v2/swar) - MB/s",
+            "value": 8105.1,
+            "unit": "MB/s",
+            "extra": "19163971 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerWord/512B/fiber (github.com/gofiber/utils/v2/swar) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "19163971 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerWord/512B/fiber (github.com/gofiber/utils/v2/swar) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "19163971 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerWord/512B/default (github.com/gofiber/utils/v2/swar)",
+            "value": 403.9,
+            "unit": "ns/op\t1267.62 MB/s\t     512 B/op\t       1 allocs/op",
+            "extra": "3082999 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerWord/512B/default (github.com/gofiber/utils/v2/swar) - ns/op",
+            "value": 403.9,
+            "unit": "ns/op",
+            "extra": "3082999 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerWord/512B/default (github.com/gofiber/utils/v2/swar) - MB/s",
+            "value": 1267.62,
+            "unit": "MB/s",
+            "extra": "3082999 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerWord/512B/default (github.com/gofiber/utils/v2/swar) - B/op",
+            "value": 512,
+            "unit": "B/op",
+            "extra": "3082999 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerWord/512B/default (github.com/gofiber/utils/v2/swar) - allocs/op",
+            "value": 1,
+            "unit": "allocs/op",
+            "extra": "3082999 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimLeft/fiber (github.com/gofiber/utils/v2)",
+            "value": 0.995,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimLeft/fiber (github.com/gofiber/utils/v2) - ns/op",
+            "value": 0.995,
+            "unit": "ns/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimLeft/fiber (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimLeft/fiber (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimLeft/default (github.com/gofiber/utils/v2)",
+            "value": 1.869,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "669501223 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimLeft/default (github.com/gofiber/utils/v2) - ns/op",
+            "value": 1.869,
+            "unit": "ns/op",
+            "extra": "669501223 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimLeft/default (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "669501223 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimLeft/default (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "669501223 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpace/fiber/empty (github.com/gofiber/utils/v2)",
+            "value": 0.1959,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpace/fiber/empty (github.com/gofiber/utils/v2) - ns/op",
+            "value": 0.1959,
+            "unit": "ns/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpace/fiber/empty (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpace/fiber/empty (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpace/default/empty (github.com/gofiber/utils/v2)",
+            "value": 1.414,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "851721520 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpace/default/empty (github.com/gofiber/utils/v2) - ns/op",
+            "value": 1.414,
+            "unit": "ns/op",
+            "extra": "851721520 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpace/default/empty (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "851721520 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpace/default/empty (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "851721520 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpace/fiber/spaces (github.com/gofiber/utils/v2)",
+            "value": 1.719,
+            "unit": "ns/op\t1744.98 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "630429560 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpace/fiber/spaces (github.com/gofiber/utils/v2) - ns/op",
+            "value": 1.719,
+            "unit": "ns/op",
+            "extra": "630429560 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpace/fiber/spaces (github.com/gofiber/utils/v2) - MB/s",
+            "value": 1744.98,
+            "unit": "MB/s",
+            "extra": "630429560 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpace/fiber/spaces (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "630429560 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpace/fiber/spaces (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "630429560 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpace/default/spaces (github.com/gofiber/utils/v2)",
+            "value": 1.988,
+            "unit": "ns/op\t1508.70 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "641800408 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpace/default/spaces (github.com/gofiber/utils/v2) - ns/op",
+            "value": 1.988,
+            "unit": "ns/op",
+            "extra": "641800408 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpace/default/spaces (github.com/gofiber/utils/v2) - MB/s",
+            "value": 1508.7,
+            "unit": "MB/s",
+            "extra": "641800408 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpace/default/spaces (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "641800408 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpace/default/spaces (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "641800408 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpace/fiber/ascii-word (github.com/gofiber/utils/v2)",
+            "value": 1.753,
+            "unit": "ns/op\t5134.18 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "627355838 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpace/fiber/ascii-word (github.com/gofiber/utils/v2) - ns/op",
+            "value": 1.753,
+            "unit": "ns/op",
+            "extra": "627355838 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpace/fiber/ascii-word (github.com/gofiber/utils/v2) - MB/s",
+            "value": 5134.18,
+            "unit": "MB/s",
+            "extra": "627355838 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpace/fiber/ascii-word (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "627355838 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpace/fiber/ascii-word (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "627355838 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpace/default/ascii-word (github.com/gofiber/utils/v2)",
+            "value": 2.706,
+            "unit": "ns/op\t3325.33 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "456175858 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpace/default/ascii-word (github.com/gofiber/utils/v2) - ns/op",
+            "value": 2.706,
+            "unit": "ns/op",
+            "extra": "456175858 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpace/default/ascii-word (github.com/gofiber/utils/v2) - MB/s",
+            "value": 3325.33,
+            "unit": "MB/s",
+            "extra": "456175858 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpace/default/ascii-word (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "456175858 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpace/default/ascii-word (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "456175858 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpace/fiber/auth-header-bearer (github.com/gofiber/utils/v2)",
+            "value": 2.288,
+            "unit": "ns/op\t10491.47 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "522828921 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpace/fiber/auth-header-bearer (github.com/gofiber/utils/v2) - ns/op",
+            "value": 2.288,
+            "unit": "ns/op",
+            "extra": "522828921 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpace/fiber/auth-header-bearer (github.com/gofiber/utils/v2) - MB/s",
+            "value": 10491.47,
+            "unit": "MB/s",
+            "extra": "522828921 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpace/fiber/auth-header-bearer (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "522828921 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpace/fiber/auth-header-bearer (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "522828921 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpace/default/auth-header-bearer (github.com/gofiber/utils/v2)",
+            "value": 3.211,
+            "unit": "ns/op\t7473.48 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "385071193 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpace/default/auth-header-bearer (github.com/gofiber/utils/v2) - ns/op",
+            "value": 3.211,
+            "unit": "ns/op",
+            "extra": "385071193 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpace/default/auth-header-bearer (github.com/gofiber/utils/v2) - MB/s",
+            "value": 7473.48,
+            "unit": "MB/s",
+            "extra": "385071193 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpace/default/auth-header-bearer (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "385071193 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpace/default/auth-header-bearer (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "385071193 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpace/fiber/auth-header-basic (github.com/gofiber/utils/v2)",
+            "value": 1.64,
+            "unit": "ns/op\t23166.57 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "720279303 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpace/fiber/auth-header-basic (github.com/gofiber/utils/v2) - ns/op",
+            "value": 1.64,
+            "unit": "ns/op",
+            "extra": "720279303 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpace/fiber/auth-header-basic (github.com/gofiber/utils/v2) - MB/s",
+            "value": 23166.57,
+            "unit": "MB/s",
+            "extra": "720279303 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpace/fiber/auth-header-basic (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "720279303 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpace/fiber/auth-header-basic (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "720279303 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpace/default/auth-header-basic (github.com/gofiber/utils/v2)",
+            "value": 2.868,
+            "unit": "ns/op\t13249.28 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "399981580 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpace/default/auth-header-basic (github.com/gofiber/utils/v2) - ns/op",
+            "value": 2.868,
+            "unit": "ns/op",
+            "extra": "399981580 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpace/default/auth-header-basic (github.com/gofiber/utils/v2) - MB/s",
+            "value": 13249.28,
+            "unit": "MB/s",
+            "extra": "399981580 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpace/default/auth-header-basic (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "399981580 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpace/default/auth-header-basic (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "399981580 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpace/fiber/accept-encoding (github.com/gofiber/utils/v2)",
+            "value": 1.842,
+            "unit": "ns/op\t11403.45 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "641140726 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpace/fiber/accept-encoding (github.com/gofiber/utils/v2) - ns/op",
+            "value": 1.842,
+            "unit": "ns/op",
+            "extra": "641140726 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpace/fiber/accept-encoding (github.com/gofiber/utils/v2) - MB/s",
+            "value": 11403.45,
+            "unit": "MB/s",
+            "extra": "641140726 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpace/fiber/accept-encoding (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "641140726 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpace/fiber/accept-encoding (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "641140726 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpace/default/accept-encoding (github.com/gofiber/utils/v2)",
+            "value": 2.561,
+            "unit": "ns/op\t8199.62 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "417621590 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpace/default/accept-encoding (github.com/gofiber/utils/v2) - ns/op",
+            "value": 2.561,
+            "unit": "ns/op",
+            "extra": "417621590 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpace/default/accept-encoding (github.com/gofiber/utils/v2) - MB/s",
+            "value": 8199.62,
+            "unit": "MB/s",
+            "extra": "417621590 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpace/default/accept-encoding (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "417621590 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpace/default/accept-encoding (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "417621590 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpace/fiber/content-type (github.com/gofiber/utils/v2)",
+            "value": 1.704,
+            "unit": "ns/op\t11737.30 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "659150080 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpace/fiber/content-type (github.com/gofiber/utils/v2) - ns/op",
+            "value": 1.704,
+            "unit": "ns/op",
+            "extra": "659150080 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpace/fiber/content-type (github.com/gofiber/utils/v2) - MB/s",
+            "value": 11737.3,
+            "unit": "MB/s",
+            "extra": "659150080 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpace/fiber/content-type (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "659150080 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpace/fiber/content-type (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "659150080 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpace/default/content-type (github.com/gofiber/utils/v2)",
+            "value": 2.767,
+            "unit": "ns/op\t7228.62 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "470359032 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpace/default/content-type (github.com/gofiber/utils/v2) - ns/op",
+            "value": 2.767,
+            "unit": "ns/op",
+            "extra": "470359032 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpace/default/content-type (github.com/gofiber/utils/v2) - MB/s",
+            "value": 7228.62,
+            "unit": "MB/s",
+            "extra": "470359032 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpace/default/content-type (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "470359032 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpace/default/content-type (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "470359032 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpace/fiber/x-forwarded-for (github.com/gofiber/utils/v2)",
+            "value": 1.555,
+            "unit": "ns/op\t18011.96 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "879094022 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpace/fiber/x-forwarded-for (github.com/gofiber/utils/v2) - ns/op",
+            "value": 1.555,
+            "unit": "ns/op",
+            "extra": "879094022 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpace/fiber/x-forwarded-for (github.com/gofiber/utils/v2) - MB/s",
+            "value": 18011.96,
+            "unit": "MB/s",
+            "extra": "879094022 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpace/fiber/x-forwarded-for (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "879094022 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpace/fiber/x-forwarded-for (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "879094022 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpace/default/x-forwarded-for (github.com/gofiber/utils/v2)",
+            "value": 2.433,
+            "unit": "ns/op\t11506.68 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "461694540 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpace/default/x-forwarded-for (github.com/gofiber/utils/v2) - ns/op",
+            "value": 2.433,
+            "unit": "ns/op",
+            "extra": "461694540 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpace/default/x-forwarded-for (github.com/gofiber/utils/v2) - MB/s",
+            "value": 11506.68,
+            "unit": "MB/s",
+            "extra": "461694540 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpace/default/x-forwarded-for (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "461694540 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpace/default/x-forwarded-for (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "461694540 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpace/fiber/query-params (github.com/gofiber/utils/v2)",
+            "value": 1.514,
+            "unit": "ns/op\t13211.03 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "785121360 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpace/fiber/query-params (github.com/gofiber/utils/v2) - ns/op",
+            "value": 1.514,
+            "unit": "ns/op",
+            "extra": "785121360 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpace/fiber/query-params (github.com/gofiber/utils/v2) - MB/s",
+            "value": 13211.03,
+            "unit": "MB/s",
+            "extra": "785121360 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpace/fiber/query-params (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "785121360 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpace/fiber/query-params (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "785121360 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpace/default/query-params (github.com/gofiber/utils/v2)",
+            "value": 2.85,
+            "unit": "ns/op\t7017.63 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "418044806 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpace/default/query-params (github.com/gofiber/utils/v2) - ns/op",
+            "value": 2.85,
+            "unit": "ns/op",
+            "extra": "418044806 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpace/default/query-params (github.com/gofiber/utils/v2) - MB/s",
+            "value": 7017.63,
+            "unit": "MB/s",
+            "extra": "418044806 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpace/default/query-params (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "418044806 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpace/default/query-params (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "418044806 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpace/fiber/ascii-long (github.com/gofiber/utils/v2)",
+            "value": 2.16,
+            "unit": "ns/op\t47214.61 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "560762724 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpace/fiber/ascii-long (github.com/gofiber/utils/v2) - ns/op",
+            "value": 2.16,
+            "unit": "ns/op",
+            "extra": "560762724 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpace/fiber/ascii-long (github.com/gofiber/utils/v2) - MB/s",
+            "value": 47214.61,
+            "unit": "MB/s",
+            "extra": "560762724 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpace/fiber/ascii-long (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "560762724 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpace/fiber/ascii-long (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "560762724 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpace/default/ascii-long (github.com/gofiber/utils/v2)",
+            "value": 3.746,
+            "unit": "ns/op\t27225.92 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "353798342 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpace/default/ascii-long (github.com/gofiber/utils/v2) - ns/op",
+            "value": 3.746,
+            "unit": "ns/op",
+            "extra": "353798342 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpace/default/ascii-long (github.com/gofiber/utils/v2) - MB/s",
+            "value": 27225.92,
+            "unit": "MB/s",
+            "extra": "353798342 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpace/default/ascii-long (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "353798342 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpace/default/ascii-long (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "353798342 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpace/fiber/no-trim (github.com/gofiber/utils/v2)",
+            "value": 0.3444,
+            "unit": "ns/op\t14517.56 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpace/fiber/no-trim (github.com/gofiber/utils/v2) - ns/op",
+            "value": 0.3444,
+            "unit": "ns/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpace/fiber/no-trim (github.com/gofiber/utils/v2) - MB/s",
+            "value": 14517.56,
+            "unit": "MB/s",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpace/fiber/no-trim (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpace/fiber/no-trim (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpace/default/no-trim (github.com/gofiber/utils/v2)",
+            "value": 1.771,
+            "unit": "ns/op\t2823.98 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "666495646 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpace/default/no-trim (github.com/gofiber/utils/v2) - ns/op",
+            "value": 1.771,
+            "unit": "ns/op",
+            "extra": "666495646 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpace/default/no-trim (github.com/gofiber/utils/v2) - MB/s",
+            "value": 2823.98,
+            "unit": "MB/s",
+            "extra": "666495646 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpace/default/no-trim (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "666495646 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpace/default/no-trim (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "666495646 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpace/fiber/mixed-whitespace (github.com/gofiber/utils/v2)",
+            "value": 2.294,
+            "unit": "ns/op\t7411.85 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "660198303 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpace/fiber/mixed-whitespace (github.com/gofiber/utils/v2) - ns/op",
+            "value": 2.294,
+            "unit": "ns/op",
+            "extra": "660198303 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpace/fiber/mixed-whitespace (github.com/gofiber/utils/v2) - MB/s",
+            "value": 7411.85,
+            "unit": "MB/s",
+            "extra": "660198303 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpace/fiber/mixed-whitespace (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "660198303 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpace/fiber/mixed-whitespace (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "660198303 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpace/default/mixed-whitespace (github.com/gofiber/utils/v2)",
+            "value": 3.595,
+            "unit": "ns/op\t4728.32 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "335364986 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpace/default/mixed-whitespace (github.com/gofiber/utils/v2) - ns/op",
+            "value": 3.595,
+            "unit": "ns/op",
+            "extra": "335364986 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpace/default/mixed-whitespace (github.com/gofiber/utils/v2) - MB/s",
+            "value": 4728.32,
+            "unit": "MB/s",
+            "extra": "335364986 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpace/default/mixed-whitespace (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "335364986 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpace/default/mixed-whitespace (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "335364986 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString_concurrency/int (github.com/gofiber/utils/v2)",
+            "value": 0.4637,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString_concurrency/int (github.com/gofiber/utils/v2) - ns/op",
+            "value": 0.4637,
+            "unit": "ns/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString_concurrency/int (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString_concurrency/int (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString_concurrency/int8 (github.com/gofiber/utils/v2)",
+            "value": 0.3161,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString_concurrency/int8 (github.com/gofiber/utils/v2) - ns/op",
+            "value": 0.3161,
+            "unit": "ns/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString_concurrency/int8 (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString_concurrency/int8 (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString_concurrency/int16 (github.com/gofiber/utils/v2)",
+            "value": 0.4756,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString_concurrency/int16 (github.com/gofiber/utils/v2) - ns/op",
+            "value": 0.4756,
+            "unit": "ns/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString_concurrency/int16 (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString_concurrency/int16 (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString_concurrency/int32 (github.com/gofiber/utils/v2)",
+            "value": 0.4531,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString_concurrency/int32 (github.com/gofiber/utils/v2) - ns/op",
+            "value": 0.4531,
+            "unit": "ns/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString_concurrency/int32 (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString_concurrency/int32 (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString_concurrency/int64 (github.com/gofiber/utils/v2)",
+            "value": 0.551,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString_concurrency/int64 (github.com/gofiber/utils/v2) - ns/op",
+            "value": 0.551,
+            "unit": "ns/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString_concurrency/int64 (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString_concurrency/int64 (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString_concurrency/uint (github.com/gofiber/utils/v2)",
+            "value": 0.3188,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString_concurrency/uint (github.com/gofiber/utils/v2) - ns/op",
+            "value": 0.3188,
+            "unit": "ns/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString_concurrency/uint (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString_concurrency/uint (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString_concurrency/uint8 (github.com/gofiber/utils/v2)",
+            "value": 0.3093,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString_concurrency/uint8 (github.com/gofiber/utils/v2) - ns/op",
+            "value": 0.3093,
+            "unit": "ns/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString_concurrency/uint8 (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString_concurrency/uint8 (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString_concurrency/uint16 (github.com/gofiber/utils/v2)",
+            "value": 0.3575,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString_concurrency/uint16 (github.com/gofiber/utils/v2) - ns/op",
+            "value": 0.3575,
+            "unit": "ns/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString_concurrency/uint16 (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString_concurrency/uint16 (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString_concurrency/uint32 (github.com/gofiber/utils/v2)",
+            "value": 0.3632,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString_concurrency/uint32 (github.com/gofiber/utils/v2) - ns/op",
+            "value": 0.3632,
+            "unit": "ns/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString_concurrency/uint32 (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString_concurrency/uint32 (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString_concurrency/uint64 (github.com/gofiber/utils/v2)",
+            "value": 0.3078,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString_concurrency/uint64 (github.com/gofiber/utils/v2) - ns/op",
+            "value": 0.3078,
+            "unit": "ns/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString_concurrency/uint64 (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString_concurrency/uint64 (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString_concurrency/string (github.com/gofiber/utils/v2)",
+            "value": 0.2922,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString_concurrency/string (github.com/gofiber/utils/v2) - ns/op",
+            "value": 0.2922,
+            "unit": "ns/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString_concurrency/string (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString_concurrency/string (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString_concurrency/[]uint8 (github.com/gofiber/utils/v2)",
+            "value": 4.802,
+            "unit": "ns/op\t      16 B/op\t       1 allocs/op",
+            "extra": "274357855 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString_concurrency/[]uint8 (github.com/gofiber/utils/v2) - ns/op",
+            "value": 4.802,
+            "unit": "ns/op",
+            "extra": "274357855 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString_concurrency/[]uint8 (github.com/gofiber/utils/v2) - B/op",
+            "value": 16,
+            "unit": "B/op",
+            "extra": "274357855 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString_concurrency/[]uint8 (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 1,
+            "unit": "allocs/op",
+            "extra": "274357855 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString_concurrency/bool (github.com/gofiber/utils/v2)",
+            "value": 0.3092,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString_concurrency/bool (github.com/gofiber/utils/v2) - ns/op",
+            "value": 0.3092,
+            "unit": "ns/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString_concurrency/bool (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString_concurrency/bool (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString_concurrency/float32 (github.com/gofiber/utils/v2)",
+            "value": 7.196,
+            "unit": "ns/op\t       4 B/op\t       1 allocs/op",
+            "extra": "141815565 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString_concurrency/float32 (github.com/gofiber/utils/v2) - ns/op",
+            "value": 7.196,
+            "unit": "ns/op",
+            "extra": "141815565 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString_concurrency/float32 (github.com/gofiber/utils/v2) - B/op",
+            "value": 4,
+            "unit": "B/op",
+            "extra": "141815565 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString_concurrency/float32 (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 1,
+            "unit": "allocs/op",
+            "extra": "141815565 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString_concurrency/float64 (github.com/gofiber/utils/v2)",
+            "value": 8.901,
+            "unit": "ns/op\t       4 B/op\t       1 allocs/op",
+            "extra": "132245594 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString_concurrency/float64 (github.com/gofiber/utils/v2) - ns/op",
+            "value": 8.901,
+            "unit": "ns/op",
+            "extra": "132245594 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString_concurrency/float64 (github.com/gofiber/utils/v2) - B/op",
+            "value": 4,
+            "unit": "B/op",
+            "extra": "132245594 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString_concurrency/float64 (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 1,
+            "unit": "allocs/op",
+            "extra": "132245594 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString_concurrency/time.Time (github.com/gofiber/utils/v2)",
+            "value": 26.07,
+            "unit": "ns/op\t      24 B/op\t       1 allocs/op",
+            "extra": "44686059 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString_concurrency/time.Time (github.com/gofiber/utils/v2) - ns/op",
+            "value": 26.07,
+            "unit": "ns/op",
+            "extra": "44686059 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString_concurrency/time.Time (github.com/gofiber/utils/v2) - B/op",
+            "value": 24,
+            "unit": "B/op",
+            "extra": "44686059 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString_concurrency/time.Time (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 1,
+            "unit": "allocs/op",
+            "extra": "44686059 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString_concurrency/time.Time#01 (github.com/gofiber/utils/v2)",
+            "value": 12.92,
+            "unit": "ns/op\t      24 B/op\t       1 allocs/op",
+            "extra": "81533558 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString_concurrency/time.Time#01 (github.com/gofiber/utils/v2) - ns/op",
+            "value": 12.92,
+            "unit": "ns/op",
+            "extra": "81533558 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString_concurrency/time.Time#01 (github.com/gofiber/utils/v2) - B/op",
+            "value": 24,
+            "unit": "B/op",
+            "extra": "81533558 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString_concurrency/time.Time#01 (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 1,
+            "unit": "allocs/op",
+            "extra": "81533558 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString_concurrency/[]string (github.com/gofiber/utils/v2)",
+            "value": 4.911,
+            "unit": "ns/op\t      16 B/op\t       1 allocs/op",
+            "extra": "254759055 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString_concurrency/[]string (github.com/gofiber/utils/v2) - ns/op",
+            "value": 4.911,
+            "unit": "ns/op",
+            "extra": "254759055 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString_concurrency/[]string (github.com/gofiber/utils/v2) - B/op",
+            "value": 16,
+            "unit": "B/op",
+            "extra": "254759055 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString_concurrency/[]string (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 1,
+            "unit": "allocs/op",
+            "extra": "254759055 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString_concurrency/[]int (github.com/gofiber/utils/v2)",
+            "value": 3.462,
+            "unit": "ns/op\t       8 B/op\t       1 allocs/op",
+            "extra": "346355364 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString_concurrency/[]int (github.com/gofiber/utils/v2) - ns/op",
+            "value": 3.462,
+            "unit": "ns/op",
+            "extra": "346355364 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString_concurrency/[]int (github.com/gofiber/utils/v2) - B/op",
+            "value": 8,
+            "unit": "B/op",
+            "extra": "346355364 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString_concurrency/[]int (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 1,
+            "unit": "allocs/op",
+            "extra": "346355364 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString_concurrency/[2]int (github.com/gofiber/utils/v2)",
+            "value": 7.652,
+            "unit": "ns/op\t      16 B/op\t       1 allocs/op",
+            "extra": "166707848 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString_concurrency/[2]int (github.com/gofiber/utils/v2) - ns/op",
+            "value": 7.652,
+            "unit": "ns/op",
+            "extra": "166707848 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString_concurrency/[2]int (github.com/gofiber/utils/v2) - B/op",
+            "value": 16,
+            "unit": "B/op",
+            "extra": "166707848 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString_concurrency/[2]int (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 1,
+            "unit": "allocs/op",
+            "extra": "166707848 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString_concurrency/[][]int (github.com/gofiber/utils/v2)",
+            "value": 38.07,
+            "unit": "ns/op\t     112 B/op\t       6 allocs/op",
+            "extra": "33491722 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString_concurrency/[][]int (github.com/gofiber/utils/v2) - ns/op",
+            "value": 38.07,
+            "unit": "ns/op",
+            "extra": "33491722 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString_concurrency/[][]int (github.com/gofiber/utils/v2) - B/op",
+            "value": 112,
+            "unit": "B/op",
+            "extra": "33491722 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString_concurrency/[][]int (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 6,
+            "unit": "allocs/op",
+            "extra": "33491722 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString_concurrency/[]interface_{} (github.com/gofiber/utils/v2)",
+            "value": 29.2,
+            "unit": "ns/op\t      72 B/op\t       3 allocs/op",
+            "extra": "42753697 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString_concurrency/[]interface_{} (github.com/gofiber/utils/v2) - ns/op",
+            "value": 29.2,
+            "unit": "ns/op",
+            "extra": "42753697 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString_concurrency/[]interface_{} (github.com/gofiber/utils/v2) - B/op",
+            "value": 72,
+            "unit": "B/op",
+            "extra": "42753697 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString_concurrency/[]interface_{} (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 3,
+            "unit": "allocs/op",
+            "extra": "42753697 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString_concurrency/utils.MyStringer (github.com/gofiber/utils/v2)",
+            "value": 0.5837,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString_concurrency/utils.MyStringer (github.com/gofiber/utils/v2) - ns/op",
+            "value": 0.5837,
+            "unit": "ns/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString_concurrency/utils.MyStringer (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString_concurrency/utils.MyStringer (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString_concurrency/utils.CustomType (github.com/gofiber/utils/v2)",
+            "value": 21.47,
+            "unit": "ns/op\t      16 B/op\t       1 allocs/op",
+            "extra": "52362870 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString_concurrency/utils.CustomType (github.com/gofiber/utils/v2) - ns/op",
+            "value": 21.47,
+            "unit": "ns/op",
+            "extra": "52362870 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString_concurrency/utils.CustomType (github.com/gofiber/utils/v2) - B/op",
+            "value": 16,
+            "unit": "B/op",
+            "extra": "52362870 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToString_concurrency/utils.CustomType (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 1,
+            "unit": "allocs/op",
+            "extra": "52362870 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_FormatUint16/fiber (github.com/gofiber/utils/v2)",
+            "value": 8.977,
+            "unit": "ns/op\t       5 B/op\t       1 allocs/op",
+            "extra": "135165472 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_FormatUint16/fiber (github.com/gofiber/utils/v2) - ns/op",
+            "value": 8.977,
+            "unit": "ns/op",
+            "extra": "135165472 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_FormatUint16/fiber (github.com/gofiber/utils/v2) - B/op",
+            "value": 5,
+            "unit": "B/op",
+            "extra": "135165472 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_FormatUint16/fiber (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 1,
+            "unit": "allocs/op",
+            "extra": "135165472 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_FormatUint16/strconv (github.com/gofiber/utils/v2)",
+            "value": 11.38,
+            "unit": "ns/op\t       5 B/op\t       1 allocs/op",
+            "extra": "105880470 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_FormatUint16/strconv (github.com/gofiber/utils/v2) - ns/op",
+            "value": 11.38,
+            "unit": "ns/op",
+            "extra": "105880470 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_FormatUint16/strconv (github.com/gofiber/utils/v2) - B/op",
+            "value": 5,
+            "unit": "B/op",
+            "extra": "105880470 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_FormatUint16/strconv (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 1,
+            "unit": "allocs/op",
+            "extra": "105880470 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_FormatInt16/fiber (github.com/gofiber/utils/v2)",
+            "value": 10.3,
+            "unit": "ns/op\t       8 B/op\t       1 allocs/op",
+            "extra": "120364719 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_FormatInt16/fiber (github.com/gofiber/utils/v2) - ns/op",
+            "value": 10.3,
+            "unit": "ns/op",
+            "extra": "120364719 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_FormatInt16/fiber (github.com/gofiber/utils/v2) - B/op",
+            "value": 8,
+            "unit": "B/op",
+            "extra": "120364719 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_FormatInt16/fiber (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 1,
+            "unit": "allocs/op",
+            "extra": "120364719 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_FormatInt16/strconv (github.com/gofiber/utils/v2)",
+            "value": 12.67,
+            "unit": "ns/op\t       8 B/op\t       1 allocs/op",
+            "extra": "93130875 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_FormatInt16/strconv (github.com/gofiber/utils/v2) - ns/op",
+            "value": 12.67,
+            "unit": "ns/op",
+            "extra": "93130875 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_FormatInt16/strconv (github.com/gofiber/utils/v2) - B/op",
+            "value": 8,
+            "unit": "B/op",
+            "extra": "93130875 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_FormatInt16/strconv (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 1,
+            "unit": "allocs/op",
+            "extra": "93130875 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_GetMIME/fiber (github.com/gofiber/utils/v2)",
+            "value": 42.87,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "29123253 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_GetMIME/fiber (github.com/gofiber/utils/v2) - ns/op",
+            "value": 42.87,
+            "unit": "ns/op",
+            "extra": "29123253 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_GetMIME/fiber (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "29123253 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_GetMIME/fiber (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "29123253 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_GetMIME/default (github.com/gofiber/utils/v2)",
+            "value": 52.93,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "22695422 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_GetMIME/default (github.com/gofiber/utils/v2) - ns/op",
+            "value": 52.93,
+            "unit": "ns/op",
+            "extra": "22695422 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_GetMIME/default (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "22695422 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_GetMIME/default (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "22695422 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AppendHTTPDate/fiber (github.com/gofiber/utils/v2)",
+            "value": 21.8,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "55840572 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AppendHTTPDate/fiber (github.com/gofiber/utils/v2) - ns/op",
+            "value": 21.8,
+            "unit": "ns/op",
+            "extra": "55840572 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AppendHTTPDate/fiber (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "55840572 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AppendHTTPDate/fiber (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "55840572 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AppendHTTPDate/default (github.com/gofiber/utils/v2)",
+            "value": 59.28,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "21171814 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AppendHTTPDate/default (github.com/gofiber/utils/v2) - ns/op",
+            "value": 59.28,
+            "unit": "ns/op",
+            "extra": "21171814 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AppendHTTPDate/default (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "21171814 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AppendHTTPDate/default (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "21171814 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseUint/fiber (github.com/gofiber/utils/v2)",
+            "value": 3.94,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "269982096 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseUint/fiber (github.com/gofiber/utils/v2) - ns/op",
+            "value": 3.94,
+            "unit": "ns/op",
+            "extra": "269982096 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseUint/fiber (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "269982096 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseUint/fiber (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "269982096 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseUint/fiber_bytes (github.com/gofiber/utils/v2)",
+            "value": 4.26,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "265360306 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseUint/fiber_bytes (github.com/gofiber/utils/v2) - ns/op",
+            "value": 4.26,
+            "unit": "ns/op",
+            "extra": "265360306 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseUint/fiber_bytes (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "265360306 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseUint/fiber_bytes (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "265360306 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseUint/default (github.com/gofiber/utils/v2)",
+            "value": 8.306,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "147998050 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseUint/default (github.com/gofiber/utils/v2) - ns/op",
+            "value": 8.306,
+            "unit": "ns/op",
+            "extra": "147998050 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseUint/default (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "147998050 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseUint/default (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "147998050 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseInt/fiber (github.com/gofiber/utils/v2)",
+            "value": 3.497,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "339887250 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseInt/fiber (github.com/gofiber/utils/v2) - ns/op",
+            "value": 3.497,
+            "unit": "ns/op",
+            "extra": "339887250 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseInt/fiber (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "339887250 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseInt/fiber (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "339887250 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseInt/fiber_bytes (github.com/gofiber/utils/v2)",
+            "value": 3.487,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "320766036 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseInt/fiber_bytes (github.com/gofiber/utils/v2) - ns/op",
+            "value": 3.487,
+            "unit": "ns/op",
+            "extra": "320766036 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseInt/fiber_bytes (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "320766036 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseInt/fiber_bytes (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "320766036 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseInt/default (github.com/gofiber/utils/v2)",
+            "value": 9.634,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "132942174 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseInt/default (github.com/gofiber/utils/v2) - ns/op",
+            "value": 9.634,
+            "unit": "ns/op",
+            "extra": "132942174 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseInt/default (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "132942174 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseInt/default (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "132942174 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseFloat64/fiber (github.com/gofiber/utils/v2)",
+            "value": 8.322,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "148303038 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseFloat64/fiber (github.com/gofiber/utils/v2) - ns/op",
+            "value": 8.322,
+            "unit": "ns/op",
+            "extra": "148303038 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseFloat64/fiber (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "148303038 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseFloat64/fiber (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "148303038 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseFloat64/fiber_bytes (github.com/gofiber/utils/v2)",
+            "value": 8.879,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "139620188 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseFloat64/fiber_bytes (github.com/gofiber/utils/v2) - ns/op",
+            "value": 8.879,
+            "unit": "ns/op",
+            "extra": "139620188 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseFloat64/fiber_bytes (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "139620188 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseFloat64/fiber_bytes (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "139620188 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseFloat64/default (github.com/gofiber/utils/v2)",
+            "value": 18.64,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "64836549 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseFloat64/default (github.com/gofiber/utils/v2) - ns/op",
+            "value": 18.64,
+            "unit": "ns/op",
+            "extra": "64836549 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseFloat64/default (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "64836549 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseFloat64/default (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "64836549 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseUint_DigitRuns/1digit (github.com/gofiber/utils/v2)",
+            "value": 2.781,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "449546998 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseUint_DigitRuns/1digit (github.com/gofiber/utils/v2) - ns/op",
+            "value": 2.781,
+            "unit": "ns/op",
+            "extra": "449546998 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseUint_DigitRuns/1digit (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "449546998 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseUint_DigitRuns/1digit (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "449546998 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseUint_DigitRuns/4digit (github.com/gofiber/utils/v2)",
+            "value": 3.722,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "324657608 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseUint_DigitRuns/4digit (github.com/gofiber/utils/v2) - ns/op",
+            "value": 3.722,
+            "unit": "ns/op",
+            "extra": "324657608 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseUint_DigitRuns/4digit (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "324657608 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseUint_DigitRuns/4digit (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "324657608 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseUint_DigitRuns/6digit (github.com/gofiber/utils/v2)",
+            "value": 3.94,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "313400637 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseUint_DigitRuns/6digit (github.com/gofiber/utils/v2) - ns/op",
+            "value": 3.94,
+            "unit": "ns/op",
+            "extra": "313400637 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseUint_DigitRuns/6digit (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "313400637 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseUint_DigitRuns/6digit (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "313400637 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseUint_DigitRuns/8digit (github.com/gofiber/utils/v2)",
+            "value": 4.321,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "278716146 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseUint_DigitRuns/8digit (github.com/gofiber/utils/v2) - ns/op",
+            "value": 4.321,
+            "unit": "ns/op",
+            "extra": "278716146 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseUint_DigitRuns/8digit (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "278716146 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseUint_DigitRuns/8digit (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "278716146 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseUint_DigitRuns/12digit (github.com/gofiber/utils/v2)",
+            "value": 7.589,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "165744958 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseUint_DigitRuns/12digit (github.com/gofiber/utils/v2) - ns/op",
+            "value": 7.589,
+            "unit": "ns/op",
+            "extra": "165744958 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseUint_DigitRuns/12digit (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "165744958 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseUint_DigitRuns/12digit (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "165744958 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseUint_DigitRuns/19digit (github.com/gofiber/utils/v2)",
+            "value": 8.151,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "146126340 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseUint_DigitRuns/19digit (github.com/gofiber/utils/v2) - ns/op",
+            "value": 8.151,
+            "unit": "ns/op",
+            "extra": "146126340 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseUint_DigitRuns/19digit (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "146126340 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseUint_DigitRuns/19digit (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "146126340 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny2/7B/swar (github.com/gofiber/utils/v2)",
+            "value": 2.71,
+            "unit": "ns/op\t2582.66 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "419938219 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny2/7B/swar (github.com/gofiber/utils/v2) - ns/op",
+            "value": 2.71,
+            "unit": "ns/op",
+            "extra": "419938219 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny2/7B/swar (github.com/gofiber/utils/v2) - MB/s",
+            "value": 2582.66,
+            "unit": "MB/s",
+            "extra": "419938219 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny2/7B/swar (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "419938219 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny2/7B/swar (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "419938219 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny2/7B/scalar (github.com/gofiber/utils/v2)",
+            "value": 2.414,
+            "unit": "ns/op\t2900.01 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "512137839 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny2/7B/scalar (github.com/gofiber/utils/v2) - ns/op",
+            "value": 2.414,
+            "unit": "ns/op",
+            "extra": "512137839 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny2/7B/scalar (github.com/gofiber/utils/v2) - MB/s",
+            "value": 2900.01,
+            "unit": "MB/s",
+            "extra": "512137839 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny2/7B/scalar (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "512137839 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny2/7B/scalar (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "512137839 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny2/7B/stdlib-indexany (github.com/gofiber/utils/v2)",
+            "value": 17.65,
+            "unit": "ns/op\t 396.67 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "64155828 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny2/7B/stdlib-indexany (github.com/gofiber/utils/v2) - ns/op",
+            "value": 17.65,
+            "unit": "ns/op",
+            "extra": "64155828 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny2/7B/stdlib-indexany (github.com/gofiber/utils/v2) - MB/s",
+            "value": 396.67,
+            "unit": "MB/s",
+            "extra": "64155828 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny2/7B/stdlib-indexany (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "64155828 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny2/7B/stdlib-indexany (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "64155828 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny2/8B/swar (github.com/gofiber/utils/v2)",
+            "value": 2.139,
+            "unit": "ns/op\t3739.28 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "566601006 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny2/8B/swar (github.com/gofiber/utils/v2) - ns/op",
+            "value": 2.139,
+            "unit": "ns/op",
+            "extra": "566601006 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny2/8B/swar (github.com/gofiber/utils/v2) - MB/s",
+            "value": 3739.28,
+            "unit": "MB/s",
+            "extra": "566601006 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny2/8B/swar (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "566601006 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny2/8B/swar (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "566601006 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny2/8B/scalar (github.com/gofiber/utils/v2)",
+            "value": 2.802,
+            "unit": "ns/op\t2855.48 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "448648837 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny2/8B/scalar (github.com/gofiber/utils/v2) - ns/op",
+            "value": 2.802,
+            "unit": "ns/op",
+            "extra": "448648837 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny2/8B/scalar (github.com/gofiber/utils/v2) - MB/s",
+            "value": 2855.48,
+            "unit": "MB/s",
+            "extra": "448648837 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny2/8B/scalar (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "448648837 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny2/8B/scalar (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "448648837 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny2/8B/stdlib-indexany (github.com/gofiber/utils/v2)",
+            "value": 21.86,
+            "unit": "ns/op\t 366.00 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "50546169 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny2/8B/stdlib-indexany (github.com/gofiber/utils/v2) - ns/op",
+            "value": 21.86,
+            "unit": "ns/op",
+            "extra": "50546169 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny2/8B/stdlib-indexany (github.com/gofiber/utils/v2) - MB/s",
+            "value": 366,
+            "unit": "MB/s",
+            "extra": "50546169 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny2/8B/stdlib-indexany (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "50546169 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny2/8B/stdlib-indexany (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "50546169 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny2/16B/swar (github.com/gofiber/utils/v2)",
+            "value": 3.404,
+            "unit": "ns/op\t4700.55 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "366665829 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny2/16B/swar (github.com/gofiber/utils/v2) - ns/op",
+            "value": 3.404,
+            "unit": "ns/op",
+            "extra": "366665829 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny2/16B/swar (github.com/gofiber/utils/v2) - MB/s",
+            "value": 4700.55,
+            "unit": "MB/s",
+            "extra": "366665829 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny2/16B/swar (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "366665829 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny2/16B/swar (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "366665829 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny2/16B/scalar (github.com/gofiber/utils/v2)",
+            "value": 4.198,
+            "unit": "ns/op\t3811.48 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "277416985 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny2/16B/scalar (github.com/gofiber/utils/v2) - ns/op",
+            "value": 4.198,
+            "unit": "ns/op",
+            "extra": "277416985 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny2/16B/scalar (github.com/gofiber/utils/v2) - MB/s",
+            "value": 3811.48,
+            "unit": "MB/s",
+            "extra": "277416985 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny2/16B/scalar (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "277416985 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny2/16B/scalar (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "277416985 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny2/16B/stdlib-indexany (github.com/gofiber/utils/v2)",
+            "value": 10.38,
+            "unit": "ns/op\t1541.91 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "100000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny2/16B/stdlib-indexany (github.com/gofiber/utils/v2) - ns/op",
+            "value": 10.38,
+            "unit": "ns/op",
+            "extra": "100000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny2/16B/stdlib-indexany (github.com/gofiber/utils/v2) - MB/s",
+            "value": 1541.91,
+            "unit": "MB/s",
+            "extra": "100000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny2/16B/stdlib-indexany (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "100000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny2/16B/stdlib-indexany (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "100000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny2/32B/swar (github.com/gofiber/utils/v2)",
+            "value": 2.933,
+            "unit": "ns/op\t10909.44 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "441246831 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny2/32B/swar (github.com/gofiber/utils/v2) - ns/op",
+            "value": 2.933,
+            "unit": "ns/op",
+            "extra": "441246831 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny2/32B/swar (github.com/gofiber/utils/v2) - MB/s",
+            "value": 10909.44,
+            "unit": "MB/s",
+            "extra": "441246831 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny2/32B/swar (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "441246831 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny2/32B/swar (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "441246831 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny2/32B/scalar (github.com/gofiber/utils/v2)",
+            "value": 8.332,
+            "unit": "ns/op\t3840.84 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "142496689 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny2/32B/scalar (github.com/gofiber/utils/v2) - ns/op",
+            "value": 8.332,
+            "unit": "ns/op",
+            "extra": "142496689 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny2/32B/scalar (github.com/gofiber/utils/v2) - MB/s",
+            "value": 3840.84,
+            "unit": "MB/s",
+            "extra": "142496689 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny2/32B/scalar (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "142496689 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny2/32B/scalar (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "142496689 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny2/32B/stdlib-indexany (github.com/gofiber/utils/v2)",
+            "value": 16.56,
+            "unit": "ns/op\t1932.06 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "75189980 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny2/32B/stdlib-indexany (github.com/gofiber/utils/v2) - ns/op",
+            "value": 16.56,
+            "unit": "ns/op",
+            "extra": "75189980 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny2/32B/stdlib-indexany (github.com/gofiber/utils/v2) - MB/s",
+            "value": 1932.06,
+            "unit": "MB/s",
+            "extra": "75189980 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny2/32B/stdlib-indexany (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "75189980 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny2/32B/stdlib-indexany (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "75189980 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny2/64B/swar (github.com/gofiber/utils/v2)",
+            "value": 3.162,
+            "unit": "ns/op\t20242.14 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "410750556 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny2/64B/swar (github.com/gofiber/utils/v2) - ns/op",
+            "value": 3.162,
+            "unit": "ns/op",
+            "extra": "410750556 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny2/64B/swar (github.com/gofiber/utils/v2) - MB/s",
+            "value": 20242.14,
+            "unit": "MB/s",
+            "extra": "410750556 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny2/64B/swar (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "410750556 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny2/64B/swar (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "410750556 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny2/64B/scalar (github.com/gofiber/utils/v2)",
+            "value": 17.73,
+            "unit": "ns/op\t3609.55 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "71662669 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny2/64B/scalar (github.com/gofiber/utils/v2) - ns/op",
+            "value": 17.73,
+            "unit": "ns/op",
+            "extra": "71662669 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny2/64B/scalar (github.com/gofiber/utils/v2) - MB/s",
+            "value": 3609.55,
+            "unit": "MB/s",
+            "extra": "71662669 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny2/64B/scalar (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "71662669 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny2/64B/scalar (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "71662669 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny2/64B/stdlib-indexany (github.com/gofiber/utils/v2)",
+            "value": 32.69,
+            "unit": "ns/op\t1957.63 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "35996332 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny2/64B/stdlib-indexany (github.com/gofiber/utils/v2) - ns/op",
+            "value": 32.69,
+            "unit": "ns/op",
+            "extra": "35996332 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny2/64B/stdlib-indexany (github.com/gofiber/utils/v2) - MB/s",
+            "value": 1957.63,
+            "unit": "MB/s",
+            "extra": "35996332 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny2/64B/stdlib-indexany (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "35996332 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny2/64B/stdlib-indexany (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "35996332 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny2/512B/swar (github.com/gofiber/utils/v2)",
+            "value": 8.18,
+            "unit": "ns/op\t62588.71 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "145833070 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny2/512B/swar (github.com/gofiber/utils/v2) - ns/op",
+            "value": 8.18,
+            "unit": "ns/op",
+            "extra": "145833070 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny2/512B/swar (github.com/gofiber/utils/v2) - MB/s",
+            "value": 62588.71,
+            "unit": "MB/s",
+            "extra": "145833070 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny2/512B/swar (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "145833070 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny2/512B/swar (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "145833070 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny2/512B/scalar (github.com/gofiber/utils/v2)",
+            "value": 131.6,
+            "unit": "ns/op\t3890.27 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "9185773 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny2/512B/scalar (github.com/gofiber/utils/v2) - ns/op",
+            "value": 131.6,
+            "unit": "ns/op",
+            "extra": "9185773 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny2/512B/scalar (github.com/gofiber/utils/v2) - MB/s",
+            "value": 3890.27,
+            "unit": "MB/s",
+            "extra": "9185773 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny2/512B/scalar (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "9185773 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny2/512B/scalar (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "9185773 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny2/512B/stdlib-indexany (github.com/gofiber/utils/v2)",
+            "value": 264.7,
+            "unit": "ns/op\t1934.06 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "4805089 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny2/512B/stdlib-indexany (github.com/gofiber/utils/v2) - ns/op",
+            "value": 264.7,
+            "unit": "ns/op",
+            "extra": "4805089 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny2/512B/stdlib-indexany (github.com/gofiber/utils/v2) - MB/s",
+            "value": 1934.06,
+            "unit": "MB/s",
+            "extra": "4805089 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny2/512B/stdlib-indexany (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "4805089 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny2/512B/stdlib-indexany (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "4805089 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IsASCII/7B/swar (github.com/gofiber/utils/v2)",
+            "value": 2.834,
+            "unit": "ns/op\t2469.74 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "403755864 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IsASCII/7B/swar (github.com/gofiber/utils/v2) - ns/op",
+            "value": 2.834,
+            "unit": "ns/op",
+            "extra": "403755864 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IsASCII/7B/swar (github.com/gofiber/utils/v2) - MB/s",
+            "value": 2469.74,
+            "unit": "MB/s",
+            "extra": "403755864 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IsASCII/7B/swar (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "403755864 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IsASCII/7B/swar (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "403755864 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IsASCII/7B/scalar (github.com/gofiber/utils/v2)",
+            "value": 2.988,
+            "unit": "ns/op\t2342.86 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "534496321 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IsASCII/7B/scalar (github.com/gofiber/utils/v2) - ns/op",
+            "value": 2.988,
+            "unit": "ns/op",
+            "extra": "534496321 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IsASCII/7B/scalar (github.com/gofiber/utils/v2) - MB/s",
+            "value": 2342.86,
+            "unit": "MB/s",
+            "extra": "534496321 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IsASCII/7B/scalar (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "534496321 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IsASCII/7B/scalar (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "534496321 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IsASCII/8B/swar (github.com/gofiber/utils/v2)",
+            "value": 2.616,
+            "unit": "ns/op\t3057.91 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "436616241 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IsASCII/8B/swar (github.com/gofiber/utils/v2) - ns/op",
+            "value": 2.616,
+            "unit": "ns/op",
+            "extra": "436616241 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IsASCII/8B/swar (github.com/gofiber/utils/v2) - MB/s",
+            "value": 3057.91,
+            "unit": "MB/s",
+            "extra": "436616241 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IsASCII/8B/swar (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "436616241 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IsASCII/8B/swar (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "436616241 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IsASCII/8B/scalar (github.com/gofiber/utils/v2)",
+            "value": 2.953,
+            "unit": "ns/op\t2709.51 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "403805098 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IsASCII/8B/scalar (github.com/gofiber/utils/v2) - ns/op",
+            "value": 2.953,
+            "unit": "ns/op",
+            "extra": "403805098 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IsASCII/8B/scalar (github.com/gofiber/utils/v2) - MB/s",
+            "value": 2709.51,
+            "unit": "MB/s",
+            "extra": "403805098 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IsASCII/8B/scalar (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "403805098 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IsASCII/8B/scalar (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "403805098 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IsASCII/16B/swar (github.com/gofiber/utils/v2)",
+            "value": 2.118,
+            "unit": "ns/op\t7553.79 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "528120546 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IsASCII/16B/swar (github.com/gofiber/utils/v2) - ns/op",
+            "value": 2.118,
+            "unit": "ns/op",
+            "extra": "528120546 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IsASCII/16B/swar (github.com/gofiber/utils/v2) - MB/s",
+            "value": 7553.79,
+            "unit": "MB/s",
+            "extra": "528120546 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IsASCII/16B/swar (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "528120546 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IsASCII/16B/swar (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "528120546 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IsASCII/16B/scalar (github.com/gofiber/utils/v2)",
+            "value": 4.601,
+            "unit": "ns/op\t3477.69 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "249626083 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IsASCII/16B/scalar (github.com/gofiber/utils/v2) - ns/op",
+            "value": 4.601,
+            "unit": "ns/op",
+            "extra": "249626083 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IsASCII/16B/scalar (github.com/gofiber/utils/v2) - MB/s",
+            "value": 3477.69,
+            "unit": "MB/s",
+            "extra": "249626083 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IsASCII/16B/scalar (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "249626083 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IsASCII/16B/scalar (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "249626083 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IsASCII/32B/swar (github.com/gofiber/utils/v2)",
+            "value": 3.17,
+            "unit": "ns/op\t10096.19 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "404336340 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IsASCII/32B/swar (github.com/gofiber/utils/v2) - ns/op",
+            "value": 3.17,
+            "unit": "ns/op",
+            "extra": "404336340 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IsASCII/32B/swar (github.com/gofiber/utils/v2) - MB/s",
+            "value": 10096.19,
+            "unit": "MB/s",
+            "extra": "404336340 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IsASCII/32B/swar (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "404336340 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IsASCII/32B/swar (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "404336340 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IsASCII/32B/scalar (github.com/gofiber/utils/v2)",
+            "value": 8.098,
+            "unit": "ns/op\t3951.63 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "150943512 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IsASCII/32B/scalar (github.com/gofiber/utils/v2) - ns/op",
+            "value": 8.098,
+            "unit": "ns/op",
+            "extra": "150943512 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IsASCII/32B/scalar (github.com/gofiber/utils/v2) - MB/s",
+            "value": 3951.63,
+            "unit": "MB/s",
+            "extra": "150943512 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IsASCII/32B/scalar (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "150943512 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IsASCII/32B/scalar (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "150943512 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IsASCII/64B/swar (github.com/gofiber/utils/v2)",
+            "value": 3.332,
+            "unit": "ns/op\t19210.47 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "370605068 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IsASCII/64B/swar (github.com/gofiber/utils/v2) - ns/op",
+            "value": 3.332,
+            "unit": "ns/op",
+            "extra": "370605068 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IsASCII/64B/swar (github.com/gofiber/utils/v2) - MB/s",
+            "value": 19210.47,
+            "unit": "MB/s",
+            "extra": "370605068 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IsASCII/64B/swar (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "370605068 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IsASCII/64B/swar (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "370605068 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IsASCII/64B/scalar (github.com/gofiber/utils/v2)",
+            "value": 15.11,
+            "unit": "ns/op\t4236.22 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "82516068 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IsASCII/64B/scalar (github.com/gofiber/utils/v2) - ns/op",
+            "value": 15.11,
+            "unit": "ns/op",
+            "extra": "82516068 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IsASCII/64B/scalar (github.com/gofiber/utils/v2) - MB/s",
+            "value": 4236.22,
+            "unit": "MB/s",
+            "extra": "82516068 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IsASCII/64B/scalar (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "82516068 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IsASCII/64B/scalar (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "82516068 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IsASCII/512B/swar (github.com/gofiber/utils/v2)",
+            "value": 7.999,
+            "unit": "ns/op\t64007.02 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "151158534 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IsASCII/512B/swar (github.com/gofiber/utils/v2) - ns/op",
+            "value": 7.999,
+            "unit": "ns/op",
+            "extra": "151158534 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IsASCII/512B/swar (github.com/gofiber/utils/v2) - MB/s",
+            "value": 64007.02,
+            "unit": "MB/s",
+            "extra": "151158534 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IsASCII/512B/swar (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "151158534 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IsASCII/512B/swar (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "151158534 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IsASCII/512B/scalar (github.com/gofiber/utils/v2)",
+            "value": 132.2,
+            "unit": "ns/op\t3872.19 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "9854492 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IsASCII/512B/scalar (github.com/gofiber/utils/v2) - ns/op",
+            "value": 132.2,
+            "unit": "ns/op",
+            "extra": "9854492 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IsASCII/512B/scalar (github.com/gofiber/utils/v2) - MB/s",
+            "value": 3872.19,
+            "unit": "MB/s",
+            "extra": "9854492 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IsASCII/512B/scalar (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "9854492 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IsASCII/512B/scalar (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "9854492 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_CalculateTimestamp/fiber (github.com/gofiber/utils/v2)",
+            "value": 0.2038,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_CalculateTimestamp/fiber (github.com/gofiber/utils/v2) - ns/op",
+            "value": 0.2038,
+            "unit": "ns/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_CalculateTimestamp/fiber (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_CalculateTimestamp/fiber (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_CalculateTimestamp/default (github.com/gofiber/utils/v2)",
+            "value": 34.75,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "34366531 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_CalculateTimestamp/default (github.com/gofiber/utils/v2) - ns/op",
+            "value": 34.75,
+            "unit": "ns/op",
+            "extra": "34366531 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_CalculateTimestamp/default (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "34366531 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_CalculateTimestamp/default (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "34366531 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_CalculateTimestamp/fiber_asserted (github.com/gofiber/utils/v2)",
+            "value": 114.7,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "9666177 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_CalculateTimestamp/fiber_asserted (github.com/gofiber/utils/v2) - ns/op",
+            "value": 114.7,
+            "unit": "ns/op",
+            "extra": "9666177 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_CalculateTimestamp/fiber_asserted (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "9666177 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_CalculateTimestamp/fiber_asserted (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "9666177 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_CalculateTimestamp/default_asserted (github.com/gofiber/utils/v2)",
+            "value": 159.7,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "8219370 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_CalculateTimestamp/default_asserted (github.com/gofiber/utils/v2) - ns/op",
+            "value": 159.7,
+            "unit": "ns/op",
+            "extra": "8219370 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_CalculateTimestamp/default_asserted (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "8219370 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_CalculateTimestamp/default_asserted (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "8219370 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AppendQueryEscape/clean-64B/fiber (github.com/gofiber/utils/v2)",
+            "value": 30.78,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "39571296 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AppendQueryEscape/clean-64B/fiber (github.com/gofiber/utils/v2) - ns/op",
+            "value": 30.78,
+            "unit": "ns/op",
+            "extra": "39571296 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AppendQueryEscape/clean-64B/fiber (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "39571296 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AppendQueryEscape/clean-64B/fiber (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "39571296 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AppendQueryEscape/clean-64B/default (github.com/gofiber/utils/v2)",
+            "value": 109.3,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "10421439 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AppendQueryEscape/clean-64B/default (github.com/gofiber/utils/v2) - ns/op",
+            "value": 109.3,
+            "unit": "ns/op",
+            "extra": "10421439 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AppendQueryEscape/clean-64B/default (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "10421439 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AppendQueryEscape/clean-64B/default (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "10421439 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AppendQueryEscape/mixed-64B/fiber (github.com/gofiber/utils/v2)",
+            "value": 87.63,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "13589967 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AppendQueryEscape/mixed-64B/fiber (github.com/gofiber/utils/v2) - ns/op",
+            "value": 87.63,
+            "unit": "ns/op",
+            "extra": "13589967 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AppendQueryEscape/mixed-64B/fiber (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "13589967 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AppendQueryEscape/mixed-64B/fiber (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "13589967 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AppendQueryEscape/mixed-64B/default (github.com/gofiber/utils/v2)",
+            "value": 292.7,
+            "unit": "ns/op\t     192 B/op\t       2 allocs/op",
+            "extra": "3893340 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AppendQueryEscape/mixed-64B/default (github.com/gofiber/utils/v2) - ns/op",
+            "value": 292.7,
+            "unit": "ns/op",
+            "extra": "3893340 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AppendQueryEscape/mixed-64B/default (github.com/gofiber/utils/v2) - B/op",
+            "value": 192,
+            "unit": "B/op",
+            "extra": "3893340 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AppendQueryEscape/mixed-64B/default (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 2,
+            "unit": "allocs/op",
+            "extra": "3893340 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_DefaultXMLEncoder (github.com/gofiber/utils/v2)",
+            "value": 1423,
+            "unit": "ns/op\t    4864 B/op\t      12 allocs/op",
+            "extra": "825013 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_DefaultXMLEncoder (github.com/gofiber/utils/v2) - ns/op",
+            "value": 1423,
+            "unit": "ns/op",
+            "extra": "825013 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_DefaultXMLEncoder (github.com/gofiber/utils/v2) - B/op",
+            "value": 4864,
+            "unit": "B/op",
+            "extra": "825013 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_DefaultXMLEncoder (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 12,
+            "unit": "allocs/op",
+            "extra": "825013 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerBytes/empty/fiber (github.com/gofiber/utils/v2/bytes)",
+            "value": 1.345,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "885061077 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerBytes/empty/fiber (github.com/gofiber/utils/v2/bytes) - ns/op",
+            "value": 1.345,
+            "unit": "ns/op",
+            "extra": "885061077 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerBytes/empty/fiber (github.com/gofiber/utils/v2/bytes) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "885061077 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerBytes/empty/fiber (github.com/gofiber/utils/v2/bytes) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "885061077 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerBytes/empty/fiber/unsafe (github.com/gofiber/utils/v2/bytes)",
+            "value": 1.494,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "876520003 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerBytes/empty/fiber/unsafe (github.com/gofiber/utils/v2/bytes) - ns/op",
+            "value": 1.494,
+            "unit": "ns/op",
+            "extra": "876520003 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerBytes/empty/fiber/unsafe (github.com/gofiber/utils/v2/bytes) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "876520003 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerBytes/empty/fiber/unsafe (github.com/gofiber/utils/v2/bytes) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "876520003 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerBytes/empty/default (github.com/gofiber/utils/v2/bytes)",
+            "value": 2.587,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "485487051 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerBytes/empty/default (github.com/gofiber/utils/v2/bytes) - ns/op",
+            "value": 2.587,
+            "unit": "ns/op",
+            "extra": "485487051 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerBytes/empty/default (github.com/gofiber/utils/v2/bytes) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "485487051 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerBytes/empty/default (github.com/gofiber/utils/v2/bytes) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "485487051 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerBytes/http-get/fiber (github.com/gofiber/utils/v2/bytes)",
+            "value": 1.776,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "653570528 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerBytes/http-get/fiber (github.com/gofiber/utils/v2/bytes) - ns/op",
+            "value": 1.776,
+            "unit": "ns/op",
+            "extra": "653570528 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerBytes/http-get/fiber (github.com/gofiber/utils/v2/bytes) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "653570528 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerBytes/http-get/fiber (github.com/gofiber/utils/v2/bytes) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "653570528 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerBytes/http-get/fiber/unsafe (github.com/gofiber/utils/v2/bytes)",
+            "value": 2.412,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "496726426 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerBytes/http-get/fiber/unsafe (github.com/gofiber/utils/v2/bytes) - ns/op",
+            "value": 2.412,
+            "unit": "ns/op",
+            "extra": "496726426 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerBytes/http-get/fiber/unsafe (github.com/gofiber/utils/v2/bytes) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "496726426 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerBytes/http-get/fiber/unsafe (github.com/gofiber/utils/v2/bytes) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "496726426 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerBytes/http-get/default (github.com/gofiber/utils/v2/bytes)",
+            "value": 14.37,
+            "unit": "ns/op\t       8 B/op\t       1 allocs/op",
+            "extra": "69677533 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerBytes/http-get/default (github.com/gofiber/utils/v2/bytes) - ns/op",
+            "value": 14.37,
+            "unit": "ns/op",
+            "extra": "69677533 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerBytes/http-get/default (github.com/gofiber/utils/v2/bytes) - B/op",
+            "value": 8,
+            "unit": "B/op",
+            "extra": "69677533 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerBytes/http-get/default (github.com/gofiber/utils/v2/bytes) - allocs/op",
+            "value": 1,
+            "unit": "allocs/op",
+            "extra": "69677533 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerBytes/http-get-upper/fiber (github.com/gofiber/utils/v2/bytes)",
+            "value": 7.879,
+            "unit": "ns/op\t       3 B/op\t       1 allocs/op",
+            "extra": "149061507 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerBytes/http-get-upper/fiber (github.com/gofiber/utils/v2/bytes) - ns/op",
+            "value": 7.879,
+            "unit": "ns/op",
+            "extra": "149061507 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerBytes/http-get-upper/fiber (github.com/gofiber/utils/v2/bytes) - B/op",
+            "value": 3,
+            "unit": "B/op",
+            "extra": "149061507 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerBytes/http-get-upper/fiber (github.com/gofiber/utils/v2/bytes) - allocs/op",
+            "value": 1,
+            "unit": "allocs/op",
+            "extra": "149061507 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerBytes/http-get-upper/fiber/unsafe (github.com/gofiber/utils/v2/bytes)",
+            "value": 2.609,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "459183111 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerBytes/http-get-upper/fiber/unsafe (github.com/gofiber/utils/v2/bytes) - ns/op",
+            "value": 2.609,
+            "unit": "ns/op",
+            "extra": "459183111 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerBytes/http-get-upper/fiber/unsafe (github.com/gofiber/utils/v2/bytes) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "459183111 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerBytes/http-get-upper/fiber/unsafe (github.com/gofiber/utils/v2/bytes) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "459183111 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerBytes/http-get-upper/default (github.com/gofiber/utils/v2/bytes)",
+            "value": 11.59,
+            "unit": "ns/op\t       8 B/op\t       1 allocs/op",
+            "extra": "122083093 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerBytes/http-get-upper/default (github.com/gofiber/utils/v2/bytes) - ns/op",
+            "value": 11.59,
+            "unit": "ns/op",
+            "extra": "122083093 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerBytes/http-get-upper/default (github.com/gofiber/utils/v2/bytes) - B/op",
+            "value": 8,
+            "unit": "B/op",
+            "extra": "122083093 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerBytes/http-get-upper/default (github.com/gofiber/utils/v2/bytes) - allocs/op",
+            "value": 1,
+            "unit": "allocs/op",
+            "extra": "122083093 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerBytes/header-content-type-mixed/fiber (github.com/gofiber/utils/v2/bytes)",
+            "value": 18.58,
+            "unit": "ns/op\t      48 B/op\t       1 allocs/op",
+            "extra": "55899493 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerBytes/header-content-type-mixed/fiber (github.com/gofiber/utils/v2/bytes) - ns/op",
+            "value": 18.58,
+            "unit": "ns/op",
+            "extra": "55899493 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerBytes/header-content-type-mixed/fiber (github.com/gofiber/utils/v2/bytes) - B/op",
+            "value": 48,
+            "unit": "B/op",
+            "extra": "55899493 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerBytes/header-content-type-mixed/fiber (github.com/gofiber/utils/v2/bytes) - allocs/op",
+            "value": 1,
+            "unit": "allocs/op",
+            "extra": "55899493 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerBytes/header-content-type-mixed/fiber/unsafe (github.com/gofiber/utils/v2/bytes)",
+            "value": 12.68,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "139247385 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerBytes/header-content-type-mixed/fiber/unsafe (github.com/gofiber/utils/v2/bytes) - ns/op",
+            "value": 12.68,
+            "unit": "ns/op",
+            "extra": "139247385 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerBytes/header-content-type-mixed/fiber/unsafe (github.com/gofiber/utils/v2/bytes) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "139247385 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerBytes/header-content-type-mixed/fiber/unsafe (github.com/gofiber/utils/v2/bytes) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "139247385 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerBytes/header-content-type-mixed/default (github.com/gofiber/utils/v2/bytes)",
+            "value": 34.15,
+            "unit": "ns/op\t      48 B/op\t       1 allocs/op",
+            "extra": "34072207 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerBytes/header-content-type-mixed/default (github.com/gofiber/utils/v2/bytes) - ns/op",
+            "value": 34.15,
+            "unit": "ns/op",
+            "extra": "34072207 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerBytes/header-content-type-mixed/default (github.com/gofiber/utils/v2/bytes) - B/op",
+            "value": 48,
+            "unit": "B/op",
+            "extra": "34072207 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerBytes/header-content-type-mixed/default (github.com/gofiber/utils/v2/bytes) - allocs/op",
+            "value": 1,
+            "unit": "allocs/op",
+            "extra": "34072207 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerBytes/large-lower/fiber (github.com/gofiber/utils/v2/bytes)",
+            "value": 7.822,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "158036347 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerBytes/large-lower/fiber (github.com/gofiber/utils/v2/bytes) - ns/op",
+            "value": 7.822,
+            "unit": "ns/op",
+            "extra": "158036347 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerBytes/large-lower/fiber (github.com/gofiber/utils/v2/bytes) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "158036347 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerBytes/large-lower/fiber (github.com/gofiber/utils/v2/bytes) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "158036347 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerBytes/large-lower/fiber/unsafe (github.com/gofiber/utils/v2/bytes)",
+            "value": 10.5,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "100000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerBytes/large-lower/fiber/unsafe (github.com/gofiber/utils/v2/bytes) - ns/op",
+            "value": 10.5,
+            "unit": "ns/op",
+            "extra": "100000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerBytes/large-lower/fiber/unsafe (github.com/gofiber/utils/v2/bytes) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "100000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerBytes/large-lower/fiber/unsafe (github.com/gofiber/utils/v2/bytes) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "100000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerBytes/large-lower/default (github.com/gofiber/utils/v2/bytes)",
+            "value": 38.02,
+            "unit": "ns/op\t      64 B/op\t       1 allocs/op",
+            "extra": "32169693 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerBytes/large-lower/default (github.com/gofiber/utils/v2/bytes) - ns/op",
+            "value": 38.02,
+            "unit": "ns/op",
+            "extra": "32169693 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerBytes/large-lower/default (github.com/gofiber/utils/v2/bytes) - B/op",
+            "value": 64,
+            "unit": "B/op",
+            "extra": "32169693 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerBytes/large-lower/default (github.com/gofiber/utils/v2/bytes) - allocs/op",
+            "value": 1,
+            "unit": "allocs/op",
+            "extra": "32169693 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerBytes/large-upper/fiber (github.com/gofiber/utils/v2/bytes)",
+            "value": 24.72,
+            "unit": "ns/op\t      64 B/op\t       1 allocs/op",
+            "extra": "49735351 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerBytes/large-upper/fiber (github.com/gofiber/utils/v2/bytes) - ns/op",
+            "value": 24.72,
+            "unit": "ns/op",
+            "extra": "49735351 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerBytes/large-upper/fiber (github.com/gofiber/utils/v2/bytes) - B/op",
+            "value": 64,
+            "unit": "B/op",
+            "extra": "49735351 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerBytes/large-upper/fiber (github.com/gofiber/utils/v2/bytes) - allocs/op",
+            "value": 1,
+            "unit": "allocs/op",
+            "extra": "49735351 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerBytes/large-upper/fiber/unsafe (github.com/gofiber/utils/v2/bytes)",
+            "value": 10.61,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "100000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerBytes/large-upper/fiber/unsafe (github.com/gofiber/utils/v2/bytes) - ns/op",
+            "value": 10.61,
+            "unit": "ns/op",
+            "extra": "100000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerBytes/large-upper/fiber/unsafe (github.com/gofiber/utils/v2/bytes) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "100000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerBytes/large-upper/fiber/unsafe (github.com/gofiber/utils/v2/bytes) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "100000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerBytes/large-upper/default (github.com/gofiber/utils/v2/bytes)",
+            "value": 56.68,
+            "unit": "ns/op\t      64 B/op\t       1 allocs/op",
+            "extra": "21792007 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerBytes/large-upper/default (github.com/gofiber/utils/v2/bytes) - ns/op",
+            "value": 56.68,
+            "unit": "ns/op",
+            "extra": "21792007 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerBytes/large-upper/default (github.com/gofiber/utils/v2/bytes) - B/op",
+            "value": 64,
+            "unit": "B/op",
+            "extra": "21792007 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerBytes/large-upper/default (github.com/gofiber/utils/v2/bytes) - allocs/op",
+            "value": 1,
+            "unit": "allocs/op",
+            "extra": "21792007 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerBytes/large-mixed/fiber (github.com/gofiber/utils/v2/bytes)",
+            "value": 26.03,
+            "unit": "ns/op\t      64 B/op\t       1 allocs/op",
+            "extra": "48045566 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerBytes/large-mixed/fiber (github.com/gofiber/utils/v2/bytes) - ns/op",
+            "value": 26.03,
+            "unit": "ns/op",
+            "extra": "48045566 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerBytes/large-mixed/fiber (github.com/gofiber/utils/v2/bytes) - B/op",
+            "value": 64,
+            "unit": "B/op",
+            "extra": "48045566 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerBytes/large-mixed/fiber (github.com/gofiber/utils/v2/bytes) - allocs/op",
+            "value": 1,
+            "unit": "allocs/op",
+            "extra": "48045566 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerBytes/large-mixed/fiber/unsafe (github.com/gofiber/utils/v2/bytes)",
+            "value": 10.28,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "100000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerBytes/large-mixed/fiber/unsafe (github.com/gofiber/utils/v2/bytes) - ns/op",
+            "value": 10.28,
+            "unit": "ns/op",
+            "extra": "100000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerBytes/large-mixed/fiber/unsafe (github.com/gofiber/utils/v2/bytes) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "100000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerBytes/large-mixed/fiber/unsafe (github.com/gofiber/utils/v2/bytes) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "100000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerBytes/large-mixed/default (github.com/gofiber/utils/v2/bytes)",
+            "value": 58.86,
+            "unit": "ns/op\t      64 B/op\t       1 allocs/op",
+            "extra": "20199168 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerBytes/large-mixed/default (github.com/gofiber/utils/v2/bytes) - ns/op",
+            "value": 58.86,
+            "unit": "ns/op",
+            "extra": "20199168 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerBytes/large-mixed/default (github.com/gofiber/utils/v2/bytes) - B/op",
+            "value": 64,
+            "unit": "B/op",
+            "extra": "20199168 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToLowerBytes/large-mixed/default (github.com/gofiber/utils/v2/bytes) - allocs/op",
+            "value": 1,
+            "unit": "allocs/op",
+            "extra": "20199168 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memchr3/8B/simd (github.com/gofiber/utils/v2/simd)",
+            "value": 3.562,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "355644115 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memchr3/8B/simd (github.com/gofiber/utils/v2/simd) - ns/op",
+            "value": 3.562,
+            "unit": "ns/op",
+            "extra": "355644115 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memchr3/8B/simd (github.com/gofiber/utils/v2/simd) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "355644115 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memchr3/8B/simd (github.com/gofiber/utils/v2/simd) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "355644115 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memchr3/8B/default (github.com/gofiber/utils/v2/simd)",
+            "value": 16.72,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "60671746 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memchr3/8B/default (github.com/gofiber/utils/v2/simd) - ns/op",
+            "value": 16.72,
+            "unit": "ns/op",
+            "extra": "60671746 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memchr3/8B/default (github.com/gofiber/utils/v2/simd) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "60671746 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memchr3/8B/default (github.com/gofiber/utils/v2/simd) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "60671746 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memchr3/32B/simd (github.com/gofiber/utils/v2/simd)",
+            "value": 2.59,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "423721688 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memchr3/32B/simd (github.com/gofiber/utils/v2/simd) - ns/op",
+            "value": 2.59,
+            "unit": "ns/op",
+            "extra": "423721688 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memchr3/32B/simd (github.com/gofiber/utils/v2/simd) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "423721688 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memchr3/32B/simd (github.com/gofiber/utils/v2/simd) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "423721688 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memchr3/32B/default (github.com/gofiber/utils/v2/simd)",
+            "value": 19.36,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "64212163 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memchr3/32B/default (github.com/gofiber/utils/v2/simd) - ns/op",
+            "value": 19.36,
+            "unit": "ns/op",
+            "extra": "64212163 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memchr3/32B/default (github.com/gofiber/utils/v2/simd) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "64212163 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memchr3/32B/default (github.com/gofiber/utils/v2/simd) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "64212163 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memchr3/64B/simd (github.com/gofiber/utils/v2/simd)",
+            "value": 2.751,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "443976490 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memchr3/64B/simd (github.com/gofiber/utils/v2/simd) - ns/op",
+            "value": 2.751,
+            "unit": "ns/op",
+            "extra": "443976490 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memchr3/64B/simd (github.com/gofiber/utils/v2/simd) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "443976490 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memchr3/64B/simd (github.com/gofiber/utils/v2/simd) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "443976490 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memchr3/64B/default (github.com/gofiber/utils/v2/simd)",
+            "value": 27.92,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "39912589 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memchr3/64B/default (github.com/gofiber/utils/v2/simd) - ns/op",
+            "value": 27.92,
+            "unit": "ns/op",
+            "extra": "39912589 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memchr3/64B/default (github.com/gofiber/utils/v2/simd) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "39912589 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memchr3/64B/default (github.com/gofiber/utils/v2/simd) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "39912589 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memchr3/512B/simd (github.com/gofiber/utils/v2/simd)",
+            "value": 7.266,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "164618464 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memchr3/512B/simd (github.com/gofiber/utils/v2/simd) - ns/op",
+            "value": 7.266,
+            "unit": "ns/op",
+            "extra": "164618464 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memchr3/512B/simd (github.com/gofiber/utils/v2/simd) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "164618464 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memchr3/512B/simd (github.com/gofiber/utils/v2/simd) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "164618464 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memchr3/512B/default (github.com/gofiber/utils/v2/simd)",
+            "value": 180.5,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "7158636 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memchr3/512B/default (github.com/gofiber/utils/v2/simd) - ns/op",
+            "value": 180.5,
+            "unit": "ns/op",
+            "extra": "7158636 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memchr3/512B/default (github.com/gofiber/utils/v2/simd) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "7158636 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memchr3/512B/default (github.com/gofiber/utils/v2/simd) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "7158636 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memchr3/4096B/simd (github.com/gofiber/utils/v2/simd)",
+            "value": 49.11,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "24596496 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memchr3/4096B/simd (github.com/gofiber/utils/v2/simd) - ns/op",
+            "value": 49.11,
+            "unit": "ns/op",
+            "extra": "24596496 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memchr3/4096B/simd (github.com/gofiber/utils/v2/simd) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "24596496 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memchr3/4096B/simd (github.com/gofiber/utils/v2/simd) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "24596496 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memchr3/4096B/default (github.com/gofiber/utils/v2/simd)",
+            "value": 1325,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "970992 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memchr3/4096B/default (github.com/gofiber/utils/v2/simd) - ns/op",
+            "value": 1325,
+            "unit": "ns/op",
+            "extra": "970992 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memchr3/4096B/default (github.com/gofiber/utils/v2/simd) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "970992 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memchr3/4096B/default (github.com/gofiber/utils/v2/simd) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "970992 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem/8B/simd (github.com/gofiber/utils/v2/simd)",
+            "value": 4.318,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "259325558 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem/8B/simd (github.com/gofiber/utils/v2/simd) - ns/op",
+            "value": 4.318,
+            "unit": "ns/op",
+            "extra": "259325558 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem/8B/simd (github.com/gofiber/utils/v2/simd) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "259325558 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem/8B/simd (github.com/gofiber/utils/v2/simd) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "259325558 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem/8B/default (github.com/gofiber/utils/v2/simd)",
+            "value": 3.181,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "354785286 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem/8B/default (github.com/gofiber/utils/v2/simd) - ns/op",
+            "value": 3.181,
+            "unit": "ns/op",
+            "extra": "354785286 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem/8B/default (github.com/gofiber/utils/v2/simd) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "354785286 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem/8B/default (github.com/gofiber/utils/v2/simd) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "354785286 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem/32B/simd (github.com/gofiber/utils/v2/simd)",
+            "value": 4.914,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "244117802 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem/32B/simd (github.com/gofiber/utils/v2/simd) - ns/op",
+            "value": 4.914,
+            "unit": "ns/op",
+            "extra": "244117802 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem/32B/simd (github.com/gofiber/utils/v2/simd) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "244117802 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem/32B/simd (github.com/gofiber/utils/v2/simd) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "244117802 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem/32B/default (github.com/gofiber/utils/v2/simd)",
+            "value": 4.273,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "270100861 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem/32B/default (github.com/gofiber/utils/v2/simd) - ns/op",
+            "value": 4.273,
+            "unit": "ns/op",
+            "extra": "270100861 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem/32B/default (github.com/gofiber/utils/v2/simd) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "270100861 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem/32B/default (github.com/gofiber/utils/v2/simd) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "270100861 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem/64B/simd (github.com/gofiber/utils/v2/simd)",
+            "value": 7.147,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "167966035 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem/64B/simd (github.com/gofiber/utils/v2/simd) - ns/op",
+            "value": 7.147,
+            "unit": "ns/op",
+            "extra": "167966035 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem/64B/simd (github.com/gofiber/utils/v2/simd) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "167966035 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem/64B/simd (github.com/gofiber/utils/v2/simd) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "167966035 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem/64B/default (github.com/gofiber/utils/v2/simd)",
+            "value": 6.564,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "169230892 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem/64B/default (github.com/gofiber/utils/v2/simd) - ns/op",
+            "value": 6.564,
+            "unit": "ns/op",
+            "extra": "169230892 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem/64B/default (github.com/gofiber/utils/v2/simd) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "169230892 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem/64B/default (github.com/gofiber/utils/v2/simd) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "169230892 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem/96B/simd (github.com/gofiber/utils/v2/simd)",
+            "value": 24.04,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "49688170 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem/96B/simd (github.com/gofiber/utils/v2/simd) - ns/op",
+            "value": 24.04,
+            "unit": "ns/op",
+            "extra": "49688170 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem/96B/simd (github.com/gofiber/utils/v2/simd) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "49688170 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem/96B/simd (github.com/gofiber/utils/v2/simd) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "49688170 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem/96B/default (github.com/gofiber/utils/v2/simd)",
+            "value": 25.37,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "51285105 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem/96B/default (github.com/gofiber/utils/v2/simd) - ns/op",
+            "value": 25.37,
+            "unit": "ns/op",
+            "extra": "51285105 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem/96B/default (github.com/gofiber/utils/v2/simd) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "51285105 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem/96B/default (github.com/gofiber/utils/v2/simd) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "51285105 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem/128B/simd (github.com/gofiber/utils/v2/simd)",
+            "value": 8.55,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "127431248 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem/128B/simd (github.com/gofiber/utils/v2/simd) - ns/op",
+            "value": 8.55,
+            "unit": "ns/op",
+            "extra": "127431248 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem/128B/simd (github.com/gofiber/utils/v2/simd) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "127431248 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem/128B/simd (github.com/gofiber/utils/v2/simd) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "127431248 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem/128B/default (github.com/gofiber/utils/v2/simd)",
+            "value": 27.19,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "45137444 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem/128B/default (github.com/gofiber/utils/v2/simd) - ns/op",
+            "value": 27.19,
+            "unit": "ns/op",
+            "extra": "45137444 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem/128B/default (github.com/gofiber/utils/v2/simd) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "45137444 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem/128B/default (github.com/gofiber/utils/v2/simd) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "45137444 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem/192B/simd (github.com/gofiber/utils/v2/simd)",
+            "value": 9.313,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "125061136 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem/192B/simd (github.com/gofiber/utils/v2/simd) - ns/op",
+            "value": 9.313,
+            "unit": "ns/op",
+            "extra": "125061136 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem/192B/simd (github.com/gofiber/utils/v2/simd) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "125061136 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem/192B/simd (github.com/gofiber/utils/v2/simd) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "125061136 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem/192B/default (github.com/gofiber/utils/v2/simd)",
+            "value": 43.32,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "27814318 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem/192B/default (github.com/gofiber/utils/v2/simd) - ns/op",
+            "value": 43.32,
+            "unit": "ns/op",
+            "extra": "27814318 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem/192B/default (github.com/gofiber/utils/v2/simd) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "27814318 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem/192B/default (github.com/gofiber/utils/v2/simd) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "27814318 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem/512B/simd (github.com/gofiber/utils/v2/simd)",
+            "value": 12.48,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "95769830 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem/512B/simd (github.com/gofiber/utils/v2/simd) - ns/op",
+            "value": 12.48,
+            "unit": "ns/op",
+            "extra": "95769830 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem/512B/simd (github.com/gofiber/utils/v2/simd) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "95769830 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem/512B/simd (github.com/gofiber/utils/v2/simd) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "95769830 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem/512B/default (github.com/gofiber/utils/v2/simd)",
+            "value": 119.6,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "9615018 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem/512B/default (github.com/gofiber/utils/v2/simd) - ns/op",
+            "value": 119.6,
+            "unit": "ns/op",
+            "extra": "9615018 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem/512B/default (github.com/gofiber/utils/v2/simd) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "9615018 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem/512B/default (github.com/gofiber/utils/v2/simd) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "9615018 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem/4096B/simd (github.com/gofiber/utils/v2/simd)",
+            "value": 48.64,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "27833224 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem/4096B/simd (github.com/gofiber/utils/v2/simd) - ns/op",
+            "value": 48.64,
+            "unit": "ns/op",
+            "extra": "27833224 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem/4096B/simd (github.com/gofiber/utils/v2/simd) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "27833224 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem/4096B/simd (github.com/gofiber/utils/v2/simd) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "27833224 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem/4096B/default (github.com/gofiber/utils/v2/simd)",
+            "value": 955.3,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "1246915 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem/4096B/default (github.com/gofiber/utils/v2/simd) - ns/op",
+            "value": 955.3,
+            "unit": "ns/op",
+            "extra": "1246915 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem/4096B/default (github.com/gofiber/utils/v2/simd) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "1246915 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem/4096B/default (github.com/gofiber/utils/v2/simd) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "1246915 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpper/empty/fiber (github.com/gofiber/utils/v2/strings)",
+            "value": 1.279,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpper/empty/fiber (github.com/gofiber/utils/v2/strings) - ns/op",
+            "value": 1.279,
+            "unit": "ns/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpper/empty/fiber (github.com/gofiber/utils/v2/strings) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpper/empty/fiber (github.com/gofiber/utils/v2/strings) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpper/empty/fiber/unsafe (github.com/gofiber/utils/v2/strings)",
+            "value": 1.215,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpper/empty/fiber/unsafe (github.com/gofiber/utils/v2/strings) - ns/op",
+            "value": 1.215,
+            "unit": "ns/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpper/empty/fiber/unsafe (github.com/gofiber/utils/v2/strings) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpper/empty/fiber/unsafe (github.com/gofiber/utils/v2/strings) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpper/empty/default (github.com/gofiber/utils/v2/strings)",
+            "value": 1.283,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "994823905 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpper/empty/default (github.com/gofiber/utils/v2/strings) - ns/op",
+            "value": 1.283,
+            "unit": "ns/op",
+            "extra": "994823905 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpper/empty/default (github.com/gofiber/utils/v2/strings) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "994823905 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpper/empty/default (github.com/gofiber/utils/v2/strings) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "994823905 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpper/http-get/fiber (github.com/gofiber/utils/v2/strings)",
+            "value": 7.326,
+            "unit": "ns/op\t       3 B/op\t       1 allocs/op",
+            "extra": "165424804 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpper/http-get/fiber (github.com/gofiber/utils/v2/strings) - ns/op",
+            "value": 7.326,
+            "unit": "ns/op",
+            "extra": "165424804 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpper/http-get/fiber (github.com/gofiber/utils/v2/strings) - B/op",
+            "value": 3,
+            "unit": "B/op",
+            "extra": "165424804 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpper/http-get/fiber (github.com/gofiber/utils/v2/strings) - allocs/op",
+            "value": 1,
+            "unit": "allocs/op",
+            "extra": "165424804 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpper/http-get/fiber/unsafe (github.com/gofiber/utils/v2/strings)",
+            "value": 2.447,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "463085124 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpper/http-get/fiber/unsafe (github.com/gofiber/utils/v2/strings) - ns/op",
+            "value": 2.447,
+            "unit": "ns/op",
+            "extra": "463085124 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpper/http-get/fiber/unsafe (github.com/gofiber/utils/v2/strings) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "463085124 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpper/http-get/fiber/unsafe (github.com/gofiber/utils/v2/strings) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "463085124 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpper/http-get/default (github.com/gofiber/utils/v2/strings)",
+            "value": 14.23,
+            "unit": "ns/op\t       8 B/op\t       1 allocs/op",
+            "extra": "70719022 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpper/http-get/default (github.com/gofiber/utils/v2/strings) - ns/op",
+            "value": 14.23,
+            "unit": "ns/op",
+            "extra": "70719022 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpper/http-get/default (github.com/gofiber/utils/v2/strings) - B/op",
+            "value": 8,
+            "unit": "B/op",
+            "extra": "70719022 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpper/http-get/default (github.com/gofiber/utils/v2/strings) - allocs/op",
+            "value": 1,
+            "unit": "allocs/op",
+            "extra": "70719022 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpper/http-get-upper/fiber (github.com/gofiber/utils/v2/strings)",
+            "value": 2.278,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "511632922 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpper/http-get-upper/fiber (github.com/gofiber/utils/v2/strings) - ns/op",
+            "value": 2.278,
+            "unit": "ns/op",
+            "extra": "511632922 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpper/http-get-upper/fiber (github.com/gofiber/utils/v2/strings) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "511632922 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpper/http-get-upper/fiber (github.com/gofiber/utils/v2/strings) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "511632922 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpper/http-get-upper/fiber/unsafe (github.com/gofiber/utils/v2/strings)",
+            "value": 2.599,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "471120304 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpper/http-get-upper/fiber/unsafe (github.com/gofiber/utils/v2/strings) - ns/op",
+            "value": 2.599,
+            "unit": "ns/op",
+            "extra": "471120304 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpper/http-get-upper/fiber/unsafe (github.com/gofiber/utils/v2/strings) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "471120304 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpper/http-get-upper/fiber/unsafe (github.com/gofiber/utils/v2/strings) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "471120304 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpper/http-get-upper/default (github.com/gofiber/utils/v2/strings)",
+            "value": 2.696,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "457315352 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpper/http-get-upper/default (github.com/gofiber/utils/v2/strings) - ns/op",
+            "value": 2.696,
+            "unit": "ns/op",
+            "extra": "457315352 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpper/http-get-upper/default (github.com/gofiber/utils/v2/strings) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "457315352 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpper/http-get-upper/default (github.com/gofiber/utils/v2/strings) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "457315352 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpper/header-content-type-mixed/fiber (github.com/gofiber/utils/v2/strings)",
+            "value": 22.35,
+            "unit": "ns/op\t      48 B/op\t       1 allocs/op",
+            "extra": "49229781 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpper/header-content-type-mixed/fiber (github.com/gofiber/utils/v2/strings) - ns/op",
+            "value": 22.35,
+            "unit": "ns/op",
+            "extra": "49229781 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpper/header-content-type-mixed/fiber (github.com/gofiber/utils/v2/strings) - B/op",
+            "value": 48,
+            "unit": "B/op",
+            "extra": "49229781 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpper/header-content-type-mixed/fiber (github.com/gofiber/utils/v2/strings) - allocs/op",
+            "value": 1,
+            "unit": "allocs/op",
+            "extra": "49229781 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpper/header-content-type-mixed/fiber/unsafe (github.com/gofiber/utils/v2/strings)",
+            "value": 9.72,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "124494556 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpper/header-content-type-mixed/fiber/unsafe (github.com/gofiber/utils/v2/strings) - ns/op",
+            "value": 9.72,
+            "unit": "ns/op",
+            "extra": "124494556 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpper/header-content-type-mixed/fiber/unsafe (github.com/gofiber/utils/v2/strings) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "124494556 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpper/header-content-type-mixed/fiber/unsafe (github.com/gofiber/utils/v2/strings) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "124494556 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpper/header-content-type-mixed/default (github.com/gofiber/utils/v2/strings)",
+            "value": 71.34,
+            "unit": "ns/op\t      48 B/op\t       1 allocs/op",
+            "extra": "15796780 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpper/header-content-type-mixed/default (github.com/gofiber/utils/v2/strings) - ns/op",
+            "value": 71.34,
+            "unit": "ns/op",
+            "extra": "15796780 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpper/header-content-type-mixed/default (github.com/gofiber/utils/v2/strings) - B/op",
+            "value": 48,
+            "unit": "B/op",
+            "extra": "15796780 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpper/header-content-type-mixed/default (github.com/gofiber/utils/v2/strings) - allocs/op",
+            "value": 1,
+            "unit": "allocs/op",
+            "extra": "15796780 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpper/large-lower/fiber (github.com/gofiber/utils/v2/strings)",
+            "value": 25.57,
+            "unit": "ns/op\t      64 B/op\t       1 allocs/op",
+            "extra": "41523772 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpper/large-lower/fiber (github.com/gofiber/utils/v2/strings) - ns/op",
+            "value": 25.57,
+            "unit": "ns/op",
+            "extra": "41523772 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpper/large-lower/fiber (github.com/gofiber/utils/v2/strings) - B/op",
+            "value": 64,
+            "unit": "B/op",
+            "extra": "41523772 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpper/large-lower/fiber (github.com/gofiber/utils/v2/strings) - allocs/op",
+            "value": 1,
+            "unit": "allocs/op",
+            "extra": "41523772 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpper/large-lower/fiber/unsafe (github.com/gofiber/utils/v2/strings)",
+            "value": 10.47,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "100000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpper/large-lower/fiber/unsafe (github.com/gofiber/utils/v2/strings) - ns/op",
+            "value": 10.47,
+            "unit": "ns/op",
+            "extra": "100000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpper/large-lower/fiber/unsafe (github.com/gofiber/utils/v2/strings) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "100000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpper/large-lower/fiber/unsafe (github.com/gofiber/utils/v2/strings) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "100000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpper/large-lower/default (github.com/gofiber/utils/v2/strings)",
+            "value": 93.72,
+            "unit": "ns/op\t      64 B/op\t       1 allocs/op",
+            "extra": "13439858 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpper/large-lower/default (github.com/gofiber/utils/v2/strings) - ns/op",
+            "value": 93.72,
+            "unit": "ns/op",
+            "extra": "13439858 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpper/large-lower/default (github.com/gofiber/utils/v2/strings) - B/op",
+            "value": 64,
+            "unit": "B/op",
+            "extra": "13439858 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpper/large-lower/default (github.com/gofiber/utils/v2/strings) - allocs/op",
+            "value": 1,
+            "unit": "allocs/op",
+            "extra": "13439858 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpper/large-upper/fiber (github.com/gofiber/utils/v2/strings)",
+            "value": 7.893,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "153207727 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpper/large-upper/fiber (github.com/gofiber/utils/v2/strings) - ns/op",
+            "value": 7.893,
+            "unit": "ns/op",
+            "extra": "153207727 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpper/large-upper/fiber (github.com/gofiber/utils/v2/strings) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "153207727 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpper/large-upper/fiber (github.com/gofiber/utils/v2/strings) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "153207727 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpper/large-upper/fiber/unsafe (github.com/gofiber/utils/v2/strings)",
+            "value": 11.2,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "100000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpper/large-upper/fiber/unsafe (github.com/gofiber/utils/v2/strings) - ns/op",
+            "value": 11.2,
+            "unit": "ns/op",
+            "extra": "100000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpper/large-upper/fiber/unsafe (github.com/gofiber/utils/v2/strings) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "100000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpper/large-upper/fiber/unsafe (github.com/gofiber/utils/v2/strings) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "100000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpper/large-upper/default (github.com/gofiber/utils/v2/strings)",
+            "value": 38.11,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "32610321 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpper/large-upper/default (github.com/gofiber/utils/v2/strings) - ns/op",
+            "value": 38.11,
+            "unit": "ns/op",
+            "extra": "32610321 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpper/large-upper/default (github.com/gofiber/utils/v2/strings) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "32610321 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpper/large-upper/default (github.com/gofiber/utils/v2/strings) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "32610321 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpper/large-mixed/fiber (github.com/gofiber/utils/v2/strings)",
+            "value": 29.57,
+            "unit": "ns/op\t      64 B/op\t       1 allocs/op",
+            "extra": "37378093 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpper/large-mixed/fiber (github.com/gofiber/utils/v2/strings) - ns/op",
+            "value": 29.57,
+            "unit": "ns/op",
+            "extra": "37378093 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpper/large-mixed/fiber (github.com/gofiber/utils/v2/strings) - B/op",
+            "value": 64,
+            "unit": "B/op",
+            "extra": "37378093 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpper/large-mixed/fiber (github.com/gofiber/utils/v2/strings) - allocs/op",
+            "value": 1,
+            "unit": "allocs/op",
+            "extra": "37378093 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpper/large-mixed/fiber/unsafe (github.com/gofiber/utils/v2/strings)",
+            "value": 11.24,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "100000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpper/large-mixed/fiber/unsafe (github.com/gofiber/utils/v2/strings) - ns/op",
+            "value": 11.24,
+            "unit": "ns/op",
+            "extra": "100000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpper/large-mixed/fiber/unsafe (github.com/gofiber/utils/v2/strings) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "100000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpper/large-mixed/fiber/unsafe (github.com/gofiber/utils/v2/strings) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "100000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpper/large-mixed/default (github.com/gofiber/utils/v2/strings)",
+            "value": 144.2,
+            "unit": "ns/op\t      64 B/op\t       1 allocs/op",
+            "extra": "9020749 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpper/large-mixed/default (github.com/gofiber/utils/v2/strings) - ns/op",
+            "value": 144.2,
+            "unit": "ns/op",
+            "extra": "9020749 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpper/large-mixed/default (github.com/gofiber/utils/v2/strings) - B/op",
+            "value": 64,
+            "unit": "B/op",
+            "extra": "9020749 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpper/large-mixed/default (github.com/gofiber/utils/v2/strings) - allocs/op",
+            "value": 1,
+            "unit": "allocs/op",
+            "extra": "9020749 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Load8/fiber (github.com/gofiber/utils/v2/swar)",
+            "value": 453.4,
+            "unit": "ns/op\t9033.29 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "2689770 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Load8/fiber (github.com/gofiber/utils/v2/swar) - ns/op",
+            "value": 453.4,
+            "unit": "ns/op",
+            "extra": "2689770 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Load8/fiber (github.com/gofiber/utils/v2/swar) - MB/s",
+            "value": 9033.29,
+            "unit": "MB/s",
+            "extra": "2689770 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Load8/fiber (github.com/gofiber/utils/v2/swar) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "2689770 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Load8/fiber (github.com/gofiber/utils/v2/swar) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "2689770 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Load8/default (github.com/gofiber/utils/v2/swar)",
+            "value": 542.1,
+            "unit": "ns/op\t7556.21 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "2221122 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Load8/default (github.com/gofiber/utils/v2/swar) - ns/op",
+            "value": 542.1,
+            "unit": "ns/op",
+            "extra": "2221122 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Load8/default (github.com/gofiber/utils/v2/swar) - MB/s",
+            "value": 7556.21,
+            "unit": "MB/s",
+            "extra": "2221122 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Load8/default (github.com/gofiber/utils/v2/swar) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "2221122 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Load8/default (github.com/gofiber/utils/v2/swar) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "2221122 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_EqualFold/fiber (github.com/gofiber/utils/v2)",
+            "value": 18.22,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "64001515 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_EqualFold/fiber (github.com/gofiber/utils/v2) - ns/op",
+            "value": 18.22,
+            "unit": "ns/op",
+            "extra": "64001515 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_EqualFold/fiber (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "64001515 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_EqualFold/fiber (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "64001515 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_EqualFold/default (github.com/gofiber/utils/v2)",
+            "value": 41.92,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "28884934 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_EqualFold/default (github.com/gofiber/utils/v2) - ns/op",
+            "value": 41.92,
+            "unit": "ns/op",
+            "extra": "28884934 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_EqualFold/default (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "28884934 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_EqualFold/default (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "28884934 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimLeftBytes/fiber (github.com/gofiber/utils/v2)",
+            "value": 1.598,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "847677357 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimLeftBytes/fiber (github.com/gofiber/utils/v2) - ns/op",
+            "value": 1.598,
+            "unit": "ns/op",
+            "extra": "847677357 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimLeftBytes/fiber (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "847677357 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimLeftBytes/fiber (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "847677357 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimLeftBytes/default (github.com/gofiber/utils/v2)",
+            "value": 2.422,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "457929192 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimLeftBytes/default (github.com/gofiber/utils/v2) - ns/op",
+            "value": 2.422,
+            "unit": "ns/op",
+            "extra": "457929192 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimLeftBytes/default (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "457929192 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimLeftBytes/default (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "457929192 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpaceBytes/fiber/empty (github.com/gofiber/utils/v2)",
+            "value": 0.2266,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpaceBytes/fiber/empty (github.com/gofiber/utils/v2) - ns/op",
+            "value": 0.2266,
+            "unit": "ns/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpaceBytes/fiber/empty (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpaceBytes/fiber/empty (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpaceBytes/default/empty (github.com/gofiber/utils/v2)",
+            "value": 1.902,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "578762162 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpaceBytes/default/empty (github.com/gofiber/utils/v2) - ns/op",
+            "value": 1.902,
+            "unit": "ns/op",
+            "extra": "578762162 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpaceBytes/default/empty (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "578762162 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpaceBytes/default/empty (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "578762162 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpaceBytes/fiber/spaces (github.com/gofiber/utils/v2)",
+            "value": 1.678,
+            "unit": "ns/op\t1788.13 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "745455535 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpaceBytes/fiber/spaces (github.com/gofiber/utils/v2) - ns/op",
+            "value": 1.678,
+            "unit": "ns/op",
+            "extra": "745455535 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpaceBytes/fiber/spaces (github.com/gofiber/utils/v2) - MB/s",
+            "value": 1788.13,
+            "unit": "MB/s",
+            "extra": "745455535 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpaceBytes/fiber/spaces (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "745455535 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpaceBytes/fiber/spaces (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "745455535 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpaceBytes/default/spaces (github.com/gofiber/utils/v2)",
+            "value": 3.155,
+            "unit": "ns/op\t 950.77 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "398368774 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpaceBytes/default/spaces (github.com/gofiber/utils/v2) - ns/op",
+            "value": 3.155,
+            "unit": "ns/op",
+            "extra": "398368774 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpaceBytes/default/spaces (github.com/gofiber/utils/v2) - MB/s",
+            "value": 950.77,
+            "unit": "MB/s",
+            "extra": "398368774 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpaceBytes/default/spaces (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "398368774 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpaceBytes/default/spaces (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "398368774 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpaceBytes/fiber/ascii-word (github.com/gofiber/utils/v2)",
+            "value": 2.343,
+            "unit": "ns/op\t3840.81 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "575559181 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpaceBytes/fiber/ascii-word (github.com/gofiber/utils/v2) - ns/op",
+            "value": 2.343,
+            "unit": "ns/op",
+            "extra": "575559181 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpaceBytes/fiber/ascii-word (github.com/gofiber/utils/v2) - MB/s",
+            "value": 3840.81,
+            "unit": "MB/s",
+            "extra": "575559181 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpaceBytes/fiber/ascii-word (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "575559181 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpaceBytes/fiber/ascii-word (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "575559181 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpaceBytes/default/ascii-word (github.com/gofiber/utils/v2)",
+            "value": 3.861,
+            "unit": "ns/op\t2330.81 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "316354651 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpaceBytes/default/ascii-word (github.com/gofiber/utils/v2) - ns/op",
+            "value": 3.861,
+            "unit": "ns/op",
+            "extra": "316354651 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpaceBytes/default/ascii-word (github.com/gofiber/utils/v2) - MB/s",
+            "value": 2330.81,
+            "unit": "MB/s",
+            "extra": "316354651 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpaceBytes/default/ascii-word (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "316354651 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpaceBytes/default/ascii-word (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "316354651 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpaceBytes/fiber/auth-header-bearer (github.com/gofiber/utils/v2)",
+            "value": 2.416,
+            "unit": "ns/op\t9932.13 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "485946391 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpaceBytes/fiber/auth-header-bearer (github.com/gofiber/utils/v2) - ns/op",
+            "value": 2.416,
+            "unit": "ns/op",
+            "extra": "485946391 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpaceBytes/fiber/auth-header-bearer (github.com/gofiber/utils/v2) - MB/s",
+            "value": 9932.13,
+            "unit": "MB/s",
+            "extra": "485946391 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpaceBytes/fiber/auth-header-bearer (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "485946391 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpaceBytes/fiber/auth-header-bearer (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "485946391 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpaceBytes/default/auth-header-bearer (github.com/gofiber/utils/v2)",
+            "value": 4.416,
+            "unit": "ns/op\t5435.20 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "270192915 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpaceBytes/default/auth-header-bearer (github.com/gofiber/utils/v2) - ns/op",
+            "value": 4.416,
+            "unit": "ns/op",
+            "extra": "270192915 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpaceBytes/default/auth-header-bearer (github.com/gofiber/utils/v2) - MB/s",
+            "value": 5435.2,
+            "unit": "MB/s",
+            "extra": "270192915 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpaceBytes/default/auth-header-bearer (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "270192915 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpaceBytes/default/auth-header-bearer (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "270192915 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpaceBytes/fiber/auth-header-basic (github.com/gofiber/utils/v2)",
+            "value": 1.979,
+            "unit": "ns/op\t19204.93 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "567832947 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpaceBytes/fiber/auth-header-basic (github.com/gofiber/utils/v2) - ns/op",
+            "value": 1.979,
+            "unit": "ns/op",
+            "extra": "567832947 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpaceBytes/fiber/auth-header-basic (github.com/gofiber/utils/v2) - MB/s",
+            "value": 19204.93,
+            "unit": "MB/s",
+            "extra": "567832947 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpaceBytes/fiber/auth-header-basic (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "567832947 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpaceBytes/fiber/auth-header-basic (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "567832947 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpaceBytes/default/auth-header-basic (github.com/gofiber/utils/v2)",
+            "value": 3.476,
+            "unit": "ns/op\t10932.20 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "351048098 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpaceBytes/default/auth-header-basic (github.com/gofiber/utils/v2) - ns/op",
+            "value": 3.476,
+            "unit": "ns/op",
+            "extra": "351048098 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpaceBytes/default/auth-header-basic (github.com/gofiber/utils/v2) - MB/s",
+            "value": 10932.2,
+            "unit": "MB/s",
+            "extra": "351048098 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpaceBytes/default/auth-header-basic (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "351048098 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpaceBytes/default/auth-header-basic (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "351048098 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpaceBytes/fiber/accept-encoding (github.com/gofiber/utils/v2)",
+            "value": 2.05,
+            "unit": "ns/op\t10242.63 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "631895982 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpaceBytes/fiber/accept-encoding (github.com/gofiber/utils/v2) - ns/op",
+            "value": 2.05,
+            "unit": "ns/op",
+            "extra": "631895982 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpaceBytes/fiber/accept-encoding (github.com/gofiber/utils/v2) - MB/s",
+            "value": 10242.63,
+            "unit": "MB/s",
+            "extra": "631895982 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpaceBytes/fiber/accept-encoding (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "631895982 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpaceBytes/fiber/accept-encoding (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "631895982 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpaceBytes/default/accept-encoding (github.com/gofiber/utils/v2)",
+            "value": 3.995,
+            "unit": "ns/op\t5257.16 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "341184760 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpaceBytes/default/accept-encoding (github.com/gofiber/utils/v2) - ns/op",
+            "value": 3.995,
+            "unit": "ns/op",
+            "extra": "341184760 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpaceBytes/default/accept-encoding (github.com/gofiber/utils/v2) - MB/s",
+            "value": 5257.16,
+            "unit": "MB/s",
+            "extra": "341184760 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpaceBytes/default/accept-encoding (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "341184760 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpaceBytes/default/accept-encoding (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "341184760 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpaceBytes/fiber/content-type (github.com/gofiber/utils/v2)",
+            "value": 1.814,
+            "unit": "ns/op\t11023.49 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "668076474 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpaceBytes/fiber/content-type (github.com/gofiber/utils/v2) - ns/op",
+            "value": 1.814,
+            "unit": "ns/op",
+            "extra": "668076474 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpaceBytes/fiber/content-type (github.com/gofiber/utils/v2) - MB/s",
+            "value": 11023.49,
+            "unit": "MB/s",
+            "extra": "668076474 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpaceBytes/fiber/content-type (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "668076474 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpaceBytes/fiber/content-type (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "668076474 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpaceBytes/default/content-type (github.com/gofiber/utils/v2)",
+            "value": 3.943,
+            "unit": "ns/op\t5071.96 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "350066868 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpaceBytes/default/content-type (github.com/gofiber/utils/v2) - ns/op",
+            "value": 3.943,
+            "unit": "ns/op",
+            "extra": "350066868 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpaceBytes/default/content-type (github.com/gofiber/utils/v2) - MB/s",
+            "value": 5071.96,
+            "unit": "MB/s",
+            "extra": "350066868 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpaceBytes/default/content-type (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "350066868 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpaceBytes/default/content-type (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "350066868 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpaceBytes/fiber/x-forwarded-for (github.com/gofiber/utils/v2)",
+            "value": 1.745,
+            "unit": "ns/op\t16047.67 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "695182125 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpaceBytes/fiber/x-forwarded-for (github.com/gofiber/utils/v2) - ns/op",
+            "value": 1.745,
+            "unit": "ns/op",
+            "extra": "695182125 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpaceBytes/fiber/x-forwarded-for (github.com/gofiber/utils/v2) - MB/s",
+            "value": 16047.67,
+            "unit": "MB/s",
+            "extra": "695182125 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpaceBytes/fiber/x-forwarded-for (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "695182125 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpaceBytes/fiber/x-forwarded-for (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "695182125 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpaceBytes/default/x-forwarded-for (github.com/gofiber/utils/v2)",
+            "value": 3.345,
+            "unit": "ns/op\t8370.77 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "352965117 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpaceBytes/default/x-forwarded-for (github.com/gofiber/utils/v2) - ns/op",
+            "value": 3.345,
+            "unit": "ns/op",
+            "extra": "352965117 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpaceBytes/default/x-forwarded-for (github.com/gofiber/utils/v2) - MB/s",
+            "value": 8370.77,
+            "unit": "MB/s",
+            "extra": "352965117 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpaceBytes/default/x-forwarded-for (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "352965117 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpaceBytes/default/x-forwarded-for (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "352965117 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpaceBytes/fiber/query-params (github.com/gofiber/utils/v2)",
+            "value": 1.95,
+            "unit": "ns/op\t10258.14 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "639300870 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpaceBytes/fiber/query-params (github.com/gofiber/utils/v2) - ns/op",
+            "value": 1.95,
+            "unit": "ns/op",
+            "extra": "639300870 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpaceBytes/fiber/query-params (github.com/gofiber/utils/v2) - MB/s",
+            "value": 10258.14,
+            "unit": "MB/s",
+            "extra": "639300870 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpaceBytes/fiber/query-params (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "639300870 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpaceBytes/fiber/query-params (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "639300870 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpaceBytes/default/query-params (github.com/gofiber/utils/v2)",
+            "value": 3.626,
+            "unit": "ns/op\t5515.45 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "328445839 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpaceBytes/default/query-params (github.com/gofiber/utils/v2) - ns/op",
+            "value": 3.626,
+            "unit": "ns/op",
+            "extra": "328445839 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpaceBytes/default/query-params (github.com/gofiber/utils/v2) - MB/s",
+            "value": 5515.45,
+            "unit": "MB/s",
+            "extra": "328445839 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpaceBytes/default/query-params (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "328445839 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpaceBytes/default/query-params (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "328445839 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpaceBytes/fiber/ascii-long (github.com/gofiber/utils/v2)",
+            "value": 2.971,
+            "unit": "ns/op\t34328.49 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "419362126 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpaceBytes/fiber/ascii-long (github.com/gofiber/utils/v2) - ns/op",
+            "value": 2.971,
+            "unit": "ns/op",
+            "extra": "419362126 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpaceBytes/fiber/ascii-long (github.com/gofiber/utils/v2) - MB/s",
+            "value": 34328.49,
+            "unit": "MB/s",
+            "extra": "419362126 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpaceBytes/fiber/ascii-long (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "419362126 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpaceBytes/fiber/ascii-long (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "419362126 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpaceBytes/default/ascii-long (github.com/gofiber/utils/v2)",
+            "value": 4.687,
+            "unit": "ns/op\t21762.95 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "255581208 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpaceBytes/default/ascii-long (github.com/gofiber/utils/v2) - ns/op",
+            "value": 4.687,
+            "unit": "ns/op",
+            "extra": "255581208 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpaceBytes/default/ascii-long (github.com/gofiber/utils/v2) - MB/s",
+            "value": 21762.95,
+            "unit": "MB/s",
+            "extra": "255581208 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpaceBytes/default/ascii-long (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "255581208 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpaceBytes/default/ascii-long (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "255581208 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpaceBytes/fiber/no-trim (github.com/gofiber/utils/v2)",
+            "value": 0.4292,
+            "unit": "ns/op\t11648.24 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpaceBytes/fiber/no-trim (github.com/gofiber/utils/v2) - ns/op",
+            "value": 0.4292,
+            "unit": "ns/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpaceBytes/fiber/no-trim (github.com/gofiber/utils/v2) - MB/s",
+            "value": 11648.24,
+            "unit": "MB/s",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpaceBytes/fiber/no-trim (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpaceBytes/fiber/no-trim (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "1000000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpaceBytes/default/no-trim (github.com/gofiber/utils/v2)",
+            "value": 2.085,
+            "unit": "ns/op\t2397.86 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "607894725 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpaceBytes/default/no-trim (github.com/gofiber/utils/v2) - ns/op",
+            "value": 2.085,
+            "unit": "ns/op",
+            "extra": "607894725 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpaceBytes/default/no-trim (github.com/gofiber/utils/v2) - MB/s",
+            "value": 2397.86,
+            "unit": "MB/s",
+            "extra": "607894725 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpaceBytes/default/no-trim (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "607894725 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpaceBytes/default/no-trim (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "607894725 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpaceBytes/fiber/mixed-whitespace (github.com/gofiber/utils/v2)",
+            "value": 2.231,
+            "unit": "ns/op\t7619.11 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "487610695 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpaceBytes/fiber/mixed-whitespace (github.com/gofiber/utils/v2) - ns/op",
+            "value": 2.231,
+            "unit": "ns/op",
+            "extra": "487610695 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpaceBytes/fiber/mixed-whitespace (github.com/gofiber/utils/v2) - MB/s",
+            "value": 7619.11,
+            "unit": "MB/s",
+            "extra": "487610695 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpaceBytes/fiber/mixed-whitespace (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "487610695 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpaceBytes/fiber/mixed-whitespace (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "487610695 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpaceBytes/default/mixed-whitespace (github.com/gofiber/utils/v2)",
+            "value": 4.966,
+            "unit": "ns/op\t3423.46 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "265069478 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpaceBytes/default/mixed-whitespace (github.com/gofiber/utils/v2) - ns/op",
+            "value": 4.966,
+            "unit": "ns/op",
+            "extra": "265069478 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpaceBytes/default/mixed-whitespace (github.com/gofiber/utils/v2) - MB/s",
+            "value": 3423.46,
+            "unit": "MB/s",
+            "extra": "265069478 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpaceBytes/default/mixed-whitespace (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "265069478 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TrimSpaceBytes/default/mixed-whitespace (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "265069478 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TokenGenerators/UUIDv4 (github.com/gofiber/utils/v2)",
+            "value": 233.5,
+            "unit": "ns/op\t      64 B/op\t       2 allocs/op",
+            "extra": "5472966 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TokenGenerators/UUIDv4 (github.com/gofiber/utils/v2) - ns/op",
+            "value": 233.5,
+            "unit": "ns/op",
+            "extra": "5472966 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TokenGenerators/UUIDv4 (github.com/gofiber/utils/v2) - B/op",
+            "value": 64,
+            "unit": "B/op",
+            "extra": "5472966 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TokenGenerators/UUIDv4 (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 2,
+            "unit": "allocs/op",
+            "extra": "5472966 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TokenGenerators/SecureToken (github.com/gofiber/utils/v2)",
+            "value": 198,
+            "unit": "ns/op\t      48 B/op\t       1 allocs/op",
+            "extra": "5967420 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TokenGenerators/SecureToken (github.com/gofiber/utils/v2) - ns/op",
+            "value": 198,
+            "unit": "ns/op",
+            "extra": "5967420 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TokenGenerators/SecureToken (github.com/gofiber/utils/v2) - B/op",
+            "value": 48,
+            "unit": "B/op",
+            "extra": "5967420 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_TokenGenerators/SecureToken (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 1,
+            "unit": "allocs/op",
+            "extra": "5967420 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_FormatUint32/fiber (github.com/gofiber/utils/v2)",
+            "value": 17.93,
+            "unit": "ns/op\t      16 B/op\t       1 allocs/op",
+            "extra": "58574272 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_FormatUint32/fiber (github.com/gofiber/utils/v2) - ns/op",
+            "value": 17.93,
+            "unit": "ns/op",
+            "extra": "58574272 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_FormatUint32/fiber (github.com/gofiber/utils/v2) - B/op",
+            "value": 16,
+            "unit": "B/op",
+            "extra": "58574272 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_FormatUint32/fiber (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 1,
+            "unit": "allocs/op",
+            "extra": "58574272 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_FormatUint32/strconv (github.com/gofiber/utils/v2)",
+            "value": 18.13,
+            "unit": "ns/op\t      16 B/op\t       1 allocs/op",
+            "extra": "65863620 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_FormatUint32/strconv (github.com/gofiber/utils/v2) - ns/op",
+            "value": 18.13,
+            "unit": "ns/op",
+            "extra": "65863620 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_FormatUint32/strconv (github.com/gofiber/utils/v2) - B/op",
+            "value": 16,
+            "unit": "B/op",
+            "extra": "65863620 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_FormatUint32/strconv (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 1,
+            "unit": "allocs/op",
+            "extra": "65863620 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_FormatInt32/fiber (github.com/gofiber/utils/v2)",
+            "value": 16.58,
+            "unit": "ns/op\t      16 B/op\t       1 allocs/op",
+            "extra": "71620252 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_FormatInt32/fiber (github.com/gofiber/utils/v2) - ns/op",
+            "value": 16.58,
+            "unit": "ns/op",
+            "extra": "71620252 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_FormatInt32/fiber (github.com/gofiber/utils/v2) - B/op",
+            "value": 16,
+            "unit": "B/op",
+            "extra": "71620252 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_FormatInt32/fiber (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 1,
+            "unit": "allocs/op",
+            "extra": "71620252 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_FormatInt32/strconv (github.com/gofiber/utils/v2)",
+            "value": 18.69,
+            "unit": "ns/op\t      16 B/op\t       1 allocs/op",
+            "extra": "69538740 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_FormatInt32/strconv (github.com/gofiber/utils/v2) - ns/op",
+            "value": 18.69,
+            "unit": "ns/op",
+            "extra": "69538740 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_FormatInt32/strconv (github.com/gofiber/utils/v2) - B/op",
+            "value": 16,
+            "unit": "B/op",
+            "extra": "69538740 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_FormatInt32/strconv (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 1,
+            "unit": "allocs/op",
+            "extra": "69538740 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AppendInt/small_neg/fiber (github.com/gofiber/utils/v2)",
+            "value": 3.031,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "446770936 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AppendInt/small_neg/fiber (github.com/gofiber/utils/v2) - ns/op",
+            "value": 3.031,
+            "unit": "ns/op",
+            "extra": "446770936 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AppendInt/small_neg/fiber (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "446770936 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AppendInt/small_neg/fiber (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "446770936 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AppendInt/small_neg/strconv (github.com/gofiber/utils/v2)",
+            "value": 6.185,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "189182416 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AppendInt/small_neg/strconv (github.com/gofiber/utils/v2) - ns/op",
+            "value": 6.185,
+            "unit": "ns/op",
+            "extra": "189182416 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AppendInt/small_neg/strconv (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "189182416 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AppendInt/small_neg/strconv (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "189182416 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AppendInt/medium_neg/fiber (github.com/gofiber/utils/v2)",
+            "value": 8.476,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "141139398 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AppendInt/medium_neg/fiber (github.com/gofiber/utils/v2) - ns/op",
+            "value": 8.476,
+            "unit": "ns/op",
+            "extra": "141139398 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AppendInt/medium_neg/fiber (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "141139398 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AppendInt/medium_neg/fiber (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "141139398 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AppendInt/medium_neg/strconv (github.com/gofiber/utils/v2)",
+            "value": 9.893,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "123352052 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AppendInt/medium_neg/strconv (github.com/gofiber/utils/v2) - ns/op",
+            "value": 9.893,
+            "unit": "ns/op",
+            "extra": "123352052 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AppendInt/medium_neg/strconv (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "123352052 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AppendInt/medium_neg/strconv (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "123352052 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_CanonicalHeaderKey/canonical/fiber (github.com/gofiber/utils/v2)",
+            "value": 8.544,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "137481823 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_CanonicalHeaderKey/canonical/fiber (github.com/gofiber/utils/v2) - ns/op",
+            "value": 8.544,
+            "unit": "ns/op",
+            "extra": "137481823 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_CanonicalHeaderKey/canonical/fiber (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "137481823 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_CanonicalHeaderKey/canonical/fiber (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "137481823 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_CanonicalHeaderKey/canonical/default (github.com/gofiber/utils/v2)",
+            "value": 15.5,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "81143221 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_CanonicalHeaderKey/canonical/default (github.com/gofiber/utils/v2) - ns/op",
+            "value": 15.5,
+            "unit": "ns/op",
+            "extra": "81143221 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_CanonicalHeaderKey/canonical/default (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "81143221 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_CanonicalHeaderKey/canonical/default (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "81143221 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_CanonicalHeaderKey/common-lower/fiber (github.com/gofiber/utils/v2)",
+            "value": 22.59,
+            "unit": "ns/op\t      16 B/op\t       1 allocs/op",
+            "extra": "53412998 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_CanonicalHeaderKey/common-lower/fiber (github.com/gofiber/utils/v2) - ns/op",
+            "value": 22.59,
+            "unit": "ns/op",
+            "extra": "53412998 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_CanonicalHeaderKey/common-lower/fiber (github.com/gofiber/utils/v2) - B/op",
+            "value": 16,
+            "unit": "B/op",
+            "extra": "53412998 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_CanonicalHeaderKey/common-lower/fiber (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 1,
+            "unit": "allocs/op",
+            "extra": "53412998 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_CanonicalHeaderKey/common-lower/default (github.com/gofiber/utils/v2)",
+            "value": 33.84,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "35217860 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_CanonicalHeaderKey/common-lower/default (github.com/gofiber/utils/v2) - ns/op",
+            "value": 33.84,
+            "unit": "ns/op",
+            "extra": "35217860 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_CanonicalHeaderKey/common-lower/default (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "35217860 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_CanonicalHeaderKey/common-lower/default (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "35217860 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_CanonicalHeaderKey/custom-lower/fiber (github.com/gofiber/utils/v2)",
+            "value": 31.88,
+            "unit": "ns/op\t      24 B/op\t       1 allocs/op",
+            "extra": "37817161 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_CanonicalHeaderKey/custom-lower/fiber (github.com/gofiber/utils/v2) - ns/op",
+            "value": 31.88,
+            "unit": "ns/op",
+            "extra": "37817161 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_CanonicalHeaderKey/custom-lower/fiber (github.com/gofiber/utils/v2) - B/op",
+            "value": 24,
+            "unit": "B/op",
+            "extra": "37817161 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_CanonicalHeaderKey/custom-lower/fiber (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 1,
+            "unit": "allocs/op",
+            "extra": "37817161 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_CanonicalHeaderKey/custom-lower/default (github.com/gofiber/utils/v2)",
+            "value": 51.42,
+            "unit": "ns/op\t      24 B/op\t       1 allocs/op",
+            "extra": "23055248 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_CanonicalHeaderKey/custom-lower/default (github.com/gofiber/utils/v2) - ns/op",
+            "value": 51.42,
+            "unit": "ns/op",
+            "extra": "23055248 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_CanonicalHeaderKey/custom-lower/default (github.com/gofiber/utils/v2) - B/op",
+            "value": 24,
+            "unit": "B/op",
+            "extra": "23055248 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_CanonicalHeaderKey/custom-lower/default (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 1,
+            "unit": "allocs/op",
+            "extra": "23055248 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseVendorSpecificContentType/vendorContentType (github.com/gofiber/utils/v2)",
+            "value": 9.862,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "121596168 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseVendorSpecificContentType/vendorContentType (github.com/gofiber/utils/v2) - ns/op",
+            "value": 9.862,
+            "unit": "ns/op",
+            "extra": "121596168 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseVendorSpecificContentType/vendorContentType (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "121596168 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseVendorSpecificContentType/vendorContentType (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "121596168 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseVendorSpecificContentType/defaultContentType (github.com/gofiber/utils/v2)",
+            "value": 3.215,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "366662464 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseVendorSpecificContentType/defaultContentType (github.com/gofiber/utils/v2) - ns/op",
+            "value": 3.215,
+            "unit": "ns/op",
+            "extra": "366662464 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseVendorSpecificContentType/defaultContentType (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "366662464 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseVendorSpecificContentType/defaultContentType (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "366662464 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseHTTPDate/fiber (github.com/gofiber/utils/v2)",
+            "value": 14,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "74038749 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseHTTPDate/fiber (github.com/gofiber/utils/v2) - ns/op",
+            "value": 14,
+            "unit": "ns/op",
+            "extra": "74038749 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseHTTPDate/fiber (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "74038749 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseHTTPDate/fiber (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "74038749 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseHTTPDate/default (github.com/gofiber/utils/v2)",
+            "value": 92.09,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "13527369 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseHTTPDate/default (github.com/gofiber/utils/v2) - ns/op",
+            "value": 92.09,
+            "unit": "ns/op",
+            "extra": "13527369 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseHTTPDate/default (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "13527369 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseHTTPDate/default (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "13527369 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IsIPv4/fiber (github.com/gofiber/utils/v2)",
+            "value": 10.33,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "100000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IsIPv4/fiber (github.com/gofiber/utils/v2) - ns/op",
+            "value": 10.33,
+            "unit": "ns/op",
+            "extra": "100000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IsIPv4/fiber (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "100000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IsIPv4/fiber (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "100000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IsIPv4/default (github.com/gofiber/utils/v2)",
+            "value": 20.56,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "61241314 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IsIPv4/default (github.com/gofiber/utils/v2) - ns/op",
+            "value": 20.56,
+            "unit": "ns/op",
+            "extra": "61241314 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IsIPv4/default (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "61241314 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IsIPv4/default (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "61241314 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseInt16/fiber (github.com/gofiber/utils/v2)",
+            "value": 4.085,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "276967076 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseInt16/fiber (github.com/gofiber/utils/v2) - ns/op",
+            "value": 4.085,
+            "unit": "ns/op",
+            "extra": "276967076 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseInt16/fiber (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "276967076 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseInt16/fiber (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "276967076 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseInt16/fiber_bytes (github.com/gofiber/utils/v2)",
+            "value": 4.491,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "282954846 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseInt16/fiber_bytes (github.com/gofiber/utils/v2) - ns/op",
+            "value": 4.491,
+            "unit": "ns/op",
+            "extra": "282954846 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseInt16/fiber_bytes (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "282954846 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseInt16/fiber_bytes (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "282954846 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseInt16/default (github.com/gofiber/utils/v2)",
+            "value": 8.084,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "150585584 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseInt16/default (github.com/gofiber/utils/v2) - ns/op",
+            "value": 8.084,
+            "unit": "ns/op",
+            "extra": "150585584 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseInt16/default (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "150585584 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseInt16/default (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "150585584 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseUint16/fiber (github.com/gofiber/utils/v2)",
+            "value": 3.827,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "324550754 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseUint16/fiber (github.com/gofiber/utils/v2) - ns/op",
+            "value": 3.827,
+            "unit": "ns/op",
+            "extra": "324550754 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseUint16/fiber (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "324550754 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseUint16/fiber (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "324550754 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseUint16/fiber_bytes (github.com/gofiber/utils/v2)",
+            "value": 3.691,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "305905171 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseUint16/fiber_bytes (github.com/gofiber/utils/v2) - ns/op",
+            "value": 3.691,
+            "unit": "ns/op",
+            "extra": "305905171 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseUint16/fiber_bytes (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "305905171 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseUint16/fiber_bytes (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "305905171 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseUint16/default (github.com/gofiber/utils/v2)",
+            "value": 5.916,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "193493452 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseUint16/default (github.com/gofiber/utils/v2) - ns/op",
+            "value": 5.916,
+            "unit": "ns/op",
+            "extra": "193493452 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseUint16/default (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "193493452 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ParseUint16/default (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "193493452 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny3/7B/swar (github.com/gofiber/utils/v2)",
+            "value": 3.173,
+            "unit": "ns/op\t2206.26 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "405891397 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny3/7B/swar (github.com/gofiber/utils/v2) - ns/op",
+            "value": 3.173,
+            "unit": "ns/op",
+            "extra": "405891397 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny3/7B/swar (github.com/gofiber/utils/v2) - MB/s",
+            "value": 2206.26,
+            "unit": "MB/s",
+            "extra": "405891397 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny3/7B/swar (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "405891397 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny3/7B/swar (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "405891397 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny3/7B/scalar (github.com/gofiber/utils/v2)",
+            "value": 2.608,
+            "unit": "ns/op\t2683.68 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "447882451 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny3/7B/scalar (github.com/gofiber/utils/v2) - ns/op",
+            "value": 2.608,
+            "unit": "ns/op",
+            "extra": "447882451 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny3/7B/scalar (github.com/gofiber/utils/v2) - MB/s",
+            "value": 2683.68,
+            "unit": "MB/s",
+            "extra": "447882451 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny3/7B/scalar (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "447882451 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny3/7B/scalar (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "447882451 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny3/8B/swar (github.com/gofiber/utils/v2)",
+            "value": 3.078,
+            "unit": "ns/op\t2599.18 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "384262617 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny3/8B/swar (github.com/gofiber/utils/v2) - ns/op",
+            "value": 3.078,
+            "unit": "ns/op",
+            "extra": "384262617 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny3/8B/swar (github.com/gofiber/utils/v2) - MB/s",
+            "value": 2599.18,
+            "unit": "MB/s",
+            "extra": "384262617 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny3/8B/swar (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "384262617 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny3/8B/swar (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "384262617 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny3/8B/scalar (github.com/gofiber/utils/v2)",
+            "value": 3.25,
+            "unit": "ns/op\t2461.77 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "412560094 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny3/8B/scalar (github.com/gofiber/utils/v2) - ns/op",
+            "value": 3.25,
+            "unit": "ns/op",
+            "extra": "412560094 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny3/8B/scalar (github.com/gofiber/utils/v2) - MB/s",
+            "value": 2461.77,
+            "unit": "MB/s",
+            "extra": "412560094 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny3/8B/scalar (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "412560094 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny3/8B/scalar (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "412560094 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny3/16B/swar (github.com/gofiber/utils/v2)",
+            "value": 4.325,
+            "unit": "ns/op\t3699.28 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "280830762 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny3/16B/swar (github.com/gofiber/utils/v2) - ns/op",
+            "value": 4.325,
+            "unit": "ns/op",
+            "extra": "280830762 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny3/16B/swar (github.com/gofiber/utils/v2) - MB/s",
+            "value": 3699.28,
+            "unit": "MB/s",
+            "extra": "280830762 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny3/16B/swar (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "280830762 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny3/16B/swar (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "280830762 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny3/16B/scalar (github.com/gofiber/utils/v2)",
+            "value": 5.28,
+            "unit": "ns/op\t3030.29 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "235054168 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny3/16B/scalar (github.com/gofiber/utils/v2) - ns/op",
+            "value": 5.28,
+            "unit": "ns/op",
+            "extra": "235054168 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny3/16B/scalar (github.com/gofiber/utils/v2) - MB/s",
+            "value": 3030.29,
+            "unit": "MB/s",
+            "extra": "235054168 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny3/16B/scalar (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "235054168 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny3/16B/scalar (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "235054168 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny3/32B/swar (github.com/gofiber/utils/v2)",
+            "value": 3.505,
+            "unit": "ns/op\t9129.53 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "341012826 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny3/32B/swar (github.com/gofiber/utils/v2) - ns/op",
+            "value": 3.505,
+            "unit": "ns/op",
+            "extra": "341012826 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny3/32B/swar (github.com/gofiber/utils/v2) - MB/s",
+            "value": 9129.53,
+            "unit": "MB/s",
+            "extra": "341012826 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny3/32B/swar (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "341012826 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny3/32B/swar (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "341012826 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny3/32B/scalar (github.com/gofiber/utils/v2)",
+            "value": 9.627,
+            "unit": "ns/op\t3324.08 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "127343953 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny3/32B/scalar (github.com/gofiber/utils/v2) - ns/op",
+            "value": 9.627,
+            "unit": "ns/op",
+            "extra": "127343953 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny3/32B/scalar (github.com/gofiber/utils/v2) - MB/s",
+            "value": 3324.08,
+            "unit": "MB/s",
+            "extra": "127343953 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny3/32B/scalar (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "127343953 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny3/32B/scalar (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "127343953 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny3/64B/swar (github.com/gofiber/utils/v2)",
+            "value": 3.686,
+            "unit": "ns/op\t17362.01 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "317270571 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny3/64B/swar (github.com/gofiber/utils/v2) - ns/op",
+            "value": 3.686,
+            "unit": "ns/op",
+            "extra": "317270571 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny3/64B/swar (github.com/gofiber/utils/v2) - MB/s",
+            "value": 17362.01,
+            "unit": "MB/s",
+            "extra": "317270571 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny3/64B/swar (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "317270571 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny3/64B/swar (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "317270571 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny3/64B/scalar (github.com/gofiber/utils/v2)",
+            "value": 18.21,
+            "unit": "ns/op\t3515.45 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "66126015 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny3/64B/scalar (github.com/gofiber/utils/v2) - ns/op",
+            "value": 18.21,
+            "unit": "ns/op",
+            "extra": "66126015 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny3/64B/scalar (github.com/gofiber/utils/v2) - MB/s",
+            "value": 3515.45,
+            "unit": "MB/s",
+            "extra": "66126015 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny3/64B/scalar (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "66126015 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny3/64B/scalar (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "66126015 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny3/512B/swar (github.com/gofiber/utils/v2)",
+            "value": 8.815,
+            "unit": "ns/op\t58082.43 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "137201538 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny3/512B/swar (github.com/gofiber/utils/v2) - ns/op",
+            "value": 8.815,
+            "unit": "ns/op",
+            "extra": "137201538 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny3/512B/swar (github.com/gofiber/utils/v2) - MB/s",
+            "value": 58082.43,
+            "unit": "MB/s",
+            "extra": "137201538 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny3/512B/swar (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "137201538 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny3/512B/swar (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "137201538 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny3/512B/scalar (github.com/gofiber/utils/v2)",
+            "value": 150.4,
+            "unit": "ns/op\t3404.69 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "8132846 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny3/512B/scalar (github.com/gofiber/utils/v2) - ns/op",
+            "value": 150.4,
+            "unit": "ns/op",
+            "extra": "8132846 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny3/512B/scalar (github.com/gofiber/utils/v2) - MB/s",
+            "value": 3404.69,
+            "unit": "MB/s",
+            "extra": "8132846 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny3/512B/scalar (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "8132846 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexAny3/512B/scalar (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "8132846 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AppendQueryUnescape/plain-64B/fiber (github.com/gofiber/utils/v2)",
+            "value": 8.616,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "138706990 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AppendQueryUnescape/plain-64B/fiber (github.com/gofiber/utils/v2) - ns/op",
+            "value": 8.616,
+            "unit": "ns/op",
+            "extra": "138706990 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AppendQueryUnescape/plain-64B/fiber (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "138706990 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AppendQueryUnescape/plain-64B/fiber (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "138706990 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AppendQueryUnescape/plain-64B/default (github.com/gofiber/utils/v2)",
+            "value": 65.7,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "17821532 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AppendQueryUnescape/plain-64B/default (github.com/gofiber/utils/v2) - ns/op",
+            "value": 65.7,
+            "unit": "ns/op",
+            "extra": "17821532 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AppendQueryUnescape/plain-64B/default (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "17821532 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AppendQueryUnescape/plain-64B/default (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "17821532 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AppendQueryUnescape/escaped-64B/fiber (github.com/gofiber/utils/v2)",
+            "value": 113.6,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "10078578 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AppendQueryUnescape/escaped-64B/fiber (github.com/gofiber/utils/v2) - ns/op",
+            "value": 113.6,
+            "unit": "ns/op",
+            "extra": "10078578 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AppendQueryUnescape/escaped-64B/fiber (github.com/gofiber/utils/v2) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "10078578 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AppendQueryUnescape/escaped-64B/fiber (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "10078578 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AppendQueryUnescape/escaped-64B/default (github.com/gofiber/utils/v2)",
+            "value": 127.2,
+            "unit": "ns/op\t      48 B/op\t       1 allocs/op",
+            "extra": "9153169 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AppendQueryUnescape/escaped-64B/default (github.com/gofiber/utils/v2) - ns/op",
+            "value": 127.2,
+            "unit": "ns/op",
+            "extra": "9153169 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AppendQueryUnescape/escaped-64B/default (github.com/gofiber/utils/v2) - B/op",
+            "value": 48,
+            "unit": "B/op",
+            "extra": "9153169 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_AppendQueryUnescape/escaped-64B/default (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 1,
+            "unit": "allocs/op",
+            "extra": "9153169 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_GolangXMLEncoder (github.com/gofiber/utils/v2)",
+            "value": 1358,
+            "unit": "ns/op\t    4864 B/op\t      12 allocs/op",
+            "extra": "801664 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_GolangXMLEncoder (github.com/gofiber/utils/v2) - ns/op",
+            "value": 1358,
+            "unit": "ns/op",
+            "extra": "801664 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_GolangXMLEncoder (github.com/gofiber/utils/v2) - B/op",
+            "value": 4864,
+            "unit": "B/op",
+            "extra": "801664 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_GolangXMLEncoder (github.com/gofiber/utils/v2) - allocs/op",
+            "value": 12,
+            "unit": "allocs/op",
+            "extra": "801664 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpperBytes/empty/fiber (github.com/gofiber/utils/v2/bytes)",
+            "value": 1.729,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "686022384 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpperBytes/empty/fiber (github.com/gofiber/utils/v2/bytes) - ns/op",
+            "value": 1.729,
+            "unit": "ns/op",
+            "extra": "686022384 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpperBytes/empty/fiber (github.com/gofiber/utils/v2/bytes) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "686022384 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpperBytes/empty/fiber (github.com/gofiber/utils/v2/bytes) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "686022384 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpperBytes/empty/fiber/unsafe (github.com/gofiber/utils/v2/bytes)",
+            "value": 1.694,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "746599239 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpperBytes/empty/fiber/unsafe (github.com/gofiber/utils/v2/bytes) - ns/op",
+            "value": 1.694,
+            "unit": "ns/op",
+            "extra": "746599239 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpperBytes/empty/fiber/unsafe (github.com/gofiber/utils/v2/bytes) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "746599239 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpperBytes/empty/fiber/unsafe (github.com/gofiber/utils/v2/bytes) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "746599239 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpperBytes/empty/default (github.com/gofiber/utils/v2/bytes)",
+            "value": 3.021,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "418157092 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpperBytes/empty/default (github.com/gofiber/utils/v2/bytes) - ns/op",
+            "value": 3.021,
+            "unit": "ns/op",
+            "extra": "418157092 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpperBytes/empty/default (github.com/gofiber/utils/v2/bytes) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "418157092 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpperBytes/empty/default (github.com/gofiber/utils/v2/bytes) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "418157092 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpperBytes/http-get/fiber (github.com/gofiber/utils/v2/bytes)",
+            "value": 9.029,
+            "unit": "ns/op\t       3 B/op\t       1 allocs/op",
+            "extra": "140377261 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpperBytes/http-get/fiber (github.com/gofiber/utils/v2/bytes) - ns/op",
+            "value": 9.029,
+            "unit": "ns/op",
+            "extra": "140377261 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpperBytes/http-get/fiber (github.com/gofiber/utils/v2/bytes) - B/op",
+            "value": 3,
+            "unit": "B/op",
+            "extra": "140377261 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpperBytes/http-get/fiber (github.com/gofiber/utils/v2/bytes) - allocs/op",
+            "value": 1,
+            "unit": "allocs/op",
+            "extra": "140377261 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpperBytes/http-get/fiber/unsafe (github.com/gofiber/utils/v2/bytes)",
+            "value": 3.347,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "371296082 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpperBytes/http-get/fiber/unsafe (github.com/gofiber/utils/v2/bytes) - ns/op",
+            "value": 3.347,
+            "unit": "ns/op",
+            "extra": "371296082 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpperBytes/http-get/fiber/unsafe (github.com/gofiber/utils/v2/bytes) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "371296082 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpperBytes/http-get/fiber/unsafe (github.com/gofiber/utils/v2/bytes) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "371296082 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpperBytes/http-get/default (github.com/gofiber/utils/v2/bytes)",
+            "value": 9.998,
+            "unit": "ns/op\t       8 B/op\t       1 allocs/op",
+            "extra": "122130997 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpperBytes/http-get/default (github.com/gofiber/utils/v2/bytes) - ns/op",
+            "value": 9.998,
+            "unit": "ns/op",
+            "extra": "122130997 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpperBytes/http-get/default (github.com/gofiber/utils/v2/bytes) - B/op",
+            "value": 8,
+            "unit": "B/op",
+            "extra": "122130997 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpperBytes/http-get/default (github.com/gofiber/utils/v2/bytes) - allocs/op",
+            "value": 1,
+            "unit": "allocs/op",
+            "extra": "122130997 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpperBytes/http-get-upper/fiber (github.com/gofiber/utils/v2/bytes)",
+            "value": 2.513,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "471194504 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpperBytes/http-get-upper/fiber (github.com/gofiber/utils/v2/bytes) - ns/op",
+            "value": 2.513,
+            "unit": "ns/op",
+            "extra": "471194504 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpperBytes/http-get-upper/fiber (github.com/gofiber/utils/v2/bytes) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "471194504 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpperBytes/http-get-upper/fiber (github.com/gofiber/utils/v2/bytes) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "471194504 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpperBytes/http-get-upper/fiber/unsafe (github.com/gofiber/utils/v2/bytes)",
+            "value": 3.152,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "384878938 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpperBytes/http-get-upper/fiber/unsafe (github.com/gofiber/utils/v2/bytes) - ns/op",
+            "value": 3.152,
+            "unit": "ns/op",
+            "extra": "384878938 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpperBytes/http-get-upper/fiber/unsafe (github.com/gofiber/utils/v2/bytes) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "384878938 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpperBytes/http-get-upper/fiber/unsafe (github.com/gofiber/utils/v2/bytes) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "384878938 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpperBytes/http-get-upper/default (github.com/gofiber/utils/v2/bytes)",
+            "value": 14.94,
+            "unit": "ns/op\t       8 B/op\t       1 allocs/op",
+            "extra": "82508988 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpperBytes/http-get-upper/default (github.com/gofiber/utils/v2/bytes) - ns/op",
+            "value": 14.94,
+            "unit": "ns/op",
+            "extra": "82508988 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpperBytes/http-get-upper/default (github.com/gofiber/utils/v2/bytes) - B/op",
+            "value": 8,
+            "unit": "B/op",
+            "extra": "82508988 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpperBytes/http-get-upper/default (github.com/gofiber/utils/v2/bytes) - allocs/op",
+            "value": 1,
+            "unit": "allocs/op",
+            "extra": "82508988 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpperBytes/header-content-type-mixed/fiber (github.com/gofiber/utils/v2/bytes)",
+            "value": 23.22,
+            "unit": "ns/op\t      48 B/op\t       1 allocs/op",
+            "extra": "52069545 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpperBytes/header-content-type-mixed/fiber (github.com/gofiber/utils/v2/bytes) - ns/op",
+            "value": 23.22,
+            "unit": "ns/op",
+            "extra": "52069545 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpperBytes/header-content-type-mixed/fiber (github.com/gofiber/utils/v2/bytes) - B/op",
+            "value": 48,
+            "unit": "B/op",
+            "extra": "52069545 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpperBytes/header-content-type-mixed/fiber (github.com/gofiber/utils/v2/bytes) - allocs/op",
+            "value": 1,
+            "unit": "allocs/op",
+            "extra": "52069545 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpperBytes/header-content-type-mixed/fiber/unsafe (github.com/gofiber/utils/v2/bytes)",
+            "value": 14.97,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "112307277 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpperBytes/header-content-type-mixed/fiber/unsafe (github.com/gofiber/utils/v2/bytes) - ns/op",
+            "value": 14.97,
+            "unit": "ns/op",
+            "extra": "112307277 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpperBytes/header-content-type-mixed/fiber/unsafe (github.com/gofiber/utils/v2/bytes) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "112307277 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpperBytes/header-content-type-mixed/fiber/unsafe (github.com/gofiber/utils/v2/bytes) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "112307277 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpperBytes/header-content-type-mixed/default (github.com/gofiber/utils/v2/bytes)",
+            "value": 40.24,
+            "unit": "ns/op\t      48 B/op\t       1 allocs/op",
+            "extra": "29383786 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpperBytes/header-content-type-mixed/default (github.com/gofiber/utils/v2/bytes) - ns/op",
+            "value": 40.24,
+            "unit": "ns/op",
+            "extra": "29383786 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpperBytes/header-content-type-mixed/default (github.com/gofiber/utils/v2/bytes) - B/op",
+            "value": 48,
+            "unit": "B/op",
+            "extra": "29383786 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpperBytes/header-content-type-mixed/default (github.com/gofiber/utils/v2/bytes) - allocs/op",
+            "value": 1,
+            "unit": "allocs/op",
+            "extra": "29383786 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpperBytes/large-lower/fiber (github.com/gofiber/utils/v2/bytes)",
+            "value": 26.49,
+            "unit": "ns/op\t      64 B/op\t       1 allocs/op",
+            "extra": "44930095 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpperBytes/large-lower/fiber (github.com/gofiber/utils/v2/bytes) - ns/op",
+            "value": 26.49,
+            "unit": "ns/op",
+            "extra": "44930095 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpperBytes/large-lower/fiber (github.com/gofiber/utils/v2/bytes) - B/op",
+            "value": 64,
+            "unit": "B/op",
+            "extra": "44930095 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpperBytes/large-lower/fiber (github.com/gofiber/utils/v2/bytes) - allocs/op",
+            "value": 1,
+            "unit": "allocs/op",
+            "extra": "44930095 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpperBytes/large-lower/fiber/unsafe (github.com/gofiber/utils/v2/bytes)",
+            "value": 12.07,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "100000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpperBytes/large-lower/fiber/unsafe (github.com/gofiber/utils/v2/bytes) - ns/op",
+            "value": 12.07,
+            "unit": "ns/op",
+            "extra": "100000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpperBytes/large-lower/fiber/unsafe (github.com/gofiber/utils/v2/bytes) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "100000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpperBytes/large-lower/fiber/unsafe (github.com/gofiber/utils/v2/bytes) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "100000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpperBytes/large-lower/default (github.com/gofiber/utils/v2/bytes)",
+            "value": 59.5,
+            "unit": "ns/op\t      64 B/op\t       1 allocs/op",
+            "extra": "18722835 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpperBytes/large-lower/default (github.com/gofiber/utils/v2/bytes) - ns/op",
+            "value": 59.5,
+            "unit": "ns/op",
+            "extra": "18722835 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpperBytes/large-lower/default (github.com/gofiber/utils/v2/bytes) - B/op",
+            "value": 64,
+            "unit": "B/op",
+            "extra": "18722835 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpperBytes/large-lower/default (github.com/gofiber/utils/v2/bytes) - allocs/op",
+            "value": 1,
+            "unit": "allocs/op",
+            "extra": "18722835 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpperBytes/large-upper/fiber (github.com/gofiber/utils/v2/bytes)",
+            "value": 8.614,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "136425013 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpperBytes/large-upper/fiber (github.com/gofiber/utils/v2/bytes) - ns/op",
+            "value": 8.614,
+            "unit": "ns/op",
+            "extra": "136425013 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpperBytes/large-upper/fiber (github.com/gofiber/utils/v2/bytes) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "136425013 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpperBytes/large-upper/fiber (github.com/gofiber/utils/v2/bytes) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "136425013 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpperBytes/large-upper/fiber/unsafe (github.com/gofiber/utils/v2/bytes)",
+            "value": 11.84,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "100000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpperBytes/large-upper/fiber/unsafe (github.com/gofiber/utils/v2/bytes) - ns/op",
+            "value": 11.84,
+            "unit": "ns/op",
+            "extra": "100000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpperBytes/large-upper/fiber/unsafe (github.com/gofiber/utils/v2/bytes) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "100000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpperBytes/large-upper/fiber/unsafe (github.com/gofiber/utils/v2/bytes) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "100000000 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpperBytes/large-upper/default (github.com/gofiber/utils/v2/bytes)",
+            "value": 60.28,
+            "unit": "ns/op\t      64 B/op\t       1 allocs/op",
+            "extra": "17786646 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpperBytes/large-upper/default (github.com/gofiber/utils/v2/bytes) - ns/op",
+            "value": 60.28,
+            "unit": "ns/op",
+            "extra": "17786646 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpperBytes/large-upper/default (github.com/gofiber/utils/v2/bytes) - B/op",
+            "value": 64,
+            "unit": "B/op",
+            "extra": "17786646 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpperBytes/large-upper/default (github.com/gofiber/utils/v2/bytes) - allocs/op",
+            "value": 1,
+            "unit": "allocs/op",
+            "extra": "17786646 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpperBytes/large-mixed/fiber (github.com/gofiber/utils/v2/bytes)",
+            "value": 29.55,
+            "unit": "ns/op\t      64 B/op\t       1 allocs/op",
+            "extra": "39177382 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpperBytes/large-mixed/fiber (github.com/gofiber/utils/v2/bytes) - ns/op",
+            "value": 29.55,
+            "unit": "ns/op",
+            "extra": "39177382 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpperBytes/large-mixed/fiber (github.com/gofiber/utils/v2/bytes) - B/op",
+            "value": 64,
+            "unit": "B/op",
+            "extra": "39177382 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpperBytes/large-mixed/fiber (github.com/gofiber/utils/v2/bytes) - allocs/op",
+            "value": 1,
+            "unit": "allocs/op",
+            "extra": "39177382 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpperBytes/large-mixed/fiber/unsafe (github.com/gofiber/utils/v2/bytes)",
+            "value": 12.02,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "84233112 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpperBytes/large-mixed/fiber/unsafe (github.com/gofiber/utils/v2/bytes) - ns/op",
+            "value": 12.02,
+            "unit": "ns/op",
+            "extra": "84233112 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpperBytes/large-mixed/fiber/unsafe (github.com/gofiber/utils/v2/bytes) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "84233112 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpperBytes/large-mixed/fiber/unsafe (github.com/gofiber/utils/v2/bytes) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "84233112 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpperBytes/large-mixed/default (github.com/gofiber/utils/v2/bytes)",
+            "value": 59.28,
+            "unit": "ns/op\t      64 B/op\t       1 allocs/op",
+            "extra": "20614604 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpperBytes/large-mixed/default (github.com/gofiber/utils/v2/bytes) - ns/op",
+            "value": 59.28,
+            "unit": "ns/op",
+            "extra": "20614604 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpperBytes/large-mixed/default (github.com/gofiber/utils/v2/bytes) - B/op",
+            "value": 64,
+            "unit": "B/op",
+            "extra": "20614604 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_ToUpperBytes/large-mixed/default (github.com/gofiber/utils/v2/bytes) - allocs/op",
+            "value": 1,
+            "unit": "allocs/op",
+            "extra": "20614604 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_MemchrDigit/8B/simd (github.com/gofiber/utils/v2/simd)",
+            "value": 3.197,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "368389578 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_MemchrDigit/8B/simd (github.com/gofiber/utils/v2/simd) - ns/op",
+            "value": 3.197,
+            "unit": "ns/op",
+            "extra": "368389578 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_MemchrDigit/8B/simd (github.com/gofiber/utils/v2/simd) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "368389578 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_MemchrDigit/8B/simd (github.com/gofiber/utils/v2/simd) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "368389578 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_MemchrDigit/8B/scalar (github.com/gofiber/utils/v2/simd)",
+            "value": 2.075,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "595225201 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_MemchrDigit/8B/scalar (github.com/gofiber/utils/v2/simd) - ns/op",
+            "value": 2.075,
+            "unit": "ns/op",
+            "extra": "595225201 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_MemchrDigit/8B/scalar (github.com/gofiber/utils/v2/simd) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "595225201 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_MemchrDigit/8B/scalar (github.com/gofiber/utils/v2/simd) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "595225201 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_MemchrDigit/32B/simd (github.com/gofiber/utils/v2/simd)",
+            "value": 2.895,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "391451437 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_MemchrDigit/32B/simd (github.com/gofiber/utils/v2/simd) - ns/op",
+            "value": 2.895,
+            "unit": "ns/op",
+            "extra": "391451437 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_MemchrDigit/32B/simd (github.com/gofiber/utils/v2/simd) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "391451437 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_MemchrDigit/32B/simd (github.com/gofiber/utils/v2/simd) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "391451437 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_MemchrDigit/32B/scalar (github.com/gofiber/utils/v2/simd)",
+            "value": 5.097,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "248926815 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_MemchrDigit/32B/scalar (github.com/gofiber/utils/v2/simd) - ns/op",
+            "value": 5.097,
+            "unit": "ns/op",
+            "extra": "248926815 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_MemchrDigit/32B/scalar (github.com/gofiber/utils/v2/simd) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "248926815 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_MemchrDigit/32B/scalar (github.com/gofiber/utils/v2/simd) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "248926815 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_MemchrDigit/64B/simd (github.com/gofiber/utils/v2/simd)",
+            "value": 3.449,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "351114812 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_MemchrDigit/64B/simd (github.com/gofiber/utils/v2/simd) - ns/op",
+            "value": 3.449,
+            "unit": "ns/op",
+            "extra": "351114812 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_MemchrDigit/64B/simd (github.com/gofiber/utils/v2/simd) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "351114812 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_MemchrDigit/64B/simd (github.com/gofiber/utils/v2/simd) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "351114812 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_MemchrDigit/64B/scalar (github.com/gofiber/utils/v2/simd)",
+            "value": 8.919,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "136182014 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_MemchrDigit/64B/scalar (github.com/gofiber/utils/v2/simd) - ns/op",
+            "value": 8.919,
+            "unit": "ns/op",
+            "extra": "136182014 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_MemchrDigit/64B/scalar (github.com/gofiber/utils/v2/simd) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "136182014 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_MemchrDigit/64B/scalar (github.com/gofiber/utils/v2/simd) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "136182014 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_MemchrDigit/512B/simd (github.com/gofiber/utils/v2/simd)",
+            "value": 10.31,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "123083778 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_MemchrDigit/512B/simd (github.com/gofiber/utils/v2/simd) - ns/op",
+            "value": 10.31,
+            "unit": "ns/op",
+            "extra": "123083778 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_MemchrDigit/512B/simd (github.com/gofiber/utils/v2/simd) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "123083778 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_MemchrDigit/512B/simd (github.com/gofiber/utils/v2/simd) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "123083778 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_MemchrDigit/512B/scalar (github.com/gofiber/utils/v2/simd)",
+            "value": 63.39,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "17148376 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_MemchrDigit/512B/scalar (github.com/gofiber/utils/v2/simd) - ns/op",
+            "value": 63.39,
+            "unit": "ns/op",
+            "extra": "17148376 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_MemchrDigit/512B/scalar (github.com/gofiber/utils/v2/simd) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "17148376 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_MemchrDigit/512B/scalar (github.com/gofiber/utils/v2/simd) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "17148376 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_MemchrDigit/4096B/simd (github.com/gofiber/utils/v2/simd)",
+            "value": 60.37,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "17168887 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_MemchrDigit/4096B/simd (github.com/gofiber/utils/v2/simd) - ns/op",
+            "value": 60.37,
+            "unit": "ns/op",
+            "extra": "17168887 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_MemchrDigit/4096B/simd (github.com/gofiber/utils/v2/simd) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "17168887 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_MemchrDigit/4096B/simd (github.com/gofiber/utils/v2/simd) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "17168887 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_MemchrDigit/4096B/scalar (github.com/gofiber/utils/v2/simd)",
+            "value": 499.1,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "2440642 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_MemchrDigit/4096B/scalar (github.com/gofiber/utils/v2/simd) - ns/op",
+            "value": 499.1,
+            "unit": "ns/op",
+            "extra": "2440642 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_MemchrDigit/4096B/scalar (github.com/gofiber/utils/v2/simd) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "2440642 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_MemchrDigit/4096B/scalar (github.com/gofiber/utils/v2/simd) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "2440642 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem_Adversarial/simd (github.com/gofiber/utils/v2/simd)",
+            "value": 1162614,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "1047 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem_Adversarial/simd (github.com/gofiber/utils/v2/simd) - ns/op",
+            "value": 1162614,
+            "unit": "ns/op",
+            "extra": "1047 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem_Adversarial/simd (github.com/gofiber/utils/v2/simd) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "1047 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem_Adversarial/simd (github.com/gofiber/utils/v2/simd) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "1047 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem_Adversarial/default (github.com/gofiber/utils/v2/simd)",
+            "value": 1175545,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "1029 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem_Adversarial/default (github.com/gofiber/utils/v2/simd) - ns/op",
+            "value": 1175545,
+            "unit": "ns/op",
+            "extra": "1029 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem_Adversarial/default (github.com/gofiber/utils/v2/simd) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "1029 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Memmem_Adversarial/default (github.com/gofiber/utils/v2/simd) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "1029 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexByte/7B/fiber (github.com/gofiber/utils/v2/swar)",
+            "value": 2.38,
+            "unit": "ns/op\t2941.04 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "516762088 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexByte/7B/fiber (github.com/gofiber/utils/v2/swar) - ns/op",
+            "value": 2.38,
+            "unit": "ns/op",
+            "extra": "516762088 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexByte/7B/fiber (github.com/gofiber/utils/v2/swar) - MB/s",
+            "value": 2941.04,
+            "unit": "MB/s",
+            "extra": "516762088 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexByte/7B/fiber (github.com/gofiber/utils/v2/swar) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "516762088 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexByte/7B/fiber (github.com/gofiber/utils/v2/swar) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "516762088 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexByte/7B/default (github.com/gofiber/utils/v2/swar)",
+            "value": 2.303,
+            "unit": "ns/op\t3039.39 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "537438072 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexByte/7B/default (github.com/gofiber/utils/v2/swar) - ns/op",
+            "value": 2.303,
+            "unit": "ns/op",
+            "extra": "537438072 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexByte/7B/default (github.com/gofiber/utils/v2/swar) - MB/s",
+            "value": 3039.39,
+            "unit": "MB/s",
+            "extra": "537438072 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexByte/7B/default (github.com/gofiber/utils/v2/swar) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "537438072 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexByte/7B/default (github.com/gofiber/utils/v2/swar) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "537438072 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexByte/8B/fiber (github.com/gofiber/utils/v2/swar)",
+            "value": 1.771,
+            "unit": "ns/op\t4517.83 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "771700725 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexByte/8B/fiber (github.com/gofiber/utils/v2/swar) - ns/op",
+            "value": 1.771,
+            "unit": "ns/op",
+            "extra": "771700725 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexByte/8B/fiber (github.com/gofiber/utils/v2/swar) - MB/s",
+            "value": 4517.83,
+            "unit": "MB/s",
+            "extra": "771700725 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexByte/8B/fiber (github.com/gofiber/utils/v2/swar) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "771700725 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexByte/8B/fiber (github.com/gofiber/utils/v2/swar) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "771700725 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexByte/8B/default (github.com/gofiber/utils/v2/swar)",
+            "value": 2.216,
+            "unit": "ns/op\t3610.18 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "551788129 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexByte/8B/default (github.com/gofiber/utils/v2/swar) - ns/op",
+            "value": 2.216,
+            "unit": "ns/op",
+            "extra": "551788129 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexByte/8B/default (github.com/gofiber/utils/v2/swar) - MB/s",
+            "value": 3610.18,
+            "unit": "MB/s",
+            "extra": "551788129 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexByte/8B/default (github.com/gofiber/utils/v2/swar) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "551788129 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexByte/8B/default (github.com/gofiber/utils/v2/swar) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "551788129 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexByte/16B/fiber (github.com/gofiber/utils/v2/swar)",
+            "value": 2.293,
+            "unit": "ns/op\t6977.57 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "562588542 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexByte/16B/fiber (github.com/gofiber/utils/v2/swar) - ns/op",
+            "value": 2.293,
+            "unit": "ns/op",
+            "extra": "562588542 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexByte/16B/fiber (github.com/gofiber/utils/v2/swar) - MB/s",
+            "value": 6977.57,
+            "unit": "MB/s",
+            "extra": "562588542 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexByte/16B/fiber (github.com/gofiber/utils/v2/swar) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "562588542 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexByte/16B/fiber (github.com/gofiber/utils/v2/swar) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "562588542 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexByte/16B/default (github.com/gofiber/utils/v2/swar)",
+            "value": 2.5,
+            "unit": "ns/op\t6399.57 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "460175380 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexByte/16B/default (github.com/gofiber/utils/v2/swar) - ns/op",
+            "value": 2.5,
+            "unit": "ns/op",
+            "extra": "460175380 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexByte/16B/default (github.com/gofiber/utils/v2/swar) - MB/s",
+            "value": 6399.57,
+            "unit": "MB/s",
+            "extra": "460175380 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexByte/16B/default (github.com/gofiber/utils/v2/swar) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "460175380 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexByte/16B/default (github.com/gofiber/utils/v2/swar) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "460175380 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexByte/32B/fiber (github.com/gofiber/utils/v2/swar)",
+            "value": 3.749,
+            "unit": "ns/op\t8535.90 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "311115001 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexByte/32B/fiber (github.com/gofiber/utils/v2/swar) - ns/op",
+            "value": 3.749,
+            "unit": "ns/op",
+            "extra": "311115001 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexByte/32B/fiber (github.com/gofiber/utils/v2/swar) - MB/s",
+            "value": 8535.9,
+            "unit": "MB/s",
+            "extra": "311115001 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexByte/32B/fiber (github.com/gofiber/utils/v2/swar) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "311115001 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexByte/32B/fiber (github.com/gofiber/utils/v2/swar) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "311115001 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexByte/32B/default (github.com/gofiber/utils/v2/swar)",
+            "value": 2.781,
+            "unit": "ns/op\t11505.62 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "481263204 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexByte/32B/default (github.com/gofiber/utils/v2/swar) - ns/op",
+            "value": 2.781,
+            "unit": "ns/op",
+            "extra": "481263204 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexByte/32B/default (github.com/gofiber/utils/v2/swar) - MB/s",
+            "value": 11505.62,
+            "unit": "MB/s",
+            "extra": "481263204 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexByte/32B/default (github.com/gofiber/utils/v2/swar) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "481263204 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexByte/32B/default (github.com/gofiber/utils/v2/swar) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "481263204 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexByte/64B/fiber (github.com/gofiber/utils/v2/swar)",
+            "value": 6.34,
+            "unit": "ns/op\t10094.20 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "189935408 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexByte/64B/fiber (github.com/gofiber/utils/v2/swar) - ns/op",
+            "value": 6.34,
+            "unit": "ns/op",
+            "extra": "189935408 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexByte/64B/fiber (github.com/gofiber/utils/v2/swar) - MB/s",
+            "value": 10094.2,
+            "unit": "MB/s",
+            "extra": "189935408 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexByte/64B/fiber (github.com/gofiber/utils/v2/swar) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "189935408 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexByte/64B/fiber (github.com/gofiber/utils/v2/swar) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "189935408 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexByte/64B/default (github.com/gofiber/utils/v2/swar)",
+            "value": 3.022,
+            "unit": "ns/op\t21176.23 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "373958139 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexByte/64B/default (github.com/gofiber/utils/v2/swar) - ns/op",
+            "value": 3.022,
+            "unit": "ns/op",
+            "extra": "373958139 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexByte/64B/default (github.com/gofiber/utils/v2/swar) - MB/s",
+            "value": 21176.23,
+            "unit": "MB/s",
+            "extra": "373958139 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexByte/64B/default (github.com/gofiber/utils/v2/swar) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "373958139 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexByte/64B/default (github.com/gofiber/utils/v2/swar) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "373958139 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexByte/512B/fiber (github.com/gofiber/utils/v2/swar)",
+            "value": 38.35,
+            "unit": "ns/op\t13351.38 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "28860490 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexByte/512B/fiber (github.com/gofiber/utils/v2/swar) - ns/op",
+            "value": 38.35,
+            "unit": "ns/op",
+            "extra": "28860490 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexByte/512B/fiber (github.com/gofiber/utils/v2/swar) - MB/s",
+            "value": 13351.38,
+            "unit": "MB/s",
+            "extra": "28860490 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexByte/512B/fiber (github.com/gofiber/utils/v2/swar) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "28860490 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexByte/512B/fiber (github.com/gofiber/utils/v2/swar) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "28860490 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexByte/512B/default (github.com/gofiber/utils/v2/swar)",
+            "value": 5.99,
+            "unit": "ns/op\t85482.18 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "200663642 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexByte/512B/default (github.com/gofiber/utils/v2/swar) - ns/op",
+            "value": 5.99,
+            "unit": "ns/op",
+            "extra": "200663642 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexByte/512B/default (github.com/gofiber/utils/v2/swar) - MB/s",
+            "value": 85482.18,
+            "unit": "MB/s",
+            "extra": "200663642 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexByte/512B/default (github.com/gofiber/utils/v2/swar) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "200663642 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_IndexByte/512B/default (github.com/gofiber/utils/v2/swar) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "200663642 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Load8_Fusion/bytes (github.com/gofiber/utils/v2/swar)",
+            "value": 732.5,
+            "unit": "ns/op\t5591.66 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "1637719 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Load8_Fusion/bytes (github.com/gofiber/utils/v2/swar) - ns/op",
+            "value": 732.5,
+            "unit": "ns/op",
+            "extra": "1637719 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Load8_Fusion/bytes (github.com/gofiber/utils/v2/swar) - MB/s",
+            "value": 5591.66,
+            "unit": "MB/s",
+            "extra": "1637719 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Load8_Fusion/bytes (github.com/gofiber/utils/v2/swar) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "1637719 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Load8_Fusion/bytes (github.com/gofiber/utils/v2/swar) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "1637719 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Load8_Fusion/string (github.com/gofiber/utils/v2/swar)",
+            "value": 640.6,
+            "unit": "ns/op\t6394.46 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "1810275 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Load8_Fusion/string (github.com/gofiber/utils/v2/swar) - ns/op",
+            "value": 640.6,
+            "unit": "ns/op",
+            "extra": "1810275 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Load8_Fusion/string (github.com/gofiber/utils/v2/swar) - MB/s",
+            "value": 6394.46,
+            "unit": "MB/s",
+            "extra": "1810275 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Load8_Fusion/string (github.com/gofiber/utils/v2/swar) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "1810275 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Load8_Fusion/string (github.com/gofiber/utils/v2/swar) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "1810275 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Load8_Fusion/store (github.com/gofiber/utils/v2/swar)",
+            "value": 599.7,
+            "unit": "ns/op\t6830.20 MB/s\t       0 B/op\t       0 allocs/op",
+            "extra": "2051481 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Load8_Fusion/store (github.com/gofiber/utils/v2/swar) - ns/op",
+            "value": 599.7,
+            "unit": "ns/op",
+            "extra": "2051481 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Load8_Fusion/store (github.com/gofiber/utils/v2/swar) - MB/s",
+            "value": 6830.2,
+            "unit": "MB/s",
+            "extra": "2051481 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Load8_Fusion/store (github.com/gofiber/utils/v2/swar) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "2051481 times\n6 procs"
+          },
+          {
+            "name": "Benchmark_Load8_Fusion/store (github.com/gofiber/utils/v2/swar) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "2051481 times\n6 procs"
           }
         ]
       }
