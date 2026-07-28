@@ -779,9 +779,24 @@ Benchmark_IsASCII/4096B/simd-4                                      11831648    
 Benchmark_IsASCII/4096B/swar-4                                       1512061    685.9  ns/op     0  B/op   0  allocs/op
 ```
 
+<!-- skip-docs -->
 ## ☕ Supporters
 
 Fiber is an open-source project that runs on donations to pay the bills, e.g., our domain name, hosting, and serverless infrastructure. If you want to support Fiber, please become a [GitHub Sponsor](https://github.com/sponsors/gofiber).
+
+<p align="center">
+  <a href="https://www.coderabbit.ai/?utm_source=gofiber&utm_medium=sponsor&utm_content=readme">
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset="https://www.coderabbit.ai/images/logo-dark.svg">
+      <img width="280" height="52" alt="CodeRabbit" src="https://www.coderabbit.ai/images/logo-orange.svg">
+    </picture>
+  </a>
+</p>
+<p align="center">
+  <a href="https://blacksmith.sh/?utm_source=gofiber&utm_medium=sponsor&utm_content=readme">
+    <img width="280" height="96" alt="Blacksmith" src="https://raw.githubusercontent.com/gofiber/.github/main/assets/sponsors/blacksmith.png">
+  </a>
+</p>
 
 <!-- sponsors -->
 
@@ -799,3 +814,4 @@ Fiber is an open-source project that runs on donations to pay the bills, e.g., o
 <tr><td valign="top"><strong>🚀 Fiber Hero</strong></td><td><a href="https://www.thanks.dev" title="@thnxdev"><img src="https://github.com/thnxdev.png" width="40" alt="@thnxdev" /></a></td></tr>
 </table>
 <!-- sponsors -->
+<!-- skip-docs -->
