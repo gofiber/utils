@@ -686,7 +686,13 @@ reach them but skip the 128-byte block loop, so they pay its setup with
 nothing to amortize it against: across that band `benchstat` reports the
 class scans clearly ahead (`MemchrNotWord` -8.6% at 32B, -18.4% at 64B;
 `IsASCII` -5.0%/-4.3%), most rows statistically unchanged, and two small
-regressions — `MemchrDigit` +5.6% at 32B and `Memchr3` +3.8% at 64B.
+regressions — `MemchrDigit` +5.6% at 32B and `Memchr3` +3.8% at 64B. Read
+those small-input figures against the run's own noise floor: the `default`
+legs call unchanged stdlib code, so their movement bounds what a delta of
+that size means. They held within 1% in the run quoted here, but a later
+run on the same machine drifted up to 17% on those same rows, so anything
+under ~10% at 32-64B should be taken as "no measured change" unless its
+control legs are quiet.
 
 On the portable side, pinning each unrolled group of words with a reslice
 before loading at constant offsets inside it removes the per-load bounds
