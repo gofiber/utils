@@ -240,10 +240,14 @@ fna_found_scalar:
 
 // func countNonASCIIAVX2(data []byte) int
 //
-// AVX2 kernel behind CountNonASCII. len(data) must be a multiple of 32:
-// counting cannot use the overlapping-window trick the first-match scans
-// rely on (it would double-count), so the Go wrapper hands the sub-vector
-// remainder to the SWAR path instead of paying for a masked epilogue here.
+// AVX2 kernel behind CountNonASCII. Counting is the one scan here that
+// cannot finish with the overlapping final window the first-match kernels
+// use — rescanning bytes would count them twice — so instead the vector
+// loops stop at the last whole vector and a branch-free byte loop takes
+// the remaining 0-31 bytes. That keeps the kernel self-bounding for any
+// length, like every other kernel in this package: it never reads past
+// data[len(data)-1], so no caller-side length preconditioning stands
+// between it and an out-of-bounds read.
 //
 // Each vector's high bits become a 32-bit mask and POPCNT turns it into a
 // lane count. Four masks are extracted before the four POPCNTs so the
@@ -251,9 +255,12 @@ fna_found_scalar:
 // writes the register its own VPMOVMSKB just produced, so the destination
 // false dependency Intel CPUs carry on POPCNT is already satisfied.
 //
+// POPCNT is a separate CPUID feature from AVX2, so countNonASCIIImpl gates
+// on both; see cpu_amd64.go.
+//
 // Parameters (FP offsets):
 //   data_base+0(FP)  - pointer to data (8 bytes)
-//   data_len+8(FP)   - data length, a multiple of 32 (8 bytes)
+//   data_len+8(FP)   - data length (8 bytes)
 //   data_cap+16(FP)  - data capacity (8 bytes, unused)
 //   ret+24(FP)       - number of bytes >= 0x80 (8 bytes)
 TEXT ·countNonASCIIAVX2(SB), NOSPLIT, $0-32
@@ -266,8 +273,12 @@ TEXT ·countNonASCIIAVX2(SB), NOSPLIT, $0-32
 	TESTQ   DX, DX
 	JZ      cna_done
 
-	LEAQ    (SI)(DX*1), R8
-	LEAQ    -128(R8), R11
+	LEAQ    (SI)(DX*1), R8          // R8 = end pointer
+	CMPQ    DX, $32
+	JB      cna_tail                // no whole vector: byte loop only
+
+	LEAQ    -32(R8), R12            // last valid 32-byte window base
+	LEAQ    -128(R8), R11           // last valid 128-byte block base
 	CMPQ    SI, R11
 	JA      cna_loop32_entry
 
@@ -294,8 +305,8 @@ cna_loop128:
 	JBE     cna_loop128
 
 cna_loop32_entry:
-	CMPQ    SI, R8
-	JAE     cna_done
+	CMPQ    SI, R12
+	JA      cna_tail
 
 cna_loop32:
 	VMOVDQU (SI), Y0
@@ -303,8 +314,19 @@ cna_loop32:
 	POPCNTL AX, AX
 	ADDQ    AX, R9
 	ADDQ    $32, SI
+	CMPQ    SI, R12
+	JBE     cna_loop32
+
+cna_tail:
+	// 0-31 bytes left. Shifting the byte down to its high bit turns the
+	// test into an add, so the loop carries no data-dependent branch.
 	CMPQ    SI, R8
-	JB      cna_loop32
+	JAE     cna_done
+	MOVBLZX (SI), AX
+	SHRL    $7, AX
+	ADDQ    AX, R9
+	INCQ    SI
+	JMP     cna_tail
 
 cna_done:
 	ADDQ    R13, R9

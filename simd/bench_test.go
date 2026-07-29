@@ -38,7 +38,7 @@ func Benchmark_Memchr2(b *testing.B) {
 				}
 			}
 		})
-		b.Run(benchName(n)+"/swar", func(b *testing.B) {
+		b.Run(benchName(n)+"/scalar", func(b *testing.B) {
 			b.ReportAllocs()
 			for range b.N {
 				if memchr2Generic(data, 'z', 'y') != -1 {
@@ -68,7 +68,7 @@ func Benchmark_Memchr3(b *testing.B) {
 				}
 			}
 		})
-		b.Run(benchName(n)+"/swar", func(b *testing.B) {
+		b.Run(benchName(n)+"/scalar", func(b *testing.B) {
 			b.ReportAllocs()
 			for range b.N {
 				if memchr3Generic(data, 'z', 'y', 'x') != -1 {

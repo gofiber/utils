@@ -6,15 +6,12 @@
 
 package simd
 
-// vectorLen is the AVX2 register width in bytes. MinLen happens to equal
-// it today, but the two mean different things — MinLen is a dispatch
-// tuning knob, vectorLen is a hardware fact — so the alignment arithmetic
-// below uses this constant rather than MinLen.
-const vectorLen = 32
-
 // The ASCII kernels are implemented in ascii_amd64.s. All three read the
 // same signal (a byte is non-ASCII exactly when its high bit is set, which
 // VPMOVMSKB gathers 32 at a time) and process four vectors per iteration.
+// Like the rest of the package's kernels they are self-bounding: each one
+// clamps its own vector loops and finishes short remainders itself, so
+// none of them carries a length precondition for the caller to uphold.
 //
 //go:noescape
 func isASCIIAVX2(data []byte) bool
@@ -22,9 +19,6 @@ func isASCIIAVX2(data []byte) bool
 //go:noescape
 func firstNonASCIIAVX2(data []byte) int
 
-// countNonASCIIAVX2 requires len(data) to be a multiple of vectorLen; see
-// countNonASCIIImpl.
-//
 //go:noescape
 func countNonASCIIAVX2(data []byte) int
 
@@ -45,16 +39,17 @@ func firstNonASCIIImpl(data []byte) int {
 	return firstNonASCIIGeneric(data)
 }
 
-// countNonASCIIImpl splits the input at the last whole vector. Counting is
-// the one scan here that cannot finish with the overlapping final window
-// the first-match kernels use — rescanning bytes would double-count them —
-// so instead of paying for a masked epilogue in assembly, the kernel takes
-// the vector-aligned prefix and the SWAR loop counts the at most 31
-// remaining bytes.
+// countNonASCIIImpl dispatches like isASCIIImpl, with the extra POPCNT
+// check its kernel needs. The kernel counts its own sub-vector remainder,
+// so there is no prefix/suffix split here. An earlier version did split,
+// handing the remainder to countNonASCIIGeneric, and paid a second
+// non-inlinable call even when the remainder was empty — enough to put
+// this scan behind its own SWAR fallback at MinLen (11.3ns vs 8.8ns at
+// 32B). With the split gone the two are level at 32B and the kernel pulls
+// ahead from 64B up, so MinLen stays the shared threshold.
 func countNonASCIIImpl(data []byte) int {
-	if hasAVX2 && len(data) >= MinLen {
-		head := len(data) &^ (vectorLen - 1)
-		return countNonASCIIAVX2(data[:head]) + countNonASCIIGeneric(data[head:])
+	if hasAVX2 && hasPOPCNT && len(data) >= MinLen {
+		return countNonASCIIAVX2(data)
 	}
 	return countNonASCIIGeneric(data)
 }

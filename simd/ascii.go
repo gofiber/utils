@@ -47,6 +47,16 @@ func CountNonASCII(data []byte) int {
 	return countNonASCIIImpl(data)
 }
 
+// The unrolled loops below all pin their group of words with a
+// three-index reslice before loading from it. swar.Load8's own reslice is
+// bounds-checked against the backing array's capacity, which the loop
+// condition (stated in terms of length) does not imply, so a variable
+// index costs a compare, a branch and a four-instruction empty-slice
+// pointer clamp per load. Pinning the window once pays that at group
+// granularity and leaves the loads inside it at constant offsets, where
+// the checks fold away entirely: measured -20% at 32B rising to -62% at
+// 4KiB for the ASCII scan, and the same shape for the first-match scans.
+
 // isASCIIGeneric is the portable SWAR implementation behind IsASCII. No
 // index is needed, so detection can be deferred: whole groups of words are
 // OR-ed into one accumulator and tested once, four words per branch and
@@ -69,16 +79,18 @@ func isASCIIGeneric(data []byte) bool {
 	}
 	i := 0
 	for ; i+4*swar.WordLen <= n; i += 4 * swar.WordLen {
-		acc := swar.Load8(data, i) |
-			swar.Load8(data, i+swar.WordLen) |
-			swar.Load8(data, i+2*swar.WordLen) |
-			swar.Load8(data, i+3*swar.WordLen)
+		w := data[i : i+4*swar.WordLen : i+4*swar.WordLen]
+		acc := swar.Load8(w, 0) |
+			swar.Load8(w, swar.WordLen) |
+			swar.Load8(w, 2*swar.WordLen) |
+			swar.Load8(w, 3*swar.WordLen)
 		if acc&swar.HighBits != 0 {
 			return false
 		}
 	}
 	for ; i+2*swar.WordLen <= n; i += 2 * swar.WordLen {
-		if (swar.Load8(data, i)|swar.Load8(data, i+swar.WordLen))&swar.HighBits != 0 {
+		w := data[i : i+2*swar.WordLen : i+2*swar.WordLen]
+		if (swar.Load8(w, 0)|swar.Load8(w, swar.WordLen))&swar.HighBits != 0 {
 			return false
 		}
 	}
@@ -107,8 +119,9 @@ func firstNonASCIIGeneric(data []byte) int {
 	}
 	i := 0
 	for ; i+2*swar.WordLen <= n; i += 2 * swar.WordLen {
-		m0 := swar.Load8(data, i) & swar.HighBits
-		m1 := swar.Load8(data, i+swar.WordLen) & swar.HighBits
+		w := data[i : i+2*swar.WordLen : i+2*swar.WordLen]
+		m0 := swar.Load8(w, 0) & swar.HighBits
+		m1 := swar.Load8(w, swar.WordLen) & swar.HighBits
 		if m0|m1 != 0 {
 			if m0 != 0 {
 				return i + swar.FirstLane(m0)
@@ -133,14 +146,21 @@ func firstNonASCIIGeneric(data []byte) int {
 }
 
 // countNonASCIIGeneric is the portable SWAR implementation behind
-// CountNonASCII: a popcount of the 0x80 lane bits per word. Unlike the
-// first-match scans it is not unrolled — the per-word popcount already
-// keeps the pipeline busy, and splitting the sum across accumulators
-// measured slower.
+// CountNonASCII: a popcount of the 0x80 lane bits per word, four words per
+// pinned window. Every word has to be visited whatever happens, so unlike
+// the first-match scans there is no branch to amortize — the win here is
+// purely the bounds checks the window removes.
 func countNonASCIIGeneric(data []byte) int {
 	count := 0
 	i := 0
 	n := len(data)
+	for ; i+4*swar.WordLen <= n; i += 4 * swar.WordLen {
+		w := data[i : i+4*swar.WordLen : i+4*swar.WordLen]
+		count += bits.OnesCount64(swar.Load8(w, 0)&swar.HighBits) +
+			bits.OnesCount64(swar.Load8(w, swar.WordLen)&swar.HighBits) +
+			bits.OnesCount64(swar.Load8(w, 2*swar.WordLen)&swar.HighBits) +
+			bits.OnesCount64(swar.Load8(w, 3*swar.WordLen)&swar.HighBits)
+	}
 	for ; i+swar.WordLen <= n; i += swar.WordLen {
 		count += bits.OnesCount64(swar.Load8(data, i) & swar.HighBits)
 	}

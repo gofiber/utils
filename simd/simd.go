@@ -7,9 +7,13 @@
 // FirstNonASCII, and CountNonASCII — dispatch to AVX2 assembly on amd64
 // CPUs (for inputs of MinLen+ bytes) and fall back to portable SWAR loops
 // built on the swar package everywhere else. The kernels consume four
-// 32-byte vectors per iteration, combining the per-vector masks so a
-// 128-byte block costs one mask extraction and one branch; the first-match
-// scans then re-extract the four masks in address order to locate the hit.
+// 32-byte vectors per iteration. The first-match scans and IsASCII combine
+// the per-vector masks, so a 128-byte block costs one mask extraction and
+// one branch, and the scans that report a position then re-extract the
+// four masks in address order to locate the hit. CountNonASCII is the
+// exception: a count cannot be recovered from a combined mask, so it
+// extracts and population-counts all four (and, unlike the others, gates
+// on POPCNT as well as AVX2).
 // Memmem prefilters 128+ byte haystacks on amd64 — needles of 2-6 bytes
 // containing two distinct values through the MemchrPair kernel, longer or
 // single-valued needles through a single rare-byte bytes.IndexByte scan —

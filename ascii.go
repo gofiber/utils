@@ -20,20 +20,38 @@ const (
 
 // IsASCII reports whether s contains only ASCII bytes (no byte >= 0x80).
 // It ORs four words per iteration where possible (no index is needed, so
-// detection can be deferred to one test per 32 bytes), then tests word-wise;
-// inputs of 8+ bytes finish with one overlapping word at n-8, shorter ones
-// byte-wise.
+// detection can be deferred to one test per 32 bytes), then two, then
+// word-wise; inputs of 8+ bytes finish with one overlapping word at n-8,
+// shorter ones byte-wise.
 // On amd64 CPUs with AVX2, inputs of 32+ bytes dispatch to package simd
 // instead.
+//
+// The unrolled loops pin their group of words with a reslice and load at
+// constant offsets inside it. swar.Load8's own reslice is bounds-checked
+// against the backing array, which the length-based loop condition does
+// not imply, so a variable index costs a compare and a branch per load;
+// pinning the window pays that once per group instead. This mirrors
+// simd.isASCIIGeneric — the same scan, kept in step so a retune of either
+// is a retune of both.
 func IsASCII[S byteSeq](s S) bool {
 	n := len(s)
 	if n >= simd.MinLen && simd.Accelerated() {
 		return simd.IsASCII(unsafeconv.Bytes(s))
 	}
+	if n >= 8 && n < 16 {
+		return (swar.Load8(s, 0)|swar.Load8(s, n-8))&swar.HighBits == 0
+	}
 	i := 0
 	for ; i+32 <= n; i += 32 {
-		acc := swar.Load8(s, i) | swar.Load8(s, i+8) | swar.Load8(s, i+16) | swar.Load8(s, i+24)
+		w := s[i : i+32]
+		acc := swar.Load8(w, 0) | swar.Load8(w, 8) | swar.Load8(w, 16) | swar.Load8(w, 24)
 		if acc&swar.HighBits != 0 {
+			return false
+		}
+	}
+	for ; i+16 <= n; i += 16 {
+		w := s[i : i+16]
+		if (swar.Load8(w, 0)|swar.Load8(w, 8))&swar.HighBits != 0 {
 			return false
 		}
 	}
@@ -70,8 +88,11 @@ func IndexNonQuotable[S byteSeq](s S) int {
 	// Two words per branch: the masks compute independently, and if only the
 	// second word matched, its first set lane is still exact.
 	for ; i+16 <= n; i += 16 {
-		m0 := nonQuotableMask(swar.Load8(s, i))
-		m1 := nonQuotableMask(swar.Load8(s, i+8))
+		// Pinned window, as in IsASCII above: the two loads land at
+		// constant offsets and skip their bounds checks.
+		w := s[i : i+16]
+		m0 := nonQuotableMask(swar.Load8(w, 0))
+		m1 := nonQuotableMask(swar.Load8(w, 8))
 		if m0|m1 != 0 {
 			if m0 != 0 {
 				return i + swar.FirstLane(m0)

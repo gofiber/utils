@@ -77,6 +77,25 @@ func refIsASCII(h []byte) bool {
 	return true
 }
 
+func refFirstNonASCII(h []byte) int {
+	for i, b := range h {
+		if b >= 0x80 {
+			return i
+		}
+	}
+	return -1
+}
+
+func refCountNonASCII(h []byte) int {
+	n := 0
+	for _, b := range h {
+		if b >= 0x80 {
+			n++
+		}
+	}
+	return n
+}
+
 func checkMemchr2(t *testing.T, h []byte, a, b byte) {
 	t.Helper()
 	want := refMemchr2(h, a, b)
@@ -266,12 +285,13 @@ func Test_FirstNonASCII_CountNonASCII(t *testing.T) {
 		require.Equal(t, -1, FirstNonASCII(clean), "clean size %d", n)
 		require.Equal(t, 0, CountNonASCII(clean), "clean size %d", n)
 		for pos := range n {
-			h := bytes.Clone(clean)
-			h[pos] = 0xc3
-			require.Equal(t, pos, FirstNonASCII(h), "size %d pos %d", n, pos)
-			require.Equal(t, pos, firstNonASCIIGeneric(h), "generic size %d pos %d", n, pos)
-			require.Equal(t, 1, CountNonASCII(h), "size %d pos %d", n, pos)
-			require.Equal(t, 1, countNonASCIIGeneric(h), "generic size %d pos %d", n, pos)
+			orig := clean[pos]
+			clean[pos] = 0xc3
+			require.Equal(t, pos, FirstNonASCII(clean), "size %d pos %d", n, pos)
+			require.Equal(t, pos, firstNonASCIIGeneric(clean), "generic size %d pos %d", n, pos)
+			require.Equal(t, 1, CountNonASCII(clean), "size %d pos %d", n, pos)
+			require.Equal(t, 1, countNonASCIIGeneric(clean), "generic size %d pos %d", n, pos)
+			clean[pos] = orig
 		}
 	}
 }
@@ -691,8 +711,12 @@ func Test_Accelerated(t *testing.T) {
 func Test_TestSizesCoverDispatchBoundaries(t *testing.T) {
 	t.Parallel()
 	// Guard the sweep against accidental edits: it must include sub-word,
-	// word-with-tail, exactly-one-vector, and beyond-crossover sizes.
-	for _, must := range []int{0, 7, 8, 31, 32, 33, 63, 64, 127, 128, 512} {
+	// word-with-tail, exactly-one-vector, whole-and-partial 128-byte
+	// block, and beyond-crossover sizes. 129/130/200 are what exercise the
+	// kernels' block loop handing off to the 32-byte loop and then to the
+	// overlapping final window; 128 and 512 divide evenly and leave both
+	// of those untouched.
+	for _, must := range []int{0, 7, 8, 31, 32, 33, 63, 64, 127, 128, 129, 130, 200, 512} {
 		require.Contains(t, testSizes, must, strconv.Itoa(must))
 	}
 }

@@ -52,8 +52,11 @@ func memchrDigitGeneric(haystack []byte) int {
 	}
 	i := 0
 	for ; i+2*swar.WordLen <= n; i += 2 * swar.WordLen {
-		m0 := swar.MatchRangeMask(swar.Load8(haystack, i), '0', '9')
-		m1 := swar.MatchRangeMask(swar.Load8(haystack, i+swar.WordLen), '0', '9')
+		// Pinned window: see the note above isASCIIGeneric in ascii.go for
+		// why the loads use constant offsets into it.
+		w := haystack[i : i+2*swar.WordLen : i+2*swar.WordLen]
+		m0 := swar.MatchRangeMask(swar.Load8(w, 0), '0', '9')
+		m1 := swar.MatchRangeMask(swar.Load8(w, swar.WordLen), '0', '9')
 		if m0|m1 != 0 {
 			if m0 != 0 {
 				return i + swar.FirstLane(m0)
