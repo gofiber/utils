@@ -31,3 +31,6 @@ jobs:
     with:
       # ~3 months of default-branch pushes (59 in the last 90 days)
       max-items-in-chart: 60
+      # ~15 min per run for 86 top-level benchmarks; the weight sits in their 187
+      # b.Run sub-benchmarks, which stay with their parent, so the split is by name.
+      shards: 6
