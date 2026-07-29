@@ -13,9 +13,9 @@ import (
 // IsASCII reports whether every byte in data is ASCII (< 0x80). An empty
 // slice is trivially ASCII.
 //
-// On amd64 with AVX2 and inputs of MinLen+ bytes it checks 32 bytes per
-// iteration with a single VPMOVMSKB; elsewhere it uses a SWAR loop over
-// 8-byte words.
+// On amd64 with AVX2 and inputs of MinLen+ bytes it ORs four 32-byte
+// vectors and tests all 128 bytes with a single VPMOVMSKB; elsewhere it
+// uses a SWAR loop over 8-byte words.
 func IsASCII(data []byte) bool {
 	if len(data) == 0 {
 		return true
@@ -24,9 +24,78 @@ func IsASCII(data []byte) bool {
 }
 
 // FirstNonASCII returns the index of the first byte >= 0x80 in data, or -1
-// if data is all ASCII. Use it to find where UTF-8 sequences begin. It scans
-// with SWAR words (no AVX2 kernel).
+// if data is all ASCII. Use it to find where UTF-8 sequences begin.
+//
+// It reads the same signal as IsASCII — a non-ASCII byte is exactly a byte
+// with its high bit set — so on amd64 with AVX2 and inputs of MinLen+
+// bytes it also tests 128 bytes per VPMOVMSKB, keeping the four vectors
+// live so the hit path can pinpoint the byte; elsewhere it falls back to
+// SWAR words.
 func FirstNonASCII(data []byte) int {
+	if len(data) == 0 {
+		return -1
+	}
+	return firstNonASCIIImpl(data)
+}
+
+// CountNonASCII returns the number of bytes >= 0x80 in data.
+//
+// On amd64 with AVX2 and inputs of MinLen+ bytes it turns each 32-byte
+// vector into a high-bit mask and adds its population count; elsewhere it
+// counts SWAR-word-wise with a popcount per word.
+func CountNonASCII(data []byte) int {
+	return countNonASCIIImpl(data)
+}
+
+// isASCIIGeneric is the portable SWAR implementation behind IsASCII. No
+// index is needed, so detection can be deferred: whole groups of words are
+// OR-ed into one accumulator and tested once, four words per branch and
+// then two, which is what turns the per-word test into a per-32-byte one.
+// Inputs of 8..15 bytes skip the loops entirely — two overlapping words
+// already cover them — and every 8+ byte input finishes with one
+// overlapping word at n-8.
+func isASCIIGeneric(data []byte) bool {
+	n := len(data)
+	if n < swar.WordLen {
+		for i := range n {
+			if data[i] >= 0x80 {
+				return false
+			}
+		}
+		return true
+	}
+	if n < 2*swar.WordLen {
+		return (swar.Load8(data, 0)|swar.Load8(data, n-swar.WordLen))&swar.HighBits == 0
+	}
+	i := 0
+	for ; i+4*swar.WordLen <= n; i += 4 * swar.WordLen {
+		acc := swar.Load8(data, i) |
+			swar.Load8(data, i+swar.WordLen) |
+			swar.Load8(data, i+2*swar.WordLen) |
+			swar.Load8(data, i+3*swar.WordLen)
+		if acc&swar.HighBits != 0 {
+			return false
+		}
+	}
+	for ; i+2*swar.WordLen <= n; i += 2 * swar.WordLen {
+		if (swar.Load8(data, i)|swar.Load8(data, i+swar.WordLen))&swar.HighBits != 0 {
+			return false
+		}
+	}
+	for ; i+swar.WordLen <= n; i += swar.WordLen {
+		if swar.Load8(data, i)&swar.HighBits != 0 {
+			return false
+		}
+	}
+	if i == n {
+		return true
+	}
+	return swar.Load8(data, n-swar.WordLen)&swar.HighBits == 0
+}
+
+// firstNonASCIIGeneric is the portable SWAR implementation behind
+// FirstNonASCII: two words per branch, then one overlapping word at n-8.
+func firstNonASCIIGeneric(data []byte) int {
 	n := len(data)
 	if n < swar.WordLen {
 		for i := range n {
@@ -37,6 +106,16 @@ func FirstNonASCII(data []byte) int {
 		return -1
 	}
 	i := 0
+	for ; i+2*swar.WordLen <= n; i += 2 * swar.WordLen {
+		m0 := swar.Load8(data, i) & swar.HighBits
+		m1 := swar.Load8(data, i+swar.WordLen) & swar.HighBits
+		if m0|m1 != 0 {
+			if m0 != 0 {
+				return i + swar.FirstLane(m0)
+			}
+			return i + swar.WordLen + swar.FirstLane(m1)
+		}
+	}
 	for ; i+swar.WordLen <= n; i += swar.WordLen {
 		if m := swar.Load8(data, i) & swar.HighBits; m != 0 {
 			return i + swar.FirstLane(m)
@@ -53,9 +132,12 @@ func FirstNonASCII(data []byte) int {
 	return -1
 }
 
-// CountNonASCII returns the number of bytes >= 0x80 in data. It counts
-// SWAR-word-wise with a popcount per word (no AVX2 kernel).
-func CountNonASCII(data []byte) int {
+// countNonASCIIGeneric is the portable SWAR implementation behind
+// CountNonASCII: a popcount of the 0x80 lane bits per word. Unlike the
+// first-match scans it is not unrolled — the per-word popcount already
+// keeps the pipeline busy, and splitting the sum across accumulators
+// measured slower.
+func countNonASCIIGeneric(data []byte) int {
 	count := 0
 	i := 0
 	n := len(data)
@@ -70,29 +152,4 @@ func CountNonASCII(data []byte) int {
 		}
 	}
 	return count
-}
-
-// isASCIIGeneric is the portable SWAR implementation behind IsASCII: it
-// masks each 8-byte word with the 0x80 lane bits, finishing 8+ byte inputs
-// with one overlapping word at n-8.
-func isASCIIGeneric(data []byte) bool {
-	n := len(data)
-	if n < swar.WordLen {
-		for i := range n {
-			if data[i] >= 0x80 {
-				return false
-			}
-		}
-		return true
-	}
-	i := 0
-	for ; i+swar.WordLen <= n; i += swar.WordLen {
-		if swar.Load8(data, i)&swar.HighBits != 0 {
-			return false
-		}
-	}
-	if i == n {
-		return true
-	}
-	return swar.Load8(data, n-swar.WordLen)&swar.HighBits == 0
 }

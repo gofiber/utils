@@ -12,9 +12,9 @@ import (
 // haystack, or -1 if no digit is present. Only ASCII digits match; Unicode
 // digit characters do not.
 //
-// On amd64 with AVX2 the range check runs on 32 bytes per iteration, which
-// is useful for locating numeric fields (ports, lengths, IP octets) in
-// request data.
+// On amd64 with AVX2 the range check runs on 32 bytes per vector, four
+// vectors per iteration, which is useful for locating numeric fields
+// (ports, lengths, IP octets) in request data.
 func MemchrDigit(haystack []byte) int {
 	if len(haystack) == 0 {
 		return -1
@@ -38,7 +38,8 @@ func MemchrDigitAt(haystack []byte, at int) int {
 
 // memchrDigitGeneric is the portable SWAR fallback for MemchrDigit: a
 // MatchRangeMask first-match scan (exact per lane; bytes >= 0x80 never
-// match), finishing 8+ byte inputs with one overlapping word at n-8.
+// match), two words per branch, finishing 8+ byte inputs with one
+// overlapping word at n-8.
 func memchrDigitGeneric(haystack []byte) int {
 	n := len(haystack)
 	if n < swar.WordLen {
@@ -50,6 +51,16 @@ func memchrDigitGeneric(haystack []byte) int {
 		return -1
 	}
 	i := 0
+	for ; i+2*swar.WordLen <= n; i += 2 * swar.WordLen {
+		m0 := swar.MatchRangeMask(swar.Load8(haystack, i), '0', '9')
+		m1 := swar.MatchRangeMask(swar.Load8(haystack, i+swar.WordLen), '0', '9')
+		if m0|m1 != 0 {
+			if m0 != 0 {
+				return i + swar.FirstLane(m0)
+			}
+			return i + swar.WordLen + swar.FirstLane(m1)
+		}
+	}
 	for ; i+swar.WordLen <= n; i += swar.WordLen {
 		if m := swar.MatchRangeMask(swar.Load8(haystack, i), '0', '9'); m != 0 {
 			return i + swar.FirstLane(m)

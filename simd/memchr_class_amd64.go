@@ -6,8 +6,10 @@
 
 package simd
 
-// Assembly kernels implemented in memchr_class_amd64.s. Range membership is
-// computed with unsigned clamp-and-compare (VPMINUB/VPMAXUB + VPCMPEQB).
+// Assembly kernels implemented in memchr_class_amd64.s. Class membership
+// is computed with a pair of VPSHUFB nibble lookups instead of one
+// clamp-and-compare per range, and four 32-byte vectors are classified per
+// iteration.
 //
 //go:noescape
 func memchrWordAVX2(haystack []byte) int

@@ -6,12 +6,14 @@
 
 package simd
 
-// Assembly kernels implemented in memchr_amd64.s. Each processes 32 bytes
-// per iteration with AVX2 and finishes the last 1-31 positions with an
-// overlapping rescan: memchr2 and memchr3 reload one 32-byte vector
-// ending at the buffer end, while memchrPair reloads both of its windows
-// — the byte1 side ending at len-offset, the byte2 side at the buffer
-// end.
+// Assembly kernels implemented in memchr_amd64.s. Each consumes four
+// 32-byte AVX2 vectors per iteration (OR-ing the per-vector match masks so
+// a 128-byte block needs one extraction and one branch), drops to a
+// 32-byte loop for the remainder, and finishes the last 1-31 positions
+// with an overlapping rescan: memchr2 and memchr3 reload one 32-byte
+// vector ending at the buffer end, while memchrPair reloads both of its
+// windows — the byte1 side ending at len-offset, the byte2 side at the
+// buffer end.
 //
 //go:noescape
 func memchr2AVX2(haystack []byte, needle1, needle2 byte) int

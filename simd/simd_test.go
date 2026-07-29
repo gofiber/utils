@@ -250,8 +250,29 @@ func Test_FirstNonASCII_CountNonASCII(t *testing.T) {
 			}
 		}
 		require.Equal(t, wantFirst, FirstNonASCII(h), "size %d", n)
+		require.Equal(t, wantFirst, firstNonASCIIGeneric(h), "generic size %d", n)
 		require.Equal(t, wantCount, CountNonASCII(h), "size %d", n)
+		require.Equal(t, wantCount, countNonASCIIGeneric(h), "generic size %d", n)
 		require.Equal(t, wantFirst == -1, IsASCII(h), "size %d", n)
+
+		// A single non-ASCII byte at every position: the position has to
+		// survive the block loop's combined test and the per-vector
+		// re-extraction that locates it, and CountNonASCII has to find it
+		// whether it lands in the vector-aligned prefix or the SWAR tail.
+		clean := make([]byte, n)
+		for i := range clean {
+			clean[i] = byte(i % 0x80)
+		}
+		require.Equal(t, -1, FirstNonASCII(clean), "clean size %d", n)
+		require.Equal(t, 0, CountNonASCII(clean), "clean size %d", n)
+		for pos := range n {
+			h := bytes.Clone(clean)
+			h[pos] = 0xc3
+			require.Equal(t, pos, FirstNonASCII(h), "size %d pos %d", n, pos)
+			require.Equal(t, pos, firstNonASCIIGeneric(h), "generic size %d pos %d", n, pos)
+			require.Equal(t, 1, CountNonASCII(h), "size %d pos %d", n, pos)
+			require.Equal(t, 1, countNonASCIIGeneric(h), "generic size %d pos %d", n, pos)
+		}
 	}
 }
 
@@ -325,6 +346,35 @@ func Test_MemchrWord_NotWord(t *testing.T) {
 		}
 		require.Equal(t, wantWord, MemchrWord(h), "byte %#x", b)
 		require.Equal(t, wantNot, MemchrNotWord(h), "byte %#x", b)
+	}
+	// Every byte value again, this time inside a buffer long enough to
+	// reach the vector kernels (and past the 128-byte block loop), so the
+	// class table is checked for all 256 values and not just at length 1.
+	for b := range 256 {
+		for _, size := range []int{32, 33, 63, 64, 129, 200} {
+			for _, pos := range []int{0, 1, 31, 32, size - 1} {
+				if pos >= size {
+					continue
+				}
+				word := bytes.Repeat([]byte{' '}, size)
+				word[pos] = byte(b)
+				wantWord := -1
+				if refIsWord(byte(b)) {
+					wantWord = pos
+				}
+				require.Equal(t, wantWord, MemchrWord(word), "byte %#x size %d pos %d", b, size, pos)
+				require.Equal(t, wantWord, memchrWordGeneric(word), "generic byte %#x size %d pos %d", b, size, pos)
+
+				not := bytes.Repeat([]byte{'k'}, size)
+				not[pos] = byte(b)
+				wantNot := pos
+				if refIsWord(byte(b)) {
+					wantNot = -1
+				}
+				require.Equal(t, wantNot, MemchrNotWord(not), "byte %#x size %d pos %d", b, size, pos)
+				require.Equal(t, wantNot, memchrNotWordGeneric(not), "generic byte %#x size %d pos %d", b, size, pos)
+			}
+		}
 	}
 	for _, n := range testSizes {
 		nonWord := bytes.Repeat([]byte{' '}, n)

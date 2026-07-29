@@ -6,7 +6,16 @@
 
 package simd
 
-// isASCIIImpl uses the portable SWAR implementation off amd64.
+// The portable SWAR implementations are the only ones off amd64.
+
 func isASCIIImpl(data []byte) bool {
 	return isASCIIGeneric(data)
+}
+
+func firstNonASCIIImpl(data []byte) int {
+	return firstNonASCIIGeneric(data)
+}
+
+func countNonASCIIImpl(data []byte) int {
+	return countNonASCIIGeneric(data)
 }
