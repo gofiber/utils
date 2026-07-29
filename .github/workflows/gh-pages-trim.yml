@@ -1,0 +1,22 @@
+name: Trim gh-pages history
+
+on:
+  schedule:
+    - cron: '0 4 1 * *'
+  workflow_dispatch:
+    inputs:
+      retention:
+        description: 'Oldest commit to keep'
+        required: false
+        default: '2 months ago'
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  trim:
+    uses: gofiber/.github/.github/workflows/gh-pages-trim.yml@main
+    with:
+      # 242 commits cost 4.5 MB against 1.0 MB for the tip, on a 4.8 MB repo.
+      retention: ${{ inputs.retention || '2 months ago' }}
