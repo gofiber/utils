@@ -2,24 +2,80 @@
 // (package simd), Copyright (c) 2025 Andrey Kolkov and contributors,
 // MIT License. See the LICENSE file in this directory for the full text.
 // Modified: legacy-SSE MOVD/MOVQ register moves replaced with VEX-encoded
-// VMOVD/VMOVQ to avoid AVX-SSE transition penalties on Intel CPUs, and the
+// VMOVD/VMOVQ to avoid AVX-SSE transition penalties on Intel CPUs, the
 // scalar tail loops replaced with one overlapping vector at the buffer end
-// for the MinLen+ inputs the Go dispatch guarantees.
+// for the MinLen+ inputs the Go dispatch guarantees, the per-range
+// clamp-and-compare classifier replaced with a nibble table lookup, and
+// the 32-byte main loops replaced with 4x unrolled 128-byte blocks.
 
 //go:build amd64
 
 #include "textflag.h"
 
+// Classifying \w = [A-Za-z0-9_] with unsigned clamp-and-compare costs three
+// VPMINUB/VPMAXUB/VPCMPEQB triples plus a VPCMPEQB for '_' and three VPORs:
+// thirteen vector ops per 32 bytes, ten of them on the two general vector
+// ALU ports. A nibble table does the same job in six, and the two VPSHUFBs
+// it adds run on the otherwise idle shuffle port.
+//
+// The table splits each byte into its high and low nibble. Every high
+// nibble that contains word characters gets one bit:
+//
+//	0x3_ -> 0x01   0x4_ -> 0x02   0x5_ -> 0x04   0x6_ -> 0x08   0x7_ -> 0x10
+//
+// and each low-nibble entry carries the set of high-nibble rows in which
+// that low nibble is a word character, so a byte is a word character
+// exactly when lowTable[lo] & highTable[hi] != 0:
+//
+//	lo 0x0        -> 0x15   ('0', 'P', 'p')
+//	lo 0x1..0x9   -> 0x1F   (digits and letters in every row)
+//	lo 0xA        -> 0x1E   ('J', 'Z', 'j', 'z' but not ':')
+//	lo 0xB..0xE   -> 0x0A   ('K'..'N', 'k'..'n' only)
+//	lo 0xF        -> 0x0E   ('O', '_', 'o')
+//
+// Bytes >= 0x80 need no separate guard: VPSHUFB zeroes any lane whose
+// index byte has bit 7 set, so the low-nibble lookup already returns 0 for
+// them and they classify as non-word, matching the SWAR fallback.
+//
+// Both kernels compute the same "not a word character" mask (0xFF per
+// non-word lane): the low and high lookups are AND-ed and compared against
+// zero, which is the complement the class test needs anyway.
+// memchrNotWord ORs those masks together across a block and scans the
+// extracted bits directly; memchrWord ANDs them (a block holds a word
+// character exactly when some lane's non-word mask is clear) and inverts
+// the extracted bits with a single NOTL.
+
+// NOTWORD leaves in dst a mask with 0xFF in every lane of src that is NOT
+// a word character. t0 and t1 are scratch; dst may alias src.
+#define NOTWORD(src, dst, t0, t1) \
+	VPSRLW   $4, src, t0;  \
+	VPAND    Y2, t0, t0;   \
+	VPSHUFB  t0, Y1, t0;   \
+	VPSHUFB  src, Y0, t1;  \
+	VPAND    t0, t1, t0;   \
+	VPCMPEQB Y3, t0, dst
+
+// SETUPTABLES loads the nibble tables, the low-nibble mask and a zero
+// vector into Y0-Y3. The tables are built from immediates rather than a
+// RODATA section so the kernels stay position-independent and free of
+// relocations.
+#define SETUPTABLES \
+	MOVQ        $0x1F1F1F1F1F1F1F15, AX; \
+	VMOVQ       AX, X0;                  \
+	MOVQ        $0x0E0A0A0A0A1E1F1F, AX; \
+	VPINSRQ     $1, AX, X0, X0;          \
+	VINSERTI128 $1, X0, Y0, Y0;          \
+	MOVQ        $0x1008040201000000, AX; \
+	VMOVQ       AX, X1;                  \
+	VINSERTI128 $1, X1, Y1, Y1;          \
+	MOVQ        $0x0F0F0F0F0F0F0F0F, AX; \
+	VMOVQ       AX, X2;                  \
+	VPBROADCASTQ X2, Y2;                 \
+	VPXOR       Y3, Y3, Y3
+
 // func memchrWordAVX2(haystack []byte) int
 //
-// AVX2 implementation to find first word character [A-Za-z0-9_].
-// Processes 32 bytes per iteration using range comparisons.
-//
-// Algorithm for checking if byte B is in range [lo, hi]:
-//   clamped = max(min(B, hi), lo)
-//   inRange = (B == clamped) ? 0xFF : 0x00
-//
-// Word character = [A-Z] | [a-z] | [0-9] | '_'
+// AVX2 implementation to find the first word character [A-Za-z0-9_].
 //
 // Parameters:
 //   haystack_base+0(FP)  - pointer to haystack (8 bytes)
@@ -36,117 +92,70 @@ TEXT ·memchrWordAVX2(SB), NOSPLIT, $0-32
 	TESTQ   DX, DX
 	JZ      word_not_found
 
-	// Save start for offset calculation
+	// Save start for offset calculation and compute the end pointer
 	MOVQ    SI, DI                     // DI = start pointer
-
-	// Calculate end pointer
 	LEAQ    (SI)(DX*1), R8             // R8 = end pointer
 
-	// Broadcast range constants to YMM registers
-	// [A-Z]: 65-90
-	MOVQ    $65, AX
-	VMOVD   AX, X8
-	VPBROADCASTB X8, Y8                // Y8 = [65, 65, ...] = 'A'
+	CMPQ    DX, $32
+	JB      word_tail_loop             // sub-32 direct call: scalar
 
-	MOVQ    $90, AX
-	VMOVD   AX, X9
-	VPBROADCASTB X9, Y9                // Y9 = [90, 90, ...] = 'Z'
+	SETUPTABLES
 
-	// [a-z]: 97-122
-	MOVQ    $97, AX
-	VMOVD   AX, X10
-	VPBROADCASTB X10, Y10              // Y10 = [97, 97, ...] = 'a'
+	LEAQ    -32(R8), R12               // last valid 32-byte window base
+	LEAQ    -128(R8), R11              // last valid 128-byte block base
+	CMPQ    SI, R11
+	JA      word_loop32_entry
 
-	MOVQ    $122, AX
-	VMOVD   AX, X11
-	VPBROADCASTB X11, Y11              // Y11 = [122, 122, ...] = 'z'
+word_loop128:
+	VMOVDQU (SI), Y4
+	VMOVDQU 32(SI), Y5
+	VMOVDQU 64(SI), Y6
+	VMOVDQU 96(SI), Y7
+	NOTWORD(Y4, Y4, Y8, Y9)
+	NOTWORD(Y5, Y5, Y8, Y9)
+	NOTWORD(Y6, Y6, Y8, Y9)
+	NOTWORD(Y7, Y7, Y8, Y9)
 
-	// [0-9]: 48-57
-	MOVQ    $48, AX
-	VMOVD   AX, X12
-	VPBROADCASTB X12, Y12              // Y12 = [48, 48, ...] = '0'
+	// A word character exists in the block iff some lane's non-word mask
+	// is clear, so AND the four masks and look for a zero lane.
+	VPAND   Y4, Y5, Y8
+	VPAND   Y6, Y7, Y9
+	VPAND   Y8, Y9, Y8
+	VPMOVMSKB Y8, CX
+	NOTL    CX
+	TESTL   CX, CX
+	JNZ     word_found_in_block
 
-	MOVQ    $57, AX
-	VMOVD   AX, X13
-	VPBROADCASTB X13, Y13              // Y13 = [57, 57, ...] = '9'
+	ADDQ    $128, SI
+	CMPQ    SI, R11
+	JBE     word_loop128
 
-	// '_': 95
-	MOVQ    $95, AX
-	VMOVD   AX, X14
-	VPBROADCASTB X14, Y14              // Y14 = [95, 95, ...] = '_'
+word_loop32_entry:
+	CMPQ    SI, R12
+	JA      word_last32
 
 word_loop32:
-	// Check if we have at least 32 bytes remaining
-	LEAQ    32(SI), R9
-	CMPQ    R9, R8
-	JA      word_handle_tail
-
-	// Load 32 bytes
-	VMOVDQU (SI), Y0                   // Y0 = data
-
-	// Check [A-Z]: clamp to [65, 90], compare
-	VPMINUB Y0, Y9, Y1                 // Y1 = min(data, 90)
-	VPMAXUB Y1, Y8, Y1                 // Y1 = max(min(data, 90), 65)
-	VPCMPEQB Y0, Y1, Y2                // Y2 = (data == clamped) for [A-Z]
-
-	// Check [a-z]: clamp to [97, 122], compare
-	VPMINUB Y0, Y11, Y1                // Y1 = min(data, 122)
-	VPMAXUB Y1, Y10, Y1                // Y1 = max(min(data, 122), 97)
-	VPCMPEQB Y0, Y1, Y3                // Y3 = (data == clamped) for [a-z]
-
-	// Check [0-9]: clamp to [48, 57], compare
-	VPMINUB Y0, Y13, Y1                // Y1 = min(data, 57)
-	VPMAXUB Y1, Y12, Y1                // Y1 = max(min(data, 57), 48)
-	VPCMPEQB Y0, Y1, Y4                // Y4 = (data == clamped) for [0-9]
-
-	// Check '_'
-	VPCMPEQB Y0, Y14, Y5               // Y5 = (data == '_')
-
-	// Combine: Y2 | Y3 | Y4 | Y5
-	VPOR    Y2, Y3, Y6
-	VPOR    Y4, Y5, Y7
-	VPOR    Y6, Y7, Y6                 // Y6 = final result mask
-
-	// Extract mask
-	VPMOVMSKB Y6, CX
-
-	// Check if any match
+	VMOVDQU (SI), Y4
+	NOTWORD(Y4, Y4, Y8, Y9)
+	VPMOVMSKB Y4, CX
+	NOTL    CX
 	TESTL   CX, CX
 	JNZ     word_found_in_vector
 
-	// Advance to next chunk
 	ADDQ    $32, SI
-	JMP     word_loop32
+	CMPQ    SI, R12
+	JBE     word_loop32
 
-word_handle_tail:
-	// Fewer than 32 bytes remain. If any do, rescan the final 32-byte
-	// window ending at the buffer end: lanes before SI were already
-	// resolved as non-matching, so BSF stays exact. Inputs shorter than
-	// 32 bytes (unreachable through the Go dispatch) take the scalar loop.
+word_last32:
+	// Fewer than 32 bytes remain past SI; rescan the final window. Lanes
+	// before SI were already resolved as non-matching, so BSF stays exact.
 	CMPQ    SI, R8
 	JAE     word_not_found
-	CMPQ    DX, $32
-	JB      word_tail_loop              // sub-32 direct call: scalar
-
-	LEAQ    -32(R8), SI                 // SI = base of the final window
-	VMOVDQU (SI), Y0
-
-	// Same class checks as the main loop
-	VPMINUB Y0, Y9, Y1
-	VPMAXUB Y1, Y8, Y1
-	VPCMPEQB Y0, Y1, Y2                // [A-Z]
-	VPMINUB Y0, Y11, Y1
-	VPMAXUB Y1, Y10, Y1
-	VPCMPEQB Y0, Y1, Y3                // [a-z]
-	VPMINUB Y0, Y13, Y1
-	VPMAXUB Y1, Y12, Y1
-	VPCMPEQB Y0, Y1, Y4                // [0-9]
-	VPCMPEQB Y0, Y14, Y5               // '_'
-	VPOR    Y2, Y3, Y6
-	VPOR    Y4, Y5, Y7
-	VPOR    Y6, Y7, Y6
-
-	VPMOVMSKB Y6, CX
+	MOVQ    R12, SI
+	VMOVDQU (SI), Y4
+	NOTWORD(Y4, Y4, Y8, Y9)
+	VPMOVMSKB Y4, CX
+	NOTL    CX
 	TESTL   CX, CX
 	JNZ     word_found_in_vector
 	JMP     word_not_found
@@ -190,8 +199,28 @@ word_not_found:
 	VZEROUPPER
 	RET
 
+word_found_in_block:
+	// Locate the first hit by re-extracting the per-vector masks in
+	// address order; only one of the four can hold the lowest match.
+	VPMOVMSKB Y4, CX
+	NOTL    CX
+	TESTL   CX, CX
+	JNZ     word_found_in_vector
+	ADDQ    $32, SI
+	VPMOVMSKB Y5, CX
+	NOTL    CX
+	TESTL   CX, CX
+	JNZ     word_found_in_vector
+	ADDQ    $32, SI
+	VPMOVMSKB Y6, CX
+	NOTL    CX
+	TESTL   CX, CX
+	JNZ     word_found_in_vector
+	ADDQ    $32, SI
+	VPMOVMSKB Y7, CX
+	NOTL    CX
+
 word_found_in_vector:
-	// Find first set bit
 	BSFL    CX, BX
 	SUBQ    DI, SI                     // SI = offset to chunk start
 	ADDQ    SI, BX                     // BX = absolute position
@@ -205,13 +234,11 @@ word_found_scalar:
 	VZEROUPPER
 	RET
 
-
 // func memchrNotWordAVX2(haystack []byte) int
 //
-// AVX2 implementation to find first non-word character.
-// This is the complement of memchrWordAVX2.
-//
-// Non-word = NOT([A-Z] | [a-z] | [0-9] | '_')
+// AVX2 implementation to find the first non-word character, the complement
+// of memchrWordAVX2. The nibble classifier already produces the non-word
+// mask directly, so this kernel skips the NOTL memchrWordAVX2 needs.
 //
 TEXT ·memchrNotWordAVX2(SB), NOSPLIT, $0-32
 	// Load parameters
@@ -222,121 +249,63 @@ TEXT ·memchrNotWordAVX2(SB), NOSPLIT, $0-32
 	TESTQ   DX, DX
 	JZ      notword_not_found
 
-	// Save start for offset calculation
+	// Save start for offset calculation and compute the end pointer
 	MOVQ    SI, DI
-
-	// Calculate end pointer
 	LEAQ    (SI)(DX*1), R8
 
-	// Broadcast range constants
-	// [A-Z]: 65-90
-	MOVQ    $65, AX
-	VMOVD   AX, X8
-	VPBROADCASTB X8, Y8
+	CMPQ    DX, $32
+	JB      notword_tail_loop          // sub-32 direct call: scalar
 
-	MOVQ    $90, AX
-	VMOVD   AX, X9
-	VPBROADCASTB X9, Y9
+	SETUPTABLES
 
-	// [a-z]: 97-122
-	MOVQ    $97, AX
-	VMOVD   AX, X10
-	VPBROADCASTB X10, Y10
+	LEAQ    -32(R8), R12
+	LEAQ    -128(R8), R11
+	CMPQ    SI, R11
+	JA      notword_loop32_entry
 
-	MOVQ    $122, AX
-	VMOVD   AX, X11
-	VPBROADCASTB X11, Y11
+notword_loop128:
+	VMOVDQU (SI), Y4
+	VMOVDQU 32(SI), Y5
+	VMOVDQU 64(SI), Y6
+	VMOVDQU 96(SI), Y7
+	NOTWORD(Y4, Y4, Y8, Y9)
+	NOTWORD(Y5, Y5, Y8, Y9)
+	NOTWORD(Y6, Y6, Y8, Y9)
+	NOTWORD(Y7, Y7, Y8, Y9)
 
-	// [0-9]: 48-57
-	MOVQ    $48, AX
-	VMOVD   AX, X12
-	VPBROADCASTB X12, Y12
+	VPOR    Y4, Y5, Y8
+	VPOR    Y6, Y7, Y9
+	VPOR    Y8, Y9, Y8
+	VPMOVMSKB Y8, CX
+	TESTL   CX, CX
+	JNZ     notword_found_in_block
 
-	MOVQ    $57, AX
-	VMOVD   AX, X13
-	VPBROADCASTB X13, Y13
+	ADDQ    $128, SI
+	CMPQ    SI, R11
+	JBE     notword_loop128
 
-	// '_': 95
-	MOVQ    $95, AX
-	VMOVD   AX, X14
-	VPBROADCASTB X14, Y14
-
-	// All ones for NOT operation
-	VPCMPEQB Y15, Y15, Y15             // Y15 = [0xFF, 0xFF, ...]
+notword_loop32_entry:
+	CMPQ    SI, R12
+	JA      notword_last32
 
 notword_loop32:
-	// Check if we have at least 32 bytes remaining
-	LEAQ    32(SI), R9
-	CMPQ    R9, R8
-	JA      notword_handle_tail
-
-	// Load 32 bytes
-	VMOVDQU (SI), Y0
-
-	// Check [A-Z]
-	VPMINUB Y0, Y9, Y1
-	VPMAXUB Y1, Y8, Y1
-	VPCMPEQB Y0, Y1, Y2
-
-	// Check [a-z]
-	VPMINUB Y0, Y11, Y1
-	VPMAXUB Y1, Y10, Y1
-	VPCMPEQB Y0, Y1, Y3
-
-	// Check [0-9]
-	VPMINUB Y0, Y13, Y1
-	VPMAXUB Y1, Y12, Y1
-	VPCMPEQB Y0, Y1, Y4
-
-	// Check '_'
-	VPCMPEQB Y0, Y14, Y5
-
-	// Combine: isWord = Y2 | Y3 | Y4 | Y5
-	VPOR    Y2, Y3, Y6
-	VPOR    Y4, Y5, Y7
-	VPOR    Y6, Y7, Y6
-
-	// NOT: isNotWord = ~isWord
-	VPXOR   Y6, Y15, Y6                // Y6 = NOT(isWord)
-
-	// Extract mask
-	VPMOVMSKB Y6, CX
-
-	// Check if any match
+	VMOVDQU (SI), Y4
+	NOTWORD(Y4, Y4, Y8, Y9)
+	VPMOVMSKB Y4, CX
 	TESTL   CX, CX
 	JNZ     notword_found_in_vector
 
-	// Advance to next chunk
 	ADDQ    $32, SI
-	JMP     notword_loop32
+	CMPQ    SI, R12
+	JBE     notword_loop32
 
-notword_handle_tail:
-	// Overlapping vector tail; see word_handle_tail.
+notword_last32:
 	CMPQ    SI, R8
 	JAE     notword_not_found
-	CMPQ    DX, $32
-	JB      notword_tail_loop           // sub-32 direct call: scalar
-
-	LEAQ    -32(R8), SI                 // SI = base of the final window
-	VMOVDQU (SI), Y0
-
-	// Same class checks as the main loop, then complement
-	VPMINUB Y0, Y9, Y1
-	VPMAXUB Y1, Y8, Y1
-	VPCMPEQB Y0, Y1, Y2
-	VPMINUB Y0, Y11, Y1
-	VPMAXUB Y1, Y10, Y1
-	VPCMPEQB Y0, Y1, Y3
-	VPMINUB Y0, Y13, Y1
-	VPMAXUB Y1, Y12, Y1
-	VPCMPEQB Y0, Y1, Y4
-	VPCMPEQB Y0, Y14, Y5
-	VPOR    Y2, Y3, Y6
-	VPOR    Y4, Y5, Y7
-	VPOR    Y6, Y7, Y6
-	VPXOR   Y6, Y15, Y6                 // Y6 = NOT(isWord)
-
-	VPMOVMSKB Y6, CX
+	MOVQ    R12, SI
+	VMOVDQU (SI), Y4
+	NOTWORD(Y4, Y4, Y8, Y9)
+	VPMOVMSKB Y4, CX
 	TESTL   CX, CX
 	JNZ     notword_found_in_vector
 	JMP     notword_not_found
@@ -387,6 +356,21 @@ notword_not_found:
 	MOVQ    AX, ret+24(FP)
 	VZEROUPPER
 	RET
+
+notword_found_in_block:
+	VPMOVMSKB Y4, CX
+	TESTL   CX, CX
+	JNZ     notword_found_in_vector
+	ADDQ    $32, SI
+	VPMOVMSKB Y5, CX
+	TESTL   CX, CX
+	JNZ     notword_found_in_vector
+	ADDQ    $32, SI
+	VPMOVMSKB Y6, CX
+	TESTL   CX, CX
+	JNZ     notword_found_in_vector
+	ADDQ    $32, SI
+	VPMOVMSKB Y7, CX
 
 notword_found_in_vector:
 	BSFL    CX, BX

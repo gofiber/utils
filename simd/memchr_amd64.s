@@ -2,25 +2,43 @@
 // (package simd), Copyright (c) 2025 Andrey Kolkov and contributors,
 // MIT License. See the LICENSE file in this directory for the full text.
 // Modified: legacy-SSE MOVD/MOVQ register moves replaced with VEX-encoded
-// VMOVD/VMOVQ to avoid AVX-SSE transition penalties on Intel CPUs, and the
+// VMOVD/VMOVQ to avoid AVX-SSE transition penalties on Intel CPUs, the
 // scalar tail loops replaced with overlapping vector rescans of the final
 // window (a vector pair in memchrPairAVX2) for the MinLen+ inputs the Go
-// dispatch guarantees.
+// dispatch guarantees, and the 32-byte main loops replaced with 4x
+// unrolled 128-byte blocks that OR the per-vector masks together and
+// extract a single VPMOVMSKB per block.
 
 //go:build amd64
 
 #include "textflag.h"
 
+// The kernels below share one loop skeleton:
+//
+//   1. A 128-byte block loop, entered only while base <= end-128. Four
+//      vectors are compared in parallel, their match masks OR-ed together,
+//      and a single VPMOVMSKB tests all 128 bytes at once. The per-vector
+//      masks stay live, so the (rare) hit path re-extracts them in address
+//      order to locate the first match. This keeps the port-0-only
+//      VPMOVMSKB and the loop bookkeeping off the critical path: the block
+//      loop retires four 32-byte compares for the branch overhead of one.
+//   2. A 32-byte loop for the remainder, entered while base <= end-32.
+//   3. One overlapping 32-byte window ending at the buffer end for the
+//      last 1-31 bytes. Lanes before the current base were already
+//      resolved as non-matching, so the first set lane of the overlap
+//      always falls in the new bytes and BSF stays exact.
+//
+// Both loops test their bound at the bottom against a precomputed limit
+// pointer, so the steady state costs one ADDQ/CMPQ/JBE instead of the
+// LEAQ/CMPQ/JA/ADDQ/JMP the original 32-byte loops carried. Inputs shorter
+// than one vector — unreachable through the Go dispatch, which routes them
+// to the SWAR fallbacks — take the scalar tail loops.
+
 // func memchr2AVX2(haystack []byte, needle1, needle2 byte) int
 //
 // AVX2 kernel behind Memchr2 that searches for either of two bytes.
 // Uses parallel comparison with two broadcast vectors and combines results
-// with VPOR. The final 1-31 bytes are handled with one overlapping 32-byte
-// vector at the buffer end: lanes before it were already resolved as
-// non-matching, so the first set lane of the overlap falls in the new bytes
-// (the same argument the SWAR fallbacks use for their overlapping word at
-// n-8). Inputs shorter than 32 bytes — unreachable through the Go dispatch,
-// which routes them to the SWAR fallback — take a scalar loop instead.
+// with VPOR.
 //
 // Parameters (FP offsets, ABI0; the byte arguments are packed into
 // adjacent 1-byte slots after the 24-byte slice header, then padded to
@@ -50,45 +68,70 @@ TEXT ·memchr2AVX2(SB), NOSPLIT, $0-40
 	VMOVD   BX, X1
 	VPBROADCASTB X1, Y1                  // Y1 = [needle2 × 32]
 
-	// Save start pointer
+	// Save start pointer and compute the end
 	MOVQ    SI, DI
-
-	// Calculate end
 	LEAQ    (SI)(DX*1), R8
 
-loop32_2:
-	LEAQ    32(SI), R9
-	CMPQ    R9, R8
-	JA      handle_tail2
+	CMPQ    DX, $32
+	JB      tail_loop2                   // sub-32 direct call: scalar
 
-	// Load chunk
+	LEAQ    -32(R8), R12                 // last valid 32-byte window base
+	LEAQ    -128(R8), R11                // last valid 128-byte block base
+	CMPQ    SI, R11
+	JA      loop32_2_entry
+
+loop128_2:
 	VMOVDQU (SI), Y2
+	VMOVDQU 32(SI), Y3
+	VMOVDQU 64(SI), Y4
+	VMOVDQU 96(SI), Y5
 
-	// Compare with both needles
-	VPCMPEQB Y0, Y2, Y3                  // Y3 = matches with needle1
-	VPCMPEQB Y1, Y2, Y4                  // Y4 = matches with needle2
+	VPCMPEQB Y0, Y2, Y6
+	VPCMPEQB Y1, Y2, Y7
+	VPOR    Y6, Y7, Y2                   // Y2 = matches in bytes 0-31
+	VPCMPEQB Y0, Y3, Y6
+	VPCMPEQB Y1, Y3, Y7
+	VPOR    Y6, Y7, Y3                   // Y3 = matches in bytes 32-63
+	VPCMPEQB Y0, Y4, Y6
+	VPCMPEQB Y1, Y4, Y7
+	VPOR    Y6, Y7, Y4                   // Y4 = matches in bytes 64-95
+	VPCMPEQB Y0, Y5, Y6
+	VPCMPEQB Y1, Y5, Y7
+	VPOR    Y6, Y7, Y5                   // Y5 = matches in bytes 96-127
 
-	// Combine results with OR (match if either needle found)
-	VPOR    Y3, Y4, Y3                   // Y3 = needle1_matches | needle2_matches
+	VPOR    Y2, Y3, Y6
+	VPOR    Y4, Y5, Y7
+	VPOR    Y6, Y7, Y6                   // Y6 = matches anywhere in the block
+	VPMOVMSKB Y6, CX
+	TESTL   CX, CX
+	JNZ     found_in_block2
 
-	// Extract mask
+	ADDQ    $128, SI
+	CMPQ    SI, R11
+	JBE     loop128_2
+
+loop32_2_entry:
+	CMPQ    SI, R12
+	JA      last32_2
+
+loop32_2:
+	VMOVDQU (SI), Y2
+	VPCMPEQB Y0, Y2, Y3
+	VPCMPEQB Y1, Y2, Y4
+	VPOR    Y3, Y4, Y3
 	VPMOVMSKB Y3, CX
 	TESTL   CX, CX
 	JNZ     found_in_vector2
 
 	ADDQ    $32, SI
-	JMP     loop32_2
+	CMPQ    SI, R12
+	JBE     loop32_2
 
-handle_tail2:
-	// Fewer than 32 bytes remain.
+last32_2:
+	// Fewer than 32 bytes remain past SI; rescan the final window.
 	CMPQ    SI, R8
 	JAE     not_found2
-	CMPQ    DX, $32
-	JB      tail_loop2                   // sub-32 direct call: scalar
-
-	// Rescan the final 32-byte window ending at the buffer end; lanes
-	// before SI are known non-matching, so BSF stays exact.
-	LEAQ    -32(R8), SI
+	MOVQ    R12, SI
 	VMOVDQU (SI), Y2
 	VPCMPEQB Y0, Y2, Y3
 	VPCMPEQB Y1, Y2, Y4
@@ -115,6 +158,23 @@ not_found2:
 	VZEROUPPER
 	RET
 
+found_in_block2:
+	// Locate the first hit by re-extracting the per-vector masks in
+	// address order; only one of the four can hold the lowest match.
+	VPMOVMSKB Y2, CX
+	TESTL   CX, CX
+	JNZ     found_in_vector2
+	ADDQ    $32, SI
+	VPMOVMSKB Y3, CX
+	TESTL   CX, CX
+	JNZ     found_in_vector2
+	ADDQ    $32, SI
+	VPMOVMSKB Y4, CX
+	TESTL   CX, CX
+	JNZ     found_in_vector2
+	ADDQ    $32, SI
+	VPMOVMSKB Y5, CX
+
 found_in_vector2:
 	BSFL    CX, CX
 	SUBQ    DI, SI
@@ -131,9 +191,8 @@ found_scalar2:
 
 // func memchr3AVX2(haystack []byte, needle1, needle2, needle3 byte) int
 //
-// AVX2 kernel behind Memchr3 that searches for any of three bytes.
-// Same structure as memchr2AVX2 (including the overlapping vector tail),
-// with a third broadcast/compare.
+// AVX2 kernel behind Memchr3 that searches for any of three bytes. Same
+// skeleton as memchr2AVX2 with a third broadcast/compare.
 //
 // Parameters (FP offsets, ABI0; byte arguments packed into adjacent 1-byte
 // slots after the slice header, then padded):
@@ -166,45 +225,79 @@ TEXT ·memchr3AVX2(SB), NOSPLIT, $0-40
 	VMOVD   R10, X2
 	VPBROADCASTB X2, Y2                  // Y2 = [needle3 × 32]
 
-	// Save start pointer
+	// Save start pointer and compute the end
 	MOVQ    SI, DI
-
-	// Calculate end
 	LEAQ    (SI)(DX*1), R8
 
-loop32_3:
-	LEAQ    32(SI), R9
-	CMPQ    R9, R8
-	JA      handle_tail3
+	CMPQ    DX, $32
+	JB      tail_loop3                   // sub-32 direct call: scalar
 
-	// Load chunk
+	LEAQ    -32(R8), R12                 // last valid 32-byte window base
+	LEAQ    -128(R8), R11                // last valid 128-byte block base
+	CMPQ    SI, R11
+	JA      loop32_3_entry
+
+loop128_3:
 	VMOVDQU (SI), Y3
+	VMOVDQU 32(SI), Y4
+	VMOVDQU 64(SI), Y5
+	VMOVDQU 96(SI), Y6
 
-	// Compare with all three needles
-	VPCMPEQB Y0, Y3, Y4                  // Y4 = matches with needle1
-	VPCMPEQB Y1, Y3, Y5                  // Y5 = matches with needle2
-	VPCMPEQB Y2, Y3, Y6                  // Y6 = matches with needle3
+	VPCMPEQB Y0, Y3, Y7
+	VPCMPEQB Y1, Y3, Y8
+	VPCMPEQB Y2, Y3, Y9
+	VPOR    Y7, Y8, Y7
+	VPOR    Y7, Y9, Y3                   // Y3 = matches in bytes 0-31
+	VPCMPEQB Y0, Y4, Y7
+	VPCMPEQB Y1, Y4, Y8
+	VPCMPEQB Y2, Y4, Y9
+	VPOR    Y7, Y8, Y7
+	VPOR    Y7, Y9, Y4                   // Y4 = matches in bytes 32-63
+	VPCMPEQB Y0, Y5, Y7
+	VPCMPEQB Y1, Y5, Y8
+	VPCMPEQB Y2, Y5, Y9
+	VPOR    Y7, Y8, Y7
+	VPOR    Y7, Y9, Y5                   // Y5 = matches in bytes 64-95
+	VPCMPEQB Y0, Y6, Y7
+	VPCMPEQB Y1, Y6, Y8
+	VPCMPEQB Y2, Y6, Y9
+	VPOR    Y7, Y8, Y7
+	VPOR    Y7, Y9, Y6                   // Y6 = matches in bytes 96-127
 
-	// Combine results: match if any needle found
-	VPOR    Y4, Y5, Y4                   // Y4 = needle1 | needle2
-	VPOR    Y4, Y6, Y4                   // Y4 = (needle1 | needle2) | needle3
+	VPOR    Y3, Y4, Y7
+	VPOR    Y5, Y6, Y8
+	VPOR    Y7, Y8, Y7                   // Y7 = matches anywhere in the block
+	VPMOVMSKB Y7, CX
+	TESTL   CX, CX
+	JNZ     found_in_block3
 
-	// Extract mask
+	ADDQ    $128, SI
+	CMPQ    SI, R11
+	JBE     loop128_3
+
+loop32_3_entry:
+	CMPQ    SI, R12
+	JA      last32_3
+
+loop32_3:
+	VMOVDQU (SI), Y3
+	VPCMPEQB Y0, Y3, Y4
+	VPCMPEQB Y1, Y3, Y5
+	VPCMPEQB Y2, Y3, Y6
+	VPOR    Y4, Y5, Y4
+	VPOR    Y4, Y6, Y4
 	VPMOVMSKB Y4, CX
 	TESTL   CX, CX
 	JNZ     found_in_vector3
 
 	ADDQ    $32, SI
-	JMP     loop32_3
+	CMPQ    SI, R12
+	JBE     loop32_3
 
-handle_tail3:
-	// Fewer than 32 bytes remain; overlapping vector tail, see memchr2AVX2.
+last32_3:
 	CMPQ    SI, R8
 	JAE     not_found3
-	CMPQ    DX, $32
-	JB      tail_loop3                   // sub-32 direct call: scalar
-
-	LEAQ    -32(R8), SI
+	MOVQ    R12, SI
 	VMOVDQU (SI), Y3
 	VPCMPEQB Y0, Y3, Y4
 	VPCMPEQB Y1, Y3, Y5
@@ -235,6 +328,21 @@ not_found3:
 	VZEROUPPER
 	RET
 
+found_in_block3:
+	VPMOVMSKB Y3, CX
+	TESTL   CX, CX
+	JNZ     found_in_vector3
+	ADDQ    $32, SI
+	VPMOVMSKB Y4, CX
+	TESTL   CX, CX
+	JNZ     found_in_vector3
+	ADDQ    $32, SI
+	VPMOVMSKB Y5, CX
+	TESTL   CX, CX
+	JNZ     found_in_vector3
+	ADDQ    $32, SI
+	VPMOVMSKB Y6, CX
+
 found_in_vector3:
 	BSFL    CX, CX
 	SUBQ    DI, SI
@@ -261,7 +369,8 @@ found_scalar3:
 //     - Load haystack[p+offset:p+offset+32], compare with byte2 → mask2
 //     - AND mask1, mask2 → combined mask (both bytes at correct distance)
 //  3. First set bit in combined mask is the answer
-//  4. The final 1-31 pair positions are rescanned with one overlapping
+//  4. The block loop runs the same AND over four chunk pairs at a time.
+//  5. The final 1-31 pair positions are rescanned with one overlapping
 //     vector pair whose second load ends exactly at the buffer end; pair
 //     positions before it are known non-matching, so BSF stays exact.
 //     Inputs with fewer than offset+32 bytes — unreachable through the Go
@@ -306,57 +415,86 @@ TEXT ·memchrPairAVX2(SB), NOSPLIT, $0-48
 	// - We need 32 bytes at position p+offset (for byte2 check)
 	// - So we need p + offset + 32 <= length
 	// - Which means p <= length - offset - 32
-	MOVQ    DX, R8                       // R8 = length
-	SUBQ    R10, R8                      // R8 = length - offset
-	SUBQ    $32, R8                      // R8 = length - offset - 32 (last valid p)
-	CMPQ    R8, $0
+	MOVQ    DX, R12                      // R12 = length
+	SUBQ    R10, R12                     // R12 = length - offset
+	SUBQ    $32, R12                     // R12 = length - offset - 32 (last valid p)
 	JL      scalar_entry_pair            // sub-(offset+32) direct call: scalar
+	ADDQ    SI, R12                      // R12 = absolute last valid base
 
-	// R8 now contains the last valid position for the vector loop
-	ADDQ    SI, R8                       // R8 = absolute last valid base
+	LEAQ    -96(R12), R11                // last valid 128-position block base
+	CMPQ    SI, R11
+	JA      loop32_pair_entry
 
-loop32_pair:
-	// Check if SI <= R8 (still have room for a full vector)
-	CMPQ    SI, R8
+loop128_pair:
+	// byte1 side: four consecutive 32-byte chunks
+	VMOVDQU (SI), Y2
+	VMOVDQU 32(SI), Y3
+	VMOVDQU 64(SI), Y4
+	VMOVDQU 96(SI), Y5
+	VPCMPEQB Y0, Y2, Y2
+	VPCMPEQB Y0, Y3, Y3
+	VPCMPEQB Y0, Y4, Y4
+	VPCMPEQB Y0, Y5, Y5
+
+	// byte2 side: the same chunks shifted by offset
+	VMOVDQU (SI)(R10*1), Y6
+	VMOVDQU 32(SI)(R10*1), Y7
+	VMOVDQU 64(SI)(R10*1), Y8
+	VMOVDQU 96(SI)(R10*1), Y9
+	VPCMPEQB Y1, Y6, Y6
+	VPCMPEQB Y1, Y7, Y7
+	VPCMPEQB Y1, Y8, Y8
+	VPCMPEQB Y1, Y9, Y9
+
+	VPAND   Y2, Y6, Y2                   // Y2 = pairs in positions 0-31
+	VPAND   Y3, Y7, Y3                   // Y3 = pairs in positions 32-63
+	VPAND   Y4, Y8, Y4                   // Y4 = pairs in positions 64-95
+	VPAND   Y5, Y9, Y5                   // Y5 = pairs in positions 96-127
+
+	VPOR    Y2, Y3, Y6
+	VPOR    Y4, Y5, Y7
+	VPOR    Y6, Y7, Y6
+	VPMOVMSKB Y6, CX
+	TESTL   CX, CX
+	JNZ     found_in_block_pair
+
+	ADDQ    $128, SI
+	CMPQ    SI, R11
+	JBE     loop128_pair
+
+loop32_pair_entry:
+	CMPQ    SI, R12
 	JA      vector_tail_pair
 
-	// Load 32 bytes at position p (for byte1)
+loop32_pair:
+	// Load 32 bytes at position p (for byte1) and at p+offset (for byte2)
 	VMOVDQU (SI), Y2                     // Y2 = haystack[p:p+32]
-
-	// Load 32 bytes at position p+offset (for byte2)
 	VMOVDQU (SI)(R10*1), Y3              // Y3 = haystack[p+offset:p+offset+32]
-
-	// Compare byte1
 	VPCMPEQB Y0, Y2, Y4                  // Y4 = positions where haystack[p+k] == byte1
-
-	// Compare byte2
 	VPCMPEQB Y1, Y3, Y5                  // Y5 = positions where haystack[p+offset+k] == byte2
 
 	// AND the results: bit k is set only if:
 	// - haystack[p+k] == byte1
 	// - haystack[p+offset+k] == byte2
-	// This means the pair (byte1, byte2) appears at (p+k, p+k+offset)
 	VPAND   Y4, Y5, Y4                   // Y4 = combined mask
-
-	// Extract mask
 	VPMOVMSKB Y4, CX
 	TESTL   CX, CX
 	JNZ     found_in_vector_pair
 
-	// No match in this chunk, advance by 32 bytes
 	ADDQ    $32, SI
-	JMP     loop32_pair
+	CMPQ    SI, R12
+	JBE     loop32_pair
 
 vector_tail_pair:
 	// Fewer than 32 pair positions remain past SI. If any do, rescan the
-	// final 32-position window based at R8 = base+len-offset-32: its second
+	// final 32-position window based at R12 = base+len-offset-32: its second
 	// load ends exactly at the buffer end, and pair positions before SI are
 	// known non-matching.
 	LEAQ    (DI)(DX*1), R9               // R9 = buffer end
 	SUBQ    R10, R9                      // R9 = end of valid pair positions
 	CMPQ    SI, R9
 	JAE     not_found_pair
-	MOVQ    R8, SI                       // SI = base of the final window
+	MOVQ    R12, SI                      // SI = base of the final window
 	VMOVDQU (SI), Y2
 	VMOVDQU (SI)(R10*1), Y3
 	VPCMPEQB Y0, Y2, Y4
@@ -396,6 +534,21 @@ not_found_pair:
 	MOVQ    AX, ret+40(FP)
 	VZEROUPPER
 	RET
+
+found_in_block_pair:
+	VPMOVMSKB Y2, CX
+	TESTL   CX, CX
+	JNZ     found_in_vector_pair
+	ADDQ    $32, SI
+	VPMOVMSKB Y3, CX
+	TESTL   CX, CX
+	JNZ     found_in_vector_pair
+	ADDQ    $32, SI
+	VPMOVMSKB Y4, CX
+	TESTL   CX, CX
+	JNZ     found_in_vector_pair
+	ADDQ    $32, SI
+	VPMOVMSKB Y5, CX
 
 found_in_vector_pair:
 	// Match found in vector! CX contains mask

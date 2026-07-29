@@ -2,27 +2,43 @@
 // (package simd), Copyright (c) 2025 Andrey Kolkov and contributors,
 // MIT License. See the LICENSE file in this directory for the full text.
 // Modified: legacy-SSE MOVD/MOVQ register moves replaced with VEX-encoded
-// VMOVD/VMOVQ to avoid AVX-SSE transition penalties on Intel CPUs, and the
+// VMOVD/VMOVQ to avoid AVX-SSE transition penalties on Intel CPUs, the
 // scalar tail loop replaced with one overlapping vector at the buffer end
-// for the MinLen+ inputs the Go dispatch guarantees.
+// for the MinLen+ inputs the Go dispatch guarantees, and the 32-byte main
+// loop replaced with a 4x unrolled 128-byte block.
 
 //go:build amd64
 
 #include "textflag.h"
 
+// DIGITS leaves in dst a mask with 0xFF in every lane of src holding an
+// ASCII digit. t0 and t1 are scratch; dst may alias src.
+//
+//	Y0 = [0x2F x 32] ('0' - 1)   Y1 = [0x39 x 32] ('9')
+//
+// VPCMPGTB is a signed comparison, which is what makes the pair exact for
+// every byte: lanes >= 0x80 are negative and so fail "> 0x2F" outright.
+#define DIGITS(src, dst, t0, t1) \
+	VPCMPGTB Y0, src, t0; \
+	VPCMPGTB Y1, src, t1; \
+	VPANDN   t0, t1, dst
+
 // func memchrDigitAVX2(haystack []byte) int
 //
 // AVX2 implementation of digit search that finds the first ASCII digit [0-9].
-// Processes 32 bytes per iteration using 256-bit vector range comparison.
 //
 // Algorithm for range check [0-9] (bytes 0x30-0x39):
 //  1. Broadcast 0x2F ('0'-1) and 0x39 ('9') to YMM registers
 //  2. Load 32 bytes from haystack
 //  3. VPCMPGTB: check if chunk > 0x2F (byte >= '0')
 //  4. VPCMPGTB: check if 0x39 < chunk, then invert (byte <= '9')
-//  5. VPAND: combine masks to get bytes in range ['0'-'9']
+//  5. VPANDN: combine masks to get bytes in range ['0'-'9']
 //  6. VPMOVMSKB: extract 32-bit mask
-//  7. TZCNT/BSFL: find first set bit
+//  7. BSFL: find first set bit
+//
+// The block loop runs steps 2-5 over four vectors, ORs the four masks and
+// extracts once; the (rare) hit path re-extracts the per-vector masks in
+// address order to locate the first digit.
 //
 // Parameters (FP offsets):
 //   haystack_base+0(FP)  - pointer to haystack data (8 bytes)
@@ -42,10 +58,6 @@ TEXT ·memchrDigitAVX2(SB), NOSPLIT, $0-32
 
 	// Prepare constants for range check ['0'-'9'] = [0x30-0x39]
 	// We check: byte > 0x2F AND byte <= 0x39
-	// Which is: byte > 0x2F AND NOT(byte > 0x39)
-	//
-	// Y0 = 0x2F repeated (low bound - 1, i.e., '0' - 1)
-	// Y1 = 0x39 repeated (high bound, i.e., '9')
 	MOVQ    $0x2F2F2F2F2F2F2F2F, AX
 	VMOVQ   AX, X0
 	VPBROADCASTQ X0, Y0                  // Y0 = [0x2F x 32]
@@ -54,63 +66,63 @@ TEXT ·memchrDigitAVX2(SB), NOSPLIT, $0-32
 	VMOVQ   AX, X1
 	VPBROADCASTQ X1, Y1                  // Y1 = [0x39 x 32]
 
-	// Save start pointer for offset calculation
+	// Save start pointer for offset calculation, compute the end pointer
 	MOVQ    SI, DI                       // DI = haystack start (preserved)
-
-	// Calculate end pointer
 	LEAQ    (SI)(DX*1), R8               // R8 = SI + length (end pointer)
 
-// Main loop: process 32 bytes per iteration
-loop32:
-	// Check if we have at least 32 bytes remaining
-	LEAQ    32(SI), R9                   // R9 = SI + 32
-	CMPQ    R9, R8                       // Compare with end pointer
-	JA      handle_tail                  // If R9 > R8, less than 32 bytes left
-
-	// Load 32 bytes from haystack (unaligned load is safe and fast with AVX2)
-	VMOVDQU (SI), Y2                     // Y2 = haystack[SI:SI+32]
-
-	// Range check: '0' <= byte <= '9'
-	//
-	// Step 1: Y3 = (byte > 0x2F) - bytes that are >= '0' have 0xFF, else 0x00
-	// VPCMPGTB sets each byte to 0xFF if Y2[i] > Y0[i], else 0x00
-	VPCMPGTB Y0, Y2, Y3                  // Y3 = (chunk > 0x2F)
-
-	// Step 2: Y4 = (byte > 0x39) - bytes that are > '9' have 0xFF, else 0x00
-	VPCMPGTB Y1, Y2, Y4                  // Y4 = (chunk > 0x39)
-
-	// Step 3: Y5 = Y3 AND NOT(Y4)
-	// This gives us: (byte > 0x2F) AND (byte <= 0x39) = digit in range
-	// VPANDN: Y5 = NOT(Y4) AND Y3
-	VPANDN  Y3, Y4, Y5                   // Y5 = (~Y4) & Y3 = digit mask
-
-	// Extract mask: bit i set if byte i is a digit
-	VPMOVMSKB Y5, CX                     // CX = 32-bit mask
-
-	// Check if any digit found (mask != 0)
-	TESTL   CX, CX
-	JNZ     found_in_vector              // Non-zero mask means digit found
-
-	// No digit in this chunk, advance to next 32 bytes
-	ADDQ    $32, SI
-	JMP     loop32
-
-handle_tail:
-	// Fewer than 32 bytes remain. If any do, rescan the final 32-byte
-	// window ending at the buffer end: lanes before SI were already
-	// resolved as non-digits, so BSF stays exact. Inputs shorter than 32
-	// bytes (unreachable through the Go dispatch) take the scalar loop.
-	CMPQ    SI, R8
-	JAE     not_found                    // If SI >= end, no bytes left
 	CMPQ    DX, $32
 	JB      tail_loop                    // sub-32 direct call: scalar
 
-	LEAQ    -32(R8), SI                  // SI = base of the final window
+	LEAQ    -32(R8), R12                 // last valid 32-byte window base
+	LEAQ    -128(R8), R11                // last valid 128-byte block base
+	CMPQ    SI, R11
+	JA      loop32_entry
+
+loop128:
 	VMOVDQU (SI), Y2
-	VPCMPGTB Y0, Y2, Y3                  // Y3 = (chunk > 0x2F)
-	VPCMPGTB Y1, Y2, Y4                  // Y4 = (chunk > 0x39)
-	VPANDN  Y3, Y4, Y5                   // Y5 = (~Y4) & Y3 = digit mask
-	VPMOVMSKB Y5, CX
+	VMOVDQU 32(SI), Y3
+	VMOVDQU 64(SI), Y4
+	VMOVDQU 96(SI), Y5
+	DIGITS(Y2, Y2, Y6, Y7)
+	DIGITS(Y3, Y3, Y6, Y7)
+	DIGITS(Y4, Y4, Y6, Y7)
+	DIGITS(Y5, Y5, Y6, Y7)
+
+	VPOR    Y2, Y3, Y6
+	VPOR    Y4, Y5, Y7
+	VPOR    Y6, Y7, Y6
+	VPMOVMSKB Y6, CX
+	TESTL   CX, CX
+	JNZ     found_in_block
+
+	ADDQ    $128, SI
+	CMPQ    SI, R11
+	JBE     loop128
+
+loop32_entry:
+	CMPQ    SI, R12
+	JA      last32
+
+loop32:
+	VMOVDQU (SI), Y2
+	DIGITS(Y2, Y2, Y6, Y7)
+	VPMOVMSKB Y2, CX
+	TESTL   CX, CX
+	JNZ     found_in_vector
+
+	ADDQ    $32, SI
+	CMPQ    SI, R12
+	JBE     loop32
+
+last32:
+	// Fewer than 32 bytes remain past SI; rescan the final window. Lanes
+	// before SI were already resolved as non-digits, so BSF stays exact.
+	CMPQ    SI, R8
+	JAE     not_found
+	MOVQ    R12, SI
+	VMOVDQU (SI), Y2
+	DIGITS(Y2, Y2, Y6, Y7)
+	VPMOVMSKB Y2, CX
 	TESTL   CX, CX
 	JNZ     found_in_vector
 	JMP     not_found
@@ -144,17 +156,29 @@ not_found:
 	VZEROUPPER                           // Clear upper YMM bits (CRITICAL!)
 	RET
 
-found_in_vector:
-	// Digit found in vector! CX contains 32-bit mask with set bits at digit positions.
-	// Use BSFL (Bit Scan Forward Long) to find index of first set bit.
-	//
-	// BSFL: scans from bit 0 upward, finds first 1 bit, stores its index in destination
-	// Example: CX = 0x00000010 (bit 4 set) -> BX = 4
-	BSFL    CX, BX                       // BX = index of first set bit (0-31)
+found_in_block:
+	// Locate the first digit by re-extracting the per-vector masks in
+	// address order; only one of the four can hold the lowest match.
+	VPMOVMSKB Y2, CX
+	TESTL   CX, CX
+	JNZ     found_in_vector
+	ADDQ    $32, SI
+	VPMOVMSKB Y3, CX
+	TESTL   CX, CX
+	JNZ     found_in_vector
+	ADDQ    $32, SI
+	VPMOVMSKB Y4, CX
+	TESTL   CX, CX
+	JNZ     found_in_vector
+	ADDQ    $32, SI
+	VPMOVMSKB Y5, CX
 
-	// Calculate absolute index in haystack
+found_in_vector:
+	// Digit found in vector! CX contains a 32-bit mask with set bits at
+	// digit positions; BSFL finds the index of the first one.
+	BSFL    CX, BX                       // BX = index of first set bit (0-31)
 	SUBQ    DI, SI                       // SI = offset from start to current chunk
-	ADDQ    SI, BX                       // BX = absolute index (chunk_offset + bit_position)
+	ADDQ    SI, BX                       // BX = absolute index
 	MOVQ    BX, ret+24(FP)               // Return index
 	VZEROUPPER                           // Clear upper YMM bits
 	RET

@@ -3,19 +3,25 @@
 // scans, paired-byte scans, substring search, and ASCII validation.
 //
 // Acceleration comes in two tiers. The scan kernels — Memchr2, Memchr3,
-// MemchrPair, MemchrDigit, MemchrWord, MemchrNotWord, and IsASCII —
-// dispatch to AVX2 assembly processing 32 bytes per iteration on amd64
+// MemchrPair, MemchrDigit, MemchrWord, MemchrNotWord, IsASCII,
+// FirstNonASCII, and CountNonASCII — dispatch to AVX2 assembly on amd64
 // CPUs (for inputs of MinLen+ bytes) and fall back to portable SWAR loops
-// built on the swar package everywhere else. Memmem prefilters 128+ byte
-// haystacks on amd64 — needles of 2-6 bytes containing two distinct
-// values through the MemchrPair kernel, longer or single-valued needles
-// through a single rare-byte bytes.IndexByte scan — and delegates to
-// bytes.Index for shorter haystacks or without AVX2.
-// FirstNonASCII and CountNonASCII are SWAR-only (8 bytes per iteration, no
-// assembly kernel), and MemchrInTable/MemchrNotInTable are plain scalar
-// loops, since an arbitrary 256-entry membership test has no cheap vector
-// form. Accelerated reports whether the AVX2 tier is active. Single-byte
-// search is deliberately absent: bytes.IndexByte is already
+// built on the swar package everywhere else. The kernels consume four
+// 32-byte vectors per iteration. The first-match scans and IsASCII combine
+// the per-vector masks, so a 128-byte block costs one mask extraction and
+// one branch, and the scans that report a position then re-extract the
+// four masks in address order to locate the hit. CountNonASCII is the
+// exception: a count cannot be recovered from a combined mask, so it
+// extracts and population-counts all four (and, unlike the others, gates
+// on POPCNT as well as AVX2).
+// Memmem prefilters 128+ byte haystacks on amd64 — needles of 2-6 bytes
+// containing two distinct values through the MemchrPair kernel, longer or
+// single-valued needles through a single rare-byte bytes.IndexByte scan —
+// and delegates to bytes.Index for shorter haystacks or without AVX2.
+// MemchrInTable/MemchrNotInTable are plain scalar loops on every
+// architecture, since an arbitrary 256-entry membership test has no cheap
+// vector form. Accelerated reports whether the AVX2 tier is active.
+// Single-byte search is deliberately absent: bytes.IndexByte is already
 // vector-accelerated by the Go runtime on all major architectures.
 //
 // Unlike the top-level utils helpers, this package operates on []byte only —

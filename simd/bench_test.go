@@ -38,6 +38,14 @@ func Benchmark_Memchr2(b *testing.B) {
 				}
 			}
 		})
+		b.Run(benchName(n)+"/scalar", func(b *testing.B) {
+			b.ReportAllocs()
+			for range b.N {
+				if memchr2Generic(data, 'z', 'y') != -1 {
+					b.Fatal("unexpected match")
+				}
+			}
+		})
 		b.Run(benchName(n)+"/default", func(b *testing.B) {
 			b.ReportAllocs()
 			for range b.N {
@@ -56,6 +64,14 @@ func Benchmark_Memchr3(b *testing.B) {
 			b.ReportAllocs()
 			for range b.N {
 				if Memchr3(data, 'z', 'y', 'x') != -1 {
+					b.Fatal("unexpected match")
+				}
+			}
+		})
+		b.Run(benchName(n)+"/scalar", func(b *testing.B) {
+			b.ReportAllocs()
+			for range b.N {
+				if memchr3Generic(data, 'z', 'y', 'x') != -1 {
 					b.Fatal("unexpected match")
 				}
 			}
@@ -108,6 +124,40 @@ func Benchmark_MemchrDigit(b *testing.B) {
 			b.ReportAllocs()
 			for range b.N {
 				if memchrDigitGeneric(data) != -1 {
+					b.Fatal("unexpected match")
+				}
+			}
+		})
+	}
+}
+
+// benchNonWordData is a repeating run of punctuation and spaces holding no
+// \w character, so MemchrWord has to scan the whole haystack. benchData
+// cannot serve here: its first byte is already a word character.
+func benchNonWordData(n int) []byte {
+	const punct = "!\"#$%&'()*+,-./:;<=>?@[\\]^`{|}~ "
+	b := make([]byte, n)
+	for i := range b {
+		b[i] = punct[i%len(punct)]
+	}
+	return b
+}
+
+func Benchmark_MemchrWord(b *testing.B) {
+	for _, n := range benchSizes {
+		data := benchNonWordData(n)
+		b.Run(benchName(n)+"/simd", func(b *testing.B) {
+			b.ReportAllocs()
+			for range b.N {
+				if MemchrWord(data) != -1 {
+					b.Fatal("unexpected match")
+				}
+			}
+		})
+		b.Run(benchName(n)+"/scalar", func(b *testing.B) {
+			b.ReportAllocs()
+			for range b.N {
+				if memchrWordGeneric(data) != -1 {
 					b.Fatal("unexpected match")
 				}
 			}
@@ -267,6 +317,50 @@ func Benchmark_IsASCII(b *testing.B) {
 			b.ReportAllocs()
 			for range b.N {
 				if !isASCIIGeneric(data) {
+					b.Fatal("unexpected non-ASCII")
+				}
+			}
+		})
+	}
+}
+
+func Benchmark_FirstNonASCII(b *testing.B) {
+	for _, n := range benchSizes {
+		data := benchData(n)
+		b.Run(benchName(n)+"/simd", func(b *testing.B) {
+			b.ReportAllocs()
+			for range b.N {
+				if FirstNonASCII(data) != -1 {
+					b.Fatal("unexpected non-ASCII")
+				}
+			}
+		})
+		b.Run(benchName(n)+"/swar", func(b *testing.B) {
+			b.ReportAllocs()
+			for range b.N {
+				if firstNonASCIIGeneric(data) != -1 {
+					b.Fatal("unexpected non-ASCII")
+				}
+			}
+		})
+	}
+}
+
+func Benchmark_CountNonASCII(b *testing.B) {
+	for _, n := range benchSizes {
+		data := benchData(n)
+		b.Run(benchName(n)+"/simd", func(b *testing.B) {
+			b.ReportAllocs()
+			for range b.N {
+				if CountNonASCII(data) != 0 {
+					b.Fatal("unexpected non-ASCII")
+				}
+			}
+		})
+		b.Run(benchName(n)+"/swar", func(b *testing.B) {
+			b.ReportAllocs()
+			for range b.N {
+				if countNonASCIIGeneric(data) != 0 {
 					b.Fatal("unexpected non-ASCII")
 				}
 			}

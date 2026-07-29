@@ -116,9 +116,68 @@ func FuzzIsASCII(f *testing.F) {
 		if got := isASCIIGeneric(h); got != want {
 			t.Fatalf("isASCIIGeneric(%q) = %v, want %v", h, got, want)
 		}
-		first := FirstNonASCII(h)
-		if want != (first == -1) {
-			t.Fatalf("FirstNonASCII(%q) = %d inconsistent with IsASCII = %v", h, first, want)
+		// Check the index itself, not just its sign: the AVX2 kernel
+		// locates the byte by re-extracting four per-vector masks in
+		// address order, so a transposed arm returns a wrong-but-positive
+		// index that a consistency check with IsASCII cannot see.
+		wantFirst := refFirstNonASCII(h)
+		if got := FirstNonASCII(h); got != wantFirst {
+			t.Fatalf("FirstNonASCII(%q) = %d, want %d", h, got, wantFirst)
+		}
+		if got := firstNonASCIIGeneric(h); got != wantFirst {
+			t.Fatalf("firstNonASCIIGeneric(%q) = %d, want %d", h, got, wantFirst)
+		}
+		wantCount := refCountNonASCII(h)
+		if got := CountNonASCII(h); got != wantCount {
+			t.Fatalf("CountNonASCII(%q) = %d, want %d", h, got, wantCount)
+		}
+		if got := countNonASCIIGeneric(h); got != wantCount {
+			t.Fatalf("countNonASCIIGeneric(%q) = %d, want %d", h, got, wantCount)
+		}
+	})
+}
+
+// FuzzMemchrClass covers the \w classifier, which the AVX2 kernels compute
+// from a hand-built pair of VPSHUFB nibble tables and the fallbacks from
+// SWAR range masks — two independent derivations of one character class,
+// so a table nibble that is wrong for some byte value shows up here.
+func FuzzMemchrClass(f *testing.F) {
+	f.Add([]byte("hello world"))
+	f.Add([]byte("________"))
+	f.Add([]byte("!\"#$%&'()*+,-./:;<=>?@[\\]^`{|}~ "))
+	f.Add(append(bytes.Repeat([]byte{'a'}, 63), '.'))
+	f.Add(append(bytes.Repeat([]byte{'.'}, 129), '_'))
+	f.Add([]byte{0x2f, 0x30, 0x39, 0x3a, 0x40, 0x41, 0x5a, 0x5b, 0x5e, 0x5f, 0x60, 0x7a, 0x7b, 0x7f, 0x80, 0xff})
+	f.Fuzz(func(t *testing.T, h []byte) {
+		wantWord, wantNot, wantDigit := -1, -1, -1
+		for i, b := range h {
+			if wantWord < 0 && refIsWord(b) {
+				wantWord = i
+			}
+			if wantNot < 0 && !refIsWord(b) {
+				wantNot = i
+			}
+			if wantDigit < 0 && b >= '0' && b <= '9' {
+				wantDigit = i
+			}
+		}
+		if got := MemchrWord(h); got != wantWord {
+			t.Fatalf("MemchrWord(%q) = %d, want %d", h, got, wantWord)
+		}
+		if got := memchrWordGeneric(h); got != wantWord {
+			t.Fatalf("memchrWordGeneric(%q) = %d, want %d", h, got, wantWord)
+		}
+		if got := MemchrNotWord(h); got != wantNot {
+			t.Fatalf("MemchrNotWord(%q) = %d, want %d", h, got, wantNot)
+		}
+		if got := memchrNotWordGeneric(h); got != wantNot {
+			t.Fatalf("memchrNotWordGeneric(%q) = %d, want %d", h, got, wantNot)
+		}
+		if got := MemchrDigit(h); got != wantDigit {
+			t.Fatalf("MemchrDigit(%q) = %d, want %d", h, got, wantDigit)
+		}
+		if got := memchrDigitGeneric(h); got != wantDigit {
+			t.Fatalf("memchrDigitGeneric(%q) = %d, want %d", h, got, wantDigit)
 		}
 	})
 }
