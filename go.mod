@@ -13,6 +13,6 @@ require golang.org/x/sys v0.47.0
 require go.yaml.in/yaml/v3 v3.0.5 // indirect
 
 require (
-	github.com/shamaton/msgpack/v3 v3.2.0
+	github.com/shamaton/msgpack/v3 v3.2.1
 	github.com/x448/float16 v0.8.4 // indirect
 )
