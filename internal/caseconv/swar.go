@@ -16,6 +16,14 @@ import (
 // word loops here (benchstat -count=10, Go 1.25, Apple M2 Pro). The lane
 // order is identical, so swar words and binary.LittleEndian loads/stores
 // can be mixed freely.
+//
+// The word loops pin each group of four words with a three-index reslice
+// and address the words at constant offsets inside it. A two-index
+// reslice at a variable offset costs a capacity check plus the
+// four-instruction pointer clamp the compiler emits when the new
+// capacity is not a known nonzero constant; the pinned form pays one
+// check per group and no clamp, and the constant-offset accesses inside
+// it are check-free. See swar.Load8 for the same note.
 
 // WordLen is the SWAR word width in bytes, re-exported for the case
 // conversion callers in the strings and bytes packages: they route inputs
@@ -42,10 +50,11 @@ func FirstUpperIndex(b []byte) int {
 		// fold; only the cold hit-resolution ladder is shared, and it
 		// inlines (the no-match loop never reaches it).
 		for i = 8; i+32 <= n; i += 32 {
-			m0 := swar.MatchRangeMask(binary.LittleEndian.Uint64(b[i:i+8]), 'A', 'Z')
-			m1 := swar.MatchRangeMask(binary.LittleEndian.Uint64(b[i+8:i+16]), 'A', 'Z')
-			m2 := swar.MatchRangeMask(binary.LittleEndian.Uint64(b[i+16:i+24]), 'A', 'Z')
-			m3 := swar.MatchRangeMask(binary.LittleEndian.Uint64(b[i+24:i+32]), 'A', 'Z')
+			w := b[i : i+32 : i+32]
+			m0 := swar.MatchRangeMask(binary.LittleEndian.Uint64(w[0:8]), 'A', 'Z')
+			m1 := swar.MatchRangeMask(binary.LittleEndian.Uint64(w[8:16]), 'A', 'Z')
+			m2 := swar.MatchRangeMask(binary.LittleEndian.Uint64(w[16:24]), 'A', 'Z')
+			m3 := swar.MatchRangeMask(binary.LittleEndian.Uint64(w[24:32]), 'A', 'Z')
 			if m0|m1|m2|m3 != 0 {
 				return firstSetLane32(i, m0, m1, m2, m3)
 			}
@@ -57,10 +66,11 @@ func FirstUpperIndex(b []byte) int {
 		// per-lane exact, so re-scanned lanes are known non-matching and the
 		// first set lane always falls in the new bytes.
 		i = n - 32
-		m0 := swar.MatchRangeMask(binary.LittleEndian.Uint64(b[i:i+8]), 'A', 'Z')
-		m1 := swar.MatchRangeMask(binary.LittleEndian.Uint64(b[i+8:i+16]), 'A', 'Z')
-		m2 := swar.MatchRangeMask(binary.LittleEndian.Uint64(b[i+16:i+24]), 'A', 'Z')
-		m3 := swar.MatchRangeMask(binary.LittleEndian.Uint64(b[i+24:i+32]), 'A', 'Z')
+		w := b[i : i+32 : i+32]
+		m0 := swar.MatchRangeMask(binary.LittleEndian.Uint64(w[0:8]), 'A', 'Z')
+		m1 := swar.MatchRangeMask(binary.LittleEndian.Uint64(w[8:16]), 'A', 'Z')
+		m2 := swar.MatchRangeMask(binary.LittleEndian.Uint64(w[16:24]), 'A', 'Z')
+		m3 := swar.MatchRangeMask(binary.LittleEndian.Uint64(w[24:32]), 'A', 'Z')
 		if m0|m1|m2|m3 != 0 {
 			return firstSetLane32(i, m0, m1, m2, m3)
 		}
@@ -120,10 +130,11 @@ func FirstLowerIndex(b []byte) int {
 			return swar.FirstLane(m)
 		}
 		for i = 8; i+32 <= n; i += 32 {
-			m0 := swar.MatchRangeMask(binary.LittleEndian.Uint64(b[i:i+8]), 'a', 'z')
-			m1 := swar.MatchRangeMask(binary.LittleEndian.Uint64(b[i+8:i+16]), 'a', 'z')
-			m2 := swar.MatchRangeMask(binary.LittleEndian.Uint64(b[i+16:i+24]), 'a', 'z')
-			m3 := swar.MatchRangeMask(binary.LittleEndian.Uint64(b[i+24:i+32]), 'a', 'z')
+			w := b[i : i+32 : i+32]
+			m0 := swar.MatchRangeMask(binary.LittleEndian.Uint64(w[0:8]), 'a', 'z')
+			m1 := swar.MatchRangeMask(binary.LittleEndian.Uint64(w[8:16]), 'a', 'z')
+			m2 := swar.MatchRangeMask(binary.LittleEndian.Uint64(w[16:24]), 'a', 'z')
+			m3 := swar.MatchRangeMask(binary.LittleEndian.Uint64(w[24:32]), 'a', 'z')
 			if m0|m1|m2|m3 != 0 {
 				return firstSetLane32(i, m0, m1, m2, m3)
 			}
@@ -132,10 +143,11 @@ func FirstLowerIndex(b []byte) int {
 			return -1
 		}
 		i = n - 32
-		m0 := swar.MatchRangeMask(binary.LittleEndian.Uint64(b[i:i+8]), 'a', 'z')
-		m1 := swar.MatchRangeMask(binary.LittleEndian.Uint64(b[i+8:i+16]), 'a', 'z')
-		m2 := swar.MatchRangeMask(binary.LittleEndian.Uint64(b[i+16:i+24]), 'a', 'z')
-		m3 := swar.MatchRangeMask(binary.LittleEndian.Uint64(b[i+24:i+32]), 'a', 'z')
+		w := b[i : i+32 : i+32]
+		m0 := swar.MatchRangeMask(binary.LittleEndian.Uint64(w[0:8]), 'a', 'z')
+		m1 := swar.MatchRangeMask(binary.LittleEndian.Uint64(w[8:16]), 'a', 'z')
+		m2 := swar.MatchRangeMask(binary.LittleEndian.Uint64(w[16:24]), 'a', 'z')
+		m3 := swar.MatchRangeMask(binary.LittleEndian.Uint64(w[24:32]), 'a', 'z')
 		if m0|m1|m2|m3 != 0 {
 			return firstSetLane32(i, m0, m1, m2, m3)
 		}
@@ -163,12 +175,21 @@ func FirstLowerIndex(b []byte) int {
 	return -1
 }
 
-// ToLowerInPlace lower-cases every ASCII uppercase byte of b in place.
+// ToLowerInPlace lower-cases every ASCII uppercase byte of b in place:
+// four words per pinned group, then single words, then bytes.
 func ToLowerInPlace(b []byte) {
 	n := len(b)
 	i := 0
+	for ; i+32 <= n; i += 32 {
+		w := b[i : i+32 : i+32]
+		binary.LittleEndian.PutUint64(w[0:8], swar.ToLowerWord(binary.LittleEndian.Uint64(w[0:8])))
+		binary.LittleEndian.PutUint64(w[8:16], swar.ToLowerWord(binary.LittleEndian.Uint64(w[8:16])))
+		binary.LittleEndian.PutUint64(w[16:24], swar.ToLowerWord(binary.LittleEndian.Uint64(w[16:24])))
+		binary.LittleEndian.PutUint64(w[24:32], swar.ToLowerWord(binary.LittleEndian.Uint64(w[24:32])))
+	}
 	for ; i+8 <= n; i += 8 {
-		binary.LittleEndian.PutUint64(b[i:i+8], swar.ToLowerWord(binary.LittleEndian.Uint64(b[i:i+8])))
+		w := b[i : i+8 : i+8]
+		binary.LittleEndian.PutUint64(w, swar.ToLowerWord(binary.LittleEndian.Uint64(w)))
 	}
 	// Finish byte-wise: an overlapping word here would partially overlap the
 	// previous 8-byte store and stall on store-to-load forwarding.
@@ -177,12 +198,21 @@ func ToLowerInPlace(b []byte) {
 	}
 }
 
-// ToUpperInPlace upper-cases every ASCII lowercase byte of b in place.
+// ToUpperInPlace upper-cases every ASCII lowercase byte of b in place; the
+// loop shape mirrors ToLowerInPlace.
 func ToUpperInPlace(b []byte) {
 	n := len(b)
 	i := 0
+	for ; i+32 <= n; i += 32 {
+		w := b[i : i+32 : i+32]
+		binary.LittleEndian.PutUint64(w[0:8], swar.ToUpperWord(binary.LittleEndian.Uint64(w[0:8])))
+		binary.LittleEndian.PutUint64(w[8:16], swar.ToUpperWord(binary.LittleEndian.Uint64(w[8:16])))
+		binary.LittleEndian.PutUint64(w[16:24], swar.ToUpperWord(binary.LittleEndian.Uint64(w[16:24])))
+		binary.LittleEndian.PutUint64(w[24:32], swar.ToUpperWord(binary.LittleEndian.Uint64(w[24:32])))
+	}
 	for ; i+8 <= n; i += 8 {
-		binary.LittleEndian.PutUint64(b[i:i+8], swar.ToUpperWord(binary.LittleEndian.Uint64(b[i:i+8])))
+		w := b[i : i+8 : i+8]
+		binary.LittleEndian.PutUint64(w, swar.ToUpperWord(binary.LittleEndian.Uint64(w)))
 	}
 	for ; i < n; i++ {
 		b[i] = ToUpperTable[b[i]]
@@ -205,14 +235,22 @@ func ToUpperInPlace(b []byte) {
 func ToLowerCopy(dst, src []byte, from int) {
 	n := len(src)
 	i := from
+	for ; i+32 <= n; i += 32 {
+		s := src[i : i+32 : i+32]
+		d := dst[i : i+32 : i+32]
+		binary.LittleEndian.PutUint64(d[0:8], swar.ToLowerWord(binary.LittleEndian.Uint64(s[0:8])))
+		binary.LittleEndian.PutUint64(d[8:16], swar.ToLowerWord(binary.LittleEndian.Uint64(s[8:16])))
+		binary.LittleEndian.PutUint64(d[16:24], swar.ToLowerWord(binary.LittleEndian.Uint64(s[16:24])))
+		binary.LittleEndian.PutUint64(d[24:32], swar.ToLowerWord(binary.LittleEndian.Uint64(s[24:32])))
+	}
 	for ; i+8 <= n; i += 8 {
-		binary.LittleEndian.PutUint64(dst[i:i+8], swar.ToLowerWord(binary.LittleEndian.Uint64(src[i:i+8])))
+		binary.LittleEndian.PutUint64(dst[i:i+8:i+8], swar.ToLowerWord(binary.LittleEndian.Uint64(src[i:i+8:i+8])))
 	}
 	if i == n {
 		return
 	}
 	if n >= 8 {
-		binary.LittleEndian.PutUint64(dst[n-8:n], swar.ToLowerWord(binary.LittleEndian.Uint64(src[n-8:n])))
+		binary.LittleEndian.PutUint64(dst[n-8:n:n], swar.ToLowerWord(binary.LittleEndian.Uint64(src[n-8:n:n])))
 		return
 	}
 	for ; i < n; i++ {
@@ -230,14 +268,22 @@ func ToLowerCopy(dst, src []byte, from int) {
 func ToUpperCopy(dst, src []byte, from int) {
 	n := len(src)
 	i := from
+	for ; i+32 <= n; i += 32 {
+		s := src[i : i+32 : i+32]
+		d := dst[i : i+32 : i+32]
+		binary.LittleEndian.PutUint64(d[0:8], swar.ToUpperWord(binary.LittleEndian.Uint64(s[0:8])))
+		binary.LittleEndian.PutUint64(d[8:16], swar.ToUpperWord(binary.LittleEndian.Uint64(s[8:16])))
+		binary.LittleEndian.PutUint64(d[16:24], swar.ToUpperWord(binary.LittleEndian.Uint64(s[16:24])))
+		binary.LittleEndian.PutUint64(d[24:32], swar.ToUpperWord(binary.LittleEndian.Uint64(s[24:32])))
+	}
 	for ; i+8 <= n; i += 8 {
-		binary.LittleEndian.PutUint64(dst[i:i+8], swar.ToUpperWord(binary.LittleEndian.Uint64(src[i:i+8])))
+		binary.LittleEndian.PutUint64(dst[i:i+8:i+8], swar.ToUpperWord(binary.LittleEndian.Uint64(src[i:i+8:i+8])))
 	}
 	if i == n {
 		return
 	}
 	if n >= 8 {
-		binary.LittleEndian.PutUint64(dst[n-8:n], swar.ToUpperWord(binary.LittleEndian.Uint64(src[n-8:n])))
+		binary.LittleEndian.PutUint64(dst[n-8:n:n], swar.ToUpperWord(binary.LittleEndian.Uint64(src[n-8:n:n])))
 		return
 	}
 	for ; i < n; i++ {

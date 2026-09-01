@@ -7,7 +7,9 @@
 // for the MinLen+ inputs the Go dispatch guarantees, the 32-byte main loop
 // replaced with a 4x unrolled 128-byte block, and firstNonASCIIAVX2 /
 // countNonASCIIAVX2 added so the locating and counting scans no longer
-// have to fall back to SWAR words on amd64.
+// have to fall back to SWAR words on amd64 (the counting kernel
+// accumulating in vector byte lanes rather than extracting and
+// population-counting every vector's mask).
 
 //go:build amd64
 
@@ -249,26 +251,46 @@ fna_found_scalar:
 // data[len(data)-1], so no caller-side length preconditioning stands
 // between it and an out-of-bounds read.
 //
-// Each vector's high bits become a 32-bit mask and POPCNT turns it into a
-// lane count. Four masks are extracted before the four POPCNTs so the
-// port-0 extractions and the port-1 population counts overlap; each POPCNT
-// writes the register its own VPMOVMSKB just produced, so the destination
-// false dependency Intel CPUs carry on POPCNT is already satisfied.
+// The count is accumulated in vector byte lanes rather than extracted per
+// vector. A signed compare against zero turns each non-ASCII byte (the
+// only bytes that read as negative) into 0xFF, and subtracting that lane
+// from a byte accumulator adds one to it; the compare takes its input
+// straight from memory, so a vector costs two vector ops and no scalar
+// work. An earlier version extracted every vector's high bits with
+// VPMOVMSKB and population-counted them, four extractions per block on
+// the one port that executes them, which held the block loop to about
+// half the throughput of the ASCII scans. Two accumulators alternate so
+// each carries a two-op dependency chain per block.
 //
-// POPCNT is a separate CPUID feature from AVX2, so countNonASCIIImpl gates
-// on both; see cpu_amd64.go.
+// A byte lane can hold 255 and gains at most two per block, so the block
+// loop flushes both accumulators every 127 blocks: VPSADBW against zero
+// sums each accumulator's bytes into four 64-bit lanes, which are added
+// to a running vector total and reduced to one scalar at the end.
+// Flushing after the block loop also clears the lanes for the 32-byte
+// loop, which adds at most three more before the final flush.
 //
 // Parameters (FP offsets):
 //   data_base+0(FP)  - pointer to data (8 bytes)
 //   data_len+8(FP)   - data length (8 bytes)
 //   data_cap+16(FP)  - data capacity (8 bytes, unused)
 //   ret+24(FP)       - number of bytes >= 0x80 (8 bytes)
+
+// FLUSH folds the two byte accumulators Y4 and Y5 into the 64-bit lane
+// totals in Y8 and clears them. Y7 is the zero vector; Y0 and Y1 are
+// scratch.
+#define FLUSH \
+	VPSADBW Y7, Y4, Y0; \
+	VPSADBW Y7, Y5, Y1; \
+	VPADDQ  Y0, Y8, Y8; \
+	VPADDQ  Y1, Y8, Y8; \
+	VPXOR   Y4, Y4, Y4; \
+	VPXOR   Y5, Y5, Y5
+
 TEXT ·countNonASCIIAVX2(SB), NOSPLIT, $0-32
 	MOVQ    data_base+0(FP), SI
 	MOVQ    data_len+8(FP), DX
 
-	XORQ    R9, R9                  // R9 = running count
-	XORQ    R13, R13                // R13 = second accumulator
+	XORQ    R9, R9                  // R9 = count
 
 	TESTQ   DX, DX
 	JZ      cna_done
@@ -277,45 +299,68 @@ TEXT ·countNonASCIIAVX2(SB), NOSPLIT, $0-32
 	CMPQ    DX, $32
 	JB      cna_tail                // no whole vector: byte loop only
 
+	VPXOR   Y7, Y7, Y7              // Y7 = zero (compare and SAD operand)
+	VPXOR   Y4, Y4, Y4              // Y4 = byte accumulator A
+	VPXOR   Y5, Y5, Y5              // Y5 = byte accumulator B
+	VPXOR   Y8, Y8, Y8              // Y8 = 64-bit lane totals
+
 	LEAQ    -32(R8), R12            // last valid 32-byte window base
 	LEAQ    -128(R8), R11           // last valid 128-byte block base
 	CMPQ    SI, R11
 	JA      cna_loop32_entry
 
+	MOVQ    $127, R13               // blocks until a byte lane could overflow
+
 cna_loop128:
-	VMOVDQU (SI), Y0
-	VMOVDQU 32(SI), Y1
-	VMOVDQU 64(SI), Y2
-	VMOVDQU 96(SI), Y3
-	VPMOVMSKB Y0, AX
-	VPMOVMSKB Y1, BX
-	VPMOVMSKB Y2, CX
-	VPMOVMSKB Y3, R10
-	POPCNTL AX, AX
-	POPCNTL BX, BX
-	POPCNTL CX, CX
-	POPCNTL R10, R10
-	ADDQ    AX, R9
-	ADDQ    BX, R13
-	ADDQ    CX, R9
-	ADDQ    R10, R13
+	// 0 > byte is exactly "high bit set"; the compares read their data
+	// operand from memory.
+	VPCMPGTB (SI), Y7, Y0
+	VPCMPGTB 32(SI), Y7, Y1
+	VPCMPGTB 64(SI), Y7, Y2
+	VPCMPGTB 96(SI), Y7, Y3
+	VPSUBB  Y0, Y4, Y4              // lane -= 0xFF, i.e. += 1 where non-ASCII
+	VPSUBB  Y1, Y5, Y5
+	VPSUBB  Y2, Y4, Y4
+	VPSUBB  Y3, Y5, Y5
 
 	ADDQ    $128, SI
+	DECQ    R13
+	JZ      cna_flush
+
+cna_loop128_next:
 	CMPQ    SI, R11
 	JBE     cna_loop128
+	JMP     cna_block_done
+
+cna_flush:
+	FLUSH
+	MOVQ    $127, R13
+	JMP     cna_loop128_next
+
+cna_block_done:
+	FLUSH
 
 cna_loop32_entry:
 	CMPQ    SI, R12
-	JA      cna_tail
+	JA      cna_vector_done
 
 cna_loop32:
-	VMOVDQU (SI), Y0
-	VPMOVMSKB Y0, AX
-	POPCNTL AX, AX
-	ADDQ    AX, R9
+	VPCMPGTB (SI), Y7, Y0
+	VPSUBB  Y0, Y4, Y4
 	ADDQ    $32, SI
 	CMPQ    SI, R12
 	JBE     cna_loop32
+
+cna_vector_done:
+	// Fold the accumulators into the lane totals and the four totals into
+	// one scalar: high half onto low, then the high 64-bit lane onto the
+	// low one.
+	FLUSH
+	VEXTRACTI128 $1, Y8, X0
+	VPADDQ  X0, X8, X8
+	VPSRLDQ $8, X8, X0
+	VPADDQ  X0, X8, X8
+	VMOVQ   X8, R9
 
 cna_tail:
 	// 0-31 bytes left. Shifting the byte down to its high bit turns the
@@ -329,7 +374,6 @@ cna_tail:
 	JMP     cna_tail
 
 cna_done:
-	ADDQ    R13, R9
 	MOVQ    R9, ret+24(FP)
 	VZEROUPPER
 	RET

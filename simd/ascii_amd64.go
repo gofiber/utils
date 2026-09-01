@@ -39,16 +39,18 @@ func firstNonASCIIImpl(data []byte) int {
 	return firstNonASCIIGeneric(data)
 }
 
-// countNonASCIIImpl dispatches like isASCIIImpl, with the extra POPCNT
-// check its kernel needs. The kernel counts its own sub-vector remainder,
-// so there is no prefix/suffix split here. An earlier version did split,
-// handing the remainder to countNonASCIIGeneric, and paid a second
-// non-inlinable call even when the remainder was empty — enough to put
-// this scan behind its own SWAR fallback at MinLen (11.3ns vs 8.8ns at
-// 32B). With the split gone the two are level at 32B and the kernel pulls
-// ahead from 64B up, so MinLen stays the shared threshold.
+// countNonASCIIImpl dispatches like isASCIIImpl. The kernel counts its
+// own sub-vector remainder, so there is no prefix/suffix split here. An
+// earlier version did split, handing the remainder to
+// countNonASCIIGeneric, and paid a second non-inlinable call even when the
+// remainder was empty — enough to put this scan behind its own SWAR
+// fallback at MinLen (11.3ns vs 8.8ns at 32B). With the split gone the two
+// are level at 32B and the kernel pulls ahead from 64B up, so MinLen stays
+// the shared threshold. The kernel once needed a POPCNT gate as well; it
+// now counts entirely in AVX2 vector lanes, so AVX2 is the only
+// requirement.
 func countNonASCIIImpl(data []byte) int {
-	if hasAVX2 && hasPOPCNT && len(data) >= MinLen {
+	if hasAVX2 && len(data) >= MinLen {
 		return countNonASCIIAVX2(data)
 	}
 	return countNonASCIIGeneric(data)

@@ -164,6 +164,16 @@ func memchr3Generic(haystack []byte, needle1, needle2, needle3 byte) int {
 // swar.MatchByteMask masks on the no-candidate fast path, which is the
 // common case. The caller guarantees offset >= 1 and
 // len(haystack) > offset.
+//
+// The scan runs over the candidate positions 0..len-offset-1: two words
+// per branch through pinned windows (see ascii.go), then one word, then
+// one overlapping word ending at the last candidate. Positions below the
+// overlap were either never flagged or refuted by the verify step, so
+// both are known non-pairs and any candidate the overlap flags there
+// fails verification harmlessly; the first candidate to verify is the
+// first pair. An earlier version loaded both words of every step through
+// swar.Load8 at variable offsets and finished the last 1-7 positions
+// scalar, which at 32 bytes ran no faster than a plain scalar loop.
 func memchrPairGeneric(haystack []byte, byte1, byte2 byte, offset int) int {
 	n := len(haystack)
 	if n < swar.WordLen+offset {
@@ -177,21 +187,55 @@ func memchrPairGeneric(haystack []byte, byte1, byte2 byte, offset int) int {
 
 	bc1 := swar.Broadcast(byte1)
 	bc2 := swar.Broadcast(byte2)
+	last := n - offset // candidate positions are 0..last-1
 	i := 0
-	for ; i+swar.WordLen+offset <= n; i += swar.WordLen {
-		cand := swar.ZeroLanes(swar.Load8(haystack, i)^bc1) &
-			swar.ZeroLanes(swar.Load8(haystack, i+offset)^bc2)
-		for cand != 0 {
-			pos := i + swar.FirstLane(cand)
-			if haystack[pos] == byte1 && haystack[pos+offset] == byte2 {
+	for ; i+2*swar.WordLen <= last; i += 2 * swar.WordLen {
+		a := haystack[i : i+2*swar.WordLen : i+2*swar.WordLen]
+		b := haystack[i+offset : i+offset+2*swar.WordLen : i+offset+2*swar.WordLen]
+		c0 := swar.ZeroLanes(swar.Load8(a, 0)^bc1) & swar.ZeroLanes(swar.Load8(b, 0)^bc2)
+		c1 := swar.ZeroLanes(swar.Load8(a, swar.WordLen)^bc1) & swar.ZeroLanes(swar.Load8(b, swar.WordLen)^bc2)
+		if c0|c1 != 0 {
+			if pos := verifyPairCandidates(haystack, byte1, byte2, offset, i, c0); pos >= 0 {
 				return pos
 			}
-			cand &= cand - 1
+			if pos := verifyPairCandidates(haystack, byte1, byte2, offset, i+swar.WordLen, c1); pos >= 0 {
+				return pos
+			}
 		}
 	}
-	for ; i+offset < n; i++ {
-		if haystack[i] == byte1 && haystack[i+offset] == byte2 {
-			return i
+	for ; i+swar.WordLen <= last; i += swar.WordLen {
+		a := haystack[i : i+swar.WordLen : i+swar.WordLen]
+		b := haystack[i+offset : i+offset+swar.WordLen : i+offset+swar.WordLen]
+		c := swar.ZeroLanes(swar.Load8(a, 0)^bc1) & swar.ZeroLanes(swar.Load8(b, 0)^bc2)
+		if c != 0 {
+			if pos := verifyPairCandidates(haystack, byte1, byte2, offset, i, c); pos >= 0 {
+				return pos
+			}
+		}
+	}
+	if i == last {
+		return -1
+	}
+	i = last - swar.WordLen
+	a := haystack[i : i+swar.WordLen : i+swar.WordLen]
+	b := haystack[i+offset : i+offset+swar.WordLen : i+offset+swar.WordLen]
+	c := swar.ZeroLanes(swar.Load8(a, 0)^bc1) & swar.ZeroLanes(swar.Load8(b, 0)^bc2)
+	if c != 0 {
+		return verifyPairCandidates(haystack, byte1, byte2, offset, i, c)
+	}
+	return -1
+}
+
+// verifyPairCandidates checks the candidate lanes of cand, a ZeroLanes AND
+// mask for the word at base, in address order and returns the first
+// position that really holds byte1 and byte2 at distance offset, or -1.
+// It runs only on the rare candidate path, so the scalar re-reads are
+// never on the no-match loop.
+func verifyPairCandidates(haystack []byte, byte1, byte2 byte, offset, base int, cand uint64) int {
+	for ; cand != 0; cand &= cand - 1 {
+		pos := base + swar.FirstLane(cand)
+		if haystack[pos] == byte1 && haystack[pos+offset] == byte2 {
+			return pos
 		}
 	}
 	return -1

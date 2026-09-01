@@ -5,8 +5,9 @@
 // VMOVD/VMOVQ to avoid AVX-SSE transition penalties on Intel CPUs, the
 // scalar tail loops replaced with one overlapping vector at the buffer end
 // for the MinLen+ inputs the Go dispatch guarantees, the per-range
-// clamp-and-compare classifier replaced with a nibble table lookup, and
-// the 32-byte main loops replaced with 4x unrolled 128-byte blocks.
+// clamp-and-compare classifier replaced with a nibble table lookup, the
+// 32-byte main loops replaced with 4x unrolled 128-byte blocks, and the
+// block test reduced to one compare over the four raw class values.
 
 //go:build amd64
 
@@ -15,8 +16,9 @@
 // Classifying \w = [A-Za-z0-9_] with unsigned clamp-and-compare costs three
 // VPMINUB/VPMAXUB/VPCMPEQB triples plus a VPCMPEQB for '_' and three VPORs:
 // thirteen vector ops per 32 bytes, ten of them on the two general vector
-// ALU ports. A nibble table does the same job in six, and the two VPSHUFBs
-// it adds run on the otherwise idle shuffle port.
+// ALU ports. A nibble table does the same job in six (five in the block
+// loops, which defer the compare to the reduced block value), and the two
+// VPSHUFBs it adds run on the otherwise idle shuffle port.
 //
 // The table splits each byte into its high and low nibble. Every high
 // nibble that contains word characters gets one bit:
@@ -37,23 +39,33 @@
 // index byte has bit 7 set, so the low-nibble lookup already returns 0 for
 // them and they classify as non-word, matching the SWAR fallback.
 //
-// Both kernels compute the same "not a word character" mask (0xFF per
-// non-word lane): the low and high lookups are AND-ed and compared against
-// zero, which is the complement the class test needs anyway.
-// memchrNotWord ORs those masks together across a block and scans the
-// extracted bits directly; memchrWord ANDs them (a block holds a word
-// character exactly when some lane's non-word mask is clear) and inverts
-// the extracted bits with a single NOTL.
+// Both kernels compute the same per-lane class value: the AND of the two
+// lookups, which is nonzero exactly in the word-character lanes. The
+// 32-byte paths compare it against zero at once, giving the "not a word
+// character" mask (0xFF per non-word lane) that VPMOVMSKB can extract;
+// memchrNotWord scans those bits directly and memchrWord inverts them
+// with a single NOTL. The block loops instead reduce the four raw class
+// values first and compare only the reduction: memchrNotWord takes the
+// per-lane minimum (zero exactly where some vector has a non-word lane),
+// memchrWord the per-lane OR (nonzero exactly where some vector has a
+// word lane). That is three reductions and one compare per block instead
+// of four compares and three reductions, and the four raw values stay
+// live so the (rare) hit path can still compare them one at a time.
 
-// NOTWORD leaves in dst a mask with 0xFF in every lane of src that is NOT
-// a word character. t0 and t1 are scratch; dst may alias src.
-#define NOTWORD(src, dst, t0, t1) \
+// WORDBITS leaves in dst the class value of every lane of src: nonzero
+// for a word character, zero otherwise. t0 is scratch; dst may alias src.
+#define WORDBITS(src, dst, t0) \
 	VPSRLW   $4, src, t0;  \
 	VPAND    Y2, t0, t0;   \
 	VPSHUFB  t0, Y1, t0;   \
-	VPSHUFB  src, Y0, t1;  \
-	VPAND    t0, t1, t0;   \
-	VPCMPEQB Y3, t0, dst
+	VPSHUFB  src, Y0, dst; \
+	VPAND    t0, dst, dst
+
+// NOTWORD leaves in dst a mask with 0xFF in every lane of src that is NOT
+// a word character. t0 is scratch; dst may alias src.
+#define NOTWORD(src, dst, t0) \
+	WORDBITS(src, dst, t0); \
+	VPCMPEQB Y3, dst, dst
 
 // SETUPTABLES loads the nibble tables, the low-nibble mask and a zero
 // vector into Y0-Y3. The tables are built from immediates rather than a
@@ -111,16 +123,18 @@ word_loop128:
 	VMOVDQU 32(SI), Y5
 	VMOVDQU 64(SI), Y6
 	VMOVDQU 96(SI), Y7
-	NOTWORD(Y4, Y4, Y8, Y9)
-	NOTWORD(Y5, Y5, Y8, Y9)
-	NOTWORD(Y6, Y6, Y8, Y9)
-	NOTWORD(Y7, Y7, Y8, Y9)
+	WORDBITS(Y4, Y4, Y8)
+	WORDBITS(Y5, Y5, Y8)
+	WORDBITS(Y6, Y6, Y8)
+	WORDBITS(Y7, Y7, Y8)
 
-	// A word character exists in the block iff some lane's non-word mask
-	// is clear, so AND the four masks and look for a zero lane.
-	VPAND   Y4, Y5, Y8
-	VPAND   Y6, Y7, Y9
-	VPAND   Y8, Y9, Y8
+	// A word character exists in the block iff some lane's class value is
+	// nonzero in some vector, so OR the four values and look for a lane
+	// that is not zero.
+	VPOR    Y4, Y5, Y8
+	VPOR    Y6, Y7, Y9
+	VPOR    Y8, Y9, Y8
+	VPCMPEQB Y3, Y8, Y8
 	VPMOVMSKB Y8, CX
 	NOTL    CX
 	TESTL   CX, CX
@@ -136,7 +150,7 @@ word_loop32_entry:
 
 word_loop32:
 	VMOVDQU (SI), Y4
-	NOTWORD(Y4, Y4, Y8, Y9)
+	NOTWORD(Y4, Y4, Y8)
 	VPMOVMSKB Y4, CX
 	NOTL    CX
 	TESTL   CX, CX
@@ -153,7 +167,7 @@ word_last32:
 	JAE     word_not_found
 	MOVQ    R12, SI
 	VMOVDQU (SI), Y4
-	NOTWORD(Y4, Y4, Y8, Y9)
+	NOTWORD(Y4, Y4, Y8)
 	VPMOVMSKB Y4, CX
 	NOTL    CX
 	TESTL   CX, CX
@@ -200,23 +214,28 @@ word_not_found:
 	RET
 
 word_found_in_block:
-	// Locate the first hit by re-extracting the per-vector masks in
-	// address order; only one of the four can hold the lowest match.
+	// Locate the first hit by comparing and extracting the per-vector
+	// class values in address order; only one of the four can hold the
+	// lowest match.
+	VPCMPEQB Y3, Y4, Y4
 	VPMOVMSKB Y4, CX
 	NOTL    CX
 	TESTL   CX, CX
 	JNZ     word_found_in_vector
 	ADDQ    $32, SI
+	VPCMPEQB Y3, Y5, Y5
 	VPMOVMSKB Y5, CX
 	NOTL    CX
 	TESTL   CX, CX
 	JNZ     word_found_in_vector
 	ADDQ    $32, SI
+	VPCMPEQB Y3, Y6, Y6
 	VPMOVMSKB Y6, CX
 	NOTL    CX
 	TESTL   CX, CX
 	JNZ     word_found_in_vector
 	ADDQ    $32, SI
+	VPCMPEQB Y3, Y7, Y7
 	VPMOVMSKB Y7, CX
 	NOTL    CX
 
@@ -268,14 +287,18 @@ notword_loop128:
 	VMOVDQU 32(SI), Y5
 	VMOVDQU 64(SI), Y6
 	VMOVDQU 96(SI), Y7
-	NOTWORD(Y4, Y4, Y8, Y9)
-	NOTWORD(Y5, Y5, Y8, Y9)
-	NOTWORD(Y6, Y6, Y8, Y9)
-	NOTWORD(Y7, Y7, Y8, Y9)
+	WORDBITS(Y4, Y4, Y8)
+	WORDBITS(Y5, Y5, Y8)
+	WORDBITS(Y6, Y6, Y8)
+	WORDBITS(Y7, Y7, Y8)
 
-	VPOR    Y4, Y5, Y8
-	VPOR    Y6, Y7, Y9
-	VPOR    Y8, Y9, Y8
+	// A non-word character exists in the block iff some lane's class
+	// value is zero in some vector, so take the per-lane minimum of the
+	// four values and look for a zero lane.
+	VPMINUB Y4, Y5, Y8
+	VPMINUB Y6, Y7, Y9
+	VPMINUB Y8, Y9, Y8
+	VPCMPEQB Y3, Y8, Y8
 	VPMOVMSKB Y8, CX
 	TESTL   CX, CX
 	JNZ     notword_found_in_block
@@ -290,7 +313,7 @@ notword_loop32_entry:
 
 notword_loop32:
 	VMOVDQU (SI), Y4
-	NOTWORD(Y4, Y4, Y8, Y9)
+	NOTWORD(Y4, Y4, Y8)
 	VPMOVMSKB Y4, CX
 	TESTL   CX, CX
 	JNZ     notword_found_in_vector
@@ -304,7 +327,7 @@ notword_last32:
 	JAE     notword_not_found
 	MOVQ    R12, SI
 	VMOVDQU (SI), Y4
-	NOTWORD(Y4, Y4, Y8, Y9)
+	NOTWORD(Y4, Y4, Y8)
 	VPMOVMSKB Y4, CX
 	TESTL   CX, CX
 	JNZ     notword_found_in_vector
@@ -358,18 +381,22 @@ notword_not_found:
 	RET
 
 notword_found_in_block:
+	VPCMPEQB Y3, Y4, Y4
 	VPMOVMSKB Y4, CX
 	TESTL   CX, CX
 	JNZ     notword_found_in_vector
 	ADDQ    $32, SI
+	VPCMPEQB Y3, Y5, Y5
 	VPMOVMSKB Y5, CX
 	TESTL   CX, CX
 	JNZ     notword_found_in_vector
 	ADDQ    $32, SI
+	VPCMPEQB Y3, Y6, Y6
 	VPMOVMSKB Y6, CX
 	TESTL   CX, CX
 	JNZ     notword_found_in_vector
 	ADDQ    $32, SI
+	VPCMPEQB Y3, Y7, Y7
 	VPMOVMSKB Y7, CX
 
 notword_found_in_vector:

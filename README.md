@@ -636,20 +636,25 @@ result is a position or a yes/no, the four masks are combined, so a
 128-byte block costs a single `VPMOVMSKB` and a single branch, and the
 scans that report a position re-extract the four masks in address order on
 the (rare) hit path. `CountNonASCII` is the exception — a count cannot be
-recovered from a combined mask, so it extracts and population-counts all
-four, and it is the one kernel gated on `POPCNT` in addition to AVX2.
+recovered from a combined mask, so it never extracts one: it accumulates
+per-lane counts in vector byte lanes (a signed compare against zero and a
+byte subtract per vector) and reduces them once at the end.
 One tier is documented explicitly as unaccelerated:
 `MemchrInTable`/`MemchrNotInTable` are plain
 scalar loops, since an arbitrary 256-entry membership test has no cheap
 vector form. There is deliberately no single-needle `Memchr`:
 `bytes.IndexByte` is already vector-accelerated by the Go runtime. `Memmem`
-delegates to `bytes.Index` below 128 bytes — a conservative routing point
-above the paired scan's measured break-even (`Benchmark_Memmem_Prefilter`
-forces the prefilter helpers at every size to keep it measurable) — and
-bails to `bytes.Index` after a bounded number of failed candidate
-verifications, so even adversarial inputs — a rare byte everywhere plus a
-long almost-matching needle — stay within a constant of the stdlib's
-O(n+m) (see `Benchmark_Memmem_Adversarial`). The
+delegates to `bytes.Index` for haystacks of up to 64 bytes, where the
+stdlib's brute-force vector kernel is level with the paired prefilter
+(`Benchmark_Memmem_Prefilter` forces the prefilter helpers at every size
+to keep that measurable); from 65 bytes `bytes.Index` switches to a loop
+anchored on the needle's first byte, and the paired scan takes over.
+Needles that take the single rare-byte scan keep a 128-byte routing point,
+since that scan is less selective. Both prefilters bail to `bytes.Index`
+after a bounded number of failed candidate verifications, so even
+adversarial inputs — a rare byte everywhere plus a long almost-matching
+needle — stay within a constant of the stdlib's O(n+m) (see
+`Benchmark_Memmem_Adversarial`). The
 package operates on `[]byte` only; the generic top-level helpers `IsASCII`,
 `IndexAny2`, and `IndexAny3` dispatch into it automatically for inputs of
 `simd.MinLen`+ bytes on amd64, which is where the AVX2 kernels overtake the
@@ -665,10 +670,14 @@ rescans at the buffer end (a 63-byte scan previously cost ~3.7x a 64-byte
 one), the 32-byte main loops replaced by 4x unrolled 128-byte blocks whose
 bound is tested once at the bottom against a precomputed limit pointer, the
 `\w` classifier rewritten from three `VPMINUB`/`VPMAXUB` clamp-and-compare
-range tests into two `VPSHUFB` nibble-table lookups, `FirstNonASCII` and
-`CountNonASCII` given kernels of their own (they were SWAR-only), and
-the fallbacks reworked around the stdlib and the `swar` package as
-described above.
+range tests into two `VPSHUFB` nibble-table lookups (with the block test
+reduced to one compare over the four raw class values), the digit range
+test reduced from two signed compares and a `VPANDN` to one biased
+`VPADDB` and one compare, `FirstNonASCII` and `CountNonASCII` given
+kernels of their own (they were SWAR-only, and the count kernel
+accumulates in vector byte lanes rather than extracting and
+population-counting every vector's mask), and the fallbacks reworked
+around the stdlib and the `swar` package as described above.
 
 Against the pre-unrolling kernels, `benchstat -count=10` on the machine
 below reports -26.6%/-49.7% ns/op for `Memchr2` at 512B/4096B,
