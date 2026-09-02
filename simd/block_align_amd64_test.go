@@ -101,6 +101,8 @@ func kernelBody(t *testing.T, name string, fn any) ([]byte, uintptr) {
 	w := unsafe.Slice((*byte)(wrapper), 128) //nolint:gosec // reading this binary's own text segment
 	call := bytes.IndexByte(w, 0xE8)
 	require.GreaterOrEqual(t, call, 0, "%s: no CALL in the ABI wrapper", name)
+	// The CALL's rel32 is a signed displacement; the conversion reinterprets
+	// its two's-complement bits.
 	rel := int32(binary.LittleEndian.Uint32(w[call+1:]))
 	body := unsafe.Add(wrapper, call+5+int(rel))
 	code := unsafe.Slice((*byte)(body), 2048) //nolint:gosec // reading this binary's own text segment
@@ -109,6 +111,9 @@ func kernelBody(t *testing.T, name string, fn any) ([]byte, uintptr) {
 	return code, uintptr(body)
 }
 
+// Test_BlockLoopBranchesStayInWindow checks, for every kernel with a
+// BLOCKALIGN block loop, that no fused compare-and-branch pair of the loop
+// crosses or ends on a 32-byte boundary; see the file comment.
 func Test_BlockLoopBranchesStayInWindow(t *testing.T) {
 	signature := append(append([]byte{}, nop9...), nop9...)
 	for name, fn := range blockLoopKernels {
