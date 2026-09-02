@@ -679,9 +679,10 @@ test reduced from two signed compares and a `VPANDN` to one biased
 kernels of their own (they were SWAR-only, and the count kernel's block
 loop accumulates in vector byte lanes rather than extracting and
 population-counting every vector's mask), the 128-byte block loops
-aligned to 64 bytes so their throughput no longer depends on where the
-linker places each kernel, and the fallbacks reworked around the stdlib
-and the `swar` package as described above.
+placed at fixed offsets inside a 32-byte code window so their throughput
+no longer depends on where the linker places each kernel, and the
+fallbacks reworked around the stdlib and the `swar` package as described
+above.
 
 Against the pre-unrolling kernels, `benchstat -count=10` on the machine
 below reports -26.6%/-49.7% ns/op for `Memchr2` at 512B/4096B,
