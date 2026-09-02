@@ -8,18 +8,24 @@ import (
 	"bytes"
 )
 
-// memmemMinHaystack is the haystack size below which Memmem skips the
-// prefilter and calls bytes.Index directly: rare-byte selection and scan
-// setup are per-call costs that need enough haystack to amortize. The
-// tradeoff is measurable with Benchmark_Memmem_Prefilter, which forces
-// the prefilter helpers at every size — the paired scan breaks even with
-// bytes.Index around its 64B point — so 128 keeps a conservative margin
-// over that break-even, covering the SelectRareBytes cost the direct
-// calls exclude and the needle shapes that route to the less selective
-// single-byte scan. Benchmark_Memmem shows the resulting end-to-end
-// routing (its sub-128B simd rows measure dispatch overhead only, since
-// both variants run bytes.Index there).
-const memmemMinHaystack = 128
+// memmemMinPairedHaystack is the haystack size from which Memmem routes
+// needles eligible for the paired prefilter through it instead of
+// bytes.Index. bytes.Index brute-forces haystacks of up to 64 bytes with
+// a vector kernel the prefilter cannot beat — Benchmark_Memmem_Prefilter
+// shows the two level at 64B before SelectRareBytes is even paid — and
+// from 65 bytes switches to a loop anchored on the needle's first byte,
+// which is where a scan anchored on the needle's two rarest bytes at
+// their exact distance pulls ahead. Benchmark_Memmem shows the resulting
+// end-to-end routing; its 96B row is the band this constant opens up.
+const memmemMinPairedHaystack = 65
+
+// memmemMinSingleHaystack is the same routing point for needles that take
+// the single rare-byte scan. That scan is far less selective (its false
+// candidates need only one byte to match) and its verification is
+// longer, so it needs more haystack to amortize the rare-byte selection
+// and the candidate loop; 128 keeps a conservative margin over the band
+// where Benchmark_Memmem_Prefilter's single rows trail bytes.Index.
+const memmemMinSingleHaystack = 128
 
 // memmemMaxPairNeedle is the needle length up to which the paired-byte
 // prefilter beats a single rare-byte scan: short needles produce frequent
@@ -39,16 +45,16 @@ const memmemMaxMisses = 16
 // or -1 if needle is not present. An empty needle matches at index 0,
 // mirroring bytes.Index.
 //
-// On amd64 with AVX2 and haystacks of 128+ bytes it prefilters with the
-// needle's rarest bytes (per ByteRank) and verifies only the candidate
-// positions, which typically beats bytes.Index by a wide margin on large
-// inputs: needles of 2-6 bytes containing two distinct byte values are
-// scanned for their two rarest values at the exact relative distance,
-// while longer or single-valued needles are scanned for the single rarest
-// byte. In all other cases it delegates to bytes.Index directly, and the
-// prefilter itself falls back to bytes.Index after a bounded number of
-// failed candidate verifications, so the worst case stays within a
-// constant of the stdlib's O(n+m).
+// On amd64 with AVX2 it prefilters with the needle's rarest bytes (per
+// ByteRank) and verifies only the candidate positions, which typically
+// beats bytes.Index by a wide margin on large inputs: needles of 2-6
+// bytes containing two distinct byte values are scanned, on haystacks of
+// 65+ bytes, for their two rarest values at the exact relative distance,
+// while longer or single-valued needles are scanned, on haystacks of
+// 128+ bytes, for the single rarest byte. In all other cases it delegates
+// to bytes.Index directly, and the prefilter itself falls back to
+// bytes.Index after a bounded number of failed candidate verifications,
+// so the worst case stays within a constant of the stdlib's O(n+m).
 func Memmem(haystack, needle []byte) int {
 	needleLen := len(needle)
 	if needleLen == 0 {
@@ -60,15 +66,25 @@ func Memmem(haystack, needle []byte) int {
 	if needleLen == 1 {
 		return bytes.IndexByte(haystack, needle[0])
 	}
-	if !hasAVX2 || len(haystack) < memmemMinHaystack {
+	if !hasAVX2 || len(haystack) < memmemMinPairedHaystack {
 		return bytes.Index(haystack, needle)
 	}
 
-	info := SelectRareBytes(needle)
-	// Distinct byte values imply distinct indices, so Byte1 != Byte2 alone
-	// guarantees the offset MemchrPair needs is >= 1.
-	if needleLen <= memmemMaxPairNeedle && info.Byte1 != info.Byte2 {
-		return memmemPaired(haystack, needle, info)
+	var info RareByteInfo
+	pairable := needleLen <= memmemMaxPairNeedle
+	if pairable {
+		info = SelectRareBytes(needle)
+		// Distinct byte values imply distinct indices, so Byte1 != Byte2
+		// alone guarantees the offset MemchrPair needs is >= 1.
+		if info.Byte1 != info.Byte2 {
+			return memmemPaired(haystack, needle, info)
+		}
+	}
+	if len(haystack) < memmemMinSingleHaystack {
+		return bytes.Index(haystack, needle)
+	}
+	if !pairable {
+		info = SelectRareBytes(needle)
 	}
 	return memmemSingle(haystack, needle, info.Byte1, info.Index1)
 }

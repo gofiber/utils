@@ -98,6 +98,16 @@ func Benchmark_MemchrPair(b *testing.B) {
 				}
 			}
 		})
+		// The SWAR fallback directly: through the exported function it is
+		// reached only below the AVX2 dispatch length on amd64 hosts.
+		b.Run(benchName(n)+"/swar", func(b *testing.B) {
+			b.ReportAllocs()
+			for range b.N {
+				if memchrPairGeneric(data, 'a', 'c', 1) != -1 {
+					b.Fatal("unexpected match")
+				}
+			}
+		})
 		b.Run(benchName(n)+"/scalar", func(b *testing.B) {
 			b.ReportAllocs()
 			for range b.N {
@@ -187,12 +197,12 @@ func Benchmark_MemchrNotWord(b *testing.B) {
 	}
 }
 
-// memmemBenchSizes brackets the 128-byte crossover that memmemMinHaystack
-// encodes. Benchmark_Memmem measures the exported routing end to end — its
-// sub-128B simd rows run bytes.Index plus dispatch, so they show routing
-// overhead only — while Benchmark_Memmem_Prefilter forces the prefilter
-// helpers at every size, making the crossover itself reproducible from
-// this file.
+// memmemBenchSizes brackets the routing points memmemMinPairedHaystack
+// (65) and memmemMinSingleHaystack (128) encode. Benchmark_Memmem
+// measures the exported routing end to end — its simd rows up to 64B run
+// bytes.Index plus dispatch, so they show routing overhead only — while
+// Benchmark_Memmem_Prefilter forces the prefilter helpers at every size,
+// making the crossovers themselves reproducible from this file.
 var memmemBenchSizes = []int{8, 32, 64, 96, 128, 192, 512, 4096}
 
 func Benchmark_Memmem(b *testing.B) {
@@ -219,12 +229,12 @@ func Benchmark_Memmem(b *testing.B) {
 }
 
 // Benchmark_Memmem_Prefilter drives the prefilter helpers directly,
-// bypassing Memmem's 128-byte routing, so the memmemMinHaystack tradeoff
-// is measurable instead of asserted. Each helper gets the needle shape
-// Memmem actually routes to it: the paired scan (short needle, two
-// distinct rare bytes) breaks even with bytes.Index around the 64B point
-// and wins from 96B up, so 128 carries a conservative margin that also
-// covers the per-call SelectRareBytes cost these direct calls exclude.
+// bypassing Memmem's routing, so the memmemMinPairedHaystack and
+// memmemMinSingleHaystack tradeoffs are measurable instead of asserted.
+// Each helper gets the needle shape Memmem actually routes to it: the
+// paired scan (short needle, two distinct rare bytes) is level with
+// bytes.Index's brute-force kernel at 64B and wins from 65B up, where
+// bytes.Index switches to a first-byte-anchored loop.
 // The single scan (long needle) anchors on 'q', which benchData's
 // repeating 'a'..'w' cycle yields every 23 bytes, so from a few hundred
 // bytes up it burns its miss budget and lands on the fallback, tracking

@@ -296,6 +296,37 @@ func Test_FirstNonASCII_CountNonASCII(t *testing.T) {
 	}
 }
 
+// Test_CountNonASCII_LargeDense crosses the amd64 kernel's accumulator
+// flush boundary: it counts in vector byte lanes and must fold them into
+// wider lanes before a lane can reach 256, which only dense non-ASCII data
+// of more than 127 128-byte blocks (16256 bytes) can provoke. Every lane
+// position sees a non-ASCII byte in every vector here, so a missing or
+// late flush shows up as a count short by a multiple of 256.
+func Test_CountNonASCII_LargeDense(t *testing.T) {
+	t.Parallel()
+	const block = 128
+	for _, n := range []int{
+		127*block - 1, 127 * block, 127*block + 1, 127*block + 32,
+		127*block + 33, 128 * block, 254 * block, 254*block + 100,
+		255 * block, 1 << 16, 100_003,
+	} {
+		dense := bytes.Repeat([]byte{0xff}, n)
+		require.Equal(t, n, CountNonASCII(dense), "all 0xff, size %d", n)
+		require.Equal(t, n, countNonASCIIGeneric(dense), "generic all 0xff, size %d", n)
+
+		// Every other byte non-ASCII, so lanes fill at half rate, plus a
+		// full-range pattern with a few ASCII holes.
+		half := make([]byte, n)
+		for i := range half {
+			half[i] = byte(i%2) << 7
+		}
+		require.Equal(t, refCountNonASCII(half), CountNonASCII(half), "alternating, size %d", n)
+		mixed := fill(n, uint64(n)+97)
+		require.Equal(t, refCountNonASCII(mixed), CountNonASCII(mixed), "mixed, size %d", n)
+		require.Equal(t, refCountNonASCII(mixed), countNonASCIIGeneric(mixed), "generic mixed, size %d", n)
+	}
+}
+
 func Test_MemchrDigit(t *testing.T) {
 	t.Parallel()
 	require.Equal(t, -1, MemchrDigit(nil))

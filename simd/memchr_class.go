@@ -70,14 +70,31 @@ func isWordChar(b byte) bool {
 		b == '_'
 }
 
-// wordMask flags the lanes of w holding word characters. The range masks
-// are exact per lane and bytes >= 0x80 never match, so the composition is
-// exact too.
+// wordMask flags the lanes of w holding word characters, exactly per lane;
+// bytes >= 0x80 never match. It is the swar.MatchRangeMask construction
+// with the three range tests fused into one expression:
+//
+//   - the ASCII gate (&^ w & HighBits) is applied once to the OR of the
+//     tests instead of once per test;
+//   - 'A'..'Z' and 'a'..'z' collapse into a single 'a'..'z' test on a
+//     case-folded copy (bit 5 set in every lane), which maps exactly the
+//     two letter ranges onto 0x61..0x7A;
+//   - '_' (0x5F) is the only byte besides DEL (0x7F) that folds to 0x7F,
+//     so "folded lane == 0x7F" is one biased add, and the DEL lanes are
+//     removed by w<<2, which moves each lane's bit 5 — clear for '_', set
+//     for DEL — into the bit-7 marker position.
+//
+// Every addition below adds a per-lane bias of at most 0x50 to lanes that
+// are at most 0x7F, so no lane can carry into its neighbor and the bit-7
+// markers stay exact. That is 15 ALU operations per word instead of 26
+// for the four separate masks.
 func wordMask(w uint64) uint64 {
-	return swar.MatchRangeMask(w, 'A', 'Z') |
-		swar.MatchRangeMask(w, 'a', 'z') |
-		swar.MatchRangeMask(w, '0', '9') |
-		swar.MatchByteMask(w, '_')
+	b := w & swar.LowSeven
+	bf := b | 0x20*swar.Ones
+	letters := (bf + (0x80-'a')*swar.Ones) &^ (bf + (0x80-'z'-1)*swar.Ones)
+	digits := (b + (0x80-'0')*swar.Ones) &^ (b + (0x80-'9'-1)*swar.Ones)
+	underscore := (bf + swar.Ones) &^ (w << 2)
+	return (letters | digits | underscore) &^ w & swar.HighBits
 }
 
 // memchrWordGeneric is the portable SWAR fallback for MemchrWord, finishing

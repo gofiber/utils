@@ -10,33 +10,39 @@
 //go:build amd64
 
 #include "textflag.h"
+#include "block_align_amd64.h"
 
 // DIGITS leaves in dst a mask with 0xFF in every lane of src holding an
-// ASCII digit. t0 and t1 are scratch; dst may alias src.
+// ASCII digit. t0 is scratch; dst may alias src.
 //
-//	Y0 = [0x2F x 32] ('0' - 1)   Y1 = [0x39 x 32] ('9')
+//	Y0 = [0x46 x 32] (0x7F - '9')   Y1 = [0x75 x 32] ('0' + 0x46 - 1)
 //
-// VPCMPGTB is a signed comparison, which is what makes the pair exact for
-// every byte: lanes >= 0x80 are negative and so fail "> 0x2F" outright.
-#define DIGITS(src, dst, t0, t1) \
-	VPCMPGTB Y0, src, t0; \
-	VPCMPGTB Y1, src, t1; \
-	VPANDN   t0, t1, dst
+// A range test needs only one compare when the range is first slid up
+// against the signed maximum: adding 0x46 maps '0'..'9' onto 0x76..0x7F,
+// the ten largest positive int8 values, so a signed "> 0x75" is exact for
+// every byte value. Everything above '9' lands in 0x80..0xFF and reads as
+// negative, everything below '0' stays at or under 0x75, and the byte
+// values from 0xBA up wrap around to 0x00..0x45, still under the
+// threshold. The earlier two-compare form (> 0x2F, then not > 0x39, AND-ed
+// with VPANDN) cost three vector ops and two scratch registers per vector;
+// this is two ops and one.
+#define DIGITS(src, dst, t0) \
+	VPADDB   Y0, src, t0; \
+	VPCMPGTB Y1, t0, dst
 
 // func memchrDigitAVX2(haystack []byte) int
 //
 // AVX2 implementation of digit search that finds the first ASCII digit [0-9].
 //
 // Algorithm for range check [0-9] (bytes 0x30-0x39):
-//  1. Broadcast 0x2F ('0'-1) and 0x39 ('9') to YMM registers
+//  1. Broadcast the 0x46 bias and the 0x75 threshold to YMM registers
 //  2. Load 32 bytes from haystack
-//  3. VPCMPGTB: check if chunk > 0x2F (byte >= '0')
-//  4. VPCMPGTB: check if 0x39 < chunk, then invert (byte <= '9')
-//  5. VPANDN: combine masks to get bytes in range ['0'-'9']
-//  6. VPMOVMSKB: extract 32-bit mask
-//  7. BSFL: find first set bit
+//  3. VPADDB: slide the digit range up to 0x76..0x7F
+//  4. VPCMPGTB: signed compare against 0x75 (see DIGITS above)
+//  5. VPMOVMSKB: extract 32-bit mask
+//  6. BSFL: find first set bit
 //
-// The block loop runs steps 2-5 over four vectors, ORs the four masks and
+// The block loop runs steps 2-4 over four vectors, ORs the four masks and
 // extracts once; the (rare) hit path re-extracts the per-vector masks in
 // address order to locate the first digit.
 //
@@ -56,15 +62,16 @@ TEXT ·memchrDigitAVX2(SB), NOSPLIT, $0-32
 	TESTQ   DX, DX
 	JZ      not_found
 
-	// Prepare constants for range check ['0'-'9'] = [0x30-0x39]
-	// We check: byte > 0x2F AND byte <= 0x39
-	MOVQ    $0x2F2F2F2F2F2F2F2F, AX
+	// Prepare constants for range check ['0'-'9'] = [0x30-0x39]:
+	// the bias that slides the range up to 0x76..0x7F and the signed
+	// threshold just below it.
+	MOVQ    $0x4646464646464646, AX
 	VMOVQ   AX, X0
-	VPBROADCASTQ X0, Y0                  // Y0 = [0x2F x 32]
+	VPBROADCASTQ X0, Y0                  // Y0 = [0x46 x 32]
 
-	MOVQ    $0x3939393939393939, AX
+	MOVQ    $0x7575757575757575, AX
 	VMOVQ   AX, X1
-	VPBROADCASTQ X1, Y1                  // Y1 = [0x39 x 32]
+	VPBROADCASTQ X1, Y1                  // Y1 = [0x75 x 32]
 
 	// Save start pointer for offset calculation, compute the end pointer
 	MOVQ    SI, DI                       // DI = haystack start (preserved)
@@ -78,15 +85,16 @@ TEXT ·memchrDigitAVX2(SB), NOSPLIT, $0-32
 	CMPQ    SI, R11
 	JA      loop32_entry
 
+	BLOCKALIGN
 loop128:
 	VMOVDQU (SI), Y2
 	VMOVDQU 32(SI), Y3
 	VMOVDQU 64(SI), Y4
 	VMOVDQU 96(SI), Y5
-	DIGITS(Y2, Y2, Y6, Y7)
-	DIGITS(Y3, Y3, Y6, Y7)
-	DIGITS(Y4, Y4, Y6, Y7)
-	DIGITS(Y5, Y5, Y6, Y7)
+	DIGITS(Y2, Y2, Y6)
+	DIGITS(Y3, Y3, Y6)
+	DIGITS(Y4, Y4, Y6)
+	DIGITS(Y5, Y5, Y6)
 
 	VPOR    Y2, Y3, Y6
 	VPOR    Y4, Y5, Y7
@@ -105,7 +113,7 @@ loop32_entry:
 
 loop32:
 	VMOVDQU (SI), Y2
-	DIGITS(Y2, Y2, Y6, Y7)
+	DIGITS(Y2, Y2, Y6)
 	VPMOVMSKB Y2, CX
 	TESTL   CX, CX
 	JNZ     found_in_vector
@@ -121,7 +129,7 @@ last32:
 	JAE     not_found
 	MOVQ    R12, SI
 	VMOVDQU (SI), Y2
-	DIGITS(Y2, Y2, Y6, Y7)
+	DIGITS(Y2, Y2, Y6)
 	VPMOVMSKB Y2, CX
 	TESTL   CX, CX
 	JNZ     found_in_vector

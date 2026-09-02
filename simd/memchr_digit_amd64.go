@@ -7,8 +7,8 @@
 package simd
 
 // memchrDigitAVX2 is implemented in memchr_digit_amd64.s. It finds bytes in
-// ['0','9'] via two signed VPCMPGTB range comparisons, four 32-byte vectors
-// per iteration.
+// ['0','9'] with one biased VPADDB and one signed VPCMPGTB per vector, four
+// 32-byte vectors per iteration.
 //
 //go:noescape
 func memchrDigitAVX2(haystack []byte) int

@@ -12,6 +12,7 @@
 //go:build amd64
 
 #include "textflag.h"
+#include "block_align_amd64.h"
 
 // The kernels below share one loop skeleton:
 //
@@ -80,6 +81,7 @@ TEXT ·memchr2AVX2(SB), NOSPLIT, $0-40
 	CMPQ    SI, R11
 	JA      loop32_2_entry
 
+	BLOCKALIGN
 loop128_2:
 	VMOVDQU (SI), Y2
 	VMOVDQU 32(SI), Y3
@@ -237,6 +239,7 @@ TEXT ·memchr3AVX2(SB), NOSPLIT, $0-40
 	CMPQ    SI, R11
 	JA      loop32_3_entry
 
+	BLOCKALIGN
 loop128_3:
 	VMOVDQU (SI), Y3
 	VMOVDQU 32(SI), Y4
@@ -425,6 +428,7 @@ TEXT ·memchrPairAVX2(SB), NOSPLIT, $0-48
 	CMPQ    SI, R11
 	JA      loop32_pair_entry
 
+	BLOCKALIGN
 loop128_pair:
 	// byte1 side: four consecutive 32-byte chunks
 	VMOVDQU (SI), Y2

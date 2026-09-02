@@ -11,13 +11,16 @@
 // the per-vector masks, so a 128-byte block costs one mask extraction and
 // one branch, and the scans that report a position then re-extract the
 // four masks in address order to locate the hit. CountNonASCII is the
-// exception: a count cannot be recovered from a combined mask, so it
-// extracts and population-counts all four (and, unlike the others, gates
-// on POPCNT as well as AVX2).
-// Memmem prefilters 128+ byte haystacks on amd64 — needles of 2-6 bytes
-// containing two distinct values through the MemchrPair kernel, longer or
-// single-valued needles through a single rare-byte bytes.IndexByte scan —
-// and delegates to bytes.Index for shorter haystacks or without AVX2.
+// exception: a count cannot be recovered from a combined mask, so its
+// block loop accumulates per-lane counts in vector byte lanes and reduces
+// them once at the end, and the remaining whole vectors are extracted and
+// population-counted (which is why it, unlike the others, gates on POPCNT
+// as well as AVX2).
+// Memmem prefilters on amd64 — needles of 2-6 bytes containing two
+// distinct values through the MemchrPair kernel from 65-byte haystacks,
+// longer or single-valued needles through a single rare-byte
+// bytes.IndexByte scan from 128 bytes — and delegates to bytes.Index for
+// shorter haystacks or without AVX2.
 // MemchrInTable/MemchrNotInTable are plain scalar loops on every
 // architecture, since an arbitrary 256-entry membership test has no cheap
 // vector form. Accelerated reports whether the AVX2 tier is active.
