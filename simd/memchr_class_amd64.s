@@ -12,6 +12,7 @@
 //go:build amd64
 
 #include "textflag.h"
+#include "block_align_amd64.h"
 
 // Classifying \w = [A-Za-z0-9_] with unsigned clamp-and-compare costs three
 // VPMINUB/VPMAXUB/VPCMPEQB triples plus a VPCMPEQB for '_' and three VPORs:
@@ -118,6 +119,7 @@ TEXT ·memchrWordAVX2(SB), NOSPLIT, $0-32
 	CMPQ    SI, R11
 	JA      word_loop32_entry
 
+	BLOCKALIGN_LONG
 word_loop128:
 	VMOVDQU (SI), Y4
 	VMOVDQU 32(SI), Y5
@@ -282,6 +284,7 @@ TEXT ·memchrNotWordAVX2(SB), NOSPLIT, $0-32
 	CMPQ    SI, R11
 	JA      notword_loop32_entry
 
+	BLOCKALIGN_LONG
 notword_loop128:
 	VMOVDQU (SI), Y4
 	VMOVDQU 32(SI), Y5

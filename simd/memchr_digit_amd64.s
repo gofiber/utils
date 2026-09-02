@@ -10,6 +10,7 @@
 //go:build amd64
 
 #include "textflag.h"
+#include "block_align_amd64.h"
 
 // DIGITS leaves in dst a mask with 0xFF in every lane of src holding an
 // ASCII digit. t0 is scratch; dst may alias src.
@@ -84,6 +85,7 @@ TEXT ·memchrDigitAVX2(SB), NOSPLIT, $0-32
 	CMPQ    SI, R11
 	JA      loop32_entry
 
+	BLOCKALIGN
 loop128:
 	VMOVDQU (SI), Y2
 	VMOVDQU 32(SI), Y3

@@ -61,7 +61,9 @@ func Test_KernelsAreSelfBounding(t *testing.T) {
 		// the guard is on the kernel itself and not on a wrapper.
 		require.True(t, isASCIIAVX2(buf), "isASCIIAVX2 len %d", n)
 		require.Equal(t, -1, firstNonASCIIAVX2(buf), "firstNonASCIIAVX2 len %d", n)
-		require.Equal(t, 0, countNonASCIIAVX2(buf), "countNonASCIIAVX2 len %d", n)
+		if hasPOPCNT {
+			require.Equal(t, 0, countNonASCIIAVX2(buf), "countNonASCIIAVX2 len %d", n)
+		}
 		require.Equal(t, -1, memchr2AVX2(buf, 'z', 'y'), "memchr2AVX2 len %d", n)
 		require.Equal(t, -1, memchr3AVX2(buf, 'z', 'y', 'x'), "memchr3AVX2 len %d", n)
 		require.Equal(t, -1, memchrDigitAVX2(buf), "memchrDigitAVX2 len %d", n)
@@ -88,8 +90,8 @@ func Test_KernelsAreSelfBounding(t *testing.T) {
 // inflate the count rather than fault, which the guard test alone cannot
 // distinguish from a correct scan of zero-filled slack.
 func Test_CountNonASCIIAVX2_CountsExactly(t *testing.T) {
-	if !Accelerated() {
-		t.Skip("AVX2 kernels not active on this CPU")
+	if !Accelerated() || !hasPOPCNT {
+		t.Skip("AVX2+POPCNT kernels not active on this CPU")
 	}
 	for n := range 400 {
 		buf := guardedTail(t, max(n, 1))[:n]

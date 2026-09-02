@@ -42,7 +42,8 @@ func FirstNonASCII(data []byte) int {
 //
 // On amd64 with AVX2 and inputs of MinLen+ bytes it accumulates a per-lane
 // count of high-bit bytes in vector byte lanes, four 32-byte vectors per
-// iteration, and sums the lanes at the end; elsewhere it counts
+// iteration, sums the lanes once at the end, and population-counts the
+// high-bit masks of the remaining whole vectors; elsewhere it counts
 // SWAR-word-wise with a popcount per word.
 func CountNonASCII(data []byte) int {
 	return countNonASCIIImpl(data)
