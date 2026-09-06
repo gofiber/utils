@@ -22,24 +22,6 @@ func EqualFold[S byteSeq](b, s S) bool {
 	if n != len(s) {
 		return false
 	}
-	if n < 8 {
-		if n >= 4 {
-			// Token-sized inputs (methods, connection options, codings):
-			// two overlapping 4-byte windows cover 4..7 bytes exactly, and
-			// packed into one word they fold with a single ToUpperWord —
-			// re-comparing the overlap cannot change the outcome.
-			x := uint64(load4(b, 0)) | uint64(load4(b, n-4))<<32
-			y := uint64(load4(s, 0)) | uint64(load4(s, n-4))<<32
-			return x == y || swar.ToUpperWord(x) == swar.ToUpperWord(y)
-		}
-		table := caseconv.ToUpperTable
-		for i := range n {
-			if table[b[i]] != table[s[i]] {
-				return false
-			}
-		}
-		return true
-	}
 
 	// Compare 8 bytes per iteration; case-fold with SWAR only when the raw
 	// words differ, so byte-identical input skips both folds entirely.
@@ -54,11 +36,32 @@ func EqualFold[S byteSeq](b, s S) bool {
 	if i == n {
 		return true
 	}
-	// Handle the tail with one overlapping word compare; re-checking
-	// bytes that were already equal cannot change the outcome.
-	x := swar.Load8(b, n-8)
-	y := swar.Load8(s, n-8)
-	return x == y || swar.ToUpperWord(x) == swar.ToUpperWord(y)
+	if n >= 8 {
+		// Handle the tail with one overlapping word compare; re-checking
+		// bytes that were already equal cannot change the outcome.
+		x := swar.Load8(b, n-8)
+		y := swar.Load8(s, n-8)
+		return x == y || swar.ToUpperWord(x) == swar.ToUpperWord(y)
+	}
+	if n >= 4 {
+		// Token-sized inputs (methods, connection options, codings): two
+		// overlapping 4-byte windows cover 4..7 bytes exactly, and packed
+		// into one word they fold with a single ToUpperWord — as above,
+		// re-comparing the overlap cannot change the outcome. The check
+		// sits after the word paths so inputs of a word or more pay
+		// nothing for it.
+		x := uint64(load4(b, 0)) | uint64(load4(b, n-4))<<32
+		y := uint64(load4(s, 0)) | uint64(load4(s, n-4))<<32
+		return x == y || swar.ToUpperWord(x) == swar.ToUpperWord(y)
+	}
+
+	table := caseconv.ToUpperTable
+	for ; i < n; i++ {
+		if table[b[i]] != table[s[i]] {
+			return false
+		}
+	}
+	return true
 }
 
 // TrimLeft removes all leading occurrences of the byte cutset from s.
