@@ -154,12 +154,12 @@ func FormatUint(n uint64) string {
 // FormatInt formats an int64 as a decimal string.
 // It is faster than strconv.FormatInt for most inputs.
 func FormatInt(n int64) string {
-	// The table cases stay inline: routing them through FormatUint costs
-	// a call that doubles the cost of the most common inputs.
-	if n >= 0 && n < 100 {
-		return smallInts[n]
-	}
 	if n >= 0 {
+		// The table case stays inline: routing it through FormatUint
+		// costs a call that doubles the cost of the most common inputs.
+		if n < 100 {
+			return smallInts[n]
+		}
 		return FormatUint(uint64(n))
 	}
 	if n > -100 {
@@ -185,10 +185,10 @@ func FormatUint32(n uint32) string {
 
 // FormatInt32 formats an int32 as a decimal string.
 func FormatInt32(n int32) string {
-	if n >= 0 && n < 100 {
-		return smallInts[n]
-	}
 	if n >= 0 {
+		if n < 100 {
+			return smallInts[n]
+		}
 		return FormatUint32(uint32(n))
 	}
 	if n > -100 {
@@ -263,10 +263,10 @@ func AppendUint(dst []byte, n uint64) []byte {
 
 // AppendInt appends the decimal string representation of n to dst.
 func AppendInt(dst []byte, n int64) []byte {
-	if n >= 0 && n < 100 {
-		return append(dst, smallInts[n]...)
-	}
 	if n >= 0 {
+		if n < 100 {
+			return append(dst, smallInts[n]...)
+		}
 		return AppendUint(dst, uint64(n))
 	}
 	if n > -100 {
