@@ -22,6 +22,65 @@ var (
 	httpDaysInMonth = [13]int{0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31}
 )
 
+// Calendar fields are converted with Hinnant's civil_from_days and
+// days_from_civil (400-year eras of 146097 days, origin -0400-03-01 so every
+// intermediate is non-negative); the tests sweep every day of 0..9999.
+const (
+	httpDateMinUnix        = -62167219200 // 0000-01-01T00:00:00Z
+	httpDateMaxUnix        = 253402300799 // 9999-12-31T23:59:59Z
+	secondsPerDay          = 86400
+	daysPerEra             = 146097
+	eraDaysToMarch         = daysPerEra - 60     // 0000-01-01 to -0400-03-01
+	daysFromMarchEraToUnix = 719468 + daysPerEra // -0400-03-01 to 1970-01-01
+	weekdayOfYearZero      = 6                   // 0000-01-01 was a Saturday
+)
+
+// civilFromDays converts days since 0000-01-01 (at most 3652424) into a
+// proleptic Gregorian year, month (1..12), and day (1..31).
+func civilFromDays(days uint64) (year, month, day uint64) { //nolint:nonamedreturns // the three calendar fields are only readable named
+	z := days + eraDaysToMarch
+	era := z / daysPerEra
+	doe := z - era*daysPerEra                              // day of era, [0, 146096]
+	yoe := (doe - doe/1460 + doe/36524 - doe/146096) / 365 // year of era, [0, 399]
+	doy := doe - (365*yoe + yoe/4 - yoe/100)               // day of March-based year, [0, 365]
+	mp := (5*doy + 2) / 153                                // March-based month, [0, 11]
+	day = doy - (153*mp+2)/5 + 1
+	month = mp + 3
+	if mp >= 10 {
+		month = mp - 9
+	}
+	year = yoe + era*400 - 400
+	if month <= 2 {
+		year++
+	}
+	return year, month, day
+}
+
+// unixFromCivil returns the Unix time of valid UTC calendar fields with the
+// year in 0..9999, as parseRFC1123 guarantees.
+func unixFromCivil(year, month, day, hour, minute, sec int) int64 {
+	y := year + 400 // one era back keeps January/February of year 0 non-negative
+	mp := month + 9
+	if month > 2 {
+		mp = month - 3
+	} else {
+		y--
+	}
+	era := y / 400
+	yoe := y - era*400
+	doy := (153*mp+2)/5 + day - 1
+	doe := yoe*365 + yoe/4 - yoe/100 + doy
+	days := era*daysPerEra + doe - daysFromMarchEraToUnix
+	return int64(days)*secondsPerDay + int64(hour*3600+minute*60+sec)
+}
+
+// putPair writes n < 100 as two zero-padded digits at b[i] and b[i+1].
+func putPair(b []byte, i int, n uint64) {
+	_ = b[i+1]
+	b[i] = decimalPairs[2*n]
+	b[i+1] = decimalPairs[2*n+1]
+}
+
 // AppendHTTPDate appends t in the RFC 9110 preferred HTTP date format
 // ("Mon, 02 Jan 2006 15:04:05 GMT", net/http.TimeFormat) to dst and returns
 // the extended slice. The output is byte-identical to
@@ -29,32 +88,35 @@ var (
 // years 0..9999 that HTTP dates can represent; times outside that range
 // delegate to time.AppendFormat.
 func AppendHTTPDate(dst []byte, t time.Time) []byte {
-	t = t.UTC()
-	year, month, day := t.Date()
-	if year < 0 || year > 9999 {
+	sec := t.Unix()
+	if sec < httpDateMinUnix || sec > httpDateMaxUnix {
 		// RFC 1123 assumes a four-digit year; keep stdlib behavior for the
 		// unrepresentable rest instead of mis-padding it.
-		return t.AppendFormat(dst, httpDateLayout)
+		return t.UTC().AppendFormat(dst, httpDateLayout)
 	}
-	hour, minute, sec := t.Clock()
-	off := len(dst)
-	dst = append(dst, httpDateLayout...)
-	b := dst[off : off+httpDateLen : off+httpDateLen]
-	copy(b, httpWeekdays[t.Weekday()])
-	b[5] = byte(day/10) + '0'
-	b[6] = byte(day%10) + '0'
-	copy(b[8:11], httpMonths[month-1])
-	b[12] = byte(year/1000) + '0'
-	b[13] = byte(year/100%10) + '0'
-	b[14] = byte(year/10%10) + '0'
-	b[15] = byte(year%10) + '0'
-	b[17] = byte(hour/10) + '0'
-	b[18] = byte(hour%10) + '0'
-	b[20] = byte(minute/10) + '0'
-	b[21] = byte(minute%10) + '0'
-	b[23] = byte(sec/10) + '0'
-	b[24] = byte(sec%10) + '0'
-	return dst
+	u := uint64(sec - httpDateMinUnix) // seconds since 0000-01-01, so every split is unsigned
+	days := u / secondsPerDay
+	sod := u - days*secondsPerDay
+	hour := sod / 3600
+	sod -= hour * 3600
+	minute := sod / 60
+	second := sod - minute*60
+	year, month, day := civilFromDays(days)
+
+	var b [httpDateLen]byte
+	copy(b[:], httpDateLayout)
+	weekday := httpWeekdays[(days+weekdayOfYearZero)%7] // byte stores: copy would be a memmove call
+	b[0], b[1], b[2] = weekday[0], weekday[1], weekday[2]
+	putPair(b[:], 5, day)
+	monthName := httpMonths[month-1]
+	b[8], b[9], b[10] = monthName[0], monthName[1], monthName[2]
+	century := year / 100
+	putPair(b[:], 12, century)
+	putPair(b[:], 14, year-century*100)
+	putPair(b[:], 17, hour)
+	putPair(b[:], 20, minute)
+	putPair(b[:], 23, second)
+	return append(dst, b[:]...)
 }
 
 // FormatHTTPDate returns t in the RFC 9110 preferred HTTP date format, equal
@@ -116,7 +178,7 @@ func parseRFC1123[S byteSeq](s S) (time.Time, bool) {
 		// time.Parse rejects these; let it produce the exact error.
 		return time.Time{}, false
 	}
-	return time.Date(year, time.Month(month), day, hour, minute, sec, 0, time.UTC), true
+	return time.Unix(unixFromCivil(year, month, day, hour, minute, sec), 0).UTC(), true
 }
 
 // parseHTTPDateSlow mirrors net/http.ParseTime: trim the whitespace

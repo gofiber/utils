@@ -9,6 +9,12 @@ type byteSeq interface {
 	~string | ~[]byte
 }
 
+// load4 assembles s[i:i+4] into a little-endian uint32; the caller guarantees i+4 <= len(s).
+func load4[S byteSeq](s S, i int) uint32 {
+	w := s[i : i+4]
+	return uint32(w[0]) | uint32(w[1])<<8 | uint32(w[2])<<16 | uint32(w[3])<<24
+}
+
 // EqualFold tests ascii strings or bytes for equality case-insensitively
 func EqualFold[S byteSeq](b, s S) bool {
 	n := len(b)
@@ -34,6 +40,14 @@ func EqualFold[S byteSeq](b, s S) bool {
 		// bytes that were already equal cannot change the outcome.
 		x := swar.Load8(b, n-8)
 		y := swar.Load8(s, n-8)
+		return x == y || swar.ToUpperWord(x) == swar.ToUpperWord(y)
+	}
+	if n >= 4 {
+		// 4..7 bytes: two overlapping 4-byte windows packed into one word
+		// fold with a single ToUpperWord; checked after the word paths so
+		// longer inputs pay nothing for it.
+		x := uint64(load4(b, 0)) | uint64(load4(b, n-4))<<32
+		y := uint64(load4(s, 0)) | uint64(load4(s, n-4))<<32
 		return x == y || swar.ToUpperWord(x) == swar.ToUpperWord(y)
 	}
 

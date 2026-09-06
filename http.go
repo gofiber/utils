@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	casestrings "github.com/gofiber/utils/v2/strings"
+	"github.com/gofiber/utils/v2/swar"
 )
 
 const MIMEOctetStream = "application/octet-stream"
@@ -19,31 +20,88 @@ const (
 	contentTypePrefixApplicationWithSlash = "application/"
 )
 
-// GetMIME returns the content-type of a file extension
+// Extensions are looked up in an open-addressed table keyed by the extension
+// packed into one lower-cased word and built from mimeExtensions at init: a
+// hit is a multiply, a shift, and usually one comparison, with no allocation.
+const (
+	mimeTableBits       = 9 // 512 slots for ~130 entries
+	mimeTableMask       = 1<<mimeTableBits - 1
+	mimeTableMaxEntries = 1 << (mimeTableBits - 1) // half full at most, so probes stay short and always end at a free slot
+	mimeHashMul         = 0x9E3779B97F4A7C15       // Fibonacci hashing multiplier
+	mimeKeyMaxLen       = swar.WordLen
+)
+
+type mimeEntry struct {
+	key      uint64
+	length   uint8
+	mimeType string
+}
+
+var mimeTable = buildMIMETable(mimeExtensions)
+
+func buildMIMETable(exts map[string]string) [1 << mimeTableBits]mimeEntry {
+	if len(exts) > mimeTableMaxEntries {
+		panic("utils: the MIME extension table holds at most " + FormatInt(mimeTableMaxEntries) + " entries; raise mimeTableBits")
+	}
+	var t [1 << mimeTableBits]mimeEntry
+	for ext, mimeType := range exts {
+		if ext == "" || len(ext) > mimeKeyMaxLen {
+			continue // not packable; served by the mime package fallback
+		}
+		key := packExtension(ext)
+		h := mimeHash(key)
+		for t[h].mimeType != "" {
+			h = (h + 1) & mimeTableMask
+		}
+		t[h] = mimeEntry{key: key, length: uint8(len(ext)), mimeType: mimeType}
+	}
+	return t
+}
+
+// packExtension packs 1..mimeKeyMaxLen bytes into a lower-cased little-endian word.
+func packExtension(ext string) uint64 {
+	if len(ext) == swar.WordLen {
+		return swar.ToLowerWord(swar.Load8(ext, 0))
+	}
+	var w uint64
+	for i := len(ext) - 1; i >= 0; i-- {
+		w = w<<8 | uint64(ext[i])
+	}
+	return swar.ToLowerWord(w)
+}
+
+func mimeHash(key uint64) int {
+	return int(key * mimeHashMul >> (64 - mimeTableBits))
+}
+
+// GetMIME returns the content-type of a file extension, matched
+// case-insensitively with or without the leading dot. Unknown extensions map
+// to MIMEOctetStream; an empty extension yields an empty string.
 func GetMIME(extension string) string {
 	if len(extension) == 0 {
 		return ""
 	}
 
-	// Normalize extension once at the start to avoid repeated checks
-	var extWithoutDot string
-	var extWithDot string
-	if extension[0] == '.' {
-		extWithoutDot = extension[1:]
-		extWithDot = extension
-	} else {
-		extWithoutDot = extension
-		extWithDot = "." + extension
+	ext := extension
+	if ext[0] == '.' {
+		ext = ext[1:]
+	}
+	if len(ext) > 0 && len(ext) <= mimeKeyMaxLen {
+		// The length check keeps NUL bytes in the input apart from the
+		// key's zero padding: "html\x00" must not match "html".
+		key := packExtension(ext)
+		for h := mimeHash(key); mimeTable[h].mimeType != ""; h = (h + 1) & mimeTableMask {
+			if mimeTable[h].key == key && int(mimeTable[h].length) == len(ext) {
+				return mimeTable[h].mimeType
+			}
+		}
 	}
 
-	// Single map lookup with normalized key. Extensions are matched
-	// case-insensitively; ToLower only allocates for upper-case input.
-	if foundMime := mimeExtensions[casestrings.ToLower(extWithoutDot)]; len(foundMime) > 0 {
-		return foundMime
+	// Fallback to the mime package, which wants the dotted form.
+	if extension[0] != '.' {
+		extension = "." + extension
 	}
-
-	// Fallback to mime package with pre-computed extension
-	if foundMime := mime.TypeByExtension(extWithDot); foundMime != "" {
+	if foundMime := mime.TypeByExtension(extension); foundMime != "" {
 		return foundMime
 	}
 

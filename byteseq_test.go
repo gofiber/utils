@@ -417,3 +417,75 @@ func Benchmark_TrimSpaceBytes(b *testing.B) {
 		})
 	}
 }
+
+// Benchmark_EqualFold_Short measures token-sized inputs that are equal up to case, so every byte is inspected.
+func Benchmark_EqualFold_Short(b *testing.B) {
+	inputs := []struct {
+		name string
+		x, y string
+	}{
+		{"3B", "GET", "get"},
+		{"4B", "POST", "post"},
+		{"5B", "close", "Close"},
+		{"7B", "chunked", "Chunked"},
+		{"8B", "identity", "Identity"},
+		{"10B", "keep-alive", "Keep-Alive"},
+		{"16B", "application/json", "Application/JSON"},
+	}
+	var res bool
+	for _, input := range inputs {
+		b.Run(input.name+"/fiber", func(b *testing.B) {
+			b.ReportAllocs()
+			for b.Loop() {
+				res = EqualFold(input.x, input.y)
+			}
+			require.True(b, res)
+		})
+		b.Run(input.name+"/default", func(b *testing.B) {
+			b.ReportAllocs()
+			for b.Loop() {
+				res = strings.EqualFold(input.x, input.y)
+			}
+			require.True(b, res)
+		})
+	}
+}
+
+// Test_EqualFold_Lengths covers every scan shape with a case-flipped twin and a changed byte at every position.
+func Test_EqualFold_Lengths(t *testing.T) {
+	t.Parallel()
+	base := "Content-Type: Multipart"
+	for n := 0; n <= len(base); n++ {
+		a := base[:n]
+		flipped := make([]byte, n)
+		for i := range n {
+			c := a[i]
+			switch {
+			case c >= 'a' && c <= 'z':
+				c -= 0x20
+			case c >= 'A' && c <= 'Z':
+				c += 0x20
+			}
+			flipped[i] = c
+		}
+		require.True(t, EqualFold(a, string(flipped)), "len %d", n)
+		require.True(t, EqualFold([]byte(a), flipped), "len %d", n)
+		for i := range n {
+			for _, c := range []byte{'!', '[', '{', '@', '`', 0x00, 0x80, 0xFF, a[i] ^ 0x01} {
+				if c == a[i] {
+					continue
+				}
+				mutated := append([]byte{}, flipped...)
+				mutated[i] = c
+				want := strings.EqualFold(a, string(mutated))
+				require.Equal(t, want, EqualFold(a, string(mutated)), "len %d pos %d byte %#x", n, i, c)
+				require.Equal(t, want, EqualFold([]byte(a), mutated), "len %d pos %d byte %#x", n, i, c)
+			}
+		}
+	}
+	// '[' and '{' differ only in bit 5, like a letter pair, and must not fold.
+	for n := 1; n <= 16; n++ {
+		require.False(t, EqualFold(strings.Repeat("[", n), strings.Repeat("{", n)), "len %d", n)
+		require.False(t, EqualFold(strings.Repeat("@", n), strings.Repeat("`", n)), "len %d", n)
+	}
+}

@@ -4,12 +4,15 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"mime"
 	"net/http"
 	"net/netip"
 	"net/url"
 	"strconv"
 	"strings"
 	"testing"
+
+	casestrings "github.com/gofiber/utils/v2/strings"
 )
 
 // Fuzz targets comparing the SWAR implementations against the scalar
@@ -44,6 +47,9 @@ func FuzzEqualFold(f *testing.F) {
 	f.Add("no\rcache", "no-cache")
 	f.Add("\xc9abc", "\xe9abc")
 	f.Add("aaaaaaaaaaaaX", "aaaaaaaaaaaax")
+	f.Add("POST", "post")
+	f.Add("chunked", "CHUNKED")
+	f.Add("[a]", "{A}")
 	f.Fuzz(func(t *testing.T, a, b string) {
 		want := bytes.Equal(asciiFoldUpperB([]byte(a)), asciiFoldUpperB([]byte(b)))
 		if got := EqualFold(a, b); got != want {
@@ -260,6 +266,41 @@ func FuzzParseIP(f *testing.F) {
 		}
 		if _, okBytes := ParseIPv6([]byte(s)); okBytes != ok6 {
 			t.Fatalf("ParseIPv6(bytes %q) diverges from string form", s)
+		}
+	})
+}
+
+// refGetMIME is the map-based lookup GetMIME's packed-key table replaced; its case fold is ASCII-only, like the original.
+func refGetMIME(extension string) string {
+	if extension == "" {
+		return ""
+	}
+	withDot := extension
+	if extension[0] == '.' {
+		extension = extension[1:]
+	} else {
+		withDot = "." + extension
+	}
+	if found := mimeExtensions[casestrings.ToLower(extension)]; found != "" {
+		return found
+	}
+	if found := mime.TypeByExtension(withDot); found != "" {
+		return found
+	}
+	return MIMEOctetStream
+}
+
+func FuzzGetMIME(f *testing.F) {
+	f.Add("html")
+	f.Add(".JSON")
+	f.Add("html\x00")
+	f.Add("\u212aml") // Kelvin sign: Unicode-lowercases to "kml", ASCII folding leaves it alone
+	f.Add("msgpack")
+	f.Add("unknown")
+	f.Add("")
+	f.Fuzz(func(t *testing.T, ext string) {
+		if got, want := GetMIME(ext), refGetMIME(ext); got != want {
+			t.Fatalf("GetMIME(%q) = %q, want %q", ext, got, want)
 		}
 	})
 }
