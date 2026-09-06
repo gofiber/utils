@@ -7,6 +7,7 @@ package utils
 import (
 	"mime"
 	"net/http"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -244,4 +245,44 @@ func Benchmark_StatusMessage(b *testing.B) {
 			http.StatusText(http.StatusNotExtended)
 		}
 	})
+}
+
+// Test_GetMIME_TableCoverage pins the packed-key table to mimeExtensions:
+// every entry must be reachable through GetMIME in its lower-case form, in
+// upper case, and with a leading dot, and no table entry may be longer
+// than a packed key can hold.
+func Test_GetMIME_TableCoverage(t *testing.T) {
+	t.Parallel()
+	for ext, want := range mimeExtensions {
+		require.NotEmpty(t, ext)
+		require.LessOrEqual(t, len(ext), mimeKeyMaxLen, "extension %q does not fit a packed key", ext)
+		require.Equal(t, want, GetMIME(ext), "extension %q", ext)
+		require.Equal(t, want, GetMIME("."+ext), "extension .%q", ext)
+		require.Equal(t, want, GetMIME(strings.ToUpper(ext)), "extension %q upper-cased", ext)
+	}
+	// Distinct extensions must never share a packed key.
+	seen := make(map[uint64]string, len(mimeExtensions))
+	for ext := range mimeExtensions {
+		key := packExtension(ext)
+		prev, dup := seen[key]
+		require.False(t, dup, "extensions %q and %q pack to the same key", prev, ext)
+		seen[key] = ext
+	}
+	// Probe sequences must terminate: the table keeps free slots.
+	free := 0
+	for i := range mimeTable {
+		if mimeTable[i].mimeType == "" {
+			free++
+		}
+	}
+	require.Positive(t, free)
+
+	// Misses of every length, including packed-key length and beyond, and
+	// bytes that fold onto table keys without being letters, fall through
+	// to the fallback.
+	// Extensions containing NUL or non-ASCII bytes cannot appear in any
+	// mime database either, so they are octet-stream on every platform.
+	for _, ext := range []string{"\x00", "ht\x00l", "j\xf3on", "1234567\x00", "toolongext\x01", ".\x00\x00\x00\x00\x00\x00\x00\x00"} {
+		require.Equal(t, MIMEOctetStream, GetMIME(ext), "extension %q", ext)
+	}
 }

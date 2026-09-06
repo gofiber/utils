@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	casestrings "github.com/gofiber/utils/v2/strings"
+	"github.com/gofiber/utils/v2/swar"
 )
 
 const MIMEOctetStream = "application/octet-stream"
@@ -19,31 +20,97 @@ const (
 	contentTypePrefixApplicationWithSlash = "application/"
 )
 
-// GetMIME returns the content-type of a file extension
+// The extension table is queried through an open-addressed hash table
+// keyed by the extension packed into one lower-cased word: every entry of
+// mimeExtensions is at most eight bytes, so the key is built by loading the
+// bytes into a uint64 and folding case with swar.ToLowerWord. That makes a
+// lookup a multiply, a shift, and usually one slot comparison, and it never
+// allocates — not even for upper-case input, which the map lookup had to
+// lower-case into a fresh string first. mimeExtensions stays the readable
+// source of truth; the table is derived from it at init.
+const (
+	// mimeTableBits sizes the table at 2^9 = 512 slots for the ~130
+	// entries, a load factor near a quarter, so probes rarely go past
+	// the first slot.
+	mimeTableBits = 9
+	mimeTableMask = 1<<mimeTableBits - 1
+	// mimeHashMul is the golden-ratio multiplier of Fibonacci hashing;
+	// the top mimeTableBits bits of the product index the table.
+	mimeHashMul = 0x9E3779B97F4A7C15
+	// mimeKeyMaxLen is the longest extension a packed key can hold.
+	mimeKeyMaxLen = swar.WordLen
+)
+
+type mimeEntry struct {
+	key      uint64
+	mimeType string
+}
+
+var mimeTable = buildMIMETable()
+
+func buildMIMETable() [1 << mimeTableBits]mimeEntry {
+	var t [1 << mimeTableBits]mimeEntry
+	for ext, mimeType := range mimeExtensions {
+		if ext == "" || len(ext) > mimeKeyMaxLen {
+			// Unreachable for the current table; such an entry would only
+			// be served by the mime package fallback.
+			continue
+		}
+		key := packExtension(ext)
+		h := mimeHash(key)
+		for t[h].mimeType != "" {
+			h = (h + 1) & mimeTableMask
+		}
+		t[h] = mimeEntry{key: key, mimeType: mimeType}
+	}
+	return t
+}
+
+// packExtension packs ext, which must be 1..mimeKeyMaxLen bytes long, into
+// a little-endian word (ext[0] in lane 0, unused lanes zero) with its ASCII
+// letters lower-cased, so that extensions equal up to case yield equal keys.
+func packExtension(ext string) uint64 {
+	if len(ext) == swar.WordLen {
+		return swar.ToLowerWord(swar.Load8(ext, 0))
+	}
+	var w uint64
+	for i := len(ext) - 1; i >= 0; i-- {
+		w = w<<8 | uint64(ext[i])
+	}
+	return swar.ToLowerWord(w)
+}
+
+func mimeHash(key uint64) int {
+	return int(key * mimeHashMul >> (64 - mimeTableBits))
+}
+
+// GetMIME returns the content-type of a file extension. The extension is
+// matched case-insensitively, with or without its leading dot, against the
+// built-in table first and then against the mime package; unknown
+// extensions map to MIMEOctetStream. Built-in hits never allocate.
 func GetMIME(extension string) string {
 	if len(extension) == 0 {
 		return ""
 	}
 
-	// Normalize extension once at the start to avoid repeated checks
-	var extWithoutDot string
-	var extWithDot string
-	if extension[0] == '.' {
-		extWithoutDot = extension[1:]
-		extWithDot = extension
-	} else {
-		extWithoutDot = extension
-		extWithDot = "." + extension
+	ext := extension
+	if ext[0] == '.' {
+		ext = ext[1:]
+	}
+	if len(ext) > 0 && len(ext) <= mimeKeyMaxLen {
+		key := packExtension(ext)
+		for h := mimeHash(key); mimeTable[h].mimeType != ""; h = (h + 1) & mimeTableMask {
+			if mimeTable[h].key == key {
+				return mimeTable[h].mimeType
+			}
+		}
 	}
 
-	// Single map lookup with normalized key. Extensions are matched
-	// case-insensitively; ToLower only allocates for upper-case input.
-	if foundMime := mimeExtensions[casestrings.ToLower(extWithoutDot)]; len(foundMime) > 0 {
-		return foundMime
+	// Fallback to the mime package, which wants the dotted form.
+	if extension[0] != '.' {
+		extension = "." + extension
 	}
-
-	// Fallback to mime package with pre-computed extension
-	if foundMime := mime.TypeByExtension(extWithDot); foundMime != "" {
+	if foundMime := mime.TypeByExtension(extension); foundMime != "" {
 		return foundMime
 	}
 
