@@ -33,6 +33,7 @@ const (
 
 type mimeEntry struct {
 	key      uint64
+	length   uint8
 	mimeType string
 }
 
@@ -52,7 +53,7 @@ func buildMIMETable(exts map[string]string) [1 << mimeTableBits]mimeEntry {
 		for t[h].mimeType != "" {
 			h = (h + 1) & mimeTableMask
 		}
-		t[h] = mimeEntry{key: key, mimeType: mimeType}
+		t[h] = mimeEntry{key: key, length: uint8(len(ext)), mimeType: mimeType}
 	}
 	return t
 }
@@ -86,9 +87,11 @@ func GetMIME(extension string) string {
 		ext = ext[1:]
 	}
 	if len(ext) > 0 && len(ext) <= mimeKeyMaxLen {
+		// The length check keeps NUL bytes in the input apart from the
+		// key's zero padding: "html\x00" must not match "html".
 		key := packExtension(ext)
 		for h := mimeHash(key); mimeTable[h].mimeType != ""; h = (h + 1) & mimeTableMask {
-			if mimeTable[h].key == key {
+			if mimeTable[h].key == key && int(mimeTable[h].length) == len(ext) {
 				return mimeTable[h].mimeType
 			}
 		}

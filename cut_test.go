@@ -113,3 +113,26 @@ func Benchmark_CutByte(b *testing.B) {
 	})
 	_, _ = bb, ba
 }
+
+func Benchmark_LastCutByte(b *testing.B) {
+	input := "[2001:db8::1]:8080"
+	var before, after string
+	var found bool
+	b.Run("fiber", func(b *testing.B) {
+		b.ReportAllocs()
+		for b.Loop() {
+			before, after, found = LastCutByte(input, ':')
+		}
+		require.True(b, found)
+	})
+	b.Run("default", func(b *testing.B) {
+		b.ReportAllocs()
+		for b.Loop() {
+			if i := strings.LastIndexByte(input, ':'); i >= 0 {
+				before, after, found = input[:i], input[i+1:], true
+			}
+		}
+		require.True(b, found)
+	})
+	_, _ = before, after
+}

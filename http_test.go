@@ -256,6 +256,10 @@ func Test_GetMIME_TableCoverage(t *testing.T) {
 		require.Equal(t, want, GetMIME(ext), "extension %q", ext)
 		require.Equal(t, want, GetMIME("."+ext), "extension .%q", ext)
 		require.Equal(t, want, GetMIME(strings.ToUpper(ext)), "extension %q upper-cased", ext)
+		// Trailing NUL bytes pack like the key's zero padding but are a different extension.
+		if len(ext) < mimeKeyMaxLen {
+			require.Equal(t, MIMEOctetStream, GetMIME(ext+"\x00"), "extension %q with a trailing NUL", ext)
+		}
 	}
 	// Distinct extensions must never share a packed key.
 	seen := make(map[uint64]string, len(mimeExtensions))
