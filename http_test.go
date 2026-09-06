@@ -285,6 +285,13 @@ func Test_GetMIME_TableCoverage(t *testing.T) {
 	}
 	require.Equal(t, 1, entries)
 
+	// More entries than the table can hold is a build-time mistake, not a hang.
+	tooMany := make(map[string]string, mimeTableMaxEntries+1)
+	for i := range mimeTableMaxEntries + 1 {
+		tooMany["e"+FormatInt(int64(i))] = "x"
+	}
+	require.Panics(t, func() { buildMIMETable(tooMany) })
+
 	// Misses of every length; NUL and non-ASCII bytes are in no mime database, so these are octet-stream everywhere.
 	for _, ext := range []string{"\x00", "ht\x00l", "j\xf3on", "1234567\x00", "toolongext\x01", ".\x00\x00\x00\x00\x00\x00\x00\x00"} {
 		require.Equal(t, MIMEOctetStream, GetMIME(ext), "extension %q", ext)

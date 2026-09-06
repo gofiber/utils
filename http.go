@@ -24,10 +24,11 @@ const (
 // packed into one lower-cased word and built from mimeExtensions at init: a
 // hit is a multiply, a shift, and usually one comparison, with no allocation.
 const (
-	mimeTableBits = 9 // 512 slots for ~130 entries
-	mimeTableMask = 1<<mimeTableBits - 1
-	mimeHashMul   = 0x9E3779B97F4A7C15 // Fibonacci hashing multiplier
-	mimeKeyMaxLen = swar.WordLen
+	mimeTableBits       = 9 // 512 slots for ~130 entries
+	mimeTableMask       = 1<<mimeTableBits - 1
+	mimeTableMaxEntries = 1 << (mimeTableBits - 1) // half full at most, so probes stay short and always end at a free slot
+	mimeHashMul         = 0x9E3779B97F4A7C15       // Fibonacci hashing multiplier
+	mimeKeyMaxLen       = swar.WordLen
 )
 
 type mimeEntry struct {
@@ -38,6 +39,9 @@ type mimeEntry struct {
 var mimeTable = buildMIMETable(mimeExtensions)
 
 func buildMIMETable(exts map[string]string) [1 << mimeTableBits]mimeEntry {
+	if len(exts) > mimeTableMaxEntries {
+		panic("utils: the MIME extension table holds at most " + FormatInt(mimeTableMaxEntries) + " entries; raise mimeTableBits")
+	}
 	var t [1 << mimeTableBits]mimeEntry
 	for ext, mimeType := range exts {
 		if ext == "" || len(ext) > mimeKeyMaxLen {
@@ -70,8 +74,8 @@ func mimeHash(key uint64) int {
 }
 
 // GetMIME returns the content-type of a file extension, matched
-// case-insensitively with or without the leading dot; unknown extensions map
-// to MIMEOctetStream.
+// case-insensitively with or without the leading dot. Unknown extensions map
+// to MIMEOctetStream; an empty extension yields an empty string.
 func GetMIME(extension string) string {
 	if len(extension) == 0 {
 		return ""
