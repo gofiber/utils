@@ -44,6 +44,9 @@ func FuzzEqualFold(f *testing.F) {
 	f.Add("no\rcache", "no-cache")
 	f.Add("\xc9abc", "\xe9abc")
 	f.Add("aaaaaaaaaaaaX", "aaaaaaaaaaaax")
+	f.Add("POST", "post")
+	f.Add("chunked", "CHUNKED")
+	f.Add("[a]", "{A}")
 	f.Fuzz(func(t *testing.T, a, b string) {
 		want := bytes.Equal(asciiFoldUpperB([]byte(a)), asciiFoldUpperB([]byte(b)))
 		if got := EqualFold(a, b); got != want {

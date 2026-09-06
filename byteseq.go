@@ -9,11 +9,36 @@ type byteSeq interface {
 	~string | ~[]byte
 }
 
+// load4 assembles s[i:i+4] into a little-endian uint32, the 32-bit
+// counterpart of swar.Load8; the caller guarantees i+4 <= len(s).
+func load4[S byteSeq](s S, i int) uint32 {
+	w := s[i : i+4]
+	return uint32(w[0]) | uint32(w[1])<<8 | uint32(w[2])<<16 | uint32(w[3])<<24
+}
+
 // EqualFold tests ascii strings or bytes for equality case-insensitively
 func EqualFold[S byteSeq](b, s S) bool {
 	n := len(b)
 	if n != len(s) {
 		return false
+	}
+	if n < 8 {
+		if n >= 4 {
+			// Token-sized inputs (methods, connection options, codings):
+			// two overlapping 4-byte windows cover 4..7 bytes exactly, and
+			// packed into one word they fold with a single ToUpperWord —
+			// re-comparing the overlap cannot change the outcome.
+			x := uint64(load4(b, 0)) | uint64(load4(b, n-4))<<32
+			y := uint64(load4(s, 0)) | uint64(load4(s, n-4))<<32
+			return x == y || swar.ToUpperWord(x) == swar.ToUpperWord(y)
+		}
+		table := caseconv.ToUpperTable
+		for i := range n {
+			if table[b[i]] != table[s[i]] {
+				return false
+			}
+		}
+		return true
 	}
 
 	// Compare 8 bytes per iteration; case-fold with SWAR only when the raw
@@ -29,21 +54,11 @@ func EqualFold[S byteSeq](b, s S) bool {
 	if i == n {
 		return true
 	}
-	if n >= 8 {
-		// Handle the tail with one overlapping word compare; re-checking
-		// bytes that were already equal cannot change the outcome.
-		x := swar.Load8(b, n-8)
-		y := swar.Load8(s, n-8)
-		return x == y || swar.ToUpperWord(x) == swar.ToUpperWord(y)
-	}
-
-	table := caseconv.ToUpperTable
-	for ; i < n; i++ {
-		if table[b[i]] != table[s[i]] {
-			return false
-		}
-	}
-	return true
+	// Handle the tail with one overlapping word compare; re-checking
+	// bytes that were already equal cannot change the outcome.
+	x := swar.Load8(b, n-8)
+	y := swar.Load8(s, n-8)
+	return x == y || swar.ToUpperWord(x) == swar.ToUpperWord(y)
 }
 
 // TrimLeft removes all leading occurrences of the byte cutset from s.
