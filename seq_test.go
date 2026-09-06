@@ -10,7 +10,7 @@ import (
 // refSplitTrim is the reference for SplitTrimSeq: split, trim, drop empties.
 func refSplitTrim(s string, sep byte) []string {
 	var out []string
-	for _, part := range strings.Split(s, string(sep)) {
+	for part := range strings.SplitSeq(s, string(sep)) {
 		if part = TrimSpace(part); part != "" {
 			out = append(out, part)
 		}

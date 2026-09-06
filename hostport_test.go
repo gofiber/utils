@@ -121,5 +121,6 @@ func Benchmark_SplitHostPort(b *testing.B) {
 			}
 		})
 	}
-	_, _, _ = host, port, ok
+	_ = host + port
+	_ = ok
 }

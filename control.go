@@ -4,7 +4,7 @@ import (
 	"github.com/gofiber/utils/v2/swar"
 )
 
-// noControlExemption is the byte passed to indexControl when no control
+// noControlExemption is the byte passed to scanControl when no control
 // byte is exempt: it is never a control lane, so masking it out is a no-op.
 const noControlExemption = 0x80
 
@@ -16,7 +16,7 @@ const noControlExemption = 0x80
 // UTF-8 sequences is not flagged; this is the byte-level check that header
 // values, request IDs, and log fields need before they are echoed.
 func IndexControl[S byteSeq](s S) int {
-	return indexControl(s, noControlExemption)
+	return scanControl(s, noControlExemption)
 }
 
 // IndexControlExceptTab is IndexControl with HTAB permitted: it returns the
@@ -24,13 +24,13 @@ func IndexControl[S byteSeq](s S) int {
 // -1 if there is none. That is the byte set an RFC 9110 field value may
 // not contain (field-content is VCHAR, SP, HTAB, and obs-text).
 func IndexControlExceptTab[S byteSeq](s S) int {
-	return indexControl(s, '\t')
+	return scanControl(s, '\t')
 }
 
-// indexControl scans for control bytes with exempt masked out of every
+// scanControl scans for control bytes with exempt masked out of every
 // word: two words per branch, then one, then one overlapping word at n-8;
 // inputs shorter than a word are checked byte-wise.
-func indexControl[S byteSeq](s S, exempt byte) int {
+func scanControl[S byteSeq](s S, exempt byte) int {
 	n := len(s)
 	i := 0
 	for ; i+16 <= n; i += 16 {
