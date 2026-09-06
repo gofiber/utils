@@ -571,8 +571,11 @@ are the intended call sites.
 `SplitHostPort` splits `host:port`, `host%zone:port`, `[host]:port`, and
 `[host%zone]:port` with exactly `net.SplitHostPort`'s acceptance rules
 (pinned by fuzzing against it), but reports failure with a `bool` instead
-of constructing a `*net.AddrError`, so rejecting a malformed `Host` or
-`Forwarded` value costs no allocation; it also accepts byte slices.
+of constructing a `*net.AddrError`, and accepts byte slices. Valid input
+costs the same as the stdlib — the scan is the same three `IndexByte`
+calls — so the win is on the rejection path, where a malformed `Host` or
+`Forwarded` value no longer costs an allocation, and on `[]byte` input,
+which no longer needs a string conversion first.
 
 ## List field iteration
 
@@ -583,7 +586,11 @@ elements skipped — how HTTP list fields such as `Accept-Encoding`,
 5.6.1: optional whitespace around the commas, empty elements ignored).
 It replaces the `strings.SplitSeq` + `TrimSpace` + emptiness-check
 triplet, locates each separator with a single `IndexByte`, works on
-strings and byte slices alike, and yields subslices without copying.
+strings and byte slices alike, and yields subslices without copying. The
+range-over-func machinery costs the same handful of allocations as
+`strings.SplitSeq`, so this is an ergonomic helper first and a modest
+(single-digit percent) speedup second; a caller that must avoid the
+iterator allocations entirely can loop over `CutByte` and `TrimSpace`.
 
 ## Duration formatting
 
