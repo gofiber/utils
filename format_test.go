@@ -368,3 +368,73 @@ func Test_UintDigits_IntDigits(t *testing.T) {
 	require.Equal(t, 20, intDigits(math.MinInt64))
 	require.Equal(t, 19, intDigits(math.MaxInt64))
 }
+
+// Test_Format_Sweep pins the lane-group formatting to strconv across every
+// value up to two lane groups' worth of shapes: a dense sweep of the first
+// two million values, every decimal boundary (10^k-1, 10^k, 10^k+1) for
+// every width, the group boundaries the 8-digit kernel splits at, the
+// extremes of every width, and a deterministic pseudo-random spread over
+// all bit lengths.
+func Test_Format_Sweep(t *testing.T) {
+	t.Parallel()
+	check := func(n uint64) {
+		t.Helper()
+		want := strconv.FormatUint(n, 10)
+		require.Equal(t, want, FormatUint(n), "FormatUint(%d)", n)
+		require.Equal(t, want, string(AppendUint([]byte("x"), n))[1:], "AppendUint(%d)", n)
+		if n <= math.MaxUint32 {
+			require.Equal(t, want, FormatUint32(uint32(n)), "FormatUint32(%d)", n)
+		}
+		if n <= math.MaxUint16 {
+			require.Equal(t, want, FormatUint16(uint16(n)), "FormatUint16(%d)", n)
+		}
+		if n <= math.MaxInt64 {
+			i := int64(n)
+			require.Equal(t, strconv.FormatInt(i, 10), FormatInt(i), "FormatInt(%d)", i)
+			require.Equal(t, strconv.FormatInt(-i, 10), FormatInt(-i), "FormatInt(%d)", -i)
+			require.Equal(t, strconv.FormatInt(-i, 10), string(AppendInt([]byte("x"), -i))[1:], "AppendInt(%d)", -i)
+		}
+		if n <= math.MaxInt32 {
+			i := int32(n)
+			require.Equal(t, strconv.FormatInt(int64(i), 10), FormatInt32(i), "FormatInt32(%d)", i)
+			require.Equal(t, strconv.FormatInt(int64(-i), 10), FormatInt32(-i), "FormatInt32(%d)", -i)
+		}
+		if n <= math.MaxInt16 {
+			i := int16(n)
+			require.Equal(t, strconv.FormatInt(int64(i), 10), FormatInt16(i), "FormatInt16(%d)", i)
+			require.Equal(t, strconv.FormatInt(int64(-i), 10), FormatInt16(-i), "FormatInt16(%d)", -i)
+		}
+	}
+
+	for n := range uint64(300_000) {
+		check(n)
+	}
+	for _, p := range pow10 {
+		check(p - 1)
+		check(p)
+		check(p + 1)
+	}
+	for _, n := range []uint64{
+		99999999, 100000000, 100000001, // one lane group
+		9999999999999999, 10000000000000000, 10000000000000001, // two lane groups
+		math.MaxUint16, math.MaxInt16, math.MaxUint32, math.MaxInt32,
+		math.MaxInt64, math.MaxInt64 + 1, math.MaxUint64,
+		1844674407370955161, 1844674407370955162, // largest top groups
+	} {
+		check(n)
+	}
+	require.Equal(t, "-9223372036854775808", FormatInt(math.MinInt64))
+	require.Equal(t, "-9223372036854775808", string(AppendInt(nil, math.MinInt64)))
+	require.Equal(t, "-2147483648", FormatInt32(math.MinInt32))
+	require.Equal(t, "-32768", FormatInt16(math.MinInt16))
+
+	// xorshift spread: a few values at every bit length.
+	x := uint64(0x9E3779B97F4A7C15)
+	for range 20000 {
+		x ^= x << 13
+		x ^= x >> 7
+		x ^= x << 17
+		check(x)
+		check(x >> (x % 64))
+	}
+}

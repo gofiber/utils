@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"encoding/binary"
 	"math/bits"
 )
 
@@ -51,18 +52,92 @@ func formatUint8Slow(n uint8) string {
 	return string([]byte{n/100 + '0', (n/10)%10 + '0', n%10 + '0'})
 }
 
-// formatUintBuf writes the digits of n into buf from the end and returns the start index.
-// buf must be at least 20 bytes.
-func formatUintBuf(buf *[20]byte, n uint64) int {
-	i := 20
-	for n >= 10 {
-		i--
-		buf[i] = byte(n%10) + '0'
-		n /= 10
+// decimalPairs holds the two-digit decimal strings "00".."99" back to back,
+// so decimalPairs[2*n:2*n+2] is the zero-padded rendering of n < 100 — the
+// building block for fixed-width fields such as the HTTP date components.
+const decimalPairs = "00010203040506070809101112131415161718192021222324252627282930313233343536373839404142434445464748495051525354555657585960616263646566676869707172737475767778798081828384858687888990919293949596979899"
+
+// Decimal formatting works eight digits at a time. digits8 turns a value
+// below 1e8 into eight zero-padded digit lanes with a fixed sequence of
+// multiplies, shifts, and masks — a SWAR inverse of parse8Digits — so a
+// 64-bit value costs at most three such conversions plus two divisions,
+// all independent of each other, instead of one dependent divide-and-store
+// per digit. The lanes come out in reading order (most significant digit
+// in lane 0, the lowest address under the little-endian Store8/PutUint64
+// layout), so one 8-byte store writes a whole group; leading zero digits
+// are zero lanes, which lets the callers find the first significant digit
+// with a trailing-zero count instead of a digit-count ladder.
+const (
+	// asciiZeros is '0' in every byte lane; digit lanes are below 16, so
+	// OR-ing it in is the same as adding it.
+	asciiZeros = 0x3030303030303030
+	// digitsBufLen is the size of the right-aligned staging buffer: 20
+	// digits plus a sign fit in 21 bytes, and three 8-byte lane groups need
+	// 24 so every store is a whole word at a constant offset.
+	digitsBufLen = 24
+	// digitsGroup is the value of one 8-digit lane group.
+	digitsGroup = 100000000
+)
+
+// digits8 returns the eight zero-padded decimal digits of n (which must be
+// below 1e8) as raw 0..9 values, one per byte lane, most significant digit
+// in lane 0. Every multiply-by-constant below is a division by 100 or 10
+// carried out on all lanes at once; the shift amounts keep each lane's
+// quotient inside its own lane, and the masks discard the neighbor's low
+// bits that the shift drags across the lane boundary. No step can carry
+// into an adjacent lane: the largest intermediate, 9999*5243, is below 2^26
+// inside a 32-bit lane, and 99*103 is below 2^14 inside a 16-bit lane.
+func digits8(n uint32) uint64 {
+	// Two 4-digit halves in 32-bit lanes, high half in the low lane.
+	hi := n / 10000
+	x := uint64(hi) | uint64(n-hi*10000)<<32
+	// Each 32-bit lane into two 2-digit values: q = lane/100 (5243/2^19 is
+	// exact for lanes below 43699), r = lane%100, r into the upper 16 bits.
+	q := (x * 5243 >> 19) & 0x0000007F0000007F
+	y := q | (x-q*100)<<16
+	// Each 16-bit lane into its digits: q = lane/10 (103/2^10 is exact for
+	// lanes below 100), r = lane%10, r into the upper byte.
+	q = (y * 103 >> 10) & 0x000F000F000F000F
+	return q | (y-q*10)<<8
+}
+
+// uintToBuf writes the decimal digits of n right-aligned into buf and
+// returns the index of the first digit. n must be at least 100: the
+// callers serve smaller values from the smallInts table, and a zero group
+// would leave the trailing-zero count with nothing to find.
+func uintToBuf(buf *[digitsBufLen]byte, n uint64) int {
+	if n < digitsGroup {
+		z := digits8(uint32(n))
+		binary.LittleEndian.PutUint64(buf[16:24], z|asciiZeros)
+		return 16 + bits.TrailingZeros64(z)>>3
 	}
-	i--
-	buf[i] = byte(n) + '0'
-	return i
+	hi := n / digitsGroup
+	binary.LittleEndian.PutUint64(buf[16:24], digits8(uint32(n-hi*digitsGroup))|asciiZeros)
+	if hi < digitsGroup {
+		z := digits8(uint32(hi))
+		binary.LittleEndian.PutUint64(buf[8:16], z|asciiZeros)
+		return 8 + bits.TrailingZeros64(z)>>3
+	}
+	top := uint32(hi / digitsGroup) // at most 1844
+	binary.LittleEndian.PutUint64(buf[8:16], digits8(uint32(hi-uint64(top)*digitsGroup))|asciiZeros)
+	z := digits8(top)
+	binary.LittleEndian.PutUint64(buf[0:8], z|asciiZeros)
+	return bits.TrailingZeros64(z) >> 3
+}
+
+// uint32ToBuf is uintToBuf for 32-bit values: at most ten digits, so two
+// lane groups always suffice. The same n >= 100 precondition applies.
+func uint32ToBuf(buf *[16]byte, n uint32) int {
+	if n < digitsGroup {
+		z := digits8(n)
+		binary.LittleEndian.PutUint64(buf[8:16], z|asciiZeros)
+		return 8 + bits.TrailingZeros64(z)>>3
+	}
+	hi := n / digitsGroup // at most 42
+	binary.LittleEndian.PutUint64(buf[8:16], digits8(n-hi*digitsGroup)|asciiZeros)
+	z := digits8(hi)
+	binary.LittleEndian.PutUint64(buf[0:8], z|asciiZeros)
+	return bits.TrailingZeros64(z) >> 3
 }
 
 // FormatUint formats a uint64 as a decimal string.
@@ -71,28 +146,24 @@ func FormatUint(n uint64) string {
 	if n < 100 {
 		return smallInts[n]
 	}
-	var buf [20]byte
-	i := formatUintBuf(&buf, n)
+	var buf [digitsBufLen]byte
+	i := uintToBuf(&buf, n)
 	return string(buf[i:])
 }
 
 // FormatInt formats an int64 as a decimal string.
 // It is faster than strconv.FormatInt for most inputs.
 func FormatInt(n int64) string {
-	if n >= 0 && n < 100 {
-		return smallInts[n]
+	if n >= 0 {
+		return FormatUint(uint64(n))
 	}
-	if n < 0 && n > -100 {
+	if n > -100 {
 		return smallNegInts[-n]
 	}
-	if n >= 0 {
-		var buf [20]byte
-		i := formatUintBuf(&buf, uint64(n))
-		return string(buf[i:])
-	}
-	var buf [20]byte
-	i := formatUintBuf(&buf, uint64(-n))
-	i--
+	var buf [digitsBufLen]byte
+	// uint64(-n) is the magnitude for every negative value via two's
+	// complement, including math.MinInt64.
+	i := uintToBuf(&buf, uint64(-n)) - 1
 	buf[i] = '-'
 	return string(buf[i:])
 }
@@ -102,85 +173,33 @@ func FormatUint32(n uint32) string {
 	if n < 100 {
 		return smallInts[n]
 	}
-	var buf [10]byte // max 4294967295
-	i := 10
-	for n >= 10 {
-		i--
-		buf[i] = byte(n%10) + '0'
-		n /= 10
-	}
-	i--
-	buf[i] = byte(n) + '0'
+	var buf [16]byte
+	i := uint32ToBuf(&buf, n)
 	return string(buf[i:])
 }
 
 // FormatInt32 formats an int32 as a decimal string.
 func FormatInt32(n int32) string {
-	if n >= 0 && n < 100 {
-		return smallInts[n]
-	}
-	if n < 0 && n > -100 {
-		return smallNegInts[-n]
-	}
 	if n >= 0 {
 		return FormatUint32(uint32(n))
 	}
-	var buf [11]byte // max -2147483648
-	un := uint32(-n)
-	i := 11
-	for un >= 10 {
-		i--
-		buf[i] = byte(un%10) + '0'
-		un /= 10
+	if n > -100 {
+		return smallNegInts[-n]
 	}
-	i--
-	buf[i] = byte(un) + '0'
-	i--
+	var buf [16]byte
+	i := uint32ToBuf(&buf, uint32(-n)) - 1
 	buf[i] = '-'
 	return string(buf[i:])
 }
 
 // FormatUint16 formats a uint16 as a decimal string.
 func FormatUint16(n uint16) string {
-	if n < 100 {
-		return smallInts[n]
-	}
-	var buf [5]byte // max 65535
-	i := 5
-	for n >= 10 {
-		i--
-		buf[i] = byte(n%10) + '0'
-		n /= 10
-	}
-	i--
-	buf[i] = byte(n) + '0'
-	return string(buf[i:])
+	return FormatUint32(uint32(n))
 }
 
 // FormatInt16 formats an int16 as a decimal string.
 func FormatInt16(n int16) string {
-	if n >= 0 && n < 100 {
-		return smallInts[n]
-	}
-	if n < 0 && n > -100 {
-		return smallNegInts[-n]
-	}
-	if n >= 0 {
-		return FormatUint16(uint16(n))
-	}
-	var buf [6]byte // max -32768
-	un := uint16(-n)
-	i := 6
-	for un >= 10 {
-		i--
-		buf[i] = byte(un%10) + '0'
-		un /= 10
-	}
-	i--
-	buf[i] = byte(un) + '0'
-	i--
-	buf[i] = '-'
-	return string(buf[i:])
+	return FormatInt32(int32(n))
 }
 
 // FormatUint8 formats a uint8 as a decimal string.
@@ -229,8 +248,8 @@ func AppendUint(dst []byte, n uint64) []byte {
 	if n < 100 {
 		return append(dst, smallInts[n]...)
 	}
-	var buf [20]byte
-	i := formatUintBuf(&buf, n)
+	var buf [digitsBufLen]byte
+	i := uintToBuf(&buf, n)
 	return append(dst, buf[i:]...)
 }
 
@@ -242,9 +261,8 @@ func AppendInt(dst []byte, n int64) []byte {
 	if n > -100 {
 		return append(dst, smallNegInts[-n]...)
 	}
-	var buf [20]byte
-	i := formatUintBuf(&buf, uint64(-n))
-	i--
+	var buf [digitsBufLen]byte
+	i := uintToBuf(&buf, uint64(-n)) - 1
 	buf[i] = '-'
 	return append(dst, buf[i:]...)
 }
