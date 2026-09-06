@@ -35,11 +35,11 @@ type mimeEntry struct {
 	mimeType string
 }
 
-var mimeTable = buildMIMETable()
+var mimeTable = buildMIMETable(mimeExtensions)
 
-func buildMIMETable() [1 << mimeTableBits]mimeEntry {
+func buildMIMETable(exts map[string]string) [1 << mimeTableBits]mimeEntry {
 	var t [1 << mimeTableBits]mimeEntry
-	for ext, mimeType := range mimeExtensions {
+	for ext, mimeType := range exts {
 		if ext == "" || len(ext) > mimeKeyMaxLen {
 			continue // not packable; served by the mime package fallback
 		}

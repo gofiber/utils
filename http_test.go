@@ -274,6 +274,17 @@ func Test_GetMIME_TableCoverage(t *testing.T) {
 	}
 	require.Positive(t, free)
 
+	// Entries a packed key cannot hold are skipped and left to the fallback.
+	partial := buildMIMETable(map[string]string{"": "a", "toolongext": "b", "ok": "c"})
+	entries := 0
+	for i := range partial {
+		if partial[i].mimeType != "" {
+			entries++
+			require.Equal(t, packExtension("ok"), partial[i].key)
+		}
+	}
+	require.Equal(t, 1, entries)
+
 	// Misses of every length; NUL and non-ASCII bytes are in no mime database, so these are octet-stream everywhere.
 	for _, ext := range []string{"\x00", "ht\x00l", "j\xf3on", "1234567\x00", "toolongext\x01", ".\x00\x00\x00\x00\x00\x00\x00\x00"} {
 		require.Equal(t, MIMEOctetStream, GetMIME(ext), "extension %q", ext)
