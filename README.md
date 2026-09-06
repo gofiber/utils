@@ -124,6 +124,8 @@ Benchmark_AddTrailingSlashString/path-no-slash-12                   82427726    
 Benchmark_AddTrailingSlashString/path-with-slash-12               1000000000   0.4529  ns/op     0  B/op   0  allocs/op
 
 # EqualFold
+// Token-sized inputs (4..7 bytes) take a packed two-window path; its
+// Benchmark_EqualFold_Short rows are in the amd64 block further down.
 Benchmark_EqualFoldBytes/fiber-12                                   67368261    18.48  ns/op     0  B/op   0  allocs/op
 Benchmark_EqualFoldBytes/default-12                                 17774803    65.91  ns/op     0  B/op   0  allocs/op
 Benchmark_EqualFold/fiber-12                                        80501566    14.75  ns/op     0  B/op   0  allocs/op
@@ -345,6 +347,8 @@ Benchmark_ByteSize/1152921504606846976-12                           64569356    
 Benchmark_ByteSize/1267763295104794624-12                           56481996    21.10  ns/op    16  B/op   1  allocs/op
 
 # Format and Append
+// These arm64 rows predate the eight-digit SWAR formatting kernel; the
+// amd64 block further down carries the current numbers for this group.
 Benchmark_FormatUint/small/fiber-12                                607527520    1.966  ns/op     0  B/op   0  allocs/op
 Benchmark_FormatUint/small/strconv-12                              607521366    1.973  ns/op     0  B/op   0  allocs/op
 Benchmark_FormatUint/medium/fiber-12                                64427509    19.04  ns/op    16  B/op   1  allocs/op
@@ -389,6 +393,8 @@ Benchmark_TokenGenerators/UUIDv4-12                                  4019139    
 Benchmark_TokenGenerators/SecureToken-12                             4360036    276.9  ns/op    48  B/op   1  allocs/op
 
 # HTTP
+// The GetMIME rows predate the packed-key hash table; see the amd64
+// block further down for the current numbers.
 Benchmark_GetMIME/fiber-12                                          22321272    53.90  ns/op     0  B/op   0  allocs/op
 Benchmark_GetMIME/default-12                                        17492530    68.46  ns/op     0  B/op   0  allocs/op
 Benchmark_ParseVendorSpecificContentType/vendorContentType-12      125467813    9.619  ns/op     0  B/op   0  allocs/op
@@ -474,15 +480,20 @@ and join the catalog above on its next regeneration.
 `AppendHTTPDate` and `FormatHTTPDate` write a time in the RFC 9110
 preferred HTTP date format (`Mon, 02 Jan 2006 15:04:05 GMT`,
 `net/http.TimeFormat`), byte-identical to `time.Format` with that layout
-but without walking a layout string: the fixed-width template is copied
-once and only the fields are overwritten. `ParseHTTPDate` is the reverse:
-canonical preferred-format input takes a strict scalar fast path, and
-everything else — the obsolete RFC 850 and asctime forms, unusual casing,
-non-GMT zone names, padding — falls back to `time.Parse` with
-`net/http.ParseTime` semantics, including its errors. `Date`,
-`Last-Modified`, and `If-Modified-Since` handling sit on every
-request/response, which makes these the highest-leverage helpers in this
-group for Fiber.
+but without walking a layout string: the calendar fields come from one
+civil-date conversion of `t.Unix()` (Hinnant's era arithmetic, instead of
+the three `abs()` walks behind `Date`, `Clock`, and `Weekday`), and are
+written into the fixed-width template with two-digit table lookups.
+`ParseHTTPDate` is the reverse: canonical preferred-format input takes a
+strict scalar fast path whose validated fields feed `time.Unix` directly
+— the same `Time` value `time.Date` builds, minus its normalization pass —
+and everything else — the obsolete RFC 850 and asctime forms, unusual
+casing, non-GMT zone names, padding — falls back to `time.Parse` with
+`net/http.ParseTime` semantics, including its errors. Both directions are
+pinned to the `time` package by a day-by-day sweep over the years
+0..9999. `Date`, `Last-Modified`, and `If-Modified-Since` handling sit on
+every request/response, which makes these the highest-leverage helpers in
+this group for Fiber.
 
 ## URL escaping
 
@@ -491,13 +502,17 @@ group for Fiber.
 (and, for the unescape pair, identical `url.EscapeError` values) to their
 `net/url` counterparts, as append-style, allocation-free single passes.
 The escape tables are pinned to `net/url.shouldEscape` by exhaustive
-per-byte tests. Unescaping jumps between escape sites with the vectorized
-scans (`IndexAny2` when `+` needs rewriting, `bytes.IndexByte` otherwise)
-and copies clean spans wholesale, so route parameters and query values
-without escapes — the common case — cost one scan and one copy. Decoding
-never grows the input, so `dst` may be `s[:0]` on a common backing array
-to unescape in place; escaping can grow the input, so there `dst` must
-not alias `s`.
+per-byte tests. Escaping locates the bytes it must rewrite a word at a
+time: a SWAR mask clears whole words of RFC 3986 unreserved bytes
+(pinned to the table for every byte value in every lane), and only the
+byte a word stops on is checked against the dialect's table, which is
+where the path dialect's extra safe bytes are admitted. Unescaping jumps
+between escape sites with the vectorized scans (`IndexAny2` when `+`
+needs rewriting, `bytes.IndexByte` otherwise). Both copy clean spans
+wholesale, so route parameters and query values without escapes — the
+common case — cost one scan and one copy. Decoding never grows the
+input, so `dst` may be `s[:0]` on a common backing array to unescape in
+place; escaping can grow the input, so there `dst` must not alias `s`.
 
 ## JSON string escaping
 
@@ -529,6 +544,75 @@ as-is with zero allocations for strings and byte slices alike. Keys that
 do need rewriting cost one allocation; note that for the ~40 header names
 in the stdlib's interning table the stdlib returns a cached string
 without allocating, so this helper's edge there is time, not allocations.
+
+## Control-byte scanning
+
+`IndexControl` returns the index of the first ASCII control byte — a byte
+below 0x20 or DEL (0x7F), the RFC 5234 CTL set — and `IndexControlExceptTab`
+is the same scan with HTAB permitted, which is exactly the byte set an
+RFC 9110 field value may not contain. Both are SWAR first-match scans
+(two words per branch, one overlapping word for the tail) over strings or
+byte slices, and they never match bytes >= 0x80, so unlike
+`strings.IndexFunc(s, unicode.IsControl)` they neither decode UTF-8 nor
+flag the C1 range hidden inside it. Fiber spells this check by hand in
+half a dozen places — header values before they are echoed, request IDs,
+`Location` values, log fields, Basic auth credentials — and each copy is
+one of these two calls.
+
+## Byte-separator cuts
+
+`CutByte` and `LastCutByte` are `strings.Cut`/`bytes.Cut` for a single
+byte separator, around its first or last occurrence, generic over strings
+and byte slices. They return the two parts and a found flag exactly like
+the stdlib pair (including the `""`/`nil` after-part of a miss), cost one
+`IndexByte`/`LastIndexByte`, and spare `[]byte` callers the `[]byte{sep}`
+needle and the length dispatch inside `bytes.Index`. Header parameter
+splits (`;`), `key=value` pairs, and host/port and name/extension splits
+are the intended call sites.
+
+## Host and port splitting
+
+`SplitHostPort` splits `host:port`, `host%zone:port`, `[host]:port`, and
+`[host%zone]:port` with exactly `net.SplitHostPort`'s acceptance rules
+(pinned by fuzzing against it), but reports failure with a `bool` instead
+of constructing a `*net.AddrError`, so rejecting a malformed `Host` or
+`Forwarded` value costs no allocation; it also accepts byte slices.
+
+## List field iteration
+
+`SplitTrimSeq` returns an iterator over the elements of a list separated
+by one byte, with ASCII whitespace trimmed from each element and empty
+elements skipped — how HTTP list fields such as `Accept-Encoding`,
+`Connection`, `Vary`, and `Cache-Control` are read (RFC 9110 Section
+5.6.1: optional whitespace around the commas, empty elements ignored).
+It replaces the `strings.SplitSeq` + `TrimSpace` + emptiness-check
+triplet, locates each separator with a single `IndexByte`, works on
+strings and byte slices alike, and yields subslices without copying.
+
+## Duration formatting
+
+`AppendDuration` renders a `time.Duration` exactly as `d.String()` does —
+"72h3m0.5s", "1.5ms", "0s" — into the caller's buffer, with the two-digit
+table for the field digits. `d.String()` allocates its result and
+`fmt.Fprintf("%v", d)`, which Fiber's logger uses for the latency column,
+costs several times more on top; an append-style form makes per-request
+duration rendering (access logs, `Server-Timing`) allocation-free.
+
+## Decimal formatting
+
+`FormatUint`/`FormatInt` (and their 32- and 16-bit variants) and
+`AppendUint`/`AppendInt` render integers eight digits at a time: a value
+below 1e8 becomes eight zero-padded digit lanes through a fixed sequence
+of multiplies, shifts, and masks (the SWAR inverse of the 8-digit parse
+step in `ParseInt`), so a 64-bit value costs at most three such
+conversions and two divisions, all independent of each other, instead of
+one dependent divide-and-store per digit; the first significant digit is
+found with a trailing-zero count. Values below 100 come from a
+precomputed table, and the output is pinned to `strconv` by a dense sweep
+plus every decimal and lane-group boundary. `GetMIME` in the same spirit
+looks up extensions through a hash table keyed by the extension packed
+into one lower-cased word, so a hit is a multiply, a shift, and one slot
+comparison, with no allocation even for upper-case input.
 
 These helpers were added on an amd64 machine, so like the `simd` numbers
 their benchmarks are recorded separately from the arm64 catalog above and
