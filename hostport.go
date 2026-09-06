@@ -8,7 +8,8 @@ import (
 
 // SplitHostPort splits "host:port", "[host]:port", and their %zone forms
 // with net.SplitHostPort's exact rules, reporting failure as ok == false
-// instead of a *net.AddrError; it accepts byte slices as well as strings.
+// instead of a *net.AddrError; it accepts byte slices as well as strings,
+// and the parts alias hostport.
 func SplitHostPort[S byteSeq](hostport S) (host, port S, ok bool) { //nolint:nonamedreturns // the two same-typed parts are only readable named
 	b := unsafeconv.Bytes(hostport)
 	// The port starts after the last colon.

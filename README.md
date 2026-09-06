@@ -539,8 +539,8 @@ without allocating, so this helper's edge there is time, not allocations.
 
 `IndexControl` returns the index of the first ASCII control byte — a byte
 below 0x20 or DEL (0x7F), the RFC 5234 CTL set — and `IndexControlExceptTab`
-is the same scan with HTAB permitted, which is exactly the byte set an
-RFC 9110 field value may not contain. Both are SWAR first-match scans
+is the same scan with HTAB permitted, which is the byte set an RFC 9110
+field value may not contain. Both are SWAR first-match scans
 (two words per branch, one overlapping word for the tail) over strings or
 byte slices, and they never match bytes >= 0x80, so unlike
 `strings.IndexFunc(s, unicode.IsControl)` they neither decode UTF-8 nor
