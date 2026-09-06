@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/gofiber/utils/v2/internal/unsafeconv"
+	"github.com/gofiber/utils/v2/swar"
 )
 
 // escapeMode selects between net/url's query-component and path-segment
@@ -81,14 +82,50 @@ func AppendPathEscape[S byteSeq](dst []byte, s S) []byte {
 	return appendEscape(dst, unsafeconv.Bytes(s), &pathNoEscapeTable, escapePath)
 }
 
-// appendEscape copies runs of unescaped bytes wholesale and expands the rest,
-// in one pass with no intermediate allocation — unlike net/url, which counts
-// in a first pass and then rebuilds the string byte by byte.
+// unreservedLanes flags the lanes of w holding RFC 3986 unreserved bytes
+// — ALPHA / DIGIT / "-" / "." / "_" / "~", the bytes neither escaping
+// dialect touches — exactly per lane; bytes >= 0x80 never match. The
+// letter test folds case first so one range covers both alphabets, "-"
+// and "." are adjacent codes and share a range, and "_" and "~" reuse the
+// wordMask trick from package simd: after the fold "_" is the only byte
+// besides DEL that reads 0x7F, and "~" the only one besides DEL at or
+// above 0x7E, so each is one biased add plus a shifted bit of w that
+// singles out DEL. Every add biases a lane of at most 0x7F by at most
+// 0x53, so no lane can carry into its neighbor.
+func unreservedLanes(w uint64) uint64 {
+	b := w & swar.LowSeven
+	bf := b | 0x20*swar.Ones
+	letters := (bf + (0x80-'a')*swar.Ones) &^ (bf + (0x80-'z'-1)*swar.Ones)
+	digits := (b + (0x80-'0')*swar.Ones) &^ (b + (0x80-'9'-1)*swar.Ones)
+	dashDot := (b + (0x80-'-')*swar.Ones) &^ (b + (0x80-'.'-1)*swar.Ones)
+	underscore := (bf + swar.Ones) &^ (w << 2)      // bit 5 is set for DEL, clear for '_'
+	tilde := (b + (0x80-'~')*swar.Ones) &^ (w << 7) // bit 0 is set for DEL, clear for '~'
+	return (letters | digits | dashDot | underscore | tilde) &^ w & swar.HighBits
+}
+
+// appendEscape copies runs of unescaped bytes wholesale and expands the
+// rest, in one pass with no intermediate allocation — unlike net/url, which
+// counts in a first pass and then rebuilds the string byte by byte. Runs
+// are located a word at a time: unreservedLanes clears whole words of
+// bytes that pass through in both dialects, and the byte a word stops on
+// is confirmed against the dialect's table, which is what admits the path
+// dialect's extra safe bytes before the scan resumes.
 func appendEscape(dst, s []byte, noEscape *[256]bool, mode escapeMode) []byte {
 	i, n := 0, len(s)
 	for i < n {
 		j := i
-		for j < n && noEscape[s[j]] {
+		for j < n {
+			if j+swar.WordLen <= n {
+				m := swar.HighBits &^ unreservedLanes(swar.Load8(s, j))
+				if m == 0 {
+					j += swar.WordLen
+					continue
+				}
+				j += swar.FirstLane(m)
+			}
+			if !noEscape[s[j]] {
+				break
+			}
 			j++
 		}
 		dst = append(dst, s[i:j]...)

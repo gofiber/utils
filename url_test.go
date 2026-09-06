@@ -6,6 +6,8 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+
+	"github.com/gofiber/utils/v2/swar"
 )
 
 func Test_AppendQueryEscape(t *testing.T) {
@@ -175,5 +177,26 @@ func Benchmark_AppendPathUnescape(b *testing.B) {
 				}
 			}
 		})
+	}
+}
+
+// Test_UnreservedLanes pins the SWAR unreserved-byte mask to the query
+// table for every byte value, in every lane, so a lane-crossing carry or a
+// wrong bias would show up as a mismatch.
+func Test_UnreservedLanes(t *testing.T) {
+	t.Parallel()
+	for c := range 256 {
+		want := queryNoEscapeTable[c]
+		for lane := range 8 {
+			// Surround the byte under test with values that would expose
+			// carries in either direction.
+			for _, fill := range []byte{0x00, 0x7F, 0xFF, '~', '_', 'z', '.'} {
+				w := uint64(fill) * swar.Ones
+				w &^= 0xFF << (8 * lane)
+				w |= uint64(c) << (8 * lane)
+				got := unreservedLanes(w)>>(8*lane)&0x80 != 0
+				require.Equal(t, want, got, "byte %#x in lane %d with fill %#x", c, lane, fill)
+			}
+		}
 	}
 }
