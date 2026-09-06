@@ -502,17 +502,13 @@ this group for Fiber.
 (and, for the unescape pair, identical `url.EscapeError` values) to their
 `net/url` counterparts, as append-style, allocation-free single passes.
 The escape tables are pinned to `net/url.shouldEscape` by exhaustive
-per-byte tests. Escaping locates the bytes it must rewrite a word at a
-time: a SWAR mask clears whole words of RFC 3986 unreserved bytes
-(pinned to the table for every byte value in every lane), and only the
-byte a word stops on is checked against the dialect's table, which is
-where the path dialect's extra safe bytes are admitted. Unescaping jumps
-between escape sites with the vectorized scans (`IndexAny2` when `+`
-needs rewriting, `bytes.IndexByte` otherwise). Both copy clean spans
-wholesale, so route parameters and query values without escapes — the
-common case — cost one scan and one copy. Decoding never grows the
-input, so `dst` may be `s[:0]` on a common backing array to unescape in
-place; escaping can grow the input, so there `dst` must not alias `s`.
+per-byte tests. Unescaping jumps between escape sites with the vectorized
+scans (`IndexAny2` when `+` needs rewriting, `bytes.IndexByte` otherwise)
+and copies clean spans wholesale, so route parameters and query values
+without escapes — the common case — cost one scan and one copy. Decoding
+never grows the input, so `dst` may be `s[:0]` on a common backing array
+to unescape in place; escaping can grow the input, so there `dst` must
+not alias `s`.
 
 ## JSON string escaping
 
