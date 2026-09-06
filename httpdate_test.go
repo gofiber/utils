@@ -159,3 +159,41 @@ func Benchmark_ParseHTTPDate(b *testing.B) {
 		}
 	})
 }
+
+// Test_HTTPDate_DaySweep pins the calendar arithmetic to the time package
+// over every day of the years 0..9999: the formatter must match
+// AppendFormat byte for byte, and the parser must return the identical
+// Time value (not merely the same instant) that time.Date builds, for a
+// second of the day that varies with the day so hours, minutes, and
+// seconds are exercised across their ranges as well.
+func Test_HTTPDate_DaySweep(t *testing.T) {
+	t.Parallel()
+	require.Equal(t, int64(httpDateMinUnix), time.Date(0, time.January, 1, 0, 0, 0, 0, time.UTC).Unix())
+	require.Equal(t, int64(httpDateMaxUnix), time.Date(9999, time.December, 31, 23, 59, 59, 0, time.UTC).Unix())
+
+	var buf [httpDateLen]byte
+	var want [httpDateLen]byte
+	for day := int64(0); day <= (httpDateMaxUnix-httpDateMinUnix)/secondsPerDay; day++ {
+		sod := (day * 7919) % secondsPerDay
+		tm := time.Unix(httpDateMinUnix+day*secondsPerDay+sod, 0)
+		got := AppendHTTPDate(buf[:0], tm)
+		exp := tm.UTC().AppendFormat(want[:0], httpDateLayout)
+		if string(got) != string(exp) {
+			t.Fatalf("day %d: got %q, want %q", day, got, exp)
+		}
+		parsed, err := ParseHTTPDate(got)
+		if err != nil {
+			t.Fatalf("day %d: parse %q: %v", day, got, err)
+		}
+		if parsed != tm.UTC() {
+			t.Fatalf("day %d: parsed %q to %v (%#v), want %v (%#v)", day, got, parsed, parsed, tm.UTC(), tm.UTC())
+		}
+	}
+
+	// The instants just outside the four-digit-year range take the
+	// stdlib path and must still match it.
+	for _, sec := range []int64{httpDateMinUnix - 1, httpDateMaxUnix + 1} {
+		tm := time.Unix(sec, 0)
+		require.Equal(t, tm.UTC().Format(httpDateLayout), FormatHTTPDate(tm))
+	}
+}
