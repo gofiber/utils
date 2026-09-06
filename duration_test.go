@@ -3,10 +3,9 @@ package utils
 import (
 	"fmt"
 	"math"
+	"math/rand"
 	"testing"
 	"time"
-
-	"github.com/stretchr/testify/require"
 )
 
 func Test_AppendDuration(t *testing.T) {
@@ -14,8 +13,12 @@ func Test_AppendDuration(t *testing.T) {
 	check := func(d time.Duration) {
 		t.Helper()
 		want := d.String()
-		require.Equal(t, want, string(AppendDuration(nil, d)), "AppendDuration(%d)", int64(d))
-		require.Equal(t, "x"+want, string(AppendDuration([]byte("x"), d)), "AppendDuration(%d) with prefix", int64(d))
+		if got := string(AppendDuration(nil, d)); got != want {
+			t.Fatalf("AppendDuration(%d) = %q, want %q", int64(d), got, want)
+		}
+		if got := string(AppendDuration([]byte("x"), d)); got != "x"+want {
+			t.Fatalf("AppendDuration(%d) with prefix = %q, want %q", int64(d), got, "x"+want)
+		}
 	}
 
 	// Every unit boundary, the values just around it, and the extremes.
@@ -48,11 +51,9 @@ func Test_AppendDuration(t *testing.T) {
 		check(-d)
 	}
 	// A deterministic pseudo-random spread across every magnitude.
-	x := uint64(0x9E3779B97F4A7C15)
+	rng := rand.New(rand.NewSource(1)) //nolint:gosec // deterministic test data
 	for range 200000 {
-		x ^= x << 13
-		x ^= x >> 7
-		x ^= x << 17
+		x := rng.Uint64()
 		check(time.Duration(x >> (x % 64)))
 		check(-time.Duration(x >> (x % 64)))
 	}

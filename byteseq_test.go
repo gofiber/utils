@@ -475,9 +475,9 @@ func Test_EqualFold_Lengths(t *testing.T) {
 				if c == a[i] {
 					continue
 				}
-				mutated := append([]byte{}, flipped...)
+				mutated := bytes.Clone(flipped)
 				mutated[i] = c
-				want := strings.EqualFold(a, string(mutated))
+				want := asciiFoldUpper(a) == asciiFoldUpper(string(mutated))
 				require.Equal(t, want, EqualFold(a, string(mutated)), "len %d pos %d byte %#x", n, i, c)
 				require.Equal(t, want, EqualFold([]byte(a), mutated), "len %d pos %d byte %#x", n, i, c)
 			}

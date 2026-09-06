@@ -28,12 +28,11 @@ const (
 	mimeTableMask       = 1<<mimeTableBits - 1
 	mimeTableMaxEntries = 1 << (mimeTableBits - 1) // half full at most, so probes stay short and always end at a free slot
 	mimeHashMul         = 0x9E3779B97F4A7C15       // Fibonacci hashing multiplier
-	mimeKeyMaxLen       = swar.WordLen
+	mimeKeyMaxLen       = swar.WordLen - 1         // the top lane of a key holds the length
 )
 
 type mimeEntry struct {
 	key      uint64
-	length   uint8
 	mimeType string
 }
 
@@ -46,28 +45,22 @@ func buildMIMETable(exts map[string]string) [1 << mimeTableBits]mimeEntry {
 	var t [1 << mimeTableBits]mimeEntry
 	for ext, mimeType := range exts {
 		if ext == "" || len(ext) > mimeKeyMaxLen {
-			continue // not packable; served by the mime package fallback
+			panic("utils: MIME extension \"" + ext + "\" must be 1.." + FormatInt(mimeKeyMaxLen) + " bytes to fit a packed key")
 		}
 		key := packExtension(ext)
 		h := mimeHash(key)
 		for t[h].mimeType != "" {
 			h = (h + 1) & mimeTableMask
 		}
-		t[h] = mimeEntry{key: key, length: uint8(len(ext)), mimeType: mimeType}
+		t[h] = mimeEntry{key: key, mimeType: mimeType}
 	}
 	return t
 }
 
-// packExtension packs 1..mimeKeyMaxLen bytes into a lower-cased little-endian word.
+// packExtension packs 1..mimeKeyMaxLen bytes lower-cased into a little-endian
+// word with the length in the top lane, so "html\x00" and "html" differ.
 func packExtension(ext string) uint64 {
-	if len(ext) == swar.WordLen {
-		return swar.ToLowerWord(swar.Load8(ext, 0))
-	}
-	var w uint64
-	for i := len(ext) - 1; i >= 0; i-- {
-		w = w<<8 | uint64(ext[i])
-	}
-	return swar.ToLowerWord(w)
+	return foldNeedle(ext) | uint64(len(ext))<<(8*mimeKeyMaxLen)
 }
 
 func mimeHash(key uint64) int {
@@ -87,11 +80,9 @@ func GetMIME(extension string) string {
 		ext = ext[1:]
 	}
 	if len(ext) > 0 && len(ext) <= mimeKeyMaxLen {
-		// The length check keeps NUL bytes in the input apart from the
-		// key's zero padding: "html\x00" must not match "html".
 		key := packExtension(ext)
 		for h := mimeHash(key); mimeTable[h].mimeType != ""; h = (h + 1) & mimeTableMask {
-			if mimeTable[h].key == key && int(mimeTable[h].length) == len(ext) {
+			if mimeTable[h].key == key {
 				return mimeTable[h].mimeType
 			}
 		}

@@ -23,35 +23,33 @@ func durationToBuf(buf *[durationBufLen]byte, d time.Duration) int {
 		u = -u
 	}
 
+	w--
+	buf[w] = 's'
 	if u < uint64(time.Second) {
-		// Sub-second: ns, µs (two UTF-8 bytes), or ms.
-		var prec int
-		w--
-		buf[w] = 's'
+		// Sub-second: ns, µs (two UTF-8 bytes), or ms. The unit splits are
+		// constant divisions, which compile to multiplies.
 		w--
 		switch {
 		case u == 0:
 			buf[w] = '0'
 			return w
 		case u < uint64(time.Microsecond):
-			prec = 0
 			buf[w] = 'n'
 		case u < uint64(time.Millisecond):
-			prec = 3
 			w--
 			buf[w] = 0xC2 // "µ" is 0xC2 0xB5
 			buf[w+1] = 0xB5
+			w = durationFrac(buf, w, u%uint64(time.Microsecond), 3)
+			u /= uint64(time.Microsecond)
 		default:
-			prec = 6
 			buf[w] = 'm'
+			w = durationFrac(buf, w, u%uint64(time.Millisecond), 6)
+			u /= uint64(time.Millisecond)
 		}
-		w, u = durationFrac(buf, w, u, prec)
 		w = durationInt(buf, w, u)
 	} else {
-		w--
-		buf[w] = 's'
-		w, u = durationFrac(buf, w, u, 9)
-		// u is now whole seconds.
+		w = durationFrac(buf, w, u%uint64(time.Second), 9)
+		u /= uint64(time.Second)
 		w = durationInt(buf, w, u%60)
 		u /= 60
 		if u > 0 {
@@ -74,40 +72,47 @@ func durationToBuf(buf *[durationBufLen]byte, d time.Duration) int {
 	return w
 }
 
-// durationFrac writes v/10**prec's fraction ending at buf[w] without trailing
-// zeros and returns the new offset with v/10**prec.
-func durationFrac(buf *[durationBufLen]byte, w int, v uint64, prec int) (int, uint64) {
-	started := false
-	for range prec {
-		digit := v % 10
-		v /= 10
-		started = started || digit != 0
-		if started {
-			w--
-			buf[w] = byte(digit) + '0'
-		}
+// durationFrac writes the prec-digit fraction frac ending at buf[w] without
+// its trailing zeros (nothing at all when it is zero, the common case) and
+// returns the new offset.
+func durationFrac(buf *[durationBufLen]byte, w int, frac uint64, prec int) int {
+	if frac == 0 {
+		return w
 	}
-	if started {
+	for frac%1000 == 0 {
+		frac /= 1000
+		prec -= 3
+	}
+	for frac%10 == 0 {
+		frac /= 10
+		prec--
+	}
+	for ; prec >= 2; prec -= 2 {
+		q := frac / 100
+		w -= 2
+		putPair(buf[:], w, frac-q*100)
+		frac = q
+	}
+	if prec == 1 {
 		w--
-		buf[w] = '.'
+		buf[w] = byte(frac) + '0'
 	}
-	return w, v
+	w--
+	buf[w] = '.'
+	return w
 }
 
 // durationInt writes the digits of v ending at buf[w] and returns the new offset.
 func durationInt(buf *[durationBufLen]byte, w int, v uint64) int {
 	for v >= 100 {
 		q := v / 100
-		r := v - q*100
 		w -= 2
-		buf[w] = decimalPairs[2*r]
-		buf[w+1] = decimalPairs[2*r+1]
+		putPair(buf[:], w, v-q*100)
 		v = q
 	}
 	if v >= 10 {
 		w -= 2
-		buf[w] = decimalPairs[2*v]
-		buf[w+1] = decimalPairs[2*v+1]
+		putPair(buf[:], w, v)
 		return w
 	}
 	w--

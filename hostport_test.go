@@ -40,28 +40,34 @@ func hostPortSamples() []string {
 	}
 }
 
+// checkSplitHostPort compares both input types with net.SplitHostPort.
+func checkSplitHostPort(tb testing.TB, in string) {
+	tb.Helper()
+	wantHost, wantPort, err := net.SplitHostPort(in)
+	host, port, ok := SplitHostPort(in)
+	require.Equal(tb, err == nil, ok, "input %q: %v", in, err)
+	if !ok {
+		require.Empty(tb, host, "input %q", in)
+		require.Empty(tb, port, "input %q", in)
+	} else {
+		require.Equal(tb, wantHost, host, "input %q", in)
+		require.Equal(tb, wantPort, port, "input %q", in)
+	}
+
+	bh, bp, bok := SplitHostPort([]byte(in))
+	require.Equal(tb, ok, bok, "input %q bytes", in)
+	require.Equal(tb, host, string(bh), "input %q bytes", in)
+	require.Equal(tb, port, string(bp), "input %q bytes", in)
+	if !bok {
+		require.Nil(tb, bh, "input %q bytes", in)
+		require.Nil(tb, bp, "input %q bytes", in)
+	}
+}
+
 func Test_SplitHostPort(t *testing.T) {
 	t.Parallel()
 	for _, in := range hostPortSamples() {
-		wantHost, wantPort, err := net.SplitHostPort(in)
-		host, port, ok := SplitHostPort(in)
-		require.Equal(t, err == nil, ok, "input %q: %v", in, err)
-		if !ok {
-			require.Empty(t, host, "input %q", in)
-			require.Empty(t, port, "input %q", in)
-		} else {
-			require.Equal(t, wantHost, host, "input %q", in)
-			require.Equal(t, wantPort, port, "input %q", in)
-		}
-
-		bh, bp, bok := SplitHostPort([]byte(in))
-		require.Equal(t, ok, bok, "input %q bytes", in)
-		require.Equal(t, host, string(bh), "input %q bytes", in)
-		require.Equal(t, port, string(bp), "input %q bytes", in)
-		if !bok {
-			require.Nil(t, bh)
-			require.Nil(t, bp)
-		}
+		checkSplitHostPort(t, in)
 	}
 
 	// The parts alias the input.
@@ -77,20 +83,7 @@ func FuzzSplitHostPort(f *testing.F) {
 		f.Add(s)
 	}
 	f.Fuzz(func(t *testing.T, s string) {
-		wantHost, wantPort, err := net.SplitHostPort(s)
-		host, port, ok := SplitHostPort(s)
-		require.Equal(t, err == nil, ok)
-		if ok {
-			require.Equal(t, wantHost, host)
-			require.Equal(t, wantPort, port)
-		} else {
-			require.Empty(t, host)
-			require.Empty(t, port)
-		}
-		bh, bp, bok := SplitHostPort([]byte(s))
-		require.Equal(t, ok, bok)
-		require.Equal(t, host, string(bh))
-		require.Equal(t, port, string(bp))
+		checkSplitHostPort(t, s)
 	})
 }
 

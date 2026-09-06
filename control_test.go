@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"slices"
 	"strings"
 	"testing"
 	"unicode"
@@ -19,25 +20,26 @@ func refIndexControl(s string, exempt byte) int {
 	return -1
 }
 
+// checkIndexControl compares both scanners on both input types with the reference.
+func checkIndexControl(tb testing.TB, s string) {
+	tb.Helper()
+	if want := refIndexControl(s, noControlExemption); IndexControl(s) != want || IndexControl([]byte(s)) != want {
+		tb.Fatalf("IndexControl(%q) = %d/%d, want %d", s, IndexControl(s), IndexControl([]byte(s)), want)
+	}
+	if want := refIndexControl(s, '\t'); IndexControlExceptTab(s) != want || IndexControlExceptTab([]byte(s)) != want {
+		tb.Fatalf("IndexControlExceptTab(%q) = %d/%d, want %d", s, IndexControlExceptTab(s), IndexControlExceptTab([]byte(s)), want)
+	}
+}
+
 func Test_IndexControl(t *testing.T) {
 	t.Parallel()
-	check := func(s string) {
-		t.Helper()
-		require.Equal(t, refIndexControl(s, noControlExemption), IndexControl(s), "IndexControl(%q)", s)
-		require.Equal(t, refIndexControl(s, noControlExemption), IndexControl([]byte(s)), "IndexControl(%q) bytes", s)
-		require.Equal(t, refIndexControl(s, '\t'), IndexControlExceptTab(s), "IndexControlExceptTab(%q)", s)
-		require.Equal(t, refIndexControl(s, '\t'), IndexControlExceptTab([]byte(s)), "IndexControlExceptTab(%q) bytes", s)
-	}
-
 	// Every byte value at every position of clean prefixes up to 40 bytes, so each scan shape sees each byte.
 	clean := strings.Repeat("abcdefghijklmnopqrstuvwxyz0123456789", 2)
 	for n := 0; n <= 40; n++ {
-		check(clean[:n])
+		checkIndexControl(t, clean[:n])
 		for c := range 256 {
-			buf := []byte(clean[:n])
 			for pos := 0; pos <= n; pos++ {
-				b := append(append(append([]byte{}, buf[:pos]...), byte(c)), buf[pos:]...)
-				check(string(b))
+				checkIndexControl(t, string(slices.Insert([]byte(clean[:n]), pos, byte(c))))
 			}
 		}
 	}
@@ -64,10 +66,7 @@ func FuzzIndexControl(f *testing.F) {
 	f.Add("utf8 caf\xc3\xa9 and \xc2\x85")
 	f.Add(strings.Repeat("x", 31) + "\x01")
 	f.Fuzz(func(t *testing.T, s string) {
-		require.Equal(t, refIndexControl(s, noControlExemption), IndexControl(s))
-		require.Equal(t, refIndexControl(s, noControlExemption), IndexControl([]byte(s)))
-		require.Equal(t, refIndexControl(s, '\t'), IndexControlExceptTab(s))
-		require.Equal(t, refIndexControl(s, '\t'), IndexControlExceptTab([]byte(s)))
+		checkIndexControl(t, s)
 	})
 }
 

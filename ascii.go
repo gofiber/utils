@@ -6,10 +6,11 @@ import (
 	"github.com/gofiber/utils/v2/swar"
 )
 
-// quoteLanes and backslashLanes broadcast '"' and '\\' to every lane.
+// quoteLanes, backslashLanes, and tabLanes broadcast '"', '\\', and HTAB to every lane.
 const (
 	quoteLanes     = uint64('"') * swar.Ones
 	backslashLanes = uint64('\\') * swar.Ones
+	tabLanes       = uint64('\t') * swar.Ones
 )
 
 // The dispatch prologues below gate on simd.MinLen — the measured length
@@ -123,16 +124,9 @@ func IndexNonQuotable[S byteSeq](s S) int {
 }
 
 // nonQuotableMask marks the lanes of w holding bytes that need RFC 9110
-// quoted-string escaping. Like swar.ZeroLanes, the result is exact in and below
-// the first marked lane, which is all the first-match scan above consumes.
+// quoted-string escaping: controls other than HTAB (quotable qdtext), DEL,
+// '"', and '\\'. Like swar.ZeroLanes, the result is exact in and below the
+// first marked lane, which is all the first-match scan above consumes.
 func nonQuotableMask(w uint64) uint64 {
-	// Controls (< 0x20) and DEL (0x7F) share one biased range test:
-	// t := ((c & 0x7F) + 1) & 0x7F maps DEL to 0 and controls to 0x01..0x20,
-	// so t <= 0x20 captures exactly both; lanes with the high bit set
-	// (obs-text, always quotable) are excluded by the &^ w term. HTAB is
-	// quotable qdtext, so its lanes are cleared with an exact match mask —
-	// an approximate one could wrongly clear a control lane above a tab.
-	t := ((w & swar.LowSeven) + swar.Ones) & swar.LowSeven
-	ctl := ^(t + (0x80-0x21)*swar.Ones) &^ w & swar.HighBits &^ swar.MatchByteMask(w, '\t')
-	return ctl | swar.ZeroLanes(w^quoteLanes) | swar.ZeroLanes(w^backslashLanes)
+	return controlLanes(w)&otherLanes(w, tabLanes) | swar.ZeroLanes(w^quoteLanes) | swar.ZeroLanes(w^backslashLanes)
 }

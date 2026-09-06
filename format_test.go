@@ -2,6 +2,7 @@ package utils
 
 import (
 	"math"
+	"math/rand"
 	"strconv"
 	"testing"
 
@@ -372,32 +373,40 @@ func Test_UintDigits_IntDigits(t *testing.T) {
 // Test_Format_Sweep pins the formatters to strconv over a dense sweep, every decimal and group boundary, and a random spread.
 func Test_Format_Sweep(t *testing.T) {
 	t.Parallel()
+	// The sweep runs hundreds of thousands of values, so it compares directly instead of through require.
+	eq := func(name, got, want string) {
+		t.Helper()
+		if got != want {
+			t.Fatalf("%s: got %q, want %q", name, got, want)
+		}
+	}
 	check := func(n uint64) {
 		t.Helper()
 		want := strconv.FormatUint(n, 10)
-		require.Equal(t, want, FormatUint(n), "FormatUint(%d)", n)
-		require.Equal(t, want, string(AppendUint([]byte("x"), n))[1:], "AppendUint(%d)", n)
+		eq("FormatUint", FormatUint(n), want)
+		eq("AppendUint", string(AppendUint([]byte("x"), n))[1:], want)
 		if n <= math.MaxUint32 {
-			require.Equal(t, want, FormatUint32(uint32(n)), "FormatUint32(%d)", n)
+			eq("FormatUint32", FormatUint32(uint32(n)), want)
 		}
 		if n <= math.MaxUint16 {
-			require.Equal(t, want, FormatUint16(uint16(n)), "FormatUint16(%d)", n)
+			eq("FormatUint16", FormatUint16(uint16(n)), want)
 		}
 		if n <= math.MaxInt64 {
 			i := int64(n)
-			require.Equal(t, strconv.FormatInt(i, 10), FormatInt(i), "FormatInt(%d)", i)
-			require.Equal(t, strconv.FormatInt(-i, 10), FormatInt(-i), "FormatInt(%d)", -i)
-			require.Equal(t, strconv.FormatInt(-i, 10), string(AppendInt([]byte("x"), -i))[1:], "AppendInt(%d)", -i)
+			neg := strconv.FormatInt(-i, 10)
+			eq("FormatInt", FormatInt(i), want)
+			eq("FormatInt", FormatInt(-i), neg)
+			eq("AppendInt", string(AppendInt([]byte("x"), -i))[1:], neg)
 		}
 		if n <= math.MaxInt32 {
 			i := int32(n)
-			require.Equal(t, strconv.FormatInt(int64(i), 10), FormatInt32(i), "FormatInt32(%d)", i)
-			require.Equal(t, strconv.FormatInt(int64(-i), 10), FormatInt32(-i), "FormatInt32(%d)", -i)
+			eq("FormatInt32", FormatInt32(i), want)
+			eq("FormatInt32", FormatInt32(-i), strconv.FormatInt(int64(-i), 10))
 		}
 		if n <= math.MaxInt16 {
 			i := int16(n)
-			require.Equal(t, strconv.FormatInt(int64(i), 10), FormatInt16(i), "FormatInt16(%d)", i)
-			require.Equal(t, strconv.FormatInt(int64(-i), 10), FormatInt16(-i), "FormatInt16(%d)", -i)
+			eq("FormatInt16", FormatInt16(i), want)
+			eq("FormatInt16", FormatInt16(-i), strconv.FormatInt(int64(-i), 10))
 		}
 	}
 
@@ -423,12 +432,10 @@ func Test_Format_Sweep(t *testing.T) {
 	require.Equal(t, "-2147483648", FormatInt32(math.MinInt32))
 	require.Equal(t, "-32768", FormatInt16(math.MinInt16))
 
-	// xorshift spread: a few values at every bit length.
-	x := uint64(0x9E3779B97F4A7C15)
+	// A deterministic pseudo-random spread: a few values at every bit length.
+	rng := rand.New(rand.NewSource(1)) //nolint:gosec // deterministic test data
 	for range 20000 {
-		x ^= x << 13
-		x ^= x >> 7
-		x ^= x << 17
+		x := rng.Uint64()
 		check(x)
 		check(x >> (x % 64))
 	}
