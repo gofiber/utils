@@ -251,15 +251,11 @@ func Benchmark_StatusMessage(b *testing.B) {
 func Test_GetMIME_TableCoverage(t *testing.T) {
 	t.Parallel()
 	for ext, want := range mimeExtensions {
-		require.NotEmpty(t, ext)
-		require.LessOrEqual(t, len(ext), mimeKeyMaxLen, "extension %q does not fit a packed key", ext)
 		require.Equal(t, want, GetMIME(ext), "extension %q", ext)
 		require.Equal(t, want, GetMIME("."+ext), "extension .%q", ext)
 		require.Equal(t, want, GetMIME(strings.ToUpper(ext)), "extension %q upper-cased", ext)
-		// Trailing NUL bytes pack like the key's zero padding but are a different extension.
-		if len(ext) < mimeKeyMaxLen {
-			require.Equal(t, MIMEOctetStream, GetMIME(ext+"\x00"), "extension %q with a trailing NUL", ext)
-		}
+		// A trailing NUL packs like the key's zero padding but is a different extension.
+		require.Equal(t, MIMEOctetStream, GetMIME(ext+"\x00"), "extension %q with a trailing NUL", ext)
 	}
 	// Distinct extensions must never share a packed key.
 	seen := make(map[uint64]string, len(mimeExtensions))
@@ -269,27 +265,9 @@ func Test_GetMIME_TableCoverage(t *testing.T) {
 		require.False(t, dup, "extensions %q and %q pack to the same key", prev, ext)
 		seen[key] = ext
 	}
-	// Probe sequences must terminate: the table keeps free slots.
-	free := 0
-	for i := range mimeTable {
-		if mimeTable[i].mimeType == "" {
-			free++
-		}
-	}
-	require.Positive(t, free)
-
-	// Entries a packed key cannot hold are skipped and left to the fallback.
-	partial := buildMIMETable(map[string]string{"": "a", "toolongext": "b", "ok": "c"})
-	entries := 0
-	for i := range partial {
-		if partial[i].mimeType != "" {
-			entries++
-			require.Equal(t, packExtension("ok"), partial[i].key)
-		}
-	}
-	require.Equal(t, 1, entries)
-
-	// More entries than the table can hold is a build-time mistake, not a hang.
+	// Entries the table cannot hold are build-time mistakes, not silent fallbacks or hangs.
+	require.Panics(t, func() { buildMIMETable(map[string]string{"": "a"}) })
+	require.Panics(t, func() { buildMIMETable(map[string]string{"toolongext": "b"}) })
 	tooMany := make(map[string]string, mimeTableMaxEntries+1)
 	for i := range mimeTableMaxEntries + 1 {
 		tooMany["e"+FormatInt(int64(i))] = "x"

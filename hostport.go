@@ -17,25 +17,19 @@ func SplitHostPort[S byteSeq](hostport S) (host, port S, ok bool) { //nolint:non
 	if i < 0 {
 		return host, port, false
 	}
-	j, k := 0, 0
+	j, k, hostEnd := 0, 0, i
 	if hostport[0] == '[' {
 		// Expect the first ']' just before the last ':'.
 		end := bytes.IndexByte(b, ']')
 		if end < 0 || end+1 != i {
 			return host, port, false
 		}
-		host = hostport[1:end]
-		j, k = 1, end+1 // there can't be a '[' resp. ']' before these positions
-	} else {
-		host = hostport[:i]
-		if bytes.IndexByte(b[:i], ':') >= 0 {
-			var zero S
-			return zero, port, false
-		}
+		j, k, hostEnd = 1, end+1, end // there can't be a '[' resp. ']' before these positions
+	} else if bytes.IndexByte(b[:i], ':') >= 0 {
+		return host, port, false
 	}
 	if bytes.IndexByte(b[j:], '[') >= 0 || bytes.IndexByte(b[k:], ']') >= 0 {
-		var zero S
-		return zero, port, false
+		return host, port, false
 	}
-	return host, hostport[i+1:], true
+	return hostport[j:hostEnd], hostport[i+1:], true
 }

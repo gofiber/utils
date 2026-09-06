@@ -85,6 +85,26 @@ func Test_SplitTrimSeq(t *testing.T) {
 	}
 }
 
+// countSplitTrimSeq and countSplitSeq range outside the b.Loop body, which
+// disables inlining for calls made directly inside it.
+func countSplitTrimSeq(s string, sep byte) int {
+	n := 0
+	for range SplitTrimSeq(s, sep) {
+		n++
+	}
+	return n
+}
+
+func countSplitSeq(s, sep string) int {
+	n := 0
+	for part := range strings.SplitSeq(s, sep) {
+		if TrimSpace(part) != "" {
+			n++
+		}
+	}
+	return n
+}
+
 func Benchmark_SplitTrimSeq(b *testing.B) {
 	inputs := []struct {
 		name  string
@@ -98,20 +118,13 @@ func Benchmark_SplitTrimSeq(b *testing.B) {
 		b.Run(input.name+"/fiber", func(b *testing.B) {
 			b.ReportAllocs()
 			for b.Loop() {
-				for range SplitTrimSeq(input.value, ',') {
-					count++
-				}
+				count += countSplitTrimSeq(input.value, ',')
 			}
 		})
 		b.Run(input.name+"/default", func(b *testing.B) {
 			b.ReportAllocs()
 			for b.Loop() {
-				for part := range strings.SplitSeq(input.value, ",") {
-					if TrimSpace(part) == "" {
-						continue
-					}
-					count++
-				}
+				count += countSplitSeq(input.value, ",")
 			}
 		})
 	}

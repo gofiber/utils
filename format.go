@@ -59,7 +59,7 @@ const decimalPairs = "0001020304050607080910111213141516171819202122232425262728
 // eight zero-padded digit lanes (most significant first) with lane-parallel
 // divisions, and leading zeros are zero lanes found by a trailing-zero count.
 const (
-	asciiZeros   = 0x3030303030303030 // '0' in every lane; digits are below 16, so OR equals add
+	digitZeros   = 0x3030303030303030 // '0' in every lane; digit lanes are below 16, so OR equals add
 	digitsBufLen = 24                 // three lane groups; 20 digits plus a sign fit
 	digitsGroup  = 100000000          // value of one lane group
 )
@@ -80,20 +80,20 @@ func digits8(n uint32) uint64 {
 func uintToBuf(buf *[digitsBufLen]byte, n uint64) int {
 	if n < digitsGroup {
 		z := digits8(uint32(n))
-		binary.LittleEndian.PutUint64(buf[16:24], z|asciiZeros)
+		binary.LittleEndian.PutUint64(buf[16:24], z|digitZeros)
 		return 16 + bits.TrailingZeros64(z)>>3
 	}
 	hi := n / digitsGroup
-	binary.LittleEndian.PutUint64(buf[16:24], digits8(uint32(n-hi*digitsGroup))|asciiZeros)
+	binary.LittleEndian.PutUint64(buf[16:24], digits8(uint32(n-hi*digitsGroup))|digitZeros)
 	if hi < digitsGroup {
 		z := digits8(uint32(hi))
-		binary.LittleEndian.PutUint64(buf[8:16], z|asciiZeros)
+		binary.LittleEndian.PutUint64(buf[8:16], z|digitZeros)
 		return 8 + bits.TrailingZeros64(z)>>3
 	}
 	top := uint32(hi / digitsGroup) // at most 1844
-	binary.LittleEndian.PutUint64(buf[8:16], digits8(uint32(hi-uint64(top)*digitsGroup))|asciiZeros)
+	binary.LittleEndian.PutUint64(buf[8:16], digits8(uint32(hi-uint64(top)*digitsGroup))|digitZeros)
 	z := digits8(top)
-	binary.LittleEndian.PutUint64(buf[0:8], z|asciiZeros)
+	binary.LittleEndian.PutUint64(buf[0:8], z|digitZeros)
 	return bits.TrailingZeros64(z) >> 3
 }
 
@@ -101,13 +101,13 @@ func uintToBuf(buf *[digitsBufLen]byte, n uint64) int {
 func uint32ToBuf(buf *[16]byte, n uint32) int {
 	if n < digitsGroup {
 		z := digits8(n)
-		binary.LittleEndian.PutUint64(buf[8:16], z|asciiZeros)
+		binary.LittleEndian.PutUint64(buf[8:16], z|digitZeros)
 		return 8 + bits.TrailingZeros64(z)>>3
 	}
 	hi := n / digitsGroup // at most 42
-	binary.LittleEndian.PutUint64(buf[8:16], digits8(n-hi*digitsGroup)|asciiZeros)
+	binary.LittleEndian.PutUint64(buf[8:16], digits8(n-hi*digitsGroup)|digitZeros)
 	z := digits8(hi)
-	binary.LittleEndian.PutUint64(buf[0:8], z|asciiZeros)
+	binary.LittleEndian.PutUint64(buf[0:8], z|digitZeros)
 	return bits.TrailingZeros64(z) >> 3
 }
 

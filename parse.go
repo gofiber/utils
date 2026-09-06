@@ -181,10 +181,9 @@ func isEightDigits(w uint64) bool {
 // steps. The caller must have validated that every lane is '0'..'9'.
 func parse8Digits(w uint64) uint64 {
 	const (
-		digitZeros = 0x3030303030303030 // '0' in every lane
-		pairMask   = 0x000000FF000000FF
-		mul1       = 100 + (1000000 << 32)
-		mul2       = 1 + (10000 << 32)
+		pairMask = 0x000000FF000000FF
+		mul1     = 100 + (1000000 << 32)
+		mul2     = 1 + (10000 << 32)
 	)
 	w -= digitZeros
 	w = w*10 + w>>8 // adjacent digit pairs -> 2-digit values in even lanes

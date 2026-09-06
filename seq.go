@@ -14,6 +14,7 @@ func SplitTrimSeq[S byteSeq](s S, sep byte) iter.Seq[S] {
 	return func(yield func(S) bool) {
 		rest := s // traversal state stays local, so the sequence can be ranged over again
 		for {
+			// CutByte's body, inline: it is too large to inline into the iterator.
 			i := bytes.IndexByte(unsafeconv.Bytes(rest), sep)
 			elem := rest
 			if i >= 0 {
