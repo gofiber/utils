@@ -12,11 +12,12 @@ import (
 // (RFC 9110 Section 5.6.1); the elements alias s.
 func SplitTrimSeq[S byteSeq](s S, sep byte) iter.Seq[S] {
 	return func(yield func(S) bool) {
+		rest := s // traversal state stays local, so the sequence can be ranged over again
 		for {
-			i := bytes.IndexByte(unsafeconv.Bytes(s), sep)
-			elem := s
+			i := bytes.IndexByte(unsafeconv.Bytes(rest), sep)
+			elem := rest
 			if i >= 0 {
-				elem = s[:i]
+				elem = rest[:i]
 			}
 			if elem = TrimSpace(elem); len(elem) > 0 && !yield(elem) {
 				return
@@ -24,7 +25,7 @@ func SplitTrimSeq[S byteSeq](s S, sep byte) iter.Seq[S] {
 			if i < 0 {
 				return
 			}
-			s = s[i+1:]
+			rest = rest[i+1:]
 		}
 	}
 }

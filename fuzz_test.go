@@ -11,6 +11,8 @@ import (
 	"strconv"
 	"strings"
 	"testing"
+
+	casestrings "github.com/gofiber/utils/v2/strings"
 )
 
 // Fuzz targets comparing the SWAR implementations against the scalar
@@ -268,7 +270,7 @@ func FuzzParseIP(f *testing.F) {
 	})
 }
 
-// refGetMIME is the map-based lookup GetMIME's packed-key table replaced.
+// refGetMIME is the map-based lookup GetMIME's packed-key table replaced; its case fold is ASCII-only, like the original.
 func refGetMIME(extension string) string {
 	if extension == "" {
 		return ""
@@ -279,7 +281,7 @@ func refGetMIME(extension string) string {
 	} else {
 		withDot = "." + extension
 	}
-	if found := mimeExtensions[strings.ToLower(extension)]; found != "" {
+	if found := mimeExtensions[casestrings.ToLower(extension)]; found != "" {
 		return found
 	}
 	if found := mime.TypeByExtension(withDot); found != "" {
@@ -292,6 +294,7 @@ func FuzzGetMIME(f *testing.F) {
 	f.Add("html")
 	f.Add(".JSON")
 	f.Add("html\x00")
+	f.Add("\u212aml") // Kelvin sign: Unicode-lowercases to "kml", ASCII folding leaves it alone
 	f.Add("msgpack")
 	f.Add("unknown")
 	f.Add("")

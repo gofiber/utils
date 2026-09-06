@@ -60,12 +60,22 @@ func Test_SplitTrimSeq(t *testing.T) {
 
 	// Breaking out of the loop stops the iteration after the first element.
 	count := 0
-	for elem := range SplitTrimSeq("a, b, c", ',') {
+	seq := SplitTrimSeq("a, b, c", ',')
+	for elem := range seq {
 		require.Equal(t, "a", elem)
 		count++
 		break
 	}
 	require.Equal(t, 1, count)
+
+	// A retained sequence starts over on every traversal, even after a break.
+	for range 2 {
+		var got []string
+		for elem := range seq {
+			got = append(got, elem)
+		}
+		require.Equal(t, []string{"a", "b", "c"}, got)
+	}
 
 	// Elements alias the input rather than copying it.
 	in := []byte(" gzip , br")
