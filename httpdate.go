@@ -22,42 +22,21 @@ var (
 	httpDaysInMonth = [13]int{0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31}
 )
 
-// The calendar arithmetic below is Howard Hinnant's civil_from_days /
-// days_from_civil: proleptic Gregorian dates are counted in 400-year eras
-// of 146097 days, and each era is decomposed with a handful of divisions
-// by constants. Both directions are pinned to the time package by a
-// day-by-day sweep over the years 0..9999 in the tests. The formatter
-// works from t.Unix() directly, one civil conversion for all the fields,
-// instead of the three t.abs() walks behind t.Date(), t.Clock(), and
-// t.Weekday(); the parser feeds its fields straight into time.Unix, whose
-// result is the same Time value time.Date would build, minus the
-// normalization pass the pre-validated fields never need.
+// Calendar fields are converted with Hinnant's civil_from_days and
+// days_from_civil (400-year eras of 146097 days, origin -0400-03-01 so every
+// intermediate is non-negative); the tests sweep every day of 0..9999.
 const (
-	// httpDateMinUnix and httpDateMaxUnix are the Unix times of the first
-	// and last second with a four-digit year: 0000-01-01T00:00:00Z and
-	// 9999-12-31T23:59:59Z.
-	httpDateMinUnix = -62167219200
-	httpDateMaxUnix = 253402300799
-	// secondsPerDay is 24*60*60.
-	secondsPerDay = 86400
-	// daysPerEra is the length of a 400-year Gregorian cycle in days.
-	daysPerEra = 146097
-	// eraDaysToMarch shifts a day count relative to 0000-01-01 to one
-	// relative to -0400-03-01, the era origin civilFromDays decomposes
-	// from: it moves the origin back one era (so nothing below is
-	// negative) and forward to March, where the leap day lands last.
-	eraDaysToMarch = daysPerEra - 60
-	// daysFromMarchEraToUnix is the number of days from -0400-03-01 to
-	// 1970-01-01, the amount unixFromCivil subtracts to land on the Unix
-	// epoch.
-	daysFromMarchEraToUnix = 719468 + daysPerEra
-	// weekdayOfYearZero is time.Saturday, the weekday of 0000-01-01.
-	weekdayOfYearZero = 6
+	httpDateMinUnix        = -62167219200 // 0000-01-01T00:00:00Z
+	httpDateMaxUnix        = 253402300799 // 9999-12-31T23:59:59Z
+	secondsPerDay          = 86400
+	daysPerEra             = 146097
+	eraDaysToMarch         = daysPerEra - 60     // 0000-01-01 to -0400-03-01
+	daysFromMarchEraToUnix = 719468 + daysPerEra // -0400-03-01 to 1970-01-01
+	weekdayOfYearZero      = 6                   // 0000-01-01 was a Saturday
 )
 
-// civilFromDays converts days since 0000-01-01 (at most 3652424, the last
-// day of year 9999) into a proleptic Gregorian year, month (1..12), and day
-// (1..31).
+// civilFromDays converts days since 0000-01-01 (at most 3652424) into a
+// proleptic Gregorian year, month (1..12), and day (1..31).
 func civilFromDays(days uint64) (year, month, day uint64) { //nolint:nonamedreturns // the three calendar fields are only readable named
 	z := days + eraDaysToMarch
 	era := z / daysPerEra
@@ -77,14 +56,10 @@ func civilFromDays(days uint64) (year, month, day uint64) { //nolint:nonamedretu
 	return year, month, day
 }
 
-// unixFromCivil returns the Unix time of the given UTC calendar fields. The
-// fields must already be a valid date with the year in 0..9999, as
-// parseRFC1123 guarantees.
+// unixFromCivil returns the Unix time of valid UTC calendar fields with the
+// year in 0..9999, as parseRFC1123 guarantees.
 func unixFromCivil(year, month, day, hour, minute, sec int) int64 {
-	// Shift the origin back one era so the year-0 January/February case,
-	// which belongs to the year -1 in March-based counting, stays
-	// non-negative.
-	y := year + 400
+	y := year + 400 // one era back keeps January/February of year 0 non-negative
 	mp := month + 9
 	if month > 2 {
 		mp = month - 3
@@ -99,8 +74,7 @@ func unixFromCivil(year, month, day, hour, minute, sec int) int64 {
 	return int64(days)*secondsPerDay + int64(hour*3600+minute*60+sec)
 }
 
-// putPair writes the two-digit zero-padded decimal form of n (< 100) at
-// b[i] and b[i+1].
+// putPair writes n < 100 as two zero-padded digits at b[i] and b[i+1].
 func putPair(b []byte, i int, n uint64) {
 	_ = b[i+1]
 	b[i] = decimalPairs[2*n]
@@ -112,9 +86,7 @@ func putPair(b []byte, i int, n uint64) {
 // the extended slice. The output is byte-identical to
 // t.UTC().AppendFormat(dst, http.TimeFormat) and always 29 bytes for the
 // years 0..9999 that HTTP dates can represent; times outside that range
-// delegate to time.AppendFormat. The fields are derived from t.Unix() with
-// one calendar conversion and written into the fixed-width template with
-// two-digit table lookups, so no layout string is walked.
+// delegate to time.AppendFormat.
 func AppendHTTPDate(dst []byte, t time.Time) []byte {
 	sec := t.Unix()
 	if sec < httpDateMinUnix || sec > httpDateMaxUnix {
@@ -122,8 +94,7 @@ func AppendHTTPDate(dst []byte, t time.Time) []byte {
 		// unrepresentable rest instead of mis-padding it.
 		return t.UTC().AppendFormat(dst, httpDateLayout)
 	}
-	// Seconds since 0000-01-01, so every split below is unsigned.
-	u := uint64(sec - httpDateMinUnix)
+	u := uint64(sec - httpDateMinUnix) // seconds since 0000-01-01, so every split is unsigned
 	days := u / secondsPerDay
 	sod := u - days*secondsPerDay
 	hour := sod / 3600
@@ -134,9 +105,7 @@ func AppendHTTPDate(dst []byte, t time.Time) []byte {
 
 	var b [httpDateLen]byte
 	copy(b[:], httpDateLayout)
-	// The three-byte names are stored byte-wise: a copy of a
-	// variable-length string is a memmove call, three stores are not.
-	weekday := httpWeekdays[(days+weekdayOfYearZero)%7]
+	weekday := httpWeekdays[(days+weekdayOfYearZero)%7] // byte stores: copy would be a memmove call
 	b[0], b[1], b[2] = weekday[0], weekday[1], weekday[2]
 	putPair(b[:], 5, day)
 	monthName := httpMonths[month-1]

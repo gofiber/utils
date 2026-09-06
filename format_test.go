@@ -369,12 +369,7 @@ func Test_UintDigits_IntDigits(t *testing.T) {
 	require.Equal(t, 19, intDigits(math.MaxInt64))
 }
 
-// Test_Format_Sweep pins the lane-group formatting to strconv across every
-// value up to two lane groups' worth of shapes: a dense sweep of the first
-// two million values, every decimal boundary (10^k-1, 10^k, 10^k+1) for
-// every width, the group boundaries the 8-digit kernel splits at, the
-// extremes of every width, and a deterministic pseudo-random spread over
-// all bit lengths.
+// Test_Format_Sweep pins the formatters to strconv over a dense sweep, every decimal and group boundary, and a random spread.
 func Test_Format_Sweep(t *testing.T) {
 	t.Parallel()
 	check := func(n uint64) {

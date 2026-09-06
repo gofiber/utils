@@ -247,10 +247,7 @@ func Benchmark_StatusMessage(b *testing.B) {
 	})
 }
 
-// Test_GetMIME_TableCoverage pins the packed-key table to mimeExtensions:
-// every entry must be reachable through GetMIME in its lower-case form, in
-// upper case, and with a leading dot, and no table entry may be longer
-// than a packed key can hold.
+// Test_GetMIME_TableCoverage checks every mimeExtensions entry is reachable through the packed-key table.
 func Test_GetMIME_TableCoverage(t *testing.T) {
 	t.Parallel()
 	for ext, want := range mimeExtensions {
@@ -277,11 +274,7 @@ func Test_GetMIME_TableCoverage(t *testing.T) {
 	}
 	require.Positive(t, free)
 
-	// Misses of every length, including packed-key length and beyond, and
-	// bytes that fold onto table keys without being letters, fall through
-	// to the fallback.
-	// Extensions containing NUL or non-ASCII bytes cannot appear in any
-	// mime database either, so they are octet-stream on every platform.
+	// Misses of every length; NUL and non-ASCII bytes are in no mime database, so these are octet-stream everywhere.
 	for _, ext := range []string{"\x00", "ht\x00l", "j\xf3on", "1234567\x00", "toolongext\x01", ".\x00\x00\x00\x00\x00\x00\x00\x00"} {
 		require.Equal(t, MIMEOctetStream, GetMIME(ext), "extension %q", ext)
 	}

@@ -20,24 +20,13 @@ const (
 	contentTypePrefixApplicationWithSlash = "application/"
 )
 
-// The extension table is queried through an open-addressed hash table
-// keyed by the extension packed into one lower-cased word: every entry of
-// mimeExtensions is at most eight bytes, so the key is built by loading the
-// bytes into a uint64 and folding case with swar.ToLowerWord. That makes a
-// lookup a multiply, a shift, and usually one slot comparison, and it never
-// allocates — not even for upper-case input, which the map lookup had to
-// lower-case into a fresh string first. mimeExtensions stays the readable
-// source of truth; the table is derived from it at init.
+// Extensions are looked up in an open-addressed table keyed by the extension
+// packed into one lower-cased word and built from mimeExtensions at init: a
+// hit is a multiply, a shift, and usually one comparison, with no allocation.
 const (
-	// mimeTableBits sizes the table at 2^9 = 512 slots for the ~130
-	// entries, a load factor near a quarter, so probes rarely go past
-	// the first slot.
-	mimeTableBits = 9
+	mimeTableBits = 9 // 512 slots for ~130 entries
 	mimeTableMask = 1<<mimeTableBits - 1
-	// mimeHashMul is the golden-ratio multiplier of Fibonacci hashing;
-	// the top mimeTableBits bits of the product index the table.
-	mimeHashMul = 0x9E3779B97F4A7C15
-	// mimeKeyMaxLen is the longest extension a packed key can hold.
+	mimeHashMul   = 0x9E3779B97F4A7C15 // Fibonacci hashing multiplier
 	mimeKeyMaxLen = swar.WordLen
 )
 
@@ -52,9 +41,7 @@ func buildMIMETable() [1 << mimeTableBits]mimeEntry {
 	var t [1 << mimeTableBits]mimeEntry
 	for ext, mimeType := range mimeExtensions {
 		if ext == "" || len(ext) > mimeKeyMaxLen {
-			// Unreachable for the current table; such an entry would only
-			// be served by the mime package fallback.
-			continue
+			continue // not packable; served by the mime package fallback
 		}
 		key := packExtension(ext)
 		h := mimeHash(key)
@@ -66,9 +53,7 @@ func buildMIMETable() [1 << mimeTableBits]mimeEntry {
 	return t
 }
 
-// packExtension packs ext, which must be 1..mimeKeyMaxLen bytes long, into
-// a little-endian word (ext[0] in lane 0, unused lanes zero) with its ASCII
-// letters lower-cased, so that extensions equal up to case yield equal keys.
+// packExtension packs 1..mimeKeyMaxLen bytes into a lower-cased little-endian word.
 func packExtension(ext string) uint64 {
 	if len(ext) == swar.WordLen {
 		return swar.ToLowerWord(swar.Load8(ext, 0))
@@ -84,10 +69,9 @@ func mimeHash(key uint64) int {
 	return int(key * mimeHashMul >> (64 - mimeTableBits))
 }
 
-// GetMIME returns the content-type of a file extension. The extension is
-// matched case-insensitively, with or without its leading dot, against the
-// built-in table first and then against the mime package; unknown
-// extensions map to MIMEOctetStream. Built-in hits never allocate.
+// GetMIME returns the content-type of a file extension, matched
+// case-insensitively with or without the leading dot; unknown extensions map
+// to MIMEOctetStream.
 func GetMIME(extension string) string {
 	if len(extension) == 0 {
 		return ""

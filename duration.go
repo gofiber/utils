@@ -4,26 +4,17 @@ import (
 	"time"
 )
 
-// durationBufLen holds the longest Duration rendering, the 24-byte
-// "-2562047h47m16.854775808s".
-const durationBufLen = 32
+const durationBufLen = 32 // the longest rendering is "-2562047h47m16.854775808s"
 
-// AppendDuration appends d in time.Duration.String's format to dst and
-// returns the extended slice: "72h3m0.5s", "1.5ms", "0s", ... — the same
-// algorithm as the stdlib (seconds with up to nine fractional digits and
-// trailing zeros dropped; ms, µs, or ns below a second; hours and minutes
-// above), producing byte-identical output, but written into the caller's
-// buffer instead of a fresh string. Access-log latency columns and
-// Server-Timing values render a duration per request, where d.String()
-// costs an allocation and fmt.Fprintf("%v", d) considerably more.
+// AppendDuration appends d formatted exactly like time.Duration.String to dst
+// and returns the extended slice, without the string allocation.
 func AppendDuration(dst []byte, d time.Duration) []byte {
 	var buf [durationBufLen]byte
 	w := durationToBuf(&buf, d)
 	return append(dst, buf[w:]...)
 }
 
-// durationToBuf renders d right-aligned into buf and returns the offset of
-// the first byte, mirroring time.Duration.format.
+// durationToBuf renders d right-aligned into buf and returns the first offset.
 func durationToBuf(buf *[durationBufLen]byte, d time.Duration) int {
 	w := len(buf)
 	u := uint64(d)
@@ -33,8 +24,7 @@ func durationToBuf(buf *[durationBufLen]byte, d time.Duration) int {
 	}
 
 	if u < uint64(time.Second) {
-		// Sub-second durations use the largest unit that keeps the value
-		// at or above 1: ns, µs (two UTF-8 bytes), or ms.
+		// Sub-second: ns, µs (two UTF-8 bytes), or ms.
 		var prec int
 		w--
 		buf[w] = 's'
@@ -84,9 +74,8 @@ func durationToBuf(buf *[durationBufLen]byte, d time.Duration) int {
 	return w
 }
 
-// durationFrac writes the fraction v/10**prec ending at buf[w], omitting
-// trailing zeros and the decimal point when the fraction is zero, and
-// returns the new offset with v/10**prec.
+// durationFrac writes v/10**prec's fraction ending at buf[w] without trailing
+// zeros and returns the new offset with v/10**prec.
 func durationFrac(buf *[durationBufLen]byte, w int, v uint64, prec int) (int, uint64) {
 	started := false
 	for range prec {
@@ -105,10 +94,7 @@ func durationFrac(buf *[durationBufLen]byte, w int, v uint64, prec int) (int, ui
 	return w, v
 }
 
-// durationInt writes the decimal digits of v ending at buf[w] and returns
-// the new offset. The values are small (a two-digit seconds or minutes
-// field, or a sub-second count below 1000, except for the hours field), so
-// the two-digit table covers almost every call in one step.
+// durationInt writes the digits of v ending at buf[w] and returns the new offset.
 func durationInt(buf *[durationBufLen]byte, w int, v uint64) int {
 	for v >= 100 {
 		q := v / 100

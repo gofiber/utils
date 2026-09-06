@@ -418,9 +418,7 @@ func Benchmark_TrimSpaceBytes(b *testing.B) {
 	}
 }
 
-// Benchmark_EqualFold_Short measures the token-sized comparisons that
-// dominate header and method handling: both sides equal up to case, so
-// every byte has to be inspected.
+// Benchmark_EqualFold_Short measures token-sized inputs that are equal up to case, so every byte is inspected.
 func Benchmark_EqualFold_Short(b *testing.B) {
 	inputs := []struct {
 		name string
@@ -453,11 +451,7 @@ func Benchmark_EqualFold_Short(b *testing.B) {
 	}
 }
 
-// Test_EqualFold_Lengths pins every scan shape — byte-wise below 4 bytes,
-// the packed 4..7-byte windows, whole words, and the overlapping tail —
-// by comparing, at every length up to three words, a string against its
-// case-flipped twin and against twins with one byte changed at every
-// position, including bytes outside the ASCII letters that must not fold.
+// Test_EqualFold_Lengths covers every scan shape with a case-flipped twin and a changed byte at every position.
 func Test_EqualFold_Lengths(t *testing.T) {
 	t.Parallel()
 	base := "Content-Type: Multipart"
@@ -489,8 +483,7 @@ func Test_EqualFold_Lengths(t *testing.T) {
 			}
 		}
 	}
-	// '[' (0x5B) and '{' (0x7B) differ only in bit 5, like a letter pair,
-	// and must not be treated as a case pair at any length.
+	// '[' and '{' differ only in bit 5, like a letter pair, and must not fold.
 	for n := 1; n <= 16; n++ {
 		require.False(t, EqualFold(strings.Repeat("[", n), strings.Repeat("{", n)), "len %d", n)
 		require.False(t, EqualFold(strings.Repeat("@", n), strings.Repeat("`", n)), "len %d", n)

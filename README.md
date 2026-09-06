@@ -124,8 +124,6 @@ Benchmark_AddTrailingSlashString/path-no-slash-12                   82427726    
 Benchmark_AddTrailingSlashString/path-with-slash-12               1000000000   0.4529  ns/op     0  B/op   0  allocs/op
 
 # EqualFold
-// Token-sized inputs (4..7 bytes) take a packed two-window path; its
-// Benchmark_EqualFold_Short rows are in the amd64 block further down.
 Benchmark_EqualFoldBytes/fiber-12                                   67368261    18.48  ns/op     0  B/op   0  allocs/op
 Benchmark_EqualFoldBytes/default-12                                 17774803    65.91  ns/op     0  B/op   0  allocs/op
 Benchmark_EqualFold/fiber-12                                        80501566    14.75  ns/op     0  B/op   0  allocs/op
@@ -347,8 +345,6 @@ Benchmark_ByteSize/1152921504606846976-12                           64569356    
 Benchmark_ByteSize/1267763295104794624-12                           56481996    21.10  ns/op    16  B/op   1  allocs/op
 
 # Format and Append
-// These arm64 rows predate the eight-digit SWAR formatting kernel; the
-// amd64 block further down carries the current numbers for this group.
 Benchmark_FormatUint/small/fiber-12                                607527520    1.966  ns/op     0  B/op   0  allocs/op
 Benchmark_FormatUint/small/strconv-12                              607521366    1.973  ns/op     0  B/op   0  allocs/op
 Benchmark_FormatUint/medium/fiber-12                                64427509    19.04  ns/op    16  B/op   1  allocs/op
@@ -393,8 +389,6 @@ Benchmark_TokenGenerators/UUIDv4-12                                  4019139    
 Benchmark_TokenGenerators/SecureToken-12                             4360036    276.9  ns/op    48  B/op   1  allocs/op
 
 # HTTP
-// The GetMIME rows predate the packed-key hash table; see the amd64
-// block further down for the current numbers.
 Benchmark_GetMIME/fiber-12                                          22321272    53.90  ns/op     0  B/op   0  allocs/op
 Benchmark_GetMIME/default-12                                        17492530    68.46  ns/op     0  B/op   0  allocs/op
 Benchmark_ParseVendorSpecificContentType/vendorContentType-12      125467813    9.619  ns/op     0  B/op   0  allocs/op

@@ -52,59 +52,31 @@ func formatUint8Slow(n uint8) string {
 	return string([]byte{n/100 + '0', (n/10)%10 + '0', n%10 + '0'})
 }
 
-// decimalPairs holds the two-digit decimal strings "00".."99" back to back,
-// so decimalPairs[2*n:2*n+2] is the zero-padded rendering of n < 100 — the
-// building block for fixed-width fields such as the HTTP date components.
+// decimalPairs holds "00".."99" back to back: decimalPairs[2*n:2*n+2] is n zero-padded.
 const decimalPairs = "00010203040506070809101112131415161718192021222324252627282930313233343536373839404142434445464748495051525354555657585960616263646566676869707172737475767778798081828384858687888990919293949596979899"
 
-// Decimal formatting works eight digits at a time. digits8 turns a value
-// below 1e8 into eight zero-padded digit lanes with a fixed sequence of
-// multiplies, shifts, and masks — a SWAR inverse of parse8Digits — so a
-// 64-bit value costs at most three such conversions plus two divisions,
-// all independent of each other, instead of one dependent divide-and-store
-// per digit. The lanes come out in reading order (most significant digit
-// in lane 0, the lowest address under the little-endian Store8/PutUint64
-// layout), so one 8-byte store writes a whole group; leading zero digits
-// are zero lanes, which lets the callers find the first significant digit
-// with a trailing-zero count instead of a digit-count ladder.
+// Formatting works on 8-digit groups: digits8 turns a value below 1e8 into
+// eight zero-padded digit lanes (most significant first) with lane-parallel
+// divisions, and leading zeros are zero lanes found by a trailing-zero count.
 const (
-	// asciiZeros is '0' in every byte lane; digit lanes are below 16, so
-	// OR-ing it in is the same as adding it.
-	asciiZeros = 0x3030303030303030
-	// digitsBufLen is the size of the right-aligned staging buffer: 20
-	// digits plus a sign fit in 21 bytes, and three 8-byte lane groups need
-	// 24 so every store is a whole word at a constant offset.
-	digitsBufLen = 24
-	// digitsGroup is the value of one 8-digit lane group.
-	digitsGroup = 100000000
+	asciiZeros   = 0x3030303030303030 // '0' in every lane; digits are below 16, so OR equals add
+	digitsBufLen = 24                 // three lane groups; 20 digits plus a sign fit
+	digitsGroup  = 100000000          // value of one lane group
 )
 
-// digits8 returns the eight zero-padded decimal digits of n (which must be
-// below 1e8) as raw 0..9 values, one per byte lane, most significant digit
-// in lane 0. Every multiply-by-constant below is a division by 100 or 10
-// carried out on all lanes at once; the shift amounts keep each lane's
-// quotient inside its own lane, and the masks discard the neighbor's low
-// bits that the shift drags across the lane boundary. No step can carry
-// into an adjacent lane: the largest intermediate, 9999*5243, is below 2^26
-// inside a 32-bit lane, and 99*103 is below 2^14 inside a 16-bit lane.
+// digits8 returns the eight zero-padded digits of n < 1e8 as 0..9 byte lanes.
+// Each multiply is a per-lane division by 100 or 10; no step carries across lanes.
 func digits8(n uint32) uint64 {
-	// Two 4-digit halves in 32-bit lanes, high half in the low lane.
-	hi := n / 10000
+	hi := n / 10000 // two 4-digit halves in 32-bit lanes, high half in the low lane
 	x := uint64(hi) | uint64(n-hi*10000)<<32
-	// Each 32-bit lane into two 2-digit values: q = lane/100 (5243/2^19 is
-	// exact for lanes below 43699), r = lane%100, r into the upper 16 bits.
-	q := (x * 5243 >> 19) & 0x0000007F0000007F
-	y := q | (x-q*100)<<16
-	// Each 16-bit lane into its digits: q = lane/10 (103/2^10 is exact for
-	// lanes below 100), r = lane%10, r into the upper byte.
-	q = (y * 103 >> 10) & 0x000F000F000F000F
-	return q | (y-q*10)<<8
+	q := (x * 5243 >> 19) & 0x0000007F0000007F // lane/100, exact below 43699
+	y := q | (x-q*100)<<16                     // lane%100 into the upper 16 bits
+	q = (y * 103 >> 10) & 0x000F000F000F000F   // lane/10, exact below 100
+	return q | (y-q*10)<<8                     // lane%10 into the upper byte
 }
 
-// uintToBuf writes the decimal digits of n right-aligned into buf and
-// returns the index of the first digit. n must be at least 100: the
-// callers serve smaller values from the smallInts table, and a zero group
-// would leave the trailing-zero count with nothing to find.
+// uintToBuf writes the digits of n >= 100 right-aligned into buf and returns
+// the index of the first digit.
 func uintToBuf(buf *[digitsBufLen]byte, n uint64) int {
 	if n < digitsGroup {
 		z := digits8(uint32(n))
@@ -125,8 +97,7 @@ func uintToBuf(buf *[digitsBufLen]byte, n uint64) int {
 	return bits.TrailingZeros64(z) >> 3
 }
 
-// uint32ToBuf is uintToBuf for 32-bit values: at most ten digits, so two
-// lane groups always suffice. The same n >= 100 precondition applies.
+// uint32ToBuf is uintToBuf for 32-bit values, which need at most two groups.
 func uint32ToBuf(buf *[16]byte, n uint32) int {
 	if n < digitsGroup {
 		z := digits8(n)
@@ -155,10 +126,8 @@ func FormatUint(n uint64) string {
 // It is faster than strconv.FormatInt for most inputs.
 func FormatInt(n int64) string {
 	if n >= 0 {
-		// The table case stays inline: routing it through FormatUint
-		// costs a call that doubles the cost of the most common inputs.
 		if n < 100 {
-			return smallInts[n]
+			return smallInts[n] // inline: a FormatUint call would double the cost
 		}
 		return FormatUint(uint64(n))
 	}
@@ -166,9 +135,7 @@ func FormatInt(n int64) string {
 		return smallNegInts[-n]
 	}
 	var buf [digitsBufLen]byte
-	// uint64(-n) is the magnitude for every negative value via two's
-	// complement, including math.MinInt64.
-	i := uintToBuf(&buf, uint64(-n)) - 1
+	i := uintToBuf(&buf, uint64(-n)) - 1 // uint64(-n) is the magnitude, math.MinInt64 included
 	buf[i] = '-'
 	return string(buf[i:])
 }

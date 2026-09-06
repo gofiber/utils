@@ -160,12 +160,7 @@ func Benchmark_ParseHTTPDate(b *testing.B) {
 	})
 }
 
-// Test_HTTPDate_DaySweep pins the calendar arithmetic to the time package
-// over every day of the years 0..9999: the formatter must match
-// AppendFormat byte for byte, and the parser must return the identical
-// Time value (not merely the same instant) that time.Date builds, for a
-// second of the day that varies with the day so hours, minutes, and
-// seconds are exercised across their ranges as well.
+// Test_HTTPDate_DaySweep pins the formatter and parser to the time package for every day of the years 0..9999.
 func Test_HTTPDate_DaySweep(t *testing.T) {
 	t.Parallel()
 	require.Equal(t, int64(httpDateMinUnix), time.Date(0, time.January, 1, 0, 0, 0, 0, time.UTC).Unix())
@@ -190,8 +185,7 @@ func Test_HTTPDate_DaySweep(t *testing.T) {
 		}
 	}
 
-	// The instants just outside the four-digit-year range take the
-	// stdlib path and must still match it.
+	// The instants just outside the four-digit-year range take the stdlib path.
 	for _, sec := range []int64{httpDateMinUnix - 1, httpDateMaxUnix + 1} {
 		tm := time.Unix(sec, 0)
 		require.Equal(t, tm.UTC().Format(httpDateLayout), FormatHTTPDate(tm))

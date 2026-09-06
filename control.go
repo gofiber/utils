@@ -4,32 +4,23 @@ import (
 	"github.com/gofiber/utils/v2/swar"
 )
 
-// noControlExemption is the byte passed to scanControl when no control
-// byte is exempt: it is never a control lane, so masking it out is a no-op.
+// noControlExemption is never a control lane, so exempting it is a no-op.
 const noControlExemption = 0x80
 
-// IndexControl returns the index of the first ASCII control byte in s — a
-// byte below 0x20 or equal to 0x7F (DEL), the CTL set of RFC 5234 — or -1
-// if s contains none. HTAB (0x09) is a control byte here; IndexControlExceptTab
-// exempts it for HTTP field values, where HTAB is legal whitespace. Bytes
-// >= 0x80 never match, so unlike unicode.IsControl the C1 range hidden in
-// UTF-8 sequences is not flagged; this is the byte-level check that header
-// values, request IDs, and log fields need before they are echoed.
+// IndexControl returns the index of the first ASCII control byte in s (below
+// 0x20 or DEL, the RFC 5234 CTL set), or -1. HTAB counts as a control byte;
+// bytes >= 0x80 never match, unlike unicode.IsControl's C1 range.
 func IndexControl[S byteSeq](s S) int {
 	return scanControl(s, noControlExemption)
 }
 
-// IndexControlExceptTab is IndexControl with HTAB permitted: it returns the
-// index of the first byte below 0x20 other than 0x09, or equal to 0x7F, or
-// -1 if there is none. That is the byte set an RFC 9110 field value may
-// not contain (field-content is VCHAR, SP, HTAB, and obs-text).
+// IndexControlExceptTab is IndexControl with HTAB permitted: the bytes an
+// RFC 9110 field value may not contain.
 func IndexControlExceptTab[S byteSeq](s S) int {
 	return scanControl(s, '\t')
 }
 
-// scanControl scans for control bytes with exempt masked out of every
-// word: two words per branch, then one, then one overlapping word at n-8;
-// inputs shorter than a word are checked byte-wise.
+// scanControl is the word scan behind both, with exempt masked out per word.
 func scanControl[S byteSeq](s S, exempt byte) int {
 	n := len(s)
 	i := 0
@@ -66,12 +57,8 @@ func scanControl[S byteSeq](s S, exempt byte) int {
 	return -1
 }
 
-// controlLanes flags the lanes of w holding control bytes (below 0x20 or
-// DEL) other than exempt, exactly per lane. Lanes below 0x20 are the ones
-// a bias of 0x60 does not carry into bit 7, DEL is the one 0x7F lane that
-// a bias of 1 does, and the &^ w term drops lanes with their own high bit
-// set. No lane can carry into its neighbor: the biased lanes stay below
-// 0xE0.
+// controlLanes flags the lanes of w below 0x20 or equal to DEL, other than
+// exempt, exactly per lane; the biased lanes stay below 0xE0, so no carries.
 func controlLanes(w uint64, exempt byte) uint64 {
 	b := w & swar.LowSeven
 	ctl := (^(b + (0x80-0x20)*swar.Ones) | (b + swar.Ones)) &^ w & swar.HighBits
