@@ -28,18 +28,12 @@ func jsonStringInputs() []string {
 func Test_AppendJSONString(t *testing.T) {
 	t.Parallel()
 	for _, in := range jsonStringInputs() {
-		want, err := json.Marshal(in)
-		require.NoError(t, err)
-		require.Equal(t, string(want), string(AppendJSONString(nil, in)), "input %q", in)
-		require.Equal(t, string(want), string(AppendJSONString(nil, []byte(in))), "input %q", in)
+		assertJSONStringParity(t, in)
 	}
 
 	// Every single byte value agrees with encoding/json.
 	for i := range 256 {
-		in := string([]byte{byte(i)})
-		want, err := json.Marshal(in)
-		require.NoError(t, err)
-		require.Equal(t, string(want), string(AppendJSONString(nil, in)), "byte %#x", i)
+		assertJSONStringParity(t, string([]byte{byte(i)}))
 	}
 
 	// Appending must preserve existing dst content.

@@ -220,16 +220,10 @@ func FuzzAppendJSONString(f *testing.F) {
 	f.Add("broken \xff\xc3( utf8 \xc3")
 	f.Add("")
 	f.Fuzz(func(t *testing.T, s string) {
-		want, err := json.Marshal(s)
-		if err != nil {
+		if _, err := json.Marshal(s); err != nil {
 			t.Skipf("json.Marshal(%q) failed: %v", s, err)
 		}
-		if got := string(AppendJSONString(nil, s)); got != string(want) {
-			t.Fatalf("AppendJSONString(%q) = %q, want %q", s, got, want)
-		}
-		if got := string(AppendJSONString(nil, []byte(s))); got != string(want) {
-			t.Fatalf("AppendJSONString(bytes %q) = %q, want %q", s, got, want)
-		}
+		assertJSONStringParity(t, s)
 	})
 }
 

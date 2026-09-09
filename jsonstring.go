@@ -40,6 +40,8 @@ func buildJSONSafeTable() [256]bool {
 // 0x20 become \b, \f, \n, \r, \t, or \u00XX; '<', '>', '&' become \u00XX; each
 // invalid UTF-8 byte becomes the six literal characters \ufffd; and the
 // line separators U+2028/U+2029 become the \u2028 and \u2029 escapes.
+// Go 1.27's json/v2 writes that replacement raw, so for invalid UTF-8 the two
+// encodings differ from 1.27 on; both still decode to the same string.
 // All other bytes, including multi-byte UTF-8 sequences, are copied
 // verbatim. dst must not alias s: the output is longer than the input (at
 // minimum by the surrounding quotes), so in-place encoding is impossible
