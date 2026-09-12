@@ -9,38 +9,11 @@ const hexFieldMaxLen = 4
 
 // IsIPv4 reports whether s is a dotted-decimal IPv4 address. It accepts
 // exactly what net.ParseIP accepts for the IPv4 case, without the net.IP slice,
-// so it makes no allocations. ParseIPv4 is the counterpart that also returns
-// the address; the two agree on every input.
+// so it makes no allocations. It is the validate-only spelling of ParseIPv4,
+// which accepts the same strings and also returns the address.
 func IsIPv4(s string) bool {
-	for i := range net.IPv4len {
-		if len(s) == 0 {
-			return false
-		}
-
-		if i > 0 {
-			if s[0] != '.' {
-				return false
-			}
-			s = s[1:]
-		}
-
-		n, ci := 0, 0
-
-		for ci = 0; ci < len(s) && '0' <= s[ci] && s[ci] <= '9'; ci++ {
-			n = n*10 + int(s[ci]-'0')
-			if n > 0xFF {
-				return false
-			}
-		}
-
-		if ci == 0 || (ci > 1 && s[0] == '0') {
-			return false
-		}
-
-		s = s[ci:]
-	}
-
-	return len(s) == 0
+	_, ok := ParseIPv4(s)
+	return ok
 }
 
 // IsIPv6 reports whether s is an IPv6 address. It accepts exactly what
