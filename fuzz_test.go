@@ -227,6 +227,9 @@ func FuzzAppendJSONString(f *testing.F) {
 	})
 }
 
+// FuzzIsIP is the exception to the file comment above: it compares the two IP
+// grammars in this module against net.ParseIP rather than a SWAR kernel against
+// a scalar reference.
 func FuzzIsIP(f *testing.F) {
 	f.Add("127.0.0.1")
 	f.Add("::1")
