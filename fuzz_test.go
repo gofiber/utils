@@ -227,6 +227,23 @@ func FuzzAppendJSONString(f *testing.F) {
 	})
 }
 
+func FuzzIsIP(f *testing.F) {
+	f.Add("127.0.0.1")
+	f.Add("::1")
+	f.Add("00001::2")
+	f.Add("0001:2:3:4:5:6:7:8")
+	f.Add("1:2:3:4:5:6:7:12345")
+	f.Add("fe80::1%eth0")
+	f.Add("::ffff:192.0.2.128")
+	f.Add("::192.168.1.1")
+	f.Add("1::2::3")
+	f.Add(":::")
+	f.Add("")
+	f.Fuzz(func(t *testing.T, s string) {
+		assertIPGrammarParity(t, s)
+	})
+}
+
 func FuzzParseIP(f *testing.F) {
 	f.Add("127.0.0.1")
 	f.Add("01.2.3.4")

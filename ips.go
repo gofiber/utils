@@ -4,14 +4,13 @@ import (
 	"net"
 )
 
-var hexTable = [256]byte{
-	'0': 0, '1': 1, '2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9,
-	'a': 10, 'b': 11, 'c': 12, 'd': 13, 'e': 14, 'f': 15,
-	'A': 10, 'B': 11, 'C': 12, 'D': 13, 'E': 14, 'F': 15,
-}
+// hexFieldMaxLen is the number of hex digits an IPv6 field may hold.
+const hexFieldMaxLen = 4
 
-// IsIPv4 works the same way as net.ParseIP,
-// but without check for IPv6 case and without returning net.IP slice, whereby IsIPv4 makes no allocations.
+// IsIPv4 reports whether s is a dotted-decimal IPv4 address. It accepts
+// exactly what net.ParseIP accepts for the IPv4 case, without the net.IP slice,
+// so it makes no allocations. ParseIPv4 is the counterpart that also returns
+// the address; the two agree on every input.
 func IsIPv4(s string) bool {
 	for i := range net.IPv4len {
 		if len(s) == 0 {
@@ -44,8 +43,14 @@ func IsIPv4(s string) bool {
 	return len(s) == 0
 }
 
-// IsIPv6 works the same way as net.ParseIP,
-// but without check for IPv4 case and without returning net.IP slice, whereby IsIPv6 makes no allocations.
+// IsIPv6 reports whether s is an IPv6 address. It accepts exactly what
+// net.ParseIP accepts for the IPv6 case, without the net.IP slice, so it makes
+// no allocations. That excludes a "%zone" suffix, because net.ParseIP rejects
+// zones.
+//
+// ParseIPv6 follows netip.ParseAddr instead and does accept zones, so the two
+// disagree on zoned input by design. Callers relying on IsIPv6 to reject zones
+// must screen '%' themselves before substituting ParseIPv6.
 func IsIPv6(s string) bool {
 	ellipsis := -1 // position of ellipsis in ip
 
@@ -62,21 +67,21 @@ func IsIPv6(s string) bool {
 	// Loop, parsing hex numbers followed by colon.
 	i := 0
 	for i < net.IPv6len {
-		// Hex number.
-		n, ci := 0, 0
-
-		for ci = 0; ci < len(s); ci++ {
-			if (s[ci] < '0' || s[ci] > '9') && (s[ci] < 'a' || s[ci] > 'f') && (s[ci] < 'A' || s[ci] > 'F') {
+		// Hex field. Bounding the digit count is what rejects "00001":
+		// leading zeros hold the value below 0xFFFF however many of them
+		// there are, so a value-only bound lets an over-long field through.
+		// Four digits cannot exceed 0xFFFF, so no value check is needed.
+		ci := 0
+		for ; ci < len(s); ci++ {
+			c := s[ci]
+			if (c < '0' || c > '9') && (c < 'a' || c > 'f') && (c < 'A' || c > 'F') {
 				break
 			}
-			n *= 16
-			n += int(hexTable[s[ci]])
-
-			if n > 0xFFFF {
+			if ci == hexFieldMaxLen {
 				return false
 			}
 		}
-		if ci == 0 || n > 0xFFFF {
+		if ci == 0 {
 			return false
 		}
 
