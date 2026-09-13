@@ -13,6 +13,8 @@ import (
 // no leading zeros, nothing before or after — and reports ok=false for
 // everything else, including IPv6 forms. It never allocates, so []byte
 // callers skip both the string conversion and netip's error construction.
+//
+// IsIPv4 is the validate-only counterpart; it accepts the same strings.
 func ParseIPv4[S byteSeq](s S) (netip.Addr, bool) {
 	var b [4]byte
 	n := len(s)
@@ -62,6 +64,10 @@ func ParseIPv4[S byteSeq](s S) (netip.Addr, bool) {
 // including plain IPv4 forms (use ParseIPv4 for those). The parse itself
 // never allocates; only a present zone is materialized as a string because
 // netip.Addr stores zones as strings.
+//
+// IsIPv6 is the validate-only counterpart, but it follows net.ParseIP, which
+// rejects zones. The two therefore disagree on zoned input by design: prefer
+// ParseIPv6 when a zone is acceptable, IsIPv6 when it is not.
 func ParseIPv6[S byteSeq](s S) (netip.Addr, bool) {
 	n := len(s)
 	zone := bytes.IndexByte(unsafeconv.Bytes(s), '%')

@@ -397,10 +397,10 @@ Benchmark_StatusMessage/fiber-12                                  1000000000   0
 Benchmark_StatusMessage/default-12                                 460456902    2.610  ns/op     0  B/op   0  allocs/op
 
 # IP
-Benchmark_IsIPv4/fiber-12                                           80408070    14.58  ns/op     0  B/op   0  allocs/op
-Benchmark_IsIPv4/default-12                                         54025154    21.99  ns/op     0  B/op   0  allocs/op
-Benchmark_IsIPv6/fiber-12                                           28283431    42.67  ns/op     0  B/op   0  allocs/op
-Benchmark_IsIPv6/default-12                                         20747964    58.18  ns/op     0  B/op   0  allocs/op
+Benchmark_IsIPv4/fiber-4                                            56396187    21.72  ns/op     0  B/op   0  allocs/op
+Benchmark_IsIPv4/default-4                                          28357074    40.38  ns/op     0  B/op   0  allocs/op
+Benchmark_IsIPv6/fiber-4                                            19461662    62.01  ns/op     0  B/op   0  allocs/op
+Benchmark_IsIPv6/default-4                                          13315670    89.84  ns/op     0  B/op   0  allocs/op
 
 # Parse
 Benchmark_ParseUint/fiber-12                                       236748204    5.049  ns/op     0  B/op   0  allocs/op

@@ -6,10 +6,81 @@ package utils
 
 import (
 	"net"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/require"
 )
+
+// assertIPGrammarParity pins the three invariants that tie this module's two IP
+// grammars together: IsIPv4 and IsIPv6 accept exactly what net.ParseIP accepts
+// for their family, and each agrees with the netip-based parser beside it once
+// the zone suffix net.ParseIP rejects is accounted for. Test_IsIP_Parity and
+// FuzzIsIP share it, so the two grammars cannot drift apart unnoticed again.
+func assertIPGrammarParity(t *testing.T, s string) {
+	t.Helper()
+
+	hasColon := strings.ContainsRune(s, ':')
+	netOK := net.ParseIP(s) != nil
+
+	is4 := IsIPv4(s)
+	is6 := IsIPv6(s)
+	if want := netOK && !hasColon; is4 != want {
+		t.Fatalf("IsIPv4(%q) = %v, want %v (net.ParseIP)", s, is4, want)
+	}
+	if want := netOK && hasColon; is6 != want {
+		t.Fatalf("IsIPv6(%q) = %v, want %v (net.ParseIP)", s, is6, want)
+	}
+
+	// net.ParseIP is netip.ParseAddr minus zones, so the parsers agree with the
+	// validators on every input that carries no zone.
+	if _, ok := ParseIPv4(s); ok != is4 {
+		t.Fatalf("ParseIPv4(%q) ok = %v but IsIPv4 = %v", s, ok, is4)
+	}
+	addr, ok6 := ParseIPv6(s)
+	if want := ok6 && addr.Zone() == ""; want != is6 {
+		t.Fatalf("ParseIPv6(%q) ok = %v zone = %q but IsIPv6 = %v", s, ok6, addr.Zone(), is6)
+	}
+}
+
+// Test_IsIP_Parity runs the shared IP corpus through both grammars.
+func Test_IsIP_Parity(t *testing.T) {
+	t.Parallel()
+
+	for _, in := range parseIPSamples() {
+		assertIPGrammarParity(t, in)
+	}
+}
+
+// Test_IsIPv6_HexFieldDigitCap covers fields longer than four hex digits whose
+// value still fits in 0xFFFF. A value-only bound accepted these; net.ParseIP,
+// the reference IsIPv6 follows, rejects them.
+func Test_IsIPv6_HexFieldDigitCap(t *testing.T) {
+	t.Parallel()
+
+	for _, in := range []string{
+		"00001::2",
+		"cec::7dcE:0D568",
+		"::00000",
+		"00000::",
+		"1:2:3:4:5:6:7:00008",
+		"00000000000000001::",
+	} {
+		require.False(t, IsIPv6(in), "over-long hex field: %q", in)
+		require.Nil(t, net.ParseIP(in), "net.ParseIP disagrees: %q", in)
+	}
+
+	// Exactly four digits stays valid, leading zeros included.
+	for _, in := range []string{
+		"0001:2:3:4:5:6:7:8",
+		"0000::0000",
+		"::0001",
+		"ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff",
+	} {
+		require.True(t, IsIPv6(in), "four-digit field rejected: %q", in)
+		require.NotNil(t, net.ParseIP(in), "net.ParseIP disagrees: %q", in)
+	}
+}
 
 func Test_IsIPv4(t *testing.T) {
 	t.Parallel()
