@@ -5,14 +5,11 @@ import (
 	"github.com/gofiber/utils/v2/internal/unsafeconv"
 )
 
-// swarMinLen is the smallest input length worth routing through the
-// word-at-a-time (SWAR) helpers; shorter inputs are cheaper byte-by-byte.
-const swarMinLen = caseconv.WordLen
-
+// Sub-word inputs convert here; see the bytes package for the measurement.
 // ToLower converts an ASCII string to lower-case without modifying the input.
 func ToLower(s string) string {
 	n := len(s)
-	if n < swarMinLen {
+	if n < caseconv.WordLen {
 		table := caseconv.ToLowerTable
 		for i := 0; i < n; i++ {
 			c := s[i]
@@ -30,25 +27,20 @@ func ToLower(s string) string {
 		return s
 	}
 
+	// caseconv only reads src, so the zero-copy view is sound.
 	src := unsafeconv.UnsafeBytes(s)
 	i := caseconv.FirstUpperIndex(src)
 	if i < 0 {
 		return s
 	}
-
-	res := make([]byte, n)
-	// Copy the unchanged prefix up to the word containing the first
-	// uppercase byte, then convert the rest word-at-a-time.
-	from := i &^ (caseconv.WordLen - 1)
-	copy(res, src[:from])
-	caseconv.ToLowerCopy(res, src, from)
-	return unsafeconv.UnsafeString(res)
+	// Its result is freshly allocated and never written again.
+	return unsafeconv.UnsafeString(caseconv.ToLowerFrom(src, i))
 }
 
 // ToUpper converts an ASCII string to upper-case without modifying the input.
 func ToUpper(s string) string {
 	n := len(s)
-	if n < swarMinLen {
+	if n < caseconv.WordLen {
 		table := caseconv.ToUpperTable
 		for i := 0; i < n; i++ {
 			c := s[i]
@@ -66,17 +58,14 @@ func ToUpper(s string) string {
 		return s
 	}
 
+	// caseconv only reads src, so the zero-copy view is sound.
 	src := unsafeconv.UnsafeBytes(s)
 	i := caseconv.FirstLowerIndex(src)
 	if i < 0 {
 		return s
 	}
-
-	res := make([]byte, n)
-	from := i &^ (caseconv.WordLen - 1)
-	copy(res, src[:from])
-	caseconv.ToUpperCopy(res, src, from)
-	return unsafeconv.UnsafeString(res)
+	// Its result is freshly allocated and never written again.
+	return unsafeconv.UnsafeString(caseconv.ToUpperFrom(src, i))
 }
 
 // UnsafeToLower converts an ASCII string to lower-case by mutating its backing bytes in-place.
@@ -84,7 +73,7 @@ func ToUpper(s string) string {
 // string is known to reference mutable memory.
 func UnsafeToLower(s string) string {
 	b := unsafeconv.UnsafeBytes(s)
-	if len(b) < swarMinLen {
+	if len(b) < caseconv.WordLen {
 		table := caseconv.ToLowerTable
 		for i := range b {
 			b[i] = table[b[i]]
@@ -100,7 +89,7 @@ func UnsafeToLower(s string) string {
 // string is known to reference mutable memory.
 func UnsafeToUpper(s string) string {
 	b := unsafeconv.UnsafeBytes(s)
-	if len(b) < swarMinLen {
+	if len(b) < caseconv.WordLen {
 		table := caseconv.ToUpperTable
 		for i := range b {
 			b[i] = table[b[i]]
