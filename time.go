@@ -13,6 +13,22 @@ var (
 	updaterDone chan struct{}
 )
 
+// now and newTicker are this package's clock: every production read of the wall
+// clock goes through them, so replacing the pair is enough to drive the updater
+// from a test without waiting on real time. Neither is reachable from outside
+// the package, and Timestamp itself touches neither.
+//
+// newTicker hands back a channel and a stop function instead of a *time.Ticker
+// because a Ticker the runtime did not build cannot stand in for one: its Stop
+// panics.
+var (
+	now       = time.Now
+	newTicker = func(d time.Duration) (<-chan time.Time, func()) {
+		t := time.NewTicker(d)
+		return t.C, t.Stop
+	}
+)
+
 // Timestamp returns the current cached Unix timestamp (seconds).
 // Call StartTimeStampUpdater() once at app startup for best performance.
 func Timestamp() uint32 {
@@ -28,19 +44,25 @@ func StartTimeStampUpdater() {
 		return
 	}
 
-	timestamp.Store(uint32(time.Now().Unix()))
+	timestamp.Store(uint32(now().Unix()))
 	stopUpdater = make(chan struct{})
 	updaterDone = make(chan struct{})
 
+	// The tick source is created here, not in the goroutine, so it exists by
+	// the time this returns and a caller cannot race the goroutine's first
+	// statement.
+	tick, stopTick := newTicker(time.Second)
+
 	go func(stop, done chan struct{}) {
-		ticker := time.NewTicker(time.Second)
-		defer ticker.Stop()
+		// stopTick before close(done), so that once StopTimeStampUpdater's
+		// wait returns the tick source is released rather than about to be.
 		defer close(done)
+		defer stopTick()
 
 		for {
 			select {
-			case <-ticker.C:
-				timestamp.Store(uint32(time.Now().Unix()))
+			case <-tick:
+				timestamp.Store(uint32(now().Unix()))
 			case <-stop:
 				return
 			}
