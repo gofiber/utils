@@ -85,6 +85,25 @@ func checkTimeStamp(tb testing.TB, expectedCurrent, actualCurrent uint32) {
 	}
 }
 
+// Test_NewTicker exercises the production tick source. Every other test here
+// replaces it, so without this one nothing proves that the real one delivers a
+// live channel or that the stop it hands back works. A millisecond period keeps
+// the only real-time wait in this file down to the cost of one tick; the
+// generous timeout is there to fail loudly rather than hang a loaded CI box.
+func Test_NewTicker(t *testing.T) {
+	timerTestMu.Lock()
+	defer timerTestMu.Unlock()
+
+	tick, stop := newTicker(time.Millisecond)
+	defer stop()
+
+	select {
+	case <-tick:
+	case <-time.After(5 * time.Second):
+		t.Fatal("the real tick source never fired")
+	}
+}
+
 func Test_TimeStampUpdater(t *testing.T) {
 	fc, done := withFakeClock(t, testEpoch)
 	defer done()
