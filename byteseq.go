@@ -1,6 +1,8 @@
 package utils
 
 import (
+	"math/bits"
+
 	"github.com/gofiber/utils/v2/internal/caseconv"
 	"github.com/gofiber/utils/v2/swar"
 )
@@ -58,6 +60,63 @@ func EqualFold[S byteSeq](b, s S) bool {
 		}
 	}
 	return true
+}
+
+// HashFold returns a 64-bit hash of s in which ASCII letters are folded to one
+// case: strings that EqualFold reports equal hash equal. It is the hashing
+// half of a case-insensitive lookup table whose other half is EqualFold, for
+// keys such as header or field names, and reads s a word at a time without
+// writing a folded copy of it anywhere. As in EqualFold, only 'A'..'Z' and
+// 'a'..'z' fold; every other byte, including those >= 0x80, hashes as is.
+//
+// It is not a cryptographic hash, and it takes no seed, so it offers no
+// protection against collisions planned in advance: use it to index keys of
+// the program's own, such as the fields of a struct, and not to store keys an
+// attacker picks. Its values may change between releases; do not persist them.
+func HashFold[S byteSeq](s S) uint64 {
+	n := len(s)
+	if n < 8 {
+		// A key shorter than a word, as most are, packs into one: from four
+		// bytes up as two overlapping halves, below that as its first,
+		// middle and last byte, which cover one to three bytes between them.
+		// Keys of different lengths can pack alike, "a" and "aa" say, so the
+		// length goes into the multiplier, where no byte of the key reaches.
+		var w uint64
+		switch {
+		case n >= 4:
+			w = uint64(load4(s, 0)) | uint64(load4(s, n-4))<<32
+		case n > 0:
+			w = uint64(s[0]) | uint64(s[n>>1])<<8 | uint64(s[n-1])<<16
+		}
+		return hashFoldMix(swar.ToLowerWord(w)^hashFoldK0, hashFoldK1^uint64(n)<<56)
+	}
+	// Longer keys go as wyhash does: sixteen bytes per multiply, then the
+	// last sixteen, overlapping what came before when fewer are left, and a
+	// final mix that takes in the length.
+	h := hashFoldK2
+	for i := 0; n-i > 16; i += 16 {
+		h = hashFoldMix(swar.ToLowerWord(swar.Load8(s, i))^hashFoldK1, swar.ToLowerWord(swar.Load8(s, i+8))^h)
+	}
+	hi, lo := bits.Mul64(
+		swar.ToLowerWord(swar.Load8(s, max(n-16, 0)))^hashFoldK1,
+		swar.ToLowerWord(swar.Load8(s, n-8))^h,
+	)
+	return hashFoldMix(lo^hashFoldK0^uint64(n), hi^hashFoldK1)
+}
+
+// The constants of HashFold, wyhash's.
+const (
+	hashFoldK0 uint64 = 0xa0761d6478bd642f
+	hashFoldK1 uint64 = 0xe7037ed1a0b428db
+	hashFoldK2 uint64 = 0x8ebc6af09c88c6e3
+)
+
+// hashFoldMix folds the 128-bit product of a and b into 64 bits, the mixing
+// step of the wyhash family: a single widening multiply spreads every bit of
+// a and b across the result.
+func hashFoldMix(a, b uint64) uint64 {
+	hi, lo := bits.Mul64(a, b)
+	return hi ^ lo
 }
 
 // TrimLeft removes all leading occurrences of the byte cutset from s.

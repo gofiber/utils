@@ -469,6 +469,20 @@ as a plain string because call sites pass constant tokens. Their
 on the [benchmark charts](https://gofiber.github.io/utils/benchmarks/)
 and join the catalog above on its next regeneration.
 
+`HashFold` is the hashing half of a case-insensitive lookup table whose
+other half is `EqualFold`: strings `EqualFold` reports equal hash equal,
+so a table of field or header names can be probed with a key in any case
+without first lower-casing a copy of it. It folds each word with
+`swar.ToLowerWord` as it loads it and mixes with wyhash's widening
+multiply: keys under eight bytes, as most are, pack into one word and
+cost one multiply, with the length in the multiplier so that keys which
+pack alike, such as `a` and `aa`, stay apart; longer keys take one
+multiply per sixteen bytes plus a final one. It takes no seed and is no
+defense against collisions planned in advance, so it suits keys of the
+program's own, such as the fields of a struct, rather than keys an
+attacker picks. Against `maphash.String` of a `strings.ToLower` copy it
+runs 3-13x faster with no allocation (amd64 rows below).
+
 ## HTTP dates
 
 `AppendHTTPDate` and `FormatHTTPDate` write a time in the RFC 9110
@@ -632,7 +646,7 @@ pkg: github.com/gofiber/utils/v2
 cpu: Intel(R) Xeon(R) Processor @ 2.80GHz
 
 ```text
-// go test -benchmem -run=^$ -count=1 . -bench='^Benchmark_(FormatUint|FormatInt|FormatUint32|FormatInt32|FormatUint16|FormatInt16|AppendUint|AppendInt|EqualFold_Short|GetMIME|AppendHTTPDate|ParseHTTPDate|AppendDuration|AppendQueryEscape|AppendQueryUnescape|AppendPathUnescape|AppendJSONString|ParseIPv4|ParseIPv6|CanonicalHeaderKey|IndexControl|CutByte|LastCutByte|SplitHostPort|SplitTrimSeq)$'
+// go test -benchmem -run=^$ -count=1 . -bench='^Benchmark_(FormatUint|FormatInt|FormatUint32|FormatInt32|FormatUint16|FormatInt16|AppendUint|AppendInt|EqualFold_Short|HashFold|GetMIME|AppendHTTPDate|ParseHTTPDate|AppendDuration|AppendQueryEscape|AppendQueryUnescape|AppendPathUnescape|AppendJSONString|ParseIPv4|ParseIPv6|CanonicalHeaderKey|IndexControl|CutByte|LastCutByte|SplitHostPort|SplitTrimSeq)$'
 Benchmark_EqualFold_Short/3B/fiber-4                               229602248    5.312  ns/op     0  B/op   0  allocs/op
 Benchmark_EqualFold_Short/3B/default-4                             204528979    5.852  ns/op     0  B/op   0  allocs/op
 Benchmark_EqualFold_Short/4B/fiber-4                               229813917    5.255  ns/op     0  B/op   0  allocs/op
@@ -647,6 +661,16 @@ Benchmark_EqualFold_Short/10B/fiber-4                              144306822    
 Benchmark_EqualFold_Short/10B/default-4                            120878482    9.925  ns/op     0  B/op   0  allocs/op
 Benchmark_EqualFold_Short/16B/fiber-4                              143038372    8.357  ns/op     0  B/op   0  allocs/op
 Benchmark_EqualFold_Short/16B/default-4                             85405070    14.49  ns/op     0  B/op   0  allocs/op
+Benchmark_HashFold/2B/fiber-4                                      253789669    4.700  ns/op     0  B/op   0  allocs/op
+Benchmark_HashFold/2B/default-4                                     93179052    12.95  ns/op     0  B/op   0  allocs/op
+Benchmark_HashFold/4B/fiber-4                                      278253961    4.552  ns/op     0  B/op   0  allocs/op
+Benchmark_HashFold/4B/default-4                                     24247200    50.52  ns/op     8  B/op   1  allocs/op
+Benchmark_HashFold/12B/fiber-4                                     177106117    6.796  ns/op     0  B/op   0  allocs/op
+Benchmark_HashFold/12B/default-4                                    15917528    79.79  ns/op    16  B/op   1  allocs/op
+Benchmark_HashFold/17B/fiber-4                                     100000000    10.93  ns/op     0  B/op   0  allocs/op
+Benchmark_HashFold/17B/default-4                                    13407313    93.29  ns/op    24  B/op   1  allocs/op
+Benchmark_HashFold/48B/fiber-4                                      80977172    14.63  ns/op     0  B/op   0  allocs/op
+Benchmark_HashFold/48B/default-4                                     6527506    185.1  ns/op    48  B/op   1  allocs/op
 Benchmark_IndexControl/clean-16B/fiber-4                           169144147    7.146  ns/op     0  B/op   0  allocs/op
 Benchmark_IndexControl/clean-16B/fiber-except-tab-4                167529128    7.135  ns/op     0  B/op   0  allocs/op
 Benchmark_IndexControl/clean-16B/default-4                          32870788    36.35  ns/op     0  B/op   0  allocs/op
