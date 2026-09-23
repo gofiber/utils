@@ -450,6 +450,16 @@ Benchmark_CalculateTimestamp/default-12                             36163686    
 Benchmark_CalculateTimestamp/fiber_asserted-12                       4471299    267.8  ns/op    12  B/op   2  allocs/op
 Benchmark_CalculateTimestamp/default_asserted-12                     3991147    298.7  ns/op     8  B/op   2  allocs/op
 
+# URL
+Benchmark_AppendPathSegmentsEscape/1-segment/fiber-12               84056664    13.99  ns/op     0  B/op   0  allocs/op
+Benchmark_AppendPathSegmentsEscape/1-segment/split-loop-12          56022625    21.97  ns/op     0  B/op   0  allocs/op
+Benchmark_AppendPathSegmentsEscape/3-segments/fiber-12              88724314    13.65  ns/op     0  B/op   0  allocs/op
+Benchmark_AppendPathSegmentsEscape/3-segments/split-loop-12         36393044    32.41  ns/op     0  B/op   0  allocs/op
+Benchmark_AppendPathSegmentsEscape/6-segments/fiber-12              87622688    13.82  ns/op     0  B/op   0  allocs/op
+Benchmark_AppendPathSegmentsEscape/6-segments/split-loop-12         23307777    51.23  ns/op     0  B/op   0  allocs/op
+Benchmark_AppendPathSegmentsEscape/escaping/fiber-12                37647206    31.85  ns/op     0  B/op   0  allocs/op
+Benchmark_AppendPathSegmentsEscape/escaping/split-loop-12           21136993    58.06  ns/op     0  B/op   0  allocs/op
+
 # XML
 Benchmark_GolangXMLEncoder-12                                         574852     2040  ns/op  4864  B/op  12  allocs/op
 Benchmark_DefaultXMLEncoder-12                                        593738     2012  ns/op  4864  B/op  12  allocs/op
@@ -507,6 +517,14 @@ without escapes — the common case — cost one scan and one copy. Decoding
 never grows the input, so `dst` may be `s[:0]` on a common backing array
 to unescape in place; escaping can grow the input, so there `dst` must
 not alias `s`.
+
+`AppendPathSegmentsEscape` covers a whole multi-segment path in one pass:
+it escapes every segment as `AppendPathEscape` does and keeps the `/`
+between them. The output equals escaping each segment and joining with
+`/`, pinned per byte and by fuzzing; `net/url`'s whole-path escaping
+differs, as it also leaves `;` and `,` unescaped. The catalog above
+measures it against the per-segment loop a caller writes without it; the
+other URL benchmarks are still in the amd64 block below.
 
 ## JSON string escaping
 

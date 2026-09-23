@@ -40,6 +40,51 @@ func Test_AppendQueryEscape(t *testing.T) {
 	require.Equal(t, "q=a+b", string(got))
 }
 
+// escapeSegments is the reference: escape each segment on its own and rejoin.
+func escapeSegments(s string) string {
+	parts := strings.Split(s, "/")
+	for i, part := range parts {
+		parts[i] = url.PathEscape(part)
+	}
+	return strings.Join(parts, "/")
+}
+
+func Test_AppendPathSegmentsEscape(t *testing.T) {
+	t.Parallel()
+	// Exhaustive single-byte agreement pins the table, '/' included.
+	for i := range 256 {
+		in := string([]byte{byte(i)})
+		require.Equal(t, escapeSegments(in), string(AppendPathSegmentsEscape(nil, in)), "byte %#x", i)
+	}
+
+	inputs := []string{
+		"",
+		"/",
+		"//",
+		"a/b",
+		"/a/b/",
+		"docs/guide/index.html",
+		"a b/c&d/e=f",
+		"héllo/wörld",
+		"100%/tax",
+		"/products/42/reviews",
+		strings.Repeat("seg-1.v2~x_/", 8),
+		"\x00\x1f/\x7f\xff",
+	}
+	for _, in := range inputs {
+		want := escapeSegments(in)
+		require.Equal(t, want, string(AppendPathSegmentsEscape(nil, in)), "input %q", in)
+		require.Equal(t, want, string(AppendPathSegmentsEscape(nil, []byte(in))), "input %q", in)
+	}
+
+	// A slash is data for AppendPathEscape and a separator here.
+	require.Equal(t, "a%2Fb", string(AppendPathEscape(nil, "a/b")))
+	require.Equal(t, "a/b", string(AppendPathSegmentsEscape(nil, "a/b")))
+
+	// Appending must preserve existing dst content.
+	require.Equal(t, "/x/a%20b", string(AppendPathSegmentsEscape([]byte("/x/"), "a b")))
+}
+
 func Test_AppendQueryUnescape(t *testing.T) {
 	t.Parallel()
 	inputs := []string{
@@ -115,6 +160,43 @@ func Benchmark_AppendQueryEscape(b *testing.B) {
 			b.ReportAllocs()
 			for b.Loop() {
 				url.QueryEscape(input.value)
+			}
+		})
+	}
+}
+
+func Benchmark_AppendPathSegmentsEscape(b *testing.B) {
+	inputs := []struct {
+		name  string
+		value string
+	}{
+		{"1-segment", strings.Repeat("token-64", 3)},
+		{"3-segments", "docs/guide/indexhtmlabc"},
+		{"6-segments", "do/cs/gu/ide/index/html"},
+		{"escaping", "do cs/gü ide/100%/html"},
+	}
+	for _, input := range inputs {
+		dst := make([]byte, 0, 3*len(input.value))
+		b.Run(input.name+"/fiber", func(b *testing.B) {
+			b.ReportAllocs()
+			for b.Loop() {
+				AppendPathSegmentsEscape(dst, input.value)
+			}
+		})
+		// What a caller has to write without this helper.
+		b.Run(input.name+"/split-loop", func(b *testing.B) {
+			b.ReportAllocs()
+			for b.Loop() {
+				out, start := dst, 0
+				for i := range len(input.value) {
+					if input.value[i] != '/' {
+						continue
+					}
+					out = AppendPathEscape(out, input.value[start:i])
+					out = append(out, '/')
+					start = i + 1
+				}
+				_ = AppendPathEscape(out, input.value[start:])
 			}
 		})
 	}

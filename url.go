@@ -50,6 +50,9 @@ func buildUnhexTable() [256]byte {
 var (
 	queryNoEscapeTable = buildNoEscapeTable("")
 	pathNoEscapeTable  = buildNoEscapeTable("$&+:=@")
+	// A multi-segment path keeps '/', which separates its segments rather than
+	// belonging to one of them.
+	pathSegmentsNoEscapeTable = buildNoEscapeTable("$&+:=@/")
 )
 
 // buildNoEscapeTable flags the RFC 3986 unreserved bytes plus alsoSafe as
@@ -79,6 +82,18 @@ func AppendQueryEscape[S byteSeq](dst []byte, s S) []byte {
 // net/url.PathEscape; the aliasing rule matches AppendQueryEscape.
 func AppendPathEscape[S byteSeq](dst []byte, s S) []byte {
 	return appendEscape(dst, unsafeconv.Bytes(s), &pathNoEscapeTable, escapePath)
+}
+
+// AppendPathSegmentsEscape appends the percent-encoded form of the multi-segment
+// path s to dst and returns the extended slice. It escapes every segment as
+// AppendPathEscape does but leaves the '/' between them, so the output matches
+// escaping each segment separately and joining the results with '/'. Use it for
+// a value whose slashes are separators; use AppendPathEscape for one segment,
+// where a slash is data and has to be encoded. Empty and dot segments pass
+// through unchanged, so clean or reject an untrusted value before appending it
+// under a fixed prefix. The aliasing rule matches AppendQueryEscape.
+func AppendPathSegmentsEscape[S byteSeq](dst []byte, s S) []byte {
+	return appendEscape(dst, unsafeconv.Bytes(s), &pathSegmentsNoEscapeTable, escapePath)
 }
 
 // appendEscape copies runs of unescaped bytes wholesale and expands the rest,
