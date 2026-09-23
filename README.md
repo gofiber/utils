@@ -494,8 +494,11 @@ pack alike, such as `a` and `aa`, stay apart; longer keys take one
 multiply per sixteen bytes plus a final one. It takes no seed and is no
 defense against collisions planned in advance, so it suits keys of the
 program's own, such as the fields of a struct, rather than keys an
-attacker picks. Against `maphash.String` of a `strings.ToLower` copy it
-runs 3-13x faster with no allocation (amd64 rows below).
+attacker picks. Against `maphash.String` of a `strings.ToLower` copy,
+benchstat over ten runs on the amd64 machine below measures 4.8 ns
+against 13.2 ns for a 2-byte key, 4.5 ns against 50.7 ns for a 4-byte
+key and 14.7 ns against 184 ns for a 48-byte key, where the copy also
+allocates; the `HashFold` rows below are those medians.
 
 ## HTTP dates
 
@@ -683,16 +686,16 @@ Benchmark_EqualFold_Short/10B/fiber-4                              144306822    
 Benchmark_EqualFold_Short/10B/default-4                            120878482    9.925  ns/op     0  B/op   0  allocs/op
 Benchmark_EqualFold_Short/16B/fiber-4                              143038372    8.357  ns/op     0  B/op   0  allocs/op
 Benchmark_EqualFold_Short/16B/default-4                             85405070    14.49  ns/op     0  B/op   0  allocs/op
-Benchmark_HashFold/2B/fiber-4                                      253789669    4.700  ns/op     0  B/op   0  allocs/op
-Benchmark_HashFold/2B/default-4                                     93179052    12.95  ns/op     0  B/op   0  allocs/op
-Benchmark_HashFold/4B/fiber-4                                      278253961    4.552  ns/op     0  B/op   0  allocs/op
-Benchmark_HashFold/4B/default-4                                     24247200    50.52  ns/op     8  B/op   1  allocs/op
-Benchmark_HashFold/12B/fiber-4                                     177106117    6.796  ns/op     0  B/op   0  allocs/op
-Benchmark_HashFold/12B/default-4                                    15917528    79.79  ns/op    16  B/op   1  allocs/op
-Benchmark_HashFold/17B/fiber-4                                     100000000    10.93  ns/op     0  B/op   0  allocs/op
-Benchmark_HashFold/17B/default-4                                    13407313    93.29  ns/op    24  B/op   1  allocs/op
-Benchmark_HashFold/48B/fiber-4                                      80977172    14.63  ns/op     0  B/op   0  allocs/op
-Benchmark_HashFold/48B/default-4                                     6527506    185.1  ns/op    48  B/op   1  allocs/op
+Benchmark_HashFold/2B/fiber-4                                      260378463    4.788  ns/op     0  B/op   0  allocs/op
+Benchmark_HashFold/2B/default-4                                     93823555    13.18  ns/op     0  B/op   0  allocs/op
+Benchmark_HashFold/4B/fiber-4                                      260541824    4.510  ns/op     0  B/op   0  allocs/op
+Benchmark_HashFold/4B/default-4                                     19893830    50.69  ns/op     8  B/op   1  allocs/op
+Benchmark_HashFold/12B/fiber-4                                     171252556    6.946  ns/op     0  B/op   0  allocs/op
+Benchmark_HashFold/12B/default-4                                    16038366    76.99  ns/op    16  B/op   1  allocs/op
+Benchmark_HashFold/17B/fiber-4                                      99782714    11.05  ns/op     0  B/op   0  allocs/op
+Benchmark_HashFold/17B/default-4                                    13452234    91.13  ns/op    24  B/op   1  allocs/op
+Benchmark_HashFold/48B/fiber-4                                      83805793    14.74  ns/op     0  B/op   0  allocs/op
+Benchmark_HashFold/48B/default-4                                     6658267    184.1  ns/op    48  B/op   1  allocs/op
 Benchmark_IndexControl/clean-16B/fiber-4                           169144147    7.146  ns/op     0  B/op   0  allocs/op
 Benchmark_IndexControl/clean-16B/fiber-except-tab-4                167529128    7.135  ns/op     0  B/op   0  allocs/op
 Benchmark_IndexControl/clean-16B/default-4                          32870788    36.35  ns/op     0  B/op   0  allocs/op
