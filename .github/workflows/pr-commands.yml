@@ -12,13 +12,23 @@ name: PR Commands
 on:
   issue_comment:
     types: [created]
+  pull_request_target:
+    types: [opened]
 
 permissions:
   contents: write
   pull-requests: write
 
 jobs:
+  hint:
+    if: github.event_name == 'pull_request_target'
+    uses: gofiber/.github/.github/workflows/pr-command-hint.yml@main
+    with:
+      hint: '`/bench-readme` or `/bench-readme-amd64` refresh the README benchmark numbers on this branch'
+
   bench-readme:
+    # Skipped outright on a newly opened pull request, so it takes no concurrency slot.
+    if: github.event_name == 'issue_comment'
     # Grouped per command, so the arm64 and amd64 runs of one pull request do not
     # queue behind each other for up to 90 minutes.
     concurrency:
@@ -42,6 +52,7 @@ jobs:
       push-token: ${{ secrets.PR_TOKEN }}
 
   bench-readme-amd64:
+    if: github.event_name == 'issue_comment'
     concurrency:
       group: ${{ github.workflow }}-bench-readme-amd64-${{ github.event.issue.number }}
       cancel-in-progress: false
