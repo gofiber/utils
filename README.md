@@ -498,7 +498,10 @@ attacker picks. Against `maphash.String` of a `strings.ToLower` copy,
 benchstat over ten runs on the amd64 machine below measures 4.8 ns
 against 13.2 ns for a 2-byte key, 4.5 ns against 50.7 ns for a 4-byte
 key and 14.7 ns against 184 ns for a 48-byte key, where the copy also
-allocates; the `HashFold` rows below are those medians.
+allocates; the `HashFold` rows below are those medians, which
+`go test -run='^$' -bench='^Benchmark_HashFold$' -benchmem -count=10 . > hashfold.txt`
+followed by `benchstat hashfold.txt` reproduces. The block's own command,
+a single run, is what refreshes its other rows.
 
 ## HTTP dates
 
