@@ -504,6 +504,15 @@ never grows the input, so `dst` may be `s[:0]` on a common backing array
 to unescape in place; escaping can grow the input, so there `dst` must
 not alias `s`.
 
+`AppendPathSegmentsEscape` covers a whole multi-segment path in one pass:
+it escapes every segment as `AppendPathEscape` does and keeps the `/`
+between them. The output equals escaping each segment and joining with
+`/`, pinned per byte and by fuzzing; `net/url`'s whole-path escaping
+differs, as it also leaves `;` and `,` unescaped. Its
+`Benchmark_AppendPathSegmentsEscape` numbers are tracked on the
+[benchmark charts](https://gofiber.github.io/utils/benchmarks/) and join
+the catalog on its next regeneration.
+
 ## JSON string escaping
 
 `AppendJSONString` appends a value as a double-quoted JSON string,
