@@ -1,0 +1,74 @@
+name: PR Commands
+
+# Comment on a pull request to refresh the benchmark tables in README.md:
+#
+#   /bench-readme                 re-measure the arm64 tables
+#   /bench-readme-amd64           re-measure the amd64 tables (Xeon block and simd/AVX2)
+#   /bench-readme-amd64 -block 3  run only the third table, not both amd64 ones
+#
+# Each table names the `go test` command that produced it, so the runner only
+# decides which of them it can reproduce. Maintainers only.
+
+on:
+  issue_comment:
+    types: [created]
+  pull_request_target:
+    types: [opened]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  hint:
+    if: github.event_name == 'pull_request_target'
+    uses: gofiber/.github/.github/workflows/pr-command-hint.yml@main
+    with:
+      hint: '`/bench-readme` or `/bench-readme-amd64` refresh the README benchmark numbers on this branch'
+
+  bench-readme:
+    # Skipped outright on a newly opened pull request, so it takes no concurrency slot.
+    if: github.event_name == 'issue_comment'
+    # Grouped per command, so the arm64 and amd64 runs of one pull request do not
+    # queue behind each other for up to 90 minutes.
+    concurrency:
+      group: ${{ github.workflow }}-bench-readme-${{ github.event.issue.number }}
+      cancel-in-progress: false
+    uses: gofiber/.github/.github/workflows/pr-command.yml@main
+    with:
+      command: bench-readme
+      # arm64 Linux carries no cpu model name, so this one writes "cpu: unknown".
+      runs-on: blacksmith-4vcpu-ubuntu-2404-arm
+      paths: README.md
+      commit-message: 'docs: refresh README benchmark numbers'
+      # the full catalog is ~15 min of measurement, plus the amd64 tables when forced
+      timeout-minutes: 90
+      # ARGS is sanitized upstream and has to split into separate flags here
+      run: go run ./scripts -update $ARGS
+    # Same PAT the dependabot workflows use. It never meets pull request code (the
+    # job that runs the command has no credentials), and it is what lets the push
+    # reach a fork branch and start the repository's own checks.
+    secrets:
+      push-token: ${{ secrets.PR_TOKEN }}
+
+  bench-readme-amd64:
+    if: github.event_name == 'issue_comment'
+    concurrency:
+      group: ${{ github.workflow }}-bench-readme-amd64-${{ github.event.issue.number }}
+      cancel-in-progress: false
+    uses: gofiber/.github/.github/workflows/pr-command.yml@main
+    with:
+      command: bench-readme-amd64
+      # This pool hands out AMD EPYC and Intel Xeon under one label and moves the
+      # same benchmark by up to 2x between them. The Environment: header above each
+      # table records what ran, so a jump has something to be read against.
+      runs-on: blacksmith-4vcpu-ubuntu-2404
+      paths: README.md
+      commit-message: 'docs: refresh README benchmark numbers'
+      timeout-minutes: 90
+      run: go run ./scripts -update $ARGS
+    # Same PAT the dependabot workflows use. It never meets pull request code (the
+    # job that runs the command has no credentials), and it is what lets the push
+    # reach a fork branch and start the repository's own checks.
+    secrets:
+      push-token: ${{ secrets.PR_TOKEN }}

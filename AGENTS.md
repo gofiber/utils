@@ -15,6 +15,7 @@ gofiber/utils is a helper library for [Fiber](https://github.com/gofiber/fiber) 
 ## Conventions
 
 - Performance claims are verified with benchstat (base vs. head on the same machine, at least `-count=10`), never with single runs.
-- `make test` runs the suite with race detector and shuffle; `make lint` runs golangci-lint; `make format` applies gofumpt; `make benchfmt` aligns the benchmark tables in README.md.
+- `make test` runs the suite with race detector and shuffle; `make lint` runs golangci-lint; `make format` applies gofumpt; `make benchfmt` aligns the benchmark tables in README.md and `make benchupdate` re-measures them.
 - README.md is a function catalog with benchmark blocks. New exported functions need a README section, and benchmark numbers for touched paths should be regenerated in the same run.
+- Each benchmark block starts with the `go test` command that produced it; `make benchupdate` re-runs that command and refreshes the values of the rows it reports, leaving rows it does not measure alone. A maintainer can trigger the same thing on a pull request by commenting `/bench-readme` (arm64) or `/bench-readme-amd64`.
 - Code, comments, commit messages, and PR text are always written in English.

@@ -137,6 +137,10 @@ func FuzzURLEscape(f *testing.F) {
 			want != string(AppendPathEscape(nil, []byte(s))) {
 			t.Fatalf("AppendPathEscape(%q) diverges from net/url (%q)", s, want)
 		}
+		if want := escapeSegments(s); want != string(AppendPathSegmentsEscape(nil, s)) ||
+			want != string(AppendPathSegmentsEscape(nil, []byte(s))) {
+			t.Fatalf("AppendPathSegmentsEscape(%q) diverges from per-segment escaping (%q)", s, want)
+		}
 
 		checkUnescape := func(name, s string, got []byte, err error, want string, wantErr error) {
 			t.Helper()

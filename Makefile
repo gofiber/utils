@@ -31,7 +31,12 @@ format:
 ## benchfmt: 📝 Format README benchmark lines
 .PHONY: benchfmt
 benchfmt:
-	go run ./scripts/format_benchmarks.go
+	go run ./scripts
+
+## benchupdate: 📊 Re-run the README benchmarks and refresh their numbers (ARGS="-block N" for one table)
+.PHONY: benchupdate
+benchupdate:
+	go run ./scripts -update $(ARGS)
 
 ## lint: 🚨 Run lint checks
 .PHONY: lint
