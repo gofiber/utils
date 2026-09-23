@@ -13,6 +13,10 @@ A collection of common functions for [Fiber](https://github.com/gofiber/fiber) w
 
 Per-commit benchmark charts: <https://gofiber.github.io/utils/benchmarks/>
 
+Each table below starts with the `go test` command that produced it. Maintainers refresh the
+numbers with `make benchupdate`, or by commenting `/bench-readme` (arm64) or
+`/bench-readme-amd64` on a pull request.
+
 Environment:
 goos: darwin
 goarch: arm64
