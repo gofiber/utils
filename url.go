@@ -89,8 +89,9 @@ func AppendPathEscape[S byteSeq](dst []byte, s S) []byte {
 // AppendPathEscape does but leaves the '/' between them, so the output matches
 // escaping each segment separately and joining the results with '/'. Use it for
 // a value whose slashes are separators; use AppendPathEscape for one segment,
-// where a slash is data and has to be encoded. The aliasing rule matches
-// AppendQueryEscape.
+// where a slash is data and has to be encoded. Empty and dot segments pass
+// through unchanged, so clean or reject an untrusted value before appending it
+// under a fixed prefix. The aliasing rule matches AppendQueryEscape.
 func AppendPathSegmentsEscape[S byteSeq](dst []byte, s S) []byte {
 	return appendEscape(dst, unsafeconv.Bytes(s), &pathSegmentsNoEscapeTable, escapePath)
 }

@@ -177,14 +177,14 @@ func Benchmark_AppendPathSegmentsEscape(b *testing.B) {
 	}
 	for _, input := range inputs {
 		dst := make([]byte, 0, 3*len(input.value))
-		b.Run(input.name+"/segments", func(b *testing.B) {
+		b.Run(input.name+"/fiber", func(b *testing.B) {
 			b.ReportAllocs()
 			for b.Loop() {
 				AppendPathSegmentsEscape(dst, input.value)
 			}
 		})
 		// What a caller has to write without this helper.
-		b.Run(input.name+"/per-segment", func(b *testing.B) {
+		b.Run(input.name+"/split-loop", func(b *testing.B) {
 			b.ReportAllocs()
 			for b.Loop() {
 				out, start := dst, 0
