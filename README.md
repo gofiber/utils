@@ -495,13 +495,14 @@ multiply per sixteen bytes plus a final one. It takes no seed and is no
 defense against collisions planned in advance, so it suits keys of the
 program's own, such as the fields of a struct, rather than keys an
 attacker picks. Against `maphash.String` of a `strings.ToLower` copy,
-benchstat over ten runs on the amd64 machine below measures 4.8 ns
+benchstat over ten runs on an Intel Xeon @ 2.80GHz measured 4.8 ns
 against 13.2 ns for a 2-byte key, 4.5 ns against 50.7 ns for a 4-byte
 key and 14.7 ns against 184 ns for a 48-byte key, where the copy also
-allocates; the `HashFold` rows below are those medians, which
+allocates;
 `go test -run='^$' -bench='^Benchmark_HashFold$' -benchmem -count=10 . > hashfold.txt`
-followed by `benchstat hashfold.txt` reproduces. The block's own command,
-a single run, is what refreshes its other rows.
+followed by `benchstat hashfold.txt` reproduces that comparison. The
+`HashFold` rows in the amd64 table below, like the table's other rows,
+are a single run on the machine its header names.
 
 ## HTTP dates
 
