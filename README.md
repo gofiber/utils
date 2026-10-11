@@ -1,3 +1,8 @@
+<p align="center">
+  <img height="125" alt="Fiber Utils" src="https://raw.githubusercontent.com/gofiber/utils/master/.github/logo-dark.svg#gh-dark-mode-only" />
+  <img height="125" alt="Fiber Utils" src="https://raw.githubusercontent.com/gofiber/utils/master/.github/logo.svg#gh-light-mode-only" />
+</p>
+
 # Fiber Utils
 
 ![Release](https://img.shields.io/github/release/gofiber/utils.svg)
