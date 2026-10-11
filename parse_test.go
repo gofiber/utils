@@ -784,7 +784,9 @@ func Test_ParseFloat32(t *testing.T) {
 		{".5", 0.5, true, false},
 		{"3.4028234e38", 3.4028234e38, true, false},
 		{"-3.4028234e38", -3.4028234e38, true, false},
-		{"3.4028235e38", 0, false, false},
+		// Java's Float.MAX_VALUE, less than half an ulp above MaxFloat32: rounds down.
+		{"3.4028235e38", math.MaxFloat32, true, false},
+		{"3.4028236e38", 0, false, false},
 		{"-0", -0, true, true},
 		{"1e39", 0, false, false},
 		{"1e", 0, false, false},

@@ -806,6 +806,23 @@ Benchmark_AppendPathUnescape/escaped-31B/fiber-4                    52789323    
 Benchmark_AppendPathUnescape/escaped-31B/default-4                  27718658    43.70  ns/op    24  B/op   1  allocs/op
 ```
 
+## Float parsing
+
+`ParseFloat64` and `ParseFloat32` return what `strconv.ParseFloat` returns,
+bit for bit, for an optional sign, digits with an optional point and an
+optional exponent, in strings or byte slices. The spellings strconv adds
+(`inf`, `nan`, hexadecimal floats, underscores) are syntax errors, a value
+too large for the type is a range error, and every error comes with a
+zero result. A mantissa that fits in 53 bits with an exponent of at most
+22 either way is one multiplication or division by an exact power of ten,
+which rounds correctly (Clinger's fast path, strconv's own first step),
+and parses about twice as fast as strconv. Anything else (mantissas past
+15 or 16 digits, larger exponents) is handed to `strconv.ParseFloat` once
+the string has been scanned, so it takes 1.3 to 1.6 times as long as
+calling strconv directly (`0.12345678901234567`, `1e-300`).
+`Benchmark_ParseFloat_Shapes` times each shape against strconv (benchstat,
+15 runs, Intel Xeon @ 2.10GHz).
+
 ## Size strings
 
 `ConvertToBytes` turns `42`, `42kb`, `1.5GiB` or `130.51MB` into a byte
