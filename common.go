@@ -9,6 +9,7 @@ import (
 	"encoding/base64"
 	"fmt"
 	"math"
+	"math/bits"
 	"net"
 	"os"
 	"reflect"
@@ -130,6 +131,9 @@ func IncrementIPRange(ip net.IP) {
 // Decimal units are powers of 1000 (42k = 42000); binary units with an 'i' infix
 // are powers of 1024 (42Ki = 43008). Note that ByteSize formats with powers of 1024,
 // so use binary suffixes for a lossless round-trip.
+// Digits with an optional point give the exact product, rounded down and capped at
+// math.MaxInt. A number with a point and also a sign, an exponent or more than 19
+// places is computed in floating point and can come out a byte short.
 // Returns 0 if the string is unrecognized or negative.
 func ConvertToBytes(humanReadableString string) int {
 	strLen := len(humanReadableString)
@@ -187,27 +191,13 @@ func ConvertToBytes(humanReadableString string) int {
 	}
 
 	numPart := humanReadableString[:lastNumberPos+1]
-	var size float64
 
-	if strings.IndexByte(numPart, '.') >= 0 {
-		var err error
-		size, err = ParseFloat64(numPart)
-		if err != nil || size < 0 {
-			return 0
-		}
-	} else {
-		i64, err := ParseUint(numPart)
-		if err != nil {
-			return 0
-		}
-		size = float64(i64)
-	}
-
+	mult := uint64(1)
 	if unitPrefixPos > 0 {
 		// An 'i' after the unit prefix selects binary units (KiB = 1024).
 		binary := unitPrefixPos+1 < strLen &&
 			(humanReadableString[unitPrefixPos+1] == 'i' || humanReadableString[unitPrefixPos+1] == 'I')
-		var decMul, binMul float64
+		var decMul, binMul uint64
 		switch humanReadableString[unitPrefixPos] {
 		case 'k', 'K':
 			decMul, binMul = 1e3, 1<<10
@@ -222,16 +212,94 @@ func ConvertToBytes(humanReadableString string) int {
 		default:
 			decMul, binMul = 1, 1
 		}
+		mult = decMul
 		if binary {
-			size *= binMul
-		} else {
-			size *= decMul
+			mult = binMul
 		}
 	}
+
+	// Scale plain sizes in integers: a float product truncates 1.001K to 1000.
+	if size, ok := scaleDecimal(numPart, mult); ok {
+		if size > uint64(math.MaxInt) {
+			return math.MaxInt
+		}
+		return int(size)
+	}
+
+	// With a point, what is left (a sign, an exponent, long numbers) is floating
+	// point; without one only a ParseUint error is left.
+	var size float64
+	if strings.IndexByte(numPart, '.') >= 0 {
+		var err error
+		size, err = ParseFloat64(numPart)
+		if err != nil || size < 0 {
+			return 0
+		}
+	} else {
+		i64, err := ParseUint(numPart)
+		if err != nil {
+			return 0
+		}
+		size = float64(i64)
+	}
+	size *= float64(mult)
 
 	if size > float64(math.MaxInt) {
 		return math.MaxInt
 	}
 
 	return int(size)
+}
+
+// scaleDecimal returns floor(s * mult) exactly, saturating at math.MaxUint64.
+// s is digits with an optional point (no sign or exponent, at most 19 places,
+// a 64-bit mantissa); any other s returns false.
+func scaleDecimal(s string, mult uint64) (uint64, bool) {
+	var mantissa uint64
+	digits, places := 0, -1 // places counts the digits after the point, -1 before it
+	for i := range len(s) {
+		c := s[i]
+		switch {
+		case c-'0' <= 9:
+			d := uint64(c - '0')
+			if mantissa > maxUint64Cutoff || (mantissa == maxUint64Cutoff && d > maxUint64Cutlim) {
+				return 0, false
+			}
+			mantissa = mantissa*10 + d
+			digits++
+			if places >= 0 {
+				places++
+			}
+		case c == '.' && places < 0:
+			places = 0
+		default:
+			return 0, false
+		}
+	}
+	if digits == 0 {
+		return 0, false
+	}
+	places = max(places, 0)
+	if places >= len(pow10) {
+		return 0, false
+	}
+
+	// mantissa * mult / 10^places. A 128-bit division costs several times a
+	// 64-bit one, so use it only when the product needs it.
+	hi, lo := bits.Mul64(mantissa, mult)
+	if places == 0 {
+		if hi != 0 {
+			return math.MaxUint64, true
+		}
+		return lo, true
+	}
+	divisor := pow10[places]
+	if hi == 0 {
+		return lo / divisor, true
+	}
+	if hi >= divisor { // the quotient needs more than 64 bits
+		return math.MaxUint64, true
+	}
+	quotient, _ := bits.Div64(hi, lo, divisor)
+	return quotient, true
 }

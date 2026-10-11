@@ -5,6 +5,9 @@
 package utils
 
 import (
+	"math"
+	"math/big"
+	"math/rand/v2"
 	"net"
 	"os"
 	"testing"
@@ -213,6 +216,112 @@ func Test_ConvertToBytes(t *testing.T) {
 	require.Equal(t, 100*1000, ConvertToBytes("100  k")) // multiple spaces
 }
 
+// Test_ConvertToBytes_Fractions pins fractional sizes that a float product
+// truncates ("65.35KB" is 65350, not 65349).
+func Test_ConvertToBytes_Fractions(t *testing.T) {
+	t.Parallel()
+	for in, want := range map[string]int64{
+		"65.35KB":    65350,
+		"1.025M":     1025000,
+		"130.51MB":   130510000,
+		"132.593G":   132593000000,
+		"1.001K":     1001,
+		"1.15KB":     1150,
+		"4.35K":      4350,
+		"0.001K":     1,
+		"0.0009K":    0, // 0.9 of a byte
+		"0.5":        0, // half a byte
+		".5K":        500,
+		"1.K":        1000, // trailing point
+		"2.675Ki":    2739, // 2739.2
+		"0.1Mi":      104857,
+		"1.5KiB":     1536,
+		"1.5e3K":     1500000, // exponent: float path
+		"1.5E3K":     1500000,
+		"007.50K":    7500,
+		"1.250000K":  1250,
+		"12.0000000": 12,
+	} {
+		require.Equal(t, min(want, math.MaxInt), int64(ConvertToBytes(in)), in) // a 32-bit int saturates
+	}
+}
+
+// Test_ConvertToBytes_Exact checks up to nine digits with a point anywhere,
+// before every unit, against big.Rat.
+func Test_ConvertToBytes_Exact(t *testing.T) {
+	t.Parallel()
+
+	units := map[string]int64{
+		"": 1, "B": 1, "K": 1e3, "KB": 1e3, "M": 1e6, "MB": 1e6, "G": 1e9, "T": 1e12, "P": 1e15,
+		"Ki": 1 << 10, "KiB": 1 << 10, "Mi": 1 << 20, "Gi": 1 << 30, "Ti": 1 << 40, "Pi": 1 << 50,
+	}
+	r := rand.New(rand.NewPCG(0xb17e5, 0x5eed)) //nolint:gosec // deterministic test data
+	maxInt := new(big.Int).SetInt64(math.MaxInt)
+	for range 10_000 {
+		digits := make([]byte, 1+r.IntN(9))
+		for i := range digits {
+			digits[i] = byte('0' + r.IntN(10))
+		}
+		num := string(digits)
+		if r.IntN(4) != 0 {
+			point := r.IntN(len(num) + 1)
+			num = num[:point] + "." + num[point:]
+		}
+		for suffix, mult := range units {
+			in := num + suffix
+			exact, ok := new(big.Rat).SetString(num)
+			require.True(t, ok, num)
+			exact.Mul(exact, big.NewRat(mult, 1))
+			want := new(big.Int).Quo(exact.Num(), exact.Denom())
+			if want.Cmp(maxInt) > 0 {
+				want = maxInt
+			}
+			require.Equal(t, want.Int64(), int64(ConvertToBytes(in)), in)
+		}
+	}
+}
+
+func Test_ConvertToBytes_Large(t *testing.T) {
+	t.Parallel()
+	// Past 2^53 a float64 cannot count bytes; min() is for 32-bit ints.
+	for in, want := range map[string]int64{
+		"9007199254740993K":     9007199254740993000,
+		"9007199254740993B":     9007199254740993,
+		"9007199254740993.000K": 9007199254740993000,
+		"1000000.000000000001T": 1000000000000000001, // 10^18 + 1
+	} {
+		require.Equal(t, min(want, math.MaxInt), int64(ConvertToBytes(in)), in)
+	}
+
+	// Saturation at the largest int, however it is reached.
+	require.Equal(t, math.MaxInt, ConvertToBytes("9223372036854775807B"))
+	require.Equal(t, math.MaxInt, ConvertToBytes("9223372036854775808"))
+	require.Equal(t, math.MaxInt, ConvertToBytes("9999999999999999999K"))
+	require.Equal(t, math.MaxInt, ConvertToBytes("18446744073709551615PiB"))
+	require.Equal(t, math.MaxInt, ConvertToBytes("9999999999999999.999P"))
+
+	// More digits than a uint64 holds: plain digits clamp, a unit makes them
+	// invalid, and with a point the float path decides.
+	require.Equal(t, math.MaxInt, ConvertToBytes("99999999999999999999"))
+	require.Equal(t, 0, ConvertToBytes("99999999999999999999K"))
+	require.Equal(t, math.MaxInt, ConvertToBytes("99999999999999999999.5K"))
+	require.Equal(t, 1000, ConvertToBytes("1.00000000000000000000001K")) // 23 decimals
+}
+
+// Test_ConvertToBytes_NeedsPoint pins that a sign or an exponent is a size only
+// next to a point; without one it is not recognized.
+func Test_ConvertToBytes_NeedsPoint(t *testing.T) {
+	t.Parallel()
+	for in, want := range map[string]int{
+		"1e3K":   0,
+		"+5K":    0,
+		"1.5e3K": 1500000,
+		"+5.0K":  5000,
+	} {
+		require.Equal(t, want, ConvertToBytes(in), in)
+	}
+}
+
 func Test_ConvertToBytes_DigitDetection(t *testing.T) {
 	t.Parallel()
 	// Test the new direct byte comparison digit detection
@@ -313,6 +422,20 @@ func Benchmark_ConvertToBytes(b *testing.B) {
 		}
 		require.Equal(b, 42, res)
 	})
+}
+
+// go test -v -run=^$ -bench=Benchmark_ConvertToBytes_Shapes -benchmem -count=2
+func Benchmark_ConvertToBytes_Shapes(b *testing.B) {
+	for _, in := range []string{"42", "42B", "42KB", "42 MB", "1.5MB", "130.51MB", "1.5GiB", "9007199254740993K"} {
+		b.Run(in, func(b *testing.B) {
+			b.ReportAllocs()
+			var res int
+			for b.Loop() {
+				res = ConvertToBytes(in)
+			}
+			require.NotZero(b, res)
+		})
+	}
 }
 
 // go test -v -run=^$ -bench=Benchmark_GenerateSecureToken -benchmem -count=2

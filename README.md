@@ -806,6 +806,20 @@ Benchmark_AppendPathUnescape/escaped-31B/fiber-4                    52789323    
 Benchmark_AppendPathUnescape/escaped-31B/default-4                  27718658    43.70  ns/op    24  B/op   1  allocs/op
 ```
 
+## Size strings
+
+`ConvertToBytes` turns `42`, `42kb`, `1.5GiB` or `130.51MB` into a byte
+count: decimal units are powers of 1000, units with an `i` are powers of
+1024, and the result saturates at `math.MaxInt`. Digits with an optional
+point are scaled with 128-bit integer arithmetic, so the result is the
+exact product rounded down (`65.35KB` is 65350) and never passes through
+a `float64`. A number with a point and also a sign, an exponent, more
+than 19 places or more digits than a `uint64` holds is computed in
+floating point and can come out a byte short (`+2.01k` is 2009, not 2010);
+without a point a sign or an exponent is not recognized and gives 0, as
+does a negative size. A plain number or one followed by `B` is a single
+digit loop. `Benchmark_ConvertToBytes_Shapes` times each shape.
+
 ## SWAR primitives
 
 The [`swar`](swar/) package exports the SWAR (SIMD within a register)
