@@ -303,12 +303,19 @@ func refGetMIME(extension string) string {
 		return found
 	}
 	if found := mime.TypeByExtension(withDot); found != "" {
-		return found
+		// bare type, like the table entries
+		base, _, _ := strings.Cut(found, ";")
+		return strings.TrimSpace(base)
 	}
 	return MIMEOctetStream
 }
 
 func FuzzGetMIME(f *testing.F) {
+	// mime stores this with "; charset=utf-8", whatever the system's tables hold
+	if err := mime.AddExtensionType(".utilsfuzz", "text/x-utils-fuzz"); err != nil {
+		f.Fatal(err)
+	}
+	f.Add("utilsfuzz")
 	f.Add("html")
 	f.Add(".JSON")
 	f.Add("html\x00")

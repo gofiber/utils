@@ -58,6 +58,22 @@ func Test_GetMIME(t *testing.T) {
 	require.Equal(t, MIMEOctetStream, GetMIME("  .json"))
 }
 
+func Test_GetMIME_FallbackWithoutParameters(t *testing.T) {
+	t.Parallel()
+
+	for _, tc := range []struct{ ext, registered, want string }{
+		// mime appends "; charset=utf-8" to a text type on its own
+		{ext: ".utilstext", registered: "text/x-utils", want: "text/x-utils"},
+		{ext: ".utilscharset", registered: "text/x-utils-cs; charset=iso-8859-1", want: "text/x-utils-cs"},
+		{ext: ".utilsquoted", registered: `multipart/x-utils; boundary="a;b"`, want: "multipart/x-utils"},
+		{ext: ".utilsspace", registered: "application/x-utils ; q=1", want: "application/x-utils"},
+	} {
+		require.NoError(t, mime.AddExtensionType(tc.ext, tc.registered))
+		require.Equal(t, tc.want, GetMIME(tc.ext))
+		require.Equal(t, tc.want, GetMIME(tc.ext[1:]))
+	}
+}
+
 // go test -v -run=^$ -bench=Benchmark_GetMIME -benchmem -count=2
 func Benchmark_GetMIME(b *testing.B) {
 	var res string

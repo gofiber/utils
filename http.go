@@ -67,7 +67,7 @@ func mimeHash(key uint64) int {
 	return int(key * mimeHashMul >> (64 - mimeTableBits))
 }
 
-// GetMIME returns the content-type of a file extension, matched
+// GetMIME returns the media type of a file extension without parameters, matched
 // case-insensitively with or without the leading dot. Unknown extensions map
 // to MIMEOctetStream; an empty extension yields an empty string.
 func GetMIME(extension string) string {
@@ -93,6 +93,10 @@ func GetMIME(extension string) string {
 		extension = "." + extension
 	}
 	if foundMime := mime.TypeByExtension(extension); foundMime != "" {
+		// mime carries parameters ("text/csv; charset=utf-8"), the table does not.
+		if i := strings.IndexByte(foundMime, ';'); i != -1 {
+			foundMime = TrimSpace(foundMime[:i])
+		}
 		return foundMime
 	}
 
