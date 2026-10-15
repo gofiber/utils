@@ -382,4 +382,5 @@ formatters:
       custom-order: true
     gofumpt:
       module-path: github.com/gofiber/utils
-      extra-rules: true
+      extra:
+        group-params: true

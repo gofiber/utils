@@ -118,7 +118,7 @@ func GetArgument(arg string) bool {
 
 // IncrementIPRange Find available next IP address
 func IncrementIPRange(ip net.IP) {
-	for j := len(ip) - 1; j >= 0; j-- { //nolint:modernize // slicesbackward: false positive
+	for j := len(ip) - 1; j >= 0; j-- {
 		ip[j]++
 		if ip[j] > 0 {
 			break
