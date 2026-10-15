@@ -6,6 +6,7 @@ import (
 	"bytes"
 	"encoding/binary"
 	"reflect"
+	"slices"
 	"testing"
 	"unsafe"
 
@@ -115,7 +116,7 @@ func kernelBody(t *testing.T, name string, fn any) ([]byte, uintptr) {
 // BLOCKALIGN block loop, that no fused compare-and-branch pair of the loop
 // crosses or ends on a 32-byte boundary; see the file comment.
 func Test_BlockLoopBranchesStayInWindow(t *testing.T) {
-	signature := append(append([]byte{}, nop9...), nop9...)
+	signature := slices.Concat(nop9, nop9)
 	for name, fn := range blockLoopKernels {
 		code, base := kernelBody(t, name, fn)
 
