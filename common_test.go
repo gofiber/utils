@@ -10,6 +10,9 @@ import (
 	"math/rand/v2"
 	"net"
 	"os"
+	"regexp"
+	"strconv"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -236,7 +239,7 @@ func Test_ConvertToBytes_Fractions(t *testing.T) {
 		"2.675Ki":    2739, // 2739.2
 		"0.1Mi":      104857,
 		"1.5KiB":     1536,
-		"1.5e3K":     1500000, // exponent: float path
+		"1.5e3K":     1500000, // exponent
 		"1.5E3K":     1500000,
 		"007.50K":    7500,
 		"1.250000K":  1250,
@@ -246,19 +249,58 @@ func Test_ConvertToBytes_Fractions(t *testing.T) {
 	}
 }
 
-// Test_ConvertToBytes_Exact checks up to nine digits with a point anywhere,
-// before every unit, against big.Rat.
-func Test_ConvertToBytes_Exact(t *testing.T) {
-	t.Parallel()
-
-	units := map[string]int64{
+var (
+	// sizeUnits are the unit spellings exactSize knows, with their multipliers.
+	sizeUnits = map[string]int64{
 		"": 1, "B": 1, "K": 1e3, "KB": 1e3, "M": 1e6, "MB": 1e6, "G": 1e9, "T": 1e12, "P": 1e15,
 		"Ki": 1 << 10, "KiB": 1 << 10, "Mi": 1 << 20, "Gi": 1 << 30, "Ti": 1 << 40, "Pi": 1 << 50,
 	}
+	sizeShape = regexp.MustCompile(`^\+?(\d+\.?\d*|\.\d+)(?:[eE]([+-]?\d{1,3}))?([A-Za-z]*)$`)
+)
+
+// exactSize is the oracle for ConvertToBytes: the size s denotes, computed with
+// big.Rat and capped at the largest int64. The second result is false unless s
+// is a number of at most 19 significant digits followed by one of sizeUnits.
+func exactSize(s string) (int64, bool) {
+	m := sizeShape.FindStringSubmatch(s)
+	if m == nil {
+		return 0, false
+	}
+	mult, known := sizeUnits[m[3]]
+	if !known || len(strings.TrimLeft(strings.ReplaceAll(m[1], ".", ""), "0")) > 19 {
+		return 0, false
+	}
+	mantissa := m[1]
+	if strings.HasSuffix(mantissa, ".") {
+		mantissa += "0"
+	}
+	exact, ok := new(big.Rat).SetString(mantissa + "e" + orZero(m[2]))
+	if !ok {
+		return 0, false
+	}
+	exact.Mul(exact, big.NewRat(mult, 1))
+	n := new(big.Int).Quo(exact.Num(), exact.Denom())
+	if !n.IsInt64() {
+		return math.MaxInt64, true
+	}
+	return n.Int64(), true
+}
+
+func orZero(exp string) string {
+	if exp == "" {
+		return "0"
+	}
+	return exp
+}
+
+// Test_ConvertToBytes_Exact checks up to 19 digits with a point anywhere, an
+// optional '+' and exponent, before every unit, against exactSize.
+func Test_ConvertToBytes_Exact(t *testing.T) {
+	t.Parallel()
+
 	r := rand.New(rand.NewPCG(0xb17e5, 0x5eed)) //nolint:gosec // deterministic test data
-	maxInt := new(big.Int).SetInt64(math.MaxInt)
 	for range 10_000 {
-		digits := make([]byte, 1+r.IntN(9))
+		digits := make([]byte, 1+r.IntN(19))
 		for i := range digits {
 			digits[i] = byte('0' + r.IntN(10))
 		}
@@ -267,16 +309,21 @@ func Test_ConvertToBytes_Exact(t *testing.T) {
 			point := r.IntN(len(num) + 1)
 			num = num[:point] + "." + num[point:]
 		}
-		for suffix, mult := range units {
-			in := num + suffix
-			exact, ok := new(big.Rat).SetString(num)
-			require.True(t, ok, num)
-			exact.Mul(exact, big.NewRat(mult, 1))
-			want := new(big.Int).Quo(exact.Num(), exact.Denom())
-			if want.Cmp(maxInt) > 0 {
-				want = maxInt
+		if r.IntN(8) == 0 {
+			num = "+" + num
+		}
+		if r.IntN(3) == 0 { // 10^-45 to 10^25 reaches every branch of the scaling
+			exp := strconv.Itoa(r.IntN(71) - 45)
+			if exp[0] != '-' && r.IntN(2) == 0 {
+				exp = "+" + exp
 			}
-			require.Equal(t, want.Int64(), int64(ConvertToBytes(in)), in)
+			num += string("eE"[r.IntN(2)]) + exp
+		}
+		for suffix := range sizeUnits {
+			in := num + suffix
+			want, ok := exactSize(in)
+			require.True(t, ok, in)
+			require.Equal(t, min(want, math.MaxInt), int64(ConvertToBytes(in)), in)
 		}
 	}
 }
@@ -300,26 +347,102 @@ func Test_ConvertToBytes_Large(t *testing.T) {
 	require.Equal(t, math.MaxInt, ConvertToBytes("18446744073709551615PiB"))
 	require.Equal(t, math.MaxInt, ConvertToBytes("9999999999999999.999P"))
 
-	// More digits than a uint64 holds: plain digits clamp, a unit makes them
-	// invalid, and with a point the float path decides.
+	// More digits than a uint64 holds: an integer digit still counts towards the
+	// magnitude, so these saturate; a fraction digit is dropped.
 	require.Equal(t, math.MaxInt, ConvertToBytes("99999999999999999999"))
-	require.Equal(t, 0, ConvertToBytes("99999999999999999999K"))
+	require.Equal(t, math.MaxInt, ConvertToBytes("99999999999999999999K"))
 	require.Equal(t, math.MaxInt, ConvertToBytes("99999999999999999999.5K"))
 	require.Equal(t, 1000, ConvertToBytes("1.00000000000000000000001K")) // 23 decimals
+	require.Equal(t, 999, ConvertToBytes("0.99999999999999999999K"))     // 20 decimals
 }
 
-// Test_ConvertToBytes_NeedsPoint pins that a sign or an exponent is a size only
-// next to a point; without one it is not recognized.
-func Test_ConvertToBytes_NeedsPoint(t *testing.T) {
+// Test_ConvertToBytes_SignAndExponent pins the '+' and the exponent, which are
+// scaled as exactly as the digits are, and what is not a size.
+func Test_ConvertToBytes_SignAndExponent(t *testing.T) {
 	t.Parallel()
-	for in, want := range map[string]int{
-		"1e3K":   0,
-		"+5K":    0,
-		"1.5e3K": 1500000,
-		"+5.0K":  5000,
+	for in, want := range map[string]int64{
+		"+2.01k":                     2010,
+		"+1.001K":                    1001,
+		"+65.35KB":                   65350,
+		".82e1GB":                    8200000000,
+		"+.5K":                       500,
+		"1e3K":                       1000000,
+		"1E3":                        1000,
+		"1e+3K":                      1000000,
+		"5e-1K":                      500,
+		"5.e1K":                      50000,
+		"1.5e3K":                     1500000,
+		"+5K":                        5000,
+		"0e999K":                     0,
+		"0.000e5K":                   0,
+		"1e-999K":                    0,
+		"1e-35K":                     0,
+		"3e-17P":                     0,               // 0.03 of a byte
+		"3e-10P":                     300000,          // a 64-bit division
+		"12345678901234567890e-20P":  123456789012345, // two 64-bit divisions
+		"12345678901234567890e-25P":  1234567890,      // from 20 to 34 places
+		"18446744073709551615e-34P":  1,               // the widest product
+		"18446744073709551615e-35P":  0,               // past it
+		"1e-38K":                     0,               // the last place the two-step division covers
+		"1e-39K":                     0,               // the first it skips
+		"1e-40K":                     0,
+		"1e20":                       math.MaxInt64, // shift 20: past the table
+		"18446744073709551.7K":       math.MaxInt64, // the high word equals the divisor
+		"18446744073709551.6K":       math.MaxInt64, // fits a uint64, not an int
+		"99999999999999999999e-20K":  999,           // a dropped integer digit still counts
+		"100000000000000000000e-20K": 1000,
+		"1e18446744073709551616K":    math.MaxInt64, // an exponent that would wrap to 0
+		"1e-18446744073709551616K":   0,
+		"99999999999999999e5K":       math.MaxInt64, // overflows the power of ten, before the unit
+		"9e18K":                      math.MaxInt64, // overflows the 64-bit multiply
+		"1e999K":                     math.MaxInt64, // saturates at once
+		"1e19":                       math.MaxInt64, // past the largest int
+		"-5K":                        0,
+		"-5.0K":                      0,
+		"-0K":                        0,
+		"5+3K":                       0, // a sign is only valid first
+		"++5K":                       0,
+		"+-5K":                       0,
+		"1e3.5K":                     0, // the exponent is an integer
+		"1e3e3K":                     0,
+		"e3K":                        0,
+		"1.2.3K":                     0,
+		"1_000K":                     0,
+		"0x10K":                      0,
+		"1 000K":                     0,
+		"1e0000003":                  1000,
 	} {
-		require.Equal(t, want, ConvertToBytes(in), in)
+		require.Equal(t, min(want, math.MaxInt), int64(ConvertToBytes(in)), in)
 	}
+
+	// The largest int, reached from either side: 2^63 and 2^63-0.5 both land on it.
+	for _, in := range []string{
+		"+9223372036854775808.0",
+		"9223372036854775808.0e0",
+		"+9223372036854775807.5",
+		"9223372036854775.808e3",
+		"92233720368547758.08e2",
+	} {
+		require.Equal(t, math.MaxInt, ConvertToBytes(in), in)
+	}
+}
+
+// FuzzConvertToBytes checks the result is never negative and, for numbers the
+// oracle covers, exact.
+func FuzzConvertToBytes(f *testing.F) {
+	for _, s := range []string{
+		"42", "42B", "42KB", "1.5MiB", "+2.01k", ".82e1GB", "1e3K", "9223372036854775808.0",
+		"+9223372036854775807.5", "99999999999999999999K", "1.00000000000000000000001K", "-5K", "1e999K",
+	} {
+		f.Add(s)
+	}
+	f.Fuzz(func(t *testing.T, s string) {
+		got := ConvertToBytes(s)
+		require.GreaterOrEqual(t, got, 0, s)
+		if want, ok := exactSize(s); ok {
+			require.Equal(t, min(want, math.MaxInt), int64(got), s)
+		}
+	})
 }
 
 func Test_ConvertToBytes_DigitDetection(t *testing.T) {

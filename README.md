@@ -827,15 +827,14 @@ calling strconv directly (`0.12345678901234567`, `1e-300`).
 
 `ConvertToBytes` turns `42`, `42kb`, `1.5GiB` or `130.51MB` into a byte
 count: decimal units are powers of 1000, units with an `i` are powers of
-1024, and the result saturates at `math.MaxInt`. Digits with an optional
-point are scaled with 128-bit integer arithmetic, so the result is the
-exact product rounded down (`65.35KB` is 65350) and never passes through
-a `float64`. A number with a point and also a sign, an exponent, more
-than 19 places or more digits than a `uint64` holds is computed in
-floating point and can come out a byte short (`+2.01k` is 2009, not 2010);
-without a point a sign or an exponent is not recognized and gives 0, as
-does a negative size. A plain number or one followed by `B` is a single
-digit loop. `Benchmark_ConvertToBytes_Shapes` times each shape.
+1024, and the result saturates at `math.MaxInt`. The number may have a
+`+`, a point and an exponent (`+2.01k`, `1.5e3K`) and is scaled with
+128-bit integer arithmetic, so the result is the exact product rounded
+down (`65.35KB` is 65350) and never passes through a `float64`. Only
+digits past the 19 or 20 a `uint64` holds are dropped, so a longer number
+can come out a byte short. A negative size is 0. A plain number or one
+followed by `B` is a single digit loop. `Benchmark_ConvertToBytes_Shapes`
+times each shape.
 
 ## SWAR primitives
 

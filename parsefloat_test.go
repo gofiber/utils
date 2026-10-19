@@ -298,6 +298,32 @@ func FuzzParseFloat(f *testing.F) {
 	})
 }
 
+// Test_ParseFloat64_MatchesScaleExact pins the float64 fast path written out in
+// parseFloat to scaleExact's float64 case, which ParseFloat32 uses for wide
+// mantissas: where scaleExact applies, both give strconv's bits.
+func Test_ParseFloat64_MatchesScaleExact(t *testing.T) {
+	t.Parallel()
+
+	for _, m := range []uint64{1, 7, 123456789, 1<<24 - 1, 1 << 24, 1<<24 + 1, 1<<53 - 1, 1 << 53, 1<<53 + 1, 9999999999999999} {
+		for exp := int64(-25); exp <= 25; exp++ {
+			in := strconv.FormatUint(m, 10) + "e" + strconv.FormatInt(exp, 10)
+			want, err := strconv.ParseFloat(in, 64)
+			require.NoError(t, err, in)
+
+			got, err := ParseFloat64(in)
+			require.NoError(t, err, in)
+			require.Equal(t, math.Float64bits(want), math.Float64bits(got), in)
+
+			applies := m <= 1<<53 && exp >= -22 && exp <= 22
+			scaled, ok := scaleExact(m, exp, 64)
+			require.Equal(t, applies, ok, in)
+			if ok {
+				require.Equal(t, math.Float64bits(want), math.Float64bits(scaled), in)
+			}
+		}
+	}
+}
+
 // Benchmark_ParseFloat_Shapes covers the shapes that decide which path a value takes.
 func Benchmark_ParseFloat_Shapes(b *testing.B) {
 	for _, tc := range []struct{ name, in string }{
@@ -315,6 +341,15 @@ func Benchmark_ParseFloat_Shapes(b *testing.B) {
 			b.ReportAllocs()
 			for b.Loop() {
 				if _, err := ParseFloat64(tc.in); err != nil {
+					b.Fatal(err)
+				}
+			}
+		})
+		b.Run(tc.name+"/fiber_bytes", func(b *testing.B) {
+			in := []byte(tc.in)
+			b.ReportAllocs()
+			for b.Loop() {
+				if _, err := ParseFloat64(in); err != nil {
 					b.Fatal(err)
 				}
 			}

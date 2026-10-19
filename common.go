@@ -15,7 +15,6 @@ import (
 	"reflect"
 	"runtime"
 	"slices"
-	"strings"
 
 	"github.com/google/uuid"
 )
@@ -131,10 +130,10 @@ func IncrementIPRange(ip net.IP) {
 // Decimal units are powers of 1000 (42k = 42000); binary units with an 'i' infix
 // are powers of 1024 (42Ki = 43008). Note that ByteSize formats with powers of 1024,
 // so use binary suffixes for a lossless round-trip.
-// Digits with an optional point give the exact product, rounded down and capped at
-// math.MaxInt. A number with a point and also a sign, an exponent or more than 19
-// places is computed in floating point and can come out a byte short.
-// Returns 0 if the string is unrecognized or negative.
+// The number may have a '+', a point and an exponent (1.5e3K). The result is its
+// exact product with the unit, rounded down and capped at math.MaxInt; digits past
+// the 19 or 20 a uint64 holds are dropped, so a longer number can come out a byte
+// short. Returns 0 if the string is unrecognized or negative.
 func ConvertToBytes(humanReadableString string) int {
 	strLen := len(humanReadableString)
 	if strLen == 0 {
@@ -218,88 +217,123 @@ func ConvertToBytes(humanReadableString string) int {
 		}
 	}
 
-	// Scale plain sizes in integers: a float product truncates 1.001K to 1000.
-	if size, ok := scaleDecimal(numPart, mult); ok {
-		if size > uint64(math.MaxInt) {
-			return math.MaxInt
-		}
-		return int(size)
-	}
-
-	// With a point, what is left (a sign, an exponent, long numbers) is floating
-	// point; without one only a ParseUint error is left.
-	var size float64
-	if strings.IndexByte(numPart, '.') >= 0 {
-		var err error
-		size, err = ParseFloat64(numPart)
-		if err != nil || size < 0 {
-			return 0
-		}
-	} else {
-		i64, err := ParseUint(numPart)
-		if err != nil {
-			return 0
-		}
-		size = float64(i64)
-	}
-	size *= float64(mult)
-
-	if size > float64(math.MaxInt) {
-		return math.MaxInt
-	}
-
-	return int(size)
+	// Scale in integers: a float product truncates 1.001K to 1000.
+	return scaleDecimal(numPart, mult)
 }
 
-// scaleDecimal returns floor(s * mult) exactly, saturating at math.MaxUint64.
-// s is digits with an optional point (no sign or exponent, at most 19 places,
-// a 64-bit mantissa); any other s returns false.
-func scaleDecimal(s string, mult uint64) (uint64, bool) {
+// maxExponent bounds the exponent scaleDecimal reads: a power of ten this large
+// already saturates or vanishes, and the bound keeps the arithmetic from overflowing.
+const maxExponent = 1 << 20
+
+// scaleDecimal returns floor(s * mult) exactly, capped at math.MaxInt, or 0 if s
+// is not a number or is negative. s is digits with an optional '+', point and
+// exponent. A mantissa past what a uint64 holds drops its extra digits (integer
+// digits still count towards the magnitude), so such a number can come out a byte
+// short.
+func scaleDecimal(s string, mult uint64) int {
 	var mantissa uint64
-	digits, places := 0, -1 // places counts the digits after the point, -1 before it
-	for i := range len(s) {
+	places, dropped, exp := -1, 0, 0 // places counts the digits after the point, -1 before it
+scan:
+	for i := 0; i < len(s); i++ {
 		c := s[i]
 		switch {
 		case c-'0' <= 9:
 			d := uint64(c - '0')
 			if mantissa > maxUint64Cutoff || (mantissa == maxUint64Cutoff && d > maxUint64Cutlim) {
-				return 0, false
-			}
-			mantissa = mantissa*10 + d
-			digits++
-			if places >= 0 {
-				places++
+				if places < 0 {
+					dropped++
+				}
+			} else {
+				mantissa = mantissa*10 + d
+				if places >= 0 {
+					places++
+				}
 			}
 		case c == '.' && places < 0:
 			places = 0
+		case c == 'e' || c == 'E':
+			var ok bool
+			if exp, ok = parseExponent(s[i+1:]); !ok {
+				return 0
+			}
+			break scan
+		case c == '+' && i == 0:
 		default:
-			return 0, false
+			return 0
 		}
 	}
-	if digits == 0 {
-		return 0, false
-	}
-	places = max(places, 0)
-	if places >= len(pow10) {
-		return 0, false
+	if mantissa == 0 {
+		return 0
 	}
 
-	// mantissa * mult / 10^places. A 128-bit division costs several times a
-	// 64-bit one, so use it only when the product needs it.
-	hi, lo := bits.Mul64(mantissa, mult)
-	if places == 0 {
-		if hi != 0 {
-			return math.MaxUint64, true
+	// The value is mantissa * 10^shift * mult. Past 10^19 a nonzero mantissa
+	// overflows a uint64, and a 128-bit division costs several times a 64-bit
+	// one, so each case does only the work it needs.
+	shift := exp + dropped - max(places, 0)
+	if shift > 0 {
+		if shift >= len(pow10) {
+			return math.MaxInt
 		}
-		return lo, true
+		hi, lo := bits.Mul64(mantissa, pow10[shift])
+		if hi != 0 {
+			return math.MaxInt
+		}
+		mantissa = lo
 	}
-	divisor := pow10[places]
-	if hi == 0 {
-		return lo / divisor, true
+	hi, lo := bits.Mul64(mantissa, mult)
+	if shift >= 0 {
+		if hi != 0 || lo > uint64(math.MaxInt) {
+			return math.MaxInt
+		}
+		return int(lo)
 	}
-	if hi >= divisor { // the quotient needs more than 64 bits
-		return math.MaxUint64, true
+
+	var quotient uint64
+	if places := -shift; places < len(pow10) {
+		divisor := pow10[places]
+		switch {
+		case hi == 0:
+			quotient = lo / divisor
+		case hi >= divisor: // the quotient needs more than 64 bits
+			return math.MaxInt
+		default:
+			quotient, _ = bits.Div64(hi, lo, divisor)
+		}
+	} else if places < 2*len(pow10)-1 {
+		// The product is below 2^114, so hi is below 10^19 and one division by
+		// 10^19 leaves 51 bits to divide by the rest.
+		quotient, _ = bits.Div64(hi, lo, pow10[len(pow10)-1])
+		quotient /= pow10[places-(len(pow10)-1)]
+	} // else the product is below 10^places
+	if quotient > uint64(math.MaxInt) {
+		return math.MaxInt
 	}
-	quotient, _ := bits.Div64(hi, lo, divisor)
-	return quotient, true
+	return int(quotient)
+}
+
+// parseExponent reads the part of a number after its 'e': an optional sign and
+// at least one digit, saturating at maxExponent.
+func parseExponent(t string) (int, bool) {
+	neg := false
+	if len(t) > 0 && (t[0] == '+' || t[0] == '-') {
+		neg = t[0] == '-'
+		t = t[1:]
+	}
+	if len(t) == 0 {
+		return 0, false
+	}
+	exp := 0
+	for i := range len(t) {
+		c := t[i] - '0'
+		if c > 9 {
+			return 0, false
+		}
+		if exp < maxExponent {
+			exp = exp*10 + int(c)
+		}
+	}
+	if neg {
+		exp = -exp
+	}
+	return exp, true
 }
