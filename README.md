@@ -832,9 +832,9 @@ count: decimal units are powers of 1000, units with an `i` are powers of
 128-bit integer arithmetic, so the result is the exact product rounded
 down (`65.35KB` is 65350) and never passes through a `float64`. Only
 digits past the 19 or 20 a `uint64` holds are dropped, so a longer number
-can come out a byte short. A negative size is 0. A plain number or one
-followed by `B` is a single digit loop. `Benchmark_ConvertToBytes_Shapes`
-times each shape.
+can come out a byte short. A negative size is 0. A whole number, with or
+without a unit, is one digit loop and a multiplication.
+`Benchmark_ConvertToBytes_Shapes` times each shape.
 
 ## SWAR primitives
 

@@ -217,6 +217,15 @@ func ConvertToBytes(humanReadableString string) int {
 		}
 	}
 
+	// A whole number is the digits read above, already capped.
+	if lastNumberPos == i-1 {
+		hi, lo := bits.Mul64(sizeFast, mult)
+		if hi != 0 || lo > maxInt {
+			return math.MaxInt
+		}
+		return int(lo)
+	}
+
 	// Scale in integers: a float product truncates 1.001K to 1000.
 	return scaleDecimal(numPart, mult)
 }
