@@ -130,9 +130,9 @@ func IncrementIPRange(ip net.IP) {
 // Decimal units are powers of 1000 (42k = 42000); binary units with an 'i' infix
 // are powers of 1024 (42Ki = 43008). Note that ByteSize formats with powers of 1024,
 // so use binary suffixes for a lossless round-trip.
-// The number may have a '+', a point and an exponent (1.5e3K). The result is exact,
-// rounded down and capped at math.MaxInt; digits past the 19 or 20 a uint64 holds
-// are dropped. Returns 0 if the string is unrecognized or negative.
+// The number may have a '+', a point and an exponent (1.5e3K), with any number of
+// digits. The result is the exact product rounded down, capped at math.MaxInt. It is
+// 0 if there is no number or it is negative or malformed; an unknown unit counts as bytes.
 func ConvertToBytes(humanReadableString string) int {
 	strLen := len(humanReadableString)
 	if strLen == 0 {
@@ -171,15 +171,15 @@ func ConvertToBytes(humanReadableString string) int {
 	// Also identify the unit prefix position in the same pass
 	lastNumberPos := -1
 	unitPrefixPos := 0
-	for i := strLen - 1; i >= 0; i-- {
-		c := humanReadableString[i]
+	for j := strLen - 1; j >= 0; j-- {
+		c := humanReadableString[j]
 		if c >= '0' && c <= '9' {
-			lastNumberPos = i
+			lastNumberPos = j
 			break
 		}
 		// Track the first letter position (unit prefix) from the end
 		if (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') {
-			unitPrefixPos = i
+			unitPrefixPos = j
 		}
 	}
 
@@ -229,62 +229,67 @@ func ConvertToBytes(humanReadableString string) int {
 	return scaleDecimal(numPart, mult)
 }
 
-// maxExponent caps the exponent scaleDecimal reads; a power of ten this large
-// saturates or vanishes anyway.
-const maxExponent = 1 << 20
-
 // scaleDecimal returns floor(s * mult) capped at math.MaxInt, or 0 if s is not a
-// number or is negative. s is digits with an optional '+', point and exponent. The
-// mantissa is the longest prefix of digits a uint64 holds; the rest are dropped,
-// though integer digits still count towards the magnitude.
+// number or is negative. s is digits with an optional '+', point and exponent.
 func scaleDecimal(s string, mult uint64) int {
-	var mantissa, kept uint64
-	places, dropped, exp := -1, 0, 0 // places counts the digits after the point, -1 before it
+	var mantissa uint64
+	var exp int64
+	end := len(s)            // where the digits end and the exponent starts
+	places, dropped := -1, 0 // places counts the digits after the point, -1 before it
+	droppedFrac := 0
+	inexact := false // a nonzero digit did not fit the mantissa
 scan:
 	for i := 0; i < len(s); i++ {
 		c := s[i]
 		switch {
 		case c-'0' <= 9:
-			d := uint64(c - '0')
-			if digitFits(mantissa, d) {
-				mantissa = mantissa*10 + d
+			switch {
+			case mantissa < maxUint64Cutoff:
+				mantissa = mantissa*10 + uint64(c-'0')
 				if places >= 0 {
 					places++
 				}
-			} else {
-				if kept == 0 {
-					// Drop every later digit too: park the mantissa behind a maximal one.
-					kept, mantissa = mantissa, math.MaxUint64
-				}
-				if places < 0 {
-					dropped++
-				}
+			case places < 0:
+				dropped++ // an integer digit still scales the number
+				inexact = inexact || c != '0'
+			default:
+				droppedFrac++
+				inexact = inexact || c != '0'
 			}
 		case c == '.' && places < 0:
 			places = 0
 		case c == 'e' || c == 'E':
 			var ok bool
-			if exp, ok = parseExponent(s[i+1:]); !ok {
+			if exp, ok = parseExp(s, i+1); !ok {
 				return 0
 			}
+			end = i
 			break scan
 		case c == '+' && i == 0:
 		default:
 			return 0
 		}
 	}
-	if kept != 0 {
-		mantissa = kept
-	}
 	if mantissa == 0 {
 		return 0
 	}
 
-	// The value is mantissa * 10^shift * mult. A 128-bit division costs several
-	// times a 64-bit one, so each case does only the work it needs.
-	shift := exp + dropped - max(places, 0)
+	// The mantissa holds a prefix of the digits, so the number lies in
+	// [mantissa, mantissa+1) * 10^shift. If both ends give the same result, so does it.
+	shift := exp + int64(dropped) - int64(max(places, 0))
+	n := scaleMantissa(mantissa, shift, mult)
+	if inexact && n != scaleMantissa(mantissa+1, shift, mult) {
+		return scaleDigits(s, end, int64(droppedFrac)-shift+int64(dropped), mult)
+	}
+	return n
+}
+
+// scaleMantissa returns floor(mantissa * 10^shift * mult) capped at math.MaxInt.
+// A 128-bit division costs several times a 64-bit one, so each case does only the
+// work it needs.
+func scaleMantissa(mantissa uint64, shift int64, mult uint64) int {
 	if shift > 0 {
-		if shift >= len(pow10) {
+		if shift >= int64(len(pow10)) {
 			return math.MaxInt
 		}
 		hi, lo := bits.Mul64(mantissa, pow10[shift])
@@ -302,8 +307,8 @@ scan:
 	}
 
 	var quotient uint64
-	if places := -shift; places < len(pow10) {
-		divisor := pow10[places]
+	if down := -shift; down < int64(len(pow10)) {
+		divisor := pow10[down]
 		switch {
 		case hi == 0:
 			quotient = lo / divisor
@@ -312,40 +317,48 @@ scan:
 		default:
 			quotient, _ = bits.Div64(hi, lo, divisor)
 		}
-	} else if places < 2*len(pow10)-1 {
+	} else if down < int64(2*len(pow10)-1) {
 		// The product is below 2^114, so one division by 10^19 cannot overflow
 		// and leaves 51 bits.
 		quotient, _ = bits.Div64(hi, lo, pow10[len(pow10)-1])
-		quotient /= pow10[places-(len(pow10)-1)]
-	} // else the product is below 10^places
+		quotient /= pow10[down-int64(len(pow10)-1)]
+	} // else the product is below 10^down
 	if quotient > uint64(math.MaxInt) {
 		return math.MaxInt
 	}
 	return int(quotient)
 }
 
-// parseExponent reads what follows the 'e': a sign and digits, saturating at maxExponent.
-func parseExponent(t string) (int, bool) {
-	neg := false
-	if len(t) > 0 && (t[0] == '+' || t[0] == '-') {
-		neg = t[0] == '-'
-		t = t[1:]
+// scaleDigits multiplies the digits of s[:end] by mult, one at a time from the
+// last, and keeps the digits of the product from the down-th on: the integer part
+// of the number, whose point is down places from the end.
+func scaleDigits(s string, end int, down int64, mult uint64) int {
+	if down <= 0 {
+		return math.MaxInt // the digits are a whole number of 10^19 or more
 	}
-	if len(t) == 0 {
-		return 0, false
-	}
-	exp := 0
-	for i := range len(t) {
-		c := t[i] - '0'
-		if c > 9 {
-			return 0, false
+	var result, carry uint64
+	pos := int64(0) // the product digit made next
+	for i := end - 1; i >= 0 || carry != 0; i-- {
+		var d uint64
+		if i >= 0 {
+			c := s[i] - '0'
+			if c > 9 { // the point or the sign
+				continue
+			}
+			d = uint64(c)
 		}
-		if exp < maxExponent {
-			exp = exp*10 + int(c)
+		t := d*mult + carry
+		carry = t / 10
+		if digit := t % 10; digit != 0 && pos >= down {
+			if pos-down >= int64(len(pow10)-1) { // 10^19 is more than math.MaxInt
+				return math.MaxInt
+			}
+			result += digit * pow10[pos-down] // below 2^64 even after the last sum
+			if result > uint64(math.MaxInt) {
+				return math.MaxInt
+			}
 		}
+		pos++
 	}
-	if neg {
-		exp = -exp
-	}
-	return exp, true
+	return int(result)
 }

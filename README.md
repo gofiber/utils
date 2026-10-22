@@ -834,12 +834,14 @@ and halfway points.
 `ConvertToBytes` turns `42`, `42kb`, `1.5GiB` or `130.51MB` into a byte
 count: decimal units are powers of 1000, units with an `i` are powers of
 1024, and the result saturates at `math.MaxInt`. The number may have a
-`+`, a point and an exponent (`+2.01k`, `1.5e3K`) and is scaled with
-128-bit integer arithmetic, so the result is the exact product rounded
-down (`65.35KB` is 65350) and never passes through a `float64`. Only
-digits past the 19 or 20 a `uint64` holds are dropped, so a longer number
-can come out a byte short. A negative size is 0. A whole number, with or
-without a unit, is one digit loop and a multiplication.
+`+`, a point and an exponent (`+2.01k`, `1.5e3K`), with any number of
+digits, and is scaled with 128-bit integer arithmetic, so the result is the
+exact product rounded down (`65.35KB` is 65350) and never passes through a
+`float64`. A number with more digits than a `uint64` holds is scaled from its
+first digits when they and the same digits plus one agree, and otherwise
+(`0.000000000931322574615478515625Gi` is exactly one byte) from all of them.
+A negative or malformed size is 0, and an unknown unit counts as bytes. A
+whole number, with or without a unit, is one digit loop and a multiplication.
 `Benchmark_ConvertToBytes_Shapes` times each shape.
 
 ## SWAR primitives

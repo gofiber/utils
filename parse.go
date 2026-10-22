@@ -14,11 +14,6 @@ const (
 	maxUint64Cutlim = math.MaxUint64 % 10
 )
 
-// digitFits reports whether n*10+d fits in a uint64.
-func digitFits(n, d uint64) bool {
-	return n < maxUint64Cutoff || (n == maxUint64Cutoff && d <= maxUint64Cutlim)
-}
-
 type Signed interface {
 	~int | ~int8 | ~int16 | ~int32 | ~int64
 }
