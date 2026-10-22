@@ -227,11 +227,11 @@ const maxExponent = 1 << 20
 
 // scaleDecimal returns floor(s * mult) exactly, capped at math.MaxInt, or 0 if s
 // is not a number or is negative. s is digits with an optional '+', point and
-// exponent. A mantissa past what a uint64 holds drops its extra digits (integer
-// digits still count towards the magnitude), so such a number can come out a byte
-// short.
+// exponent. The mantissa is the longest run of leading digits a uint64 holds; the
+// digits after it are dropped (integer digits still count towards the magnitude),
+// so such a number can come out a byte short.
 func scaleDecimal(s string, mult uint64) int {
-	var mantissa uint64
+	var mantissa, kept uint64
 	places, dropped, exp := -1, 0, 0 // places counts the digits after the point, -1 before it
 scan:
 	for i := 0; i < len(s); i++ {
@@ -240,6 +240,11 @@ scan:
 		case c-'0' <= 9:
 			d := uint64(c - '0')
 			if mantissa > maxUint64Cutoff || (mantissa == maxUint64Cutoff && d > maxUint64Cutlim) {
+				if kept == 0 {
+					// Nothing may follow a dropped digit, not even one that would fit: park
+					// the mantissa and let a maximal one turn every later digit away.
+					kept, mantissa = mantissa, math.MaxUint64
+				}
 				if places < 0 {
 					dropped++
 				}
@@ -261,6 +266,9 @@ scan:
 		default:
 			return 0
 		}
+	}
+	if kept != 0 {
+		mantissa = kept
 	}
 	if mantissa == 0 {
 		return 0
