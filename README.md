@@ -813,15 +813,18 @@ bit for bit, for an optional sign, digits with an optional point and an
 optional exponent, in strings or byte slices. The spellings strconv adds
 (`inf`, `nan`, hexadecimal floats, underscores) are syntax errors, a value
 too large for the type is a range error, and every error comes with a
-zero result. A mantissa that fits in 53 bits with an exponent of at most
-22 either way is one multiplication or division by an exact power of ten,
-which rounds correctly (Clinger's fast path, strconv's own first step),
-and parses about twice as fast as strconv. Anything else (mantissas past
-15 or 16 digits, larger exponents) is handed to `strconv.ParseFloat` once
-the string has been scanned, so it takes 1.3 to 1.6 times as long as
-calling strconv directly (`0.12345678901234567`, `1e-300`).
-`Benchmark_ParseFloat_Shapes` times each shape against strconv (benchstat,
-15 runs, Intel Xeon @ 2.10GHz).
+zero result. A mantissa that fits in 53 bits (24 for `ParseFloat32`) with
+an exponent of at most 22 (10) either way is one multiplication or division
+by an exact power of ten, which rounds correctly (Clinger's fast path,
+strconv's own first step). Longer mantissas and larger exponents
+(`0.12345678901234567`, `1e-300`) go through the Eisel-Lemire algorithm,
+strconv's second step: one 128-bit multiplication by a tabulated power of
+ten. Together they parse 1.8 to 2.7 times as fast as strconv
+(`Benchmark_ParseFloat_Shapes`, benchstat, 15 runs, Intel Xeon @ 2.10GHz).
+Only what neither can round is handed to `strconv.ParseFloat`: a subnormal
+or overflowing result, a product too close to a halfway point for the
+approximation, and a number that lost a nonzero digit because it has more
+than a `uint64` holds.
 
 ## Size strings
 

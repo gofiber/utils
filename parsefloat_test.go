@@ -298,27 +298,28 @@ func FuzzParseFloat(f *testing.F) {
 	})
 }
 
-// Test_ParseFloat64_MatchesScaleExact pins the float64 fast path written out in
-// parseFloat to scaleExact's float64 case, which ParseFloat32 uses for wide
-// mantissas: where scaleExact applies, both give strconv's bits.
-func Test_ParseFloat64_MatchesScaleExact(t *testing.T) {
+// Test_ParseFloat_ExactPathBounds walks both sides of the edges of the exact
+// path (2^24 and 2^53 for the mantissa, 10 and 22 for the exponent) and checks the
+// parsers and scaleExact against strconv.
+func Test_ParseFloat_ExactPathBounds(t *testing.T) {
 	t.Parallel()
 
 	for _, m := range []uint64{1, 7, 123456789, 1<<24 - 1, 1 << 24, 1<<24 + 1, 1<<53 - 1, 1 << 53, 1<<53 + 1, 9999999999999999} {
 		for exp := int64(-25); exp <= 25; exp++ {
 			in := strconv.FormatUint(m, 10) + "e" + strconv.FormatInt(exp, 10)
-			want, err := strconv.ParseFloat(in, 64)
-			require.NoError(t, err, in)
+			requireFloatMatchesStrconv(t, in)
 
-			got, err := ParseFloat64(in)
+			want64, err := strconv.ParseFloat(in, 64)
 			require.NoError(t, err, in)
-			require.Equal(t, math.Float64bits(want), math.Float64bits(got), in)
-
-			applies := m <= 1<<53 && exp >= -22 && exp <= 22
-			scaled, ok := scaleExact(m, exp, 64)
-			require.Equal(t, applies, ok, in)
-			if ok {
-				require.Equal(t, math.Float64bits(want), math.Float64bits(scaled), in)
+			if got, ok := scaleExact(m, exp, 64); ok {
+				require.Equal(t, math.Float64bits(want64), math.Float64bits(got), "scaleExact(%s, 64)", in)
+			}
+			want32, err := strconv.ParseFloat(in, 32)
+			if err != nil {
+				continue
+			}
+			if got, ok := scaleExact(m, exp, 32); ok {
+				require.Equal(t, math.Float64bits(want32), math.Float64bits(got), "scaleExact(%s, 32)", in)
 			}
 		}
 	}

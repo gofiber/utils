@@ -13,6 +13,11 @@ const (
 	maxUint64Cutlim = math.MaxUint64 % 10
 )
 
+// digitFits reports whether n*10+d fits in a uint64.
+func digitFits(n, d uint64) bool {
+	return n < maxUint64Cutoff || (n == maxUint64Cutoff && d <= maxUint64Cutlim)
+}
+
 type Signed interface {
 	~int | ~int8 | ~int16 | ~int32 | ~int64
 }
@@ -329,8 +334,8 @@ const (
 // parseFloat parses a decimal ASCII string or byte slice into the nearest float64
 // (for bitSize 32, the float64 holding the nearest float32), as strconv.ParseFloat
 // does. It supports optional sign, fractional part and exponent. It returns
-// (0, error) on error or overflow. Inputs that need more than one exact scaling
-// step go to strconv.
+// (0, error) on error or overflow. Inputs that scaleExact cannot round, or that
+// lost a nonzero digit, go to strconv.
 func parseFloat[S byteSeq](fn string, bitSize int, s S) (float64, error) {
 	if len(s) == 0 {
 		return 0, &strconv.NumError{Func: fn, Num: "", Err: strconv.ErrSyntax}
@@ -361,11 +366,11 @@ func parseFloat[S byteSeq](fn string, bitSize int, s S) (float64, error) {
 		if c > 9 {
 			break
 		}
-		if mantissa > maxUint64Cutoff || (mantissa == maxUint64Cutoff && uint64(c) > maxUint64Cutlim) {
+		if digitFits(mantissa, uint64(c)) {
+			mantissa = mantissa*10 + uint64(c)
+		} else {
 			exp10++
 			truncated = truncated || c != 0
-		} else {
-			mantissa = mantissa*10 + uint64(c)
 		}
 		digits++
 		i++
@@ -378,7 +383,7 @@ func parseFloat[S byteSeq](fn string, bitSize int, s S) (float64, error) {
 			if c > 9 {
 				break
 			}
-			if mantissa < maxUint64Cutoff || (mantissa == maxUint64Cutoff && uint64(c) <= maxUint64Cutlim) {
+			if digitFits(mantissa, uint64(c)) {
 				mantissa = mantissa*10 + uint64(c)
 				exp10--
 			} else {
@@ -440,17 +445,12 @@ func parseFloat[S byteSeq](fn string, bitSize int, s S) (float64, error) {
 		return 0, nil
 	}
 
+	// Only an exact mantissa is scaled here: a dropped nonzero digit can decide
+	// the rounding, so strconv settles those from the whole string.
 	if !truncated {
-		// scaleExact's float64 case, written out on the hot path;
-		// Test_ParseFloat64_MatchesScaleExact keeps the two in step.
-		if bitSize == 64 && mantissa <= maxExactMantissa64 && exp > -int64(len(float64pow10)) && exp < int64(len(float64pow10)) {
-			f := float64(mantissa)
-			switch {
-			case exp > 0:
-				f *= float64pow10[exp]
-			case exp < 0:
-				f /= float64pow10[-exp]
-			}
+		// The common case, ahead of scaleExact, which would do the same after a call.
+		if bitSize == 64 && exactFloat64(mantissa, exp) {
+			f := scale64(mantissa, exp)
 			if neg {
 				f = -f
 			}
@@ -474,8 +474,26 @@ func parseFloat[S byteSeq](fn string, bitSize int, s S) (float64, error) {
 	return f, nil
 }
 
-// scaleExact returns mantissa * 10^exp rounded once to bitSize bits, or false
-// if that takes more than one exact operation. mantissa must not be zero.
+// exactFloat64 reports whether mantissa * 10^exp is one correctly rounded float64
+// operation (Clinger's fast path), which scale64 then performs.
+func exactFloat64(mantissa uint64, exp int64) bool {
+	return mantissa <= maxExactMantissa64 && exp > -int64(len(float64pow10)) && exp < int64(len(float64pow10))
+}
+
+// scale64 returns mantissa * 10^exp for a pair that exactFloat64 accepts.
+func scale64(mantissa uint64, exp int64) float64 {
+	f := float64(mantissa)
+	switch {
+	case exp > 0:
+		f *= float64pow10[exp]
+	case exp < 0:
+		f /= float64pow10[-exp]
+	}
+	return f
+}
+
+// scaleExact returns mantissa * 10^exp rounded once to bitSize bits, or false if
+// neither one exact operation nor Eisel-Lemire can do it. mantissa must not be zero.
 func scaleExact(mantissa uint64, exp int64, bitSize int) (float64, bool) {
 	if bitSize == 32 && mantissa <= maxExactMantissa32 && exp > -int64(len(float32pow10)) && exp < int64(len(float32pow10)) {
 		f := float32(mantissa)
@@ -488,23 +506,16 @@ func scaleExact(mantissa uint64, exp int64, bitSize int) (float64, bool) {
 		return float64(f), true
 	}
 
-	if mantissa > maxExactMantissa64 || exp <= -int64(len(float64pow10)) || exp >= int64(len(float64pow10)) {
-		return 0, false
+	if !exactFloat64(mantissa, exp) {
+		return eiselLemire(mantissa, exp, bitSize)
 	}
-	f := float64(mantissa)
-	switch {
-	case exp > 0:
-		f *= float64pow10[exp]
-	case exp < 0:
-		f /= float64pow10[-exp]
-	}
+	f := scale64(mantissa, exp)
 	if bitSize == 32 {
 		// Rounding f again is exact unless it is a float32 halfway point, where
-		// the decimal may lie on either side. Those, and values outside the
-		// normal float32 range, are left to strconv.
+		// the decimal may lie on either side, or outside the normal float32 range.
 		const halfway = 1 << 28 // the 29 mantissa bits a float32 drops, half set
 		if f < 0x1p-126 || f > math.MaxFloat32 || math.Float64bits(f)&(1<<29-1) == halfway {
-			return 0, false
+			return eiselLemire(mantissa, exp, bitSize)
 		}
 		return float64(float32(f)), true
 	}

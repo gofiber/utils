@@ -248,7 +248,12 @@ scan:
 		switch {
 		case c-'0' <= 9:
 			d := uint64(c - '0')
-			if mantissa > maxUint64Cutoff || (mantissa == maxUint64Cutoff && d > maxUint64Cutlim) {
+			if digitFits(mantissa, d) {
+				mantissa = mantissa*10 + d
+				if places >= 0 {
+					places++
+				}
+			} else {
 				if kept == 0 {
 					// Nothing may follow a dropped digit, not even one that would fit: park
 					// the mantissa and let a maximal one turn every later digit away.
@@ -256,11 +261,6 @@ scan:
 				}
 				if places < 0 {
 					dropped++
-				}
-			} else {
-				mantissa = mantissa*10 + d
-				if places >= 0 {
-					places++
 				}
 			}
 		case c == '.' && places < 0:
