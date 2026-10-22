@@ -99,7 +99,7 @@ func Test_ParseFloat_MatchesStrconv_Corpus(t *testing.T) {
 }
 
 // genFloatString draws a string of the grammar with digit counts around the
-// 15, 17 and 19 digit limits and exponents that reach the fallback.
+// 15, 17 and 19 digit limits.
 func genFloatString(r *rand.Rand) string {
 	var b strings.Builder
 	switch r.IntN(4) {
@@ -183,8 +183,7 @@ func Test_ParseFloat_ShortestRoundTrip(t *testing.T) {
 }
 
 // Test_ParseFloat32_Midpoints checks decimals around the halfway points between
-// float32s, where rounding through a float64 can pick the wrong side. Each
-// midpoint is cut to 12 to 17 digits, with the neighboring last digits too.
+// float32s, cut to 12 to 17 digits with the neighboring last digits.
 func Test_ParseFloat32_Midpoints(t *testing.T) {
 	t.Parallel()
 
@@ -298,9 +297,8 @@ func FuzzParseFloat(f *testing.F) {
 	})
 }
 
-// Test_ParseFloat_ExactPathBounds walks both sides of the edges of the exact
-// path (2^24 and 2^53 for the mantissa, 10 and 22 for the exponent) and checks the
-// parsers and scaleExact against strconv.
+// Test_ParseFloat_ExactPathBounds checks both sides of the edges of the exact path
+// (2^24 and 2^53, exponents 10 and 22) against strconv.
 func Test_ParseFloat_ExactPathBounds(t *testing.T) {
 	t.Parallel()
 

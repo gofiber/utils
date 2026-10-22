@@ -38,14 +38,11 @@ import (
 
 //go:generate go run pow10gen.go
 
-// eiselLemire returns man * 10^exp10 rounded to the nearest float64, or to the
-// nearest float32 (as a float64) when bitSize is 32. It reports false when it
-// cannot tell how to round: the exponent is outside the table, the result is
-// subnormal or overflows, or the product is too close to a float or to a
-// halfway point between two for a 128-bit approximation to say on which side it
-// lies. man must not be zero.
-//
-// See https://nigeltao.github.io/blog/2020/eisel-lemire.html for how it works.
+// eiselLemire returns man * 10^exp10 rounded to the nearest float64 (float32 when
+// bitSize is 32, held in a float64), or false when it cannot tell how to round: the
+// exponent is outside the table, the result is subnormal or overflows, or the product
+// is too close to a float or a halfway point for the 128-bit approximation.
+// man must not be zero. See https://nigeltao.github.io/blog/2020/eisel-lemire.html.
 func eiselLemire(man uint64, exp10 int64, bitSize int) (float64, bool) {
 	if exp10 < pow10Min || exp10 > pow10Max {
 		return 0, false
@@ -54,8 +51,8 @@ func eiselLemire(man uint64, exp10 int64, bitSize int) (float64, bool) {
 	if bitSize == 32 {
 		mantBits, bias = 23, 127
 	}
-	// The product keeps mantBits+2 bits (the rounding bit included); the bits
-	// below them, lowBits of them, say whether the approximation is decisive.
+	// Keep mantBits+2 bits of the product (one for rounding); the lowBits below
+	// them tell whether the approximation is decisive.
 	lowBits := 61 - mantBits
 	lowMask := uint64(1)<<lowBits - 1
 
@@ -64,9 +61,8 @@ func eiselLemire(man uint64, exp10 int64, bitSize int) (float64, bool) {
 	man <<= clz
 	exp2 := uint64(217706*exp10>>16+64) + bias - uint64(clz)
 
-	// Multiply by the top 64 bits of the power. If the low bits of the product
-	// are all ones, the bits dropped from the power could carry into the
-	// result, so multiply by them too.
+	// Multiply by the top 64 bits of the power; if the low bits of the product are
+	// all ones, the dropped bits could carry into the result, so use them too.
 	pow := &pow10Tab[exp10-pow10Min]
 	hi, lo := bits.Mul64(man, pow.hi)
 	if hi&lowMask == lowMask && lo+man < man {
@@ -81,15 +77,13 @@ func eiselLemire(man uint64, exp10 int64, bitSize int) (float64, bool) {
 		hi, lo = mergedHi, mergedLo
 	}
 
-	// Keep mantBits+2 bits. The product has 127 or 128 bits, so the shift and
-	// the exponent depend on the top one.
+	// The product has 127 or 128 bits, so the shift and the exponent depend on the top one.
 	msb := hi >> 63
 	m := hi >> (msb + uint64(lowBits))
 	exp2 -= 1 ^ msb
 
-	// With the rounding bit set and an even mantissa, an exact halfway product
-	// rounds down and anything above it rounds up. The approximation cannot
-	// tell them apart.
+	// With the rounding bit set and an even mantissa, an exact tie rounds down and
+	// anything above rounds up; the approximation cannot tell which this is.
 	if lo == 0 && hi&lowMask == 0 && m&3 == 1 {
 		return 0, false
 	}
@@ -101,8 +95,7 @@ func eiselLemire(man uint64, exp10 int64, bitSize int) (float64, bool) {
 		exp2++
 	}
 
-	// exp2 is unsigned: zero or below wrapped around, and 2*bias+1 or more is
-	// infinity or NaN. Both mean the result is not a normal number.
+	// exp2 is unsigned, so zero or below wrapped; 2*bias+1 or more is Inf or NaN.
 	if exp2-1 >= 2*bias {
 		return 0, false
 	}

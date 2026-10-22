@@ -259,12 +259,9 @@ var (
 )
 
 // modelSize is the oracle for ConvertToBytes: the size s denotes, computed with
-// big.Int and big.Rat and capped at the largest int64. The mantissa is the
-// longest run of leading digits that fits a uint64; the digits after it are
-// dropped, though dropped integer digits still count towards the magnitude. So
-// the result is exact for up to 19 significant digits and is what the godoc
-// promises beyond. The second result is false unless s is a number followed by
-// one of sizeUnits.
+// big.Int and big.Rat and capped at the largest int64. The mantissa is the longest
+// prefix of digits that fits a uint64; integer digits after it still count towards
+// the magnitude. The second result is false unless s is a number and a known unit.
 func modelSize(s string) (int64, bool) {
 	m := sizeShape.FindStringSubmatch(s)
 	if m == nil {
@@ -410,11 +407,11 @@ func Test_ConvertToBytes_SignAndExponent(t *testing.T) {
 		"1e18446744073709551616K":            math.MaxInt64, // an exponent that would wrap to 0
 		"1e-18446744073709551616K":           0,
 		"99999999999999999e5K":               math.MaxInt64,       // overflows the power of ten, before the unit
-		"184467440737095516.161e-5Mi":        1934281311383406678, // 1844674407370955161 fills a uint64: the 6 is dropped, so the 1 is too
+		"184467440737095516.161e-5Mi":        1934281311383406678, // the 6 does not fit, so the 1 after it is dropped too
 		"1844674407370955.1616199e-3Mi":      1934281311383406678,
 		"184467440737095.51616199e-2Mi":      1934281311383406678,
-		"0.000000000931322574615478515625Gi": 0,                   // 21 digits: the last two are dropped, so 1 byte reads as 0
-		"1844674407370955.1615Ki":            1888946593147858085, // 18446744073709551615 fits a uint64 exactly, down to the 5
+		"0.000000000931322574615478515625Gi": 0,                   // 21 digits: the last two are dropped
+		"1844674407370955.1615Ki":            1888946593147858085, // the last 5 still fits
 		"9e18K":                              math.MaxInt64,       // overflows the 64-bit multiply
 		"1e999K":                             math.MaxInt64,       // saturates at once
 		"1e19":                               math.MaxInt64,       // past the largest int

@@ -11,8 +11,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// Test_Pow10Tab derives every table entry again, in 4096-bit floating point,
-// and compares it with the generated file.
+// Test_Pow10Tab derives each table entry again in 4096-bit floating point.
 func Test_Pow10Tab(t *testing.T) {
 	t.Parallel()
 
@@ -36,8 +35,8 @@ func Test_Pow10Tab(t *testing.T) {
 	}
 }
 
-// requireEiselLemire checks man * 10^exp10 against strconv for both float sizes
-// and reports how many of the two results eiselLemire gave.
+// requireEiselLemire compares eiselLemire with strconv for both sizes and returns
+// how many results it gave.
 func requireEiselLemire(tb testing.TB, man uint64, exp10 int) int {
 	tb.Helper()
 
@@ -56,9 +55,8 @@ func requireEiselLemire(tb testing.TB, man uint64, exp10 int) int {
 	return decided
 }
 
-// Test_EiselLemire_MatchesStrconv compares random mantissas and exponents with
-// strconv, and requires an answer for nearly all results that are normal
-// numbers: a function that always gives up would pass every other test.
+// Test_EiselLemire_MatchesStrconv compares random inputs with strconv and requires
+// an answer for nearly every normal result, so a function that always gives up fails.
 func Test_EiselLemire_MatchesStrconv(t *testing.T) {
 	t.Parallel()
 
@@ -94,9 +92,8 @@ func Test_EiselLemire_MatchesStrconv(t *testing.T) {
 	require.GreaterOrEqual(t, decided, normal*99/100, "eiselLemire gave up on too many normal results")
 }
 
-// Test_ParseFloat_Halfway feeds both parsers the exact halfway points between
-// floats, up to integers of 40 digits whose dropped digits decide the rounding,
-// and the decimals just above and below each.
+// Test_ParseFloat_Halfway parses the exact halfway points between floats, up to
+// 40-digit integers, and the decimals just above and below each.
 func Test_ParseFloat_Halfway(t *testing.T) {
 	t.Parallel()
 
@@ -112,7 +109,7 @@ func Test_ParseFloat_Halfway(t *testing.T) {
 	} {
 		for k := f.minExp; k <= f.maxExp; k++ {
 			for range 24 {
-				// (2m+1) * 2^(k-mantBits-1) lies between m * 2^(k-mantBits) and its successor.
+				// (2m+1) * 2^(k-mantBits-1) is halfway between m * 2^(k-mantBits) and the next float.
 				m := uint64(1)<<f.mantBits | r.Uint64N(1<<f.mantBits)
 				tie := new(big.Float).SetPrec(128).SetMantExp(new(big.Float).SetUint64(2*m+1), k-f.mantBits-1)
 				text := tie.Text('f', 80)
@@ -149,8 +146,8 @@ func Test_ParseFloat_Halfway(t *testing.T) {
 	require.Greater(t, checked, 1_000)
 }
 
-// Test_EiselLemire_NotHalfway covers products whose top bits look like a halfway
-// point but which have bits below them, so they must not be given up on.
+// Test_EiselLemire_NotHalfway covers products that look like a halfway point in
+// their top bits but are not one.
 func Test_EiselLemire_NotHalfway(t *testing.T) {
 	t.Parallel()
 
@@ -167,8 +164,7 @@ func Test_EiselLemire_NotHalfway(t *testing.T) {
 	}
 }
 
-// Test_EiselLemire_Carry checks products that round up into the next binade and
-// the edges of the normal range.
+// Test_EiselLemire_Carry covers roundings into the next binade and the edges of the normal range.
 func Test_EiselLemire_Carry(t *testing.T) {
 	t.Parallel()
 
@@ -183,9 +179,8 @@ func Test_EiselLemire_Carry(t *testing.T) {
 	}
 }
 
-// Test_ParseFloat_UsesEiselLemire pins scaleExact to answer past the exact
-// range, so that these inputs do not fall through to strconv, and to give up on
-// a halfway point that rounds down.
+// Test_ParseFloat_UsesEiselLemire pins scaleExact to answer past the exact range,
+// and to give up on a tie that rounds down.
 func Test_ParseFloat_UsesEiselLemire(t *testing.T) {
 	t.Parallel()
 

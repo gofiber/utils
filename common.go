@@ -130,10 +130,9 @@ func IncrementIPRange(ip net.IP) {
 // Decimal units are powers of 1000 (42k = 42000); binary units with an 'i' infix
 // are powers of 1024 (42Ki = 43008). Note that ByteSize formats with powers of 1024,
 // so use binary suffixes for a lossless round-trip.
-// The number may have a '+', a point and an exponent (1.5e3K). The result is its
-// exact product with the unit, rounded down and capped at math.MaxInt; digits past
-// the 19 or 20 a uint64 holds are dropped, so a longer number can come out a byte
-// short. Returns 0 if the string is unrecognized or negative.
+// The number may have a '+', a point and an exponent (1.5e3K). The result is exact,
+// rounded down and capped at math.MaxInt; digits past the 19 or 20 a uint64 holds
+// are dropped. Returns 0 if the string is unrecognized or negative.
 func ConvertToBytes(humanReadableString string) int {
 	strLen := len(humanReadableString)
 	if strLen == 0 {
@@ -226,19 +225,18 @@ func ConvertToBytes(humanReadableString string) int {
 		return int(lo)
 	}
 
-	// Scale in integers: a float product truncates 1.001K to 1000.
+	// Integers, not floats: 1.001 * 1000 is 1000.9999999999999.
 	return scaleDecimal(numPart, mult)
 }
 
-// maxExponent bounds the exponent scaleDecimal reads: a power of ten this large
-// already saturates or vanishes, and the bound keeps the arithmetic from overflowing.
+// maxExponent caps the exponent scaleDecimal reads; a power of ten this large
+// saturates or vanishes anyway.
 const maxExponent = 1 << 20
 
-// scaleDecimal returns floor(s * mult) exactly, capped at math.MaxInt, or 0 if s
-// is not a number or is negative. s is digits with an optional '+', point and
-// exponent. The mantissa is the longest run of leading digits a uint64 holds; the
-// digits after it are dropped (integer digits still count towards the magnitude),
-// so such a number can come out a byte short.
+// scaleDecimal returns floor(s * mult) capped at math.MaxInt, or 0 if s is not a
+// number or is negative. s is digits with an optional '+', point and exponent. The
+// mantissa is the longest prefix of digits a uint64 holds; the rest are dropped,
+// though integer digits still count towards the magnitude.
 func scaleDecimal(s string, mult uint64) int {
 	var mantissa, kept uint64
 	places, dropped, exp := -1, 0, 0 // places counts the digits after the point, -1 before it
@@ -255,8 +253,7 @@ scan:
 				}
 			} else {
 				if kept == 0 {
-					// Nothing may follow a dropped digit, not even one that would fit: park
-					// the mantissa and let a maximal one turn every later digit away.
+					// Drop every later digit too: park the mantissa behind a maximal one.
 					kept, mantissa = mantissa, math.MaxUint64
 				}
 				if places < 0 {
@@ -283,9 +280,8 @@ scan:
 		return 0
 	}
 
-	// The value is mantissa * 10^shift * mult. Past 10^19 a nonzero mantissa
-	// overflows a uint64, and a 128-bit division costs several times a 64-bit
-	// one, so each case does only the work it needs.
+	// The value is mantissa * 10^shift * mult. A 128-bit division costs several
+	// times a 64-bit one, so each case does only the work it needs.
 	shift := exp + dropped - max(places, 0)
 	if shift > 0 {
 		if shift >= len(pow10) {
@@ -317,8 +313,8 @@ scan:
 			quotient, _ = bits.Div64(hi, lo, divisor)
 		}
 	} else if places < 2*len(pow10)-1 {
-		// The product is below 2^114, so hi is below 10^19 and one division by
-		// 10^19 leaves 51 bits to divide by the rest.
+		// The product is below 2^114, so one division by 10^19 cannot overflow
+		// and leaves 51 bits.
 		quotient, _ = bits.Div64(hi, lo, pow10[len(pow10)-1])
 		quotient /= pow10[places-(len(pow10)-1)]
 	} // else the product is below 10^places
@@ -328,8 +324,7 @@ scan:
 	return int(quotient)
 }
 
-// parseExponent reads the part of a number after its 'e': an optional sign and
-// at least one digit, saturating at maxExponent.
+// parseExponent reads what follows the 'e': a sign and digits, saturating at maxExponent.
 func parseExponent(t string) (int, bool) {
 	neg := false
 	if len(t) > 0 && (t[0] == '+' || t[0] == '-') {
