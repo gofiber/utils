@@ -808,23 +808,26 @@ Benchmark_AppendPathUnescape/escaped-31B/default-4                  27718658    
 
 ## Float parsing
 
-`ParseFloat64` and `ParseFloat32` return what `strconv.ParseFloat` returns,
-bit for bit, for an optional sign, digits with an optional point and an
-optional exponent, in strings or byte slices. The spellings strconv adds
-(`inf`, `nan`, hexadecimal floats, underscores) are syntax errors, a value
-too large for the type is a range error, and every error comes with a
-zero result. A mantissa that fits in 53 bits (24 for `ParseFloat32`) with
-an exponent of at most 22 (10) either way is one multiplication or division
-by an exact power of ten, which rounds correctly (Clinger's fast path,
-strconv's own first step). Longer mantissas and larger exponents
-(`0.12345678901234567`, `1e-300`) go through the Eisel-Lemire algorithm,
-strconv's second step: one 128-bit multiplication by a tabulated power of
-ten. Together they parse 1.8 to 2.7 times as fast as strconv
-(`Benchmark_ParseFloat_Shapes`, benchstat, 15 runs, Intel Xeon @ 2.10GHz).
-Only what neither can round is handed to `strconv.ParseFloat`: a subnormal
-or overflowing result, a product too close to a halfway point for the
-approximation, and a number that lost a nonzero digit because it has more
-than a `uint64` holds.
+`ParseFloat64` and `ParseFloat32` return the float `strconv.ParseFloat`
+returns, bit for bit, for an optional sign, digits with an optional point and
+an optional exponent, in strings or byte slices. The spellings strconv adds
+(`inf`, `nan`, hexadecimal floats, underscores) are syntax errors, and a value
+too large for the type is a range error; every error comes with a zero
+result, where strconv returns ±Inf for a range error. A mantissa up to 2^53
+(2^24 for `ParseFloat32`) with an exponent of at most 22 (10) either way is
+one multiplication or division by an exact power of ten, which rounds
+correctly (Clinger's fast path, strconv's own first step). Every other
+result, subnormals and overflow included, goes through the Eisel-Lemire
+algorithm, strconv's second step: one 128-bit multiplication by a tabulated
+power of ten. A number with more digits than a `uint64` holds is rounded from
+its first digits when they and the same digits plus one agree. What is left
+goes to `strconv.ParseFloat` as at most 768 digits and an exponent, a form it
+reads correctly however long the input was: the rare product too close to a
+halfway point for the approximation (exact halfway points are rounded with
+integer arithmetic), and the number whose dropped digits decide the
+rounding. `Benchmark_ParseFloat_Shapes` times each shape against strconv:
+1.2 to 2.5 times as fast on ordinary decimals, and far faster on subnormals
+and halfway points.
 
 ## Size strings
 

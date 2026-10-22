@@ -13,9 +13,11 @@ import (
 	"os"
 )
 
+// A 64-bit mantissa times 10^e is zero below pow10Min and infinite above pow10Max
+// whatever the mantissa, so only the exponents between them need a table entry.
 const (
-	pow10Min = -348
-	pow10Max = 347
+	pow10Min = -342
+	pow10Max = 308
 )
 
 func main() {

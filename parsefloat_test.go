@@ -2,6 +2,7 @@ package utils
 
 import (
 	"math"
+	"math/big"
 	"math/rand/v2"
 	"regexp"
 	"strconv"
@@ -14,8 +15,74 @@ import (
 // floatGrammar is the syntax the parsers accept; strconv also takes inf, nan and hex floats.
 var floatGrammar = regexp.MustCompile(`^[+-]?([0-9]+\.?[0-9]*|\.[0-9]+)([eE][+-]?[0-9]+)?$`)
 
-// requireFloatMatchesStrconv compares both parsers and input types with strconv, bit for bit.
-func requireFloatMatchesStrconv(tb testing.TB, s string) {
+// wantFloat is the float a correct parser returns for the number s, in strconv's
+// convention (±Inf and ErrRange on overflow). strconv is right up to 700 bytes; it
+// keeps at most 800 digits, misplaces the point past them and reads five digits of
+// an exponent, so longer numbers go to big.Rat, which rounds exactly.
+func wantFloat(tb testing.TB, s string, bitSize int) (float64, error) {
+	tb.Helper()
+
+	if len(s) <= 700 {
+		return strconv.ParseFloat(s, bitSize)
+	}
+	mantissa, exp, _ := strings.Cut(strings.ToLower(strings.TrimLeft(s, "+-")), "e")
+	intPart, fracPart, _ := strings.Cut(mantissa, ".")
+	digits := strings.TrimLeft(intPart+fracPart, "0")
+	trimmed := strings.TrimRight(digits, "0")
+
+	// The number is trimmed * 10^e. An exponent beyond 2^40 is as good as 2^40:
+	// no input has that many digits to offset it.
+	const maxExp = 1 << 40
+	bigExp := new(big.Int)
+	if exp != "" {
+		bigExp.SetString(exp, 10)
+	}
+	e := int64(maxExp)
+	switch {
+	case bigExp.CmpAbs(big.NewInt(maxExp)) <= 0:
+		e = bigExp.Int64()
+	case bigExp.Sign() < 0:
+		e = -maxExp
+	}
+	e += int64(len(digits)-len(trimmed)) - int64(len(fracPart))
+
+	// It lies in [10^(n-1+e), 10^(n+e)): out of the float range one way or the other
+	// whatever the digits, or big.Rat rounds it.
+	n := int64(len(trimmed))
+	var f float64
+	switch {
+	case trimmed == "" || n+e < -400:
+	case n-1+e > 400:
+		f = math.Inf(1)
+	default:
+		num, ok := new(big.Int).SetString(trimmed, 10)
+		require.True(tb, ok, "big.Int cannot read %.40q", trimmed)
+		scale := new(big.Int).Exp(big.NewInt(10), big.NewInt(max(e, -e)), nil)
+		r := new(big.Rat)
+		if e >= 0 {
+			r.SetInt(num.Mul(num, scale))
+		} else {
+			r.SetFrac(num, scale)
+		}
+		if bitSize == 32 {
+			f32, _ := r.Float32()
+			f = float64(f32)
+		} else {
+			f, _ = r.Float64()
+		}
+	}
+	if strings.HasPrefix(s, "-") {
+		f = math.Copysign(f, -1) // a zero Rat has no sign
+	}
+	if math.IsInf(f, 0) {
+		return f, &strconv.NumError{Func: "ParseFloat", Num: s, Err: strconv.ErrRange}
+	}
+	return f, nil
+}
+
+// requireFloatMatches compares both parsers and input types with the correct
+// answer, bit for bit.
+func requireFloatMatches(tb testing.TB, s string) {
 	tb.Helper()
 
 	if !floatGrammar.MatchString(s) {
@@ -26,13 +93,13 @@ func requireFloatMatchesStrconv(tb testing.TB, s string) {
 		return
 	}
 
-	want64, wantErr64 := strconv.ParseFloat(s, 64)
+	want64, wantErr64 := wantFloat(tb, s, 64)
 	got64, err64 := ParseFloat64(s)
 	gotB64, errB64 := ParseFloat64([]byte(s))
 	requireFloatResult(tb, "ParseFloat64", s, want64, wantErr64, got64, err64)
 	requireFloatResult(tb, "ParseFloat64(bytes)", s, want64, wantErr64, gotB64, errB64)
 
-	want32, wantErr32 := strconv.ParseFloat(s, 32)
+	want32, wantErr32 := wantFloat(tb, s, 32)
 	got32, err32 := ParseFloat32(s)
 	gotB32, errB32 := ParseFloat32([]byte(s))
 	requireFloatResult(tb, "ParseFloat32", s, want32, wantErr32, float64(got32), err32)
@@ -43,18 +110,18 @@ func requireFloatResult(tb testing.TB, fn, s string, want float64, wantErr error
 	tb.Helper()
 
 	if wantErr != nil {
-		// Inside the grammar only a range error is possible; strconv returns Inf, these 0.
-		require.ErrorIs(tb, wantErr, strconv.ErrRange, "%s(%q): strconv", fn, s)
-		require.ErrorIs(tb, err, strconv.ErrRange, "%s(%q)", fn, s)
-		require.Zero(tb, got, "%s(%q) returned a value with an error", fn, s)
+		// Inside the grammar only a range error is possible; the reference returns Inf, these 0.
+		require.ErrorIs(tb, wantErr, strconv.ErrRange, "%s(%.40q): reference", fn, s)
+		require.ErrorIs(tb, err, strconv.ErrRange, "%s(%.40q)", fn, s)
+		require.Zero(tb, got, "%s(%.40q) returned a value with an error", fn, s)
 		return
 	}
-	require.NoError(tb, err, "%s(%q)", fn, s)
+	require.NoError(tb, err, "%s(%.40q)", fn, s)
 	require.Equal(tb, math.Float64bits(want), math.Float64bits(got),
-		"%s(%q) = %v (%#x), strconv says %v (%#x)", fn, s, got, math.Float64bits(got), want, math.Float64bits(want))
+		"%s(%.40q) = %v (%#x), want %v (%#x)", fn, s, got, math.Float64bits(got), want, math.Float64bits(want))
 }
 
-func Test_ParseFloat_MatchesStrconv_Corpus(t *testing.T) {
+func Test_ParseFloat_Corpus(t *testing.T) {
 	t.Parallel()
 
 	corpus := []string{
@@ -78,6 +145,7 @@ func Test_ParseFloat_MatchesStrconv_Corpus(t *testing.T) {
 		"1.7976931348623157e308", "1.7976931348623158e308", "1.7976931348623159e308", "1.797693134862315807e308",
 		"3.4028234e38", "3.4028235e38", "3.4028236e38", "3.40282356779733661637539395458142568447e38",
 		"3.4028235677973366e38", "3.4028235677973367e38", "1.1754943508222875e-38", "1.1754942807573643e-38",
+		"1.797693134862315708145274237317043567981e308", "3.4028234663852885981170418348451692544e38", // the largest floats, digits cut off
 		"1e-45", "7e-46", "7.006492321624085e-46", "7.006492321624086e-46", "1.401298464324817e-45",
 		"1.00000017881393432617187499", "1.00000017881393432617187500", "1.00000017881393432617187501",
 		// Long digit strings: dropped digits decide the rounding.
@@ -88,13 +156,22 @@ func Test_ParseFloat_MatchesStrconv_Corpus(t *testing.T) {
 		"0." + strings.Repeat("0", 400) + "1", "1" + strings.Repeat("0", 400) + "e-400",
 		// Huge exponents.
 		"1e309", "1e308", "1e-324", "1e-400", "1e400", "1e-999999999999", "1e999999999999", "0e999999999999",
-		"1e99999999999999999999", "1e-99999999999999999999",
+		"1e99999999999999999999", "1e-99999999999999999999", "1e3000", "1e-3000", "-1e3000", "-1e-3000",
+		"1e1125899906842623", "1e1125899906842624", "1e1125899906842625", "1e-1125899906842625",
+		"1e18446744073709551615", "1e18446744073709551616", "1e18446744073709551621", "1e-18446744073709551621",
+		// Past what strconv reads right: 800 digits, five digits of an exponent.
+		"1" + strings.Repeat("0", 800) + "e-800", "1" + strings.Repeat("0", 800) + "e-791",
+		"1" + strings.Repeat("0", 799) + "1e-491", "1" + strings.Repeat("0", 1000) + "e-500",
+		"1" + strings.Repeat("0", 1000) + "e-940", "1" + strings.Repeat("0", 1000) + "e-1000",
+		strings.Repeat("9", 1500) + "e-1500", "0." + strings.Repeat("0", 1000) + strings.Repeat("9", 1000),
+		"0." + strings.Repeat("0", 9691) + "1e100000", "0." + strings.Repeat("0", 11000) + "1e100000",
+		"1" + strings.Repeat("0", 10000) + "e-100000", "0." + strings.Repeat("0", 20000) + "1" + strings.Repeat("0", 21) + "1e20001",
 		// Not in the grammar: every one a syntax error.
 		"", "+", "-", ".", "+.", "-.", "e5", ".e5", "1e", "1e+", "1e-", "1.2.3", "1e1.0", "1e5x", "abc", "1x", " 1", "1 ",
 		"inf", "-inf", "+Inf", "infinity", "nan", "NaN", "0x1p-2", "0x10", "1_000", "1,5", "--1", "+-1", "1e--1", "１２",
 	}
 	for _, s := range corpus {
-		requireFloatMatchesStrconv(t, s)
+		requireFloatMatches(t, s)
 	}
 }
 
@@ -135,12 +212,12 @@ func genFloatString(r *rand.Rand) string {
 	return b.String()
 }
 
-func Test_ParseFloat_MatchesStrconv_Generated(t *testing.T) {
+func Test_ParseFloat_Generated(t *testing.T) {
 	t.Parallel()
 
 	r := rand.New(rand.NewPCG(0xf10a7, 0x5eed)) //nolint:gosec // deterministic test data
 	for range 30_000 {
-		requireFloatMatchesStrconv(t, genFloatString(r))
+		requireFloatMatches(t, genFloatString(r))
 	}
 }
 
@@ -293,7 +370,7 @@ func FuzzParseFloat(f *testing.F) {
 		f.Add(s)
 	}
 	f.Fuzz(func(t *testing.T, s string) {
-		requireFloatMatchesStrconv(t, s)
+		requireFloatMatches(t, s)
 	})
 }
 
@@ -305,7 +382,7 @@ func Test_ParseFloat_ExactPathBounds(t *testing.T) {
 	for _, m := range []uint64{1, 7, 123456789, 1<<24 - 1, 1 << 24, 1<<24 + 1, 1<<53 - 1, 1 << 53, 1<<53 + 1, 9999999999999999} {
 		for exp := int64(-25); exp <= 25; exp++ {
 			in := strconv.FormatUint(m, 10) + "e" + strconv.FormatInt(exp, 10)
-			requireFloatMatchesStrconv(t, in)
+			requireFloatMatches(t, in)
 
 			want64, err := strconv.ParseFloat(in, 64)
 			require.NoError(t, err, in)
@@ -323,6 +400,57 @@ func Test_ParseFloat_ExactPathBounds(t *testing.T) {
 	}
 }
 
+// Test_parseExp pins the exponent reader that ParseFloat and ConvertToBytes share.
+func Test_parseExp(t *testing.T) {
+	t.Parallel()
+
+	for _, tc := range []struct {
+		in   string
+		from int
+		want int64
+		ok   bool
+	}{
+		{"5", 0, 5, true},
+		{"+5", 0, 5, true},
+		{"-5", 0, -5, true},
+		{"-0", 0, 0, true},
+		{"0012", 0, 12, true},
+		{"1e30", 2, 30, true},
+		{"1e-30", 2, -30, true},
+		{"", 0, 0, false},
+		{"1e", 2, 0, false},
+		{"+", 0, 0, false},
+		{"-", 0, 0, false},
+		{"1e+", 2, 0, false},
+		{"5x", 0, 0, false},
+		{"x5", 0, 0, false},
+		{"--5", 0, 0, false},
+		{"+-5", 0, 0, false},
+		{"5-", 0, 0, false},
+		{"5 ", 0, 0, false},
+		{"5.0", 0, 0, false},
+		{"1e3.5", 2, 0, false},
+	} {
+		got, ok := parseExp(tc.in, tc.from)
+		require.Equal(t, tc.ok, ok, "%q from %d", tc.in, tc.from)
+		require.Equal(t, tc.want, got, "%q from %d", tc.in, tc.from)
+		got, ok = parseExp([]byte(tc.in), tc.from)
+		require.Equal(t, tc.ok, ok, "%q from %d as bytes", tc.in, tc.from)
+		require.Equal(t, tc.want, got, "%q from %d as bytes", tc.in, tc.from)
+	}
+
+	// A long exponent keeps its sign and is clamped.
+	got, ok := parseExp("99999999999999999999999999", 0)
+	require.True(t, ok)
+	require.Equal(t, int64(maxParsedExp), got)
+	got, ok = parseExp("-99999999999999999999999999", 0)
+	require.True(t, ok)
+	require.Equal(t, -int64(maxParsedExp), got)
+	got, ok = parseExp(strings.Repeat("0", 100)+"7", 0)
+	require.True(t, ok)
+	require.Equal(t, int64(7), got)
+}
+
 // Benchmark_ParseFloat_Shapes covers the shapes that decide which path a value takes.
 func Benchmark_ParseFloat_Shapes(b *testing.B) {
 	for _, tc := range []struct{ name, in string }{
@@ -335,6 +463,11 @@ func Benchmark_ParseFloat_Shapes(b *testing.B) {
 		{"wide-15", "123456.789012345"},
 		{"wide-17", "0.12345678901234567"},
 		{"tiny", "1e-300"},
+		{"tie", "9007199254740993"},
+		{"padded", "1.0000000000000000"},
+		{"subnormal", "5e-324"},
+		{"digits-21", "0.123456789012345678901"},
+		{"digits-40", "3.141592653589793238462643383279502884197"},
 	} {
 		b.Run(tc.name+"/fiber", func(b *testing.B) {
 			b.ReportAllocs()

@@ -39,15 +39,18 @@ import (
 //go:generate go run pow10gen.go
 
 // eiselLemire returns man * 10^exp10 rounded to the nearest float64 (float32 when
-// bitSize is 32, held in a float64), or false when it cannot tell how to round: the
-// exponent is outside the table, the result is subnormal or overflows, or the product
-// is too close to a float or a halfway point for the 128-bit approximation.
-// man must not be zero. See https://nigeltao.github.io/blog/2020/eisel-lemire.html.
+// bitSize is 32, held in a float64), +Inf included, or false when it cannot tell
+// how to round: the product is too close to a float or a halfway point for the
+// 128-bit approximation. man must not be zero.
+// See https://nigeltao.github.io/blog/2020/eisel-lemire.html.
 func eiselLemire(man uint64, exp10 int64, bitSize int) (float64, bool) {
-	if exp10 < pow10Min || exp10 > pow10Max {
-		return 0, false
+	if exp10 < pow10Min {
+		return 0, true
 	}
-	mantBits, bias := uint(52), uint64(1023)
+	if exp10 > pow10Max {
+		return math.Inf(1), true
+	}
+	mantBits, bias := uint(52), int64(1023)
 	if bitSize == 32 {
 		mantBits, bias = 23, 127
 	}
@@ -59,7 +62,7 @@ func eiselLemire(man uint64, exp10 int64, bitSize int) (float64, bool) {
 	// Normalize man and estimate the binary exponent: 217706/2^16 is log2(10).
 	clz := uint(bits.LeadingZeros64(man))
 	man <<= clz
-	exp2 := uint64(217706*exp10>>16+64) + bias - uint64(clz)
+	exp2 := 217706*exp10>>16 + 64 + bias - int64(clz)
 
 	// Multiply by the top 64 bits of the power; if the low bits of the product are
 	// all ones, the dropped bits could carry into the result, so use them too.
@@ -80,7 +83,14 @@ func eiselLemire(man uint64, exp10 int64, bitSize int) (float64, bool) {
 	// The product has 127 or 128 bits, so the shift and the exponent depend on the top one.
 	msb := hi >> 63
 	m := hi >> (msb + uint64(lowBits))
-	exp2 -= 1 ^ msb
+	exp2 -= int64(1 ^ msb)
+
+	// Subnormal or zero. A halfway point this small would need 5^-exp10 to divide
+	// man, which no 64-bit man allows, so rounding up at the half is exact.
+	if exp2 <= 0 {
+		m >>= uint64(1 - exp2)
+		return floatFromBits((m+1)>>1, bitSize), true
+	}
 
 	// With the rounding bit set and an even mantissa, an exact tie rounds down and
 	// anything above rounds up; the approximation cannot tell which this is.
@@ -94,14 +104,16 @@ func eiselLemire(man uint64, exp10 int64, bitSize int) (float64, bool) {
 		m >>= 1
 		exp2++
 	}
+	if exp2 > 2*bias {
+		return math.Inf(1), true
+	}
+	return floatFromBits(uint64(exp2)<<mantBits|m&(1<<mantBits-1), bitSize), true
+}
 
-	// exp2 is unsigned, so zero or below wrapped; 2*bias+1 or more is Inf or NaN.
-	if exp2-1 >= 2*bias {
-		return 0, false
-	}
-	b := exp2<<mantBits | m&(1<<mantBits-1)
+// floatFromBits returns the float64 whose bits are b, or for bitSize 32 the float32.
+func floatFromBits(b uint64, bitSize int) float64 {
 	if bitSize == 32 {
-		return float64(math.Float32frombits(uint32(b))), true
+		return float64(math.Float32frombits(uint32(b)))
 	}
-	return math.Float64frombits(b), true
+	return math.Float64frombits(b)
 }
