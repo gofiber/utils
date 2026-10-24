@@ -314,6 +314,20 @@ func parseUnsigned[S byteSeq, T Unsigned](fn string, s S, maxRange T) (T, error)
 	return T(n), nil
 }
 
+// exactPow10Max is the largest power of ten that float64 holds exactly: 10^22
+// is 2^22 * 5^22, and 5^22 fits the 53-bit significand where 5^23 does not.
+const exactPow10Max = 22
+
+// exactPow10 holds 10^0 through 10^22, each exactly. A mantissa of at most 2^53
+// is also exact, so dividing or multiplying by one of these rounds only once,
+// to the nearest float64, as strconv.ParseFloat does (Clinger's fast path).
+// math.Pow10 of a negative exponent is the inexact 1/10^k instead, and scaling
+// by it rounds twice.
+var exactPow10 = [exactPow10Max + 1]float64{
+	1e0, 1e1, 1e2, 1e3, 1e4, 1e5, 1e6, 1e7, 1e8, 1e9, 1e10, 1e11,
+	1e12, 1e13, 1e14, 1e15, 1e16, 1e17, 1e18, 1e19, 1e20, 1e21, 1e22,
+}
+
 // parseFloat parses a decimal ASCII string or byte slice into a float64.
 // It supports optional sign, fractional part and exponent. It returns (0, error)
 // on error or overflow.
@@ -340,6 +354,9 @@ func parseFloat[S byteSeq](fn string, s S) (float64, error) {
 	var mantissa uint64
 	var exp10 int
 	digits := 0
+	// truncated records that a digit did not fit the mantissa and was dropped,
+	// which leaves mantissa and exp10 only an approximation of the input.
+	truncated := false
 	for i < len(s) {
 		c := s[i] - '0'
 		if c > 9 {
@@ -347,6 +364,7 @@ func parseFloat[S byteSeq](fn string, s S) (float64, error) {
 		}
 		if mantissa > maxUint64Cutoff || (mantissa == maxUint64Cutoff && uint64(c) > maxUint64Cutlim) {
 			exp10++
+			truncated = true
 		} else {
 			mantissa = mantissa*10 + uint64(c)
 		}
@@ -364,6 +382,8 @@ func parseFloat[S byteSeq](fn string, s S) (float64, error) {
 			if mantissa < maxUint64Cutoff || (mantissa == maxUint64Cutoff && uint64(c) <= maxUint64Cutlim) {
 				mantissa = mantissa*10 + uint64(c)
 				exp10--
+			} else {
+				truncated = true
 			}
 			digits++
 			i++
@@ -425,10 +445,22 @@ func parseFloat[S byteSeq](fn string, s S) (float64, error) {
 	}
 
 	f := float64(mantissa)
-	// Skip scaling for a zero mantissa: 0 * Pow10(309) would be 0 * Inf = NaN
-	// and turn inputs like "0e400" into a spurious range error.
-	if exp != 0 && f != 0 {
+	switch {
+	case truncated || exp > exactPow10Max || exp < -exactPow10Max:
+		// Skip scaling for a zero mantissa: 0 * Pow10(309) would be 0 * Inf = NaN
+		// and turn inputs like "0e400" into a spurious range error.
+		if exp != 0 && f != 0 {
+			f *= math.Pow10(int(exp))
+		}
+	case exp == 0:
+		// The conversion alone rounds correctly, whatever the mantissa.
+	case mantissa > 1<<53:
+		// Not exactly representable: the scaling below would round twice.
 		f *= math.Pow10(int(exp))
+	case exp > 0:
+		f *= exactPow10[exp]
+	default:
+		f /= exactPow10[-exp]
 	}
 	if neg {
 		f = -f
@@ -441,12 +473,25 @@ func parseFloat[S byteSeq](fn string, s S) (float64, error) {
 
 // ParseFloat64 parses a decimal ASCII string or byte slice into a float64. It
 // delegates the actual parsing to parseFloat.
+//
+// The result is the float64 nearest the input, which is what strconv.ParseFloat
+// returns, whenever the digits read as an integer of at most 2^53 and the power
+// of ten they are scaled by is at most 22 in magnitude: that covers decimals
+// such as "19.99" and "1e-5", and it covers an integer of up to 19 digits.
+// Other input is approximate. Digits past what a uint64 holds are dropped, the
+// scaling rounds a second time, and a value near the bottom of the float64
+// range can underflow to zero early, so the result may differ from strconv's in
+// its last bits. Use strconv.ParseFloat where that matters.
 func ParseFloat64[S byteSeq](s S) (float64, error) {
 	return parseFloat[S]("ParseFloat64", s)
 }
 
 // ParseFloat32 parses a decimal ASCII string or byte slice into a float32. It
 // returns (0, false) on error or if the parsed value overflows float32.
+//
+// It rounds what ParseFloat64 returns, so the precision ParseFloat64 documents
+// applies, and an input that float64 happens to round onto the midpoint of two
+// float32s may land on the further one of them.
 func ParseFloat32[S byteSeq](s S) (float32, error) {
 	f, err := parseFloat[S]("ParseFloat32", s)
 	if err != nil {

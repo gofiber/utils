@@ -735,6 +735,98 @@ func Test_ParseFloat64(t *testing.T) {
 	}
 }
 
+// Decimals that the mantissa and a power of ten hold exactly are rounded once,
+// to the nearest float64, so they parse to the same float as strconv.ParseFloat,
+// bit for bit. These are the ones multiplying by math.Pow10 of a negative
+// exponent, itself rounded, used to get wrong in the last bit: 3 * 0.1 is
+// 0.30000000000000004.
+func Test_ParseFloat64_MatchesStrconv(t *testing.T) {
+	t.Parallel()
+
+	same := func(t *testing.T, in string) {
+		t.Helper()
+		want, err := strconv.ParseFloat(in, 64)
+		require.NoError(t, err, "input: %s", in)
+		got, err := ParseFloat64(in)
+		require.NoError(t, err, "input: %s", in)
+		require.Equal(t, math.Float64bits(want), math.Float64bits(got), "input: %s: got %v, want %v", in, got, want)
+		gotBytes, err := ParseFloat64([]byte(in))
+		require.NoError(t, err, "input: %s", in)
+		require.Equal(t, math.Float64bits(want), math.Float64bits(gotBytes), "bytes input: %s", in)
+	}
+
+	for _, in := range []string{
+		"0.1", "0.2", "0.3", "0.7", "1.1", "2.675", "1.005", "3.14", "3.14159", "19.99", "100.1", "0.07",
+		"12345.6789", "3721.5575", "9002.335", "552.2429", "8878.13186", "-0.3", "-19.99", "+100.1",
+		".3", "3.", "1e-5", "1.5e-7", "25e-3", "7e22", "1e22", "1e-22", "123456789e-22", "9007199254740992", "9007199254740992e-22",
+		"9007199254740991e22", "0.000000000000000000001", "0e5", "-0.0", "1e0", "12e0",
+		"1234567890123456789", "9999999999999999999",
+	} {
+		same(t, in)
+	}
+
+	// Plain decimals of up to 15 digits: the integer they make is below 2^53 and
+	// the number of fractional digits below 22, so every one is inside the exact
+	// range.
+	rng := rand.New(rand.NewSource(1)) //nolint:gosec // deterministic test data
+	for range 20000 {
+		digits := 1 + rng.Intn(15)
+		point := rng.Intn(digits + 1)
+		var sb strings.Builder
+		if rng.Intn(4) == 0 {
+			sb.WriteByte('-')
+		}
+		for i := range digits {
+			if i == point {
+				sb.WriteByte('.')
+			}
+			sb.WriteByte(byte('0' + rng.Intn(10)))
+		}
+		in := sb.String()
+		if in == "." || in == "-." {
+			continue
+		}
+		same(t, in)
+	}
+
+	// An explicit exponent moves the point too, so mantissa and exponent are
+	// drawn together to stay within 2^53 and 10^22.
+	for range 20000 {
+		m := rng.Int63n(1<<53 + 1)
+		e := rng.Intn(45) - 22
+		same(t, strconv.FormatInt(m, 10)+"e"+strconv.Itoa(e))
+	}
+}
+
+// ParseFloat32 rounds the float64 result, which can differ from rounding the
+// input once only when the float64 lands on the midpoint of two float32s; the
+// decimals people write do not.
+func Test_ParseFloat32_MatchesStrconv(t *testing.T) {
+	t.Parallel()
+
+	rng := rand.New(rand.NewSource(2)) //nolint:gosec // deterministic test data
+	for range 20000 {
+		digits := 1 + rng.Intn(9)
+		point := rng.Intn(digits + 1)
+		var sb strings.Builder
+		for i := range digits {
+			if i == point {
+				sb.WriteByte('.')
+			}
+			sb.WriteByte(byte('0' + rng.Intn(10)))
+		}
+		in := sb.String()
+		if in == "." {
+			continue
+		}
+		want, err := strconv.ParseFloat(in, 32)
+		require.NoError(t, err, "input: %s", in)
+		got, err := ParseFloat32(in)
+		require.NoError(t, err, "input: %s", in)
+		require.Equal(t, math.Float32bits(float32(want)), math.Float32bits(got), "input: %s", in)
+	}
+}
+
 func Benchmark_ParseFloat64(b *testing.B) {
 	input := "12345.6789"
 

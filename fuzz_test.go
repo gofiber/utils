@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"math"
 	"mime"
 	"net/http"
 	"net/netip"
@@ -115,6 +116,45 @@ func FuzzParse(f *testing.F) {
 			t.Fatalf("ParseInt(%q) = %d, want %d", s, gotI, wantI)
 		case wantErrI != nil && gotI != 0:
 			t.Fatalf("ParseInt(%q) returned %d with error", s, gotI)
+		}
+	})
+}
+
+// FuzzParseFloat holds the plain decimals of at most 15 digits to what
+// strconv.ParseFloat returns, bit for bit: they are inside the range that
+// ParseFloat64 rounds exactly. Other input is only approximate, so it is
+// checked for no more than agreeing with strconv on whether it parses.
+func FuzzParseFloat(f *testing.F) {
+	f.Add("0.3")
+	f.Add("19.99")
+	f.Add("-100.1")
+	f.Add("123456789012345")
+	f.Add("0.000000000000001")
+	f.Add("9007199254740993")
+	f.Add("1e-5")
+	f.Add("2.2250738585072014e-308")
+	f.Fuzz(func(t *testing.T, s string) {
+		got, err := ParseFloat64(s)
+		want, wantErr := strconv.ParseFloat(s, 64)
+
+		digits, plain := 0, s != ""
+		for i := 0; i < len(s); i++ {
+			switch c := s[i]; {
+			case c >= '0' && c <= '9':
+				digits++
+			case c == '.' || (i == 0 && (c == '-' || c == '+')):
+			default:
+				plain = false
+			}
+		}
+		if !plain || digits == 0 || digits > 15 || strings.Count(s, ".") > 1 {
+			return
+		}
+		if (err == nil) != (wantErr == nil) {
+			t.Fatalf("ParseFloat64(%q) err = %v, strconv err = %v", s, err, wantErr)
+		}
+		if err == nil && math.Float64bits(got) != math.Float64bits(want) {
+			t.Fatalf("ParseFloat64(%q) = %v, want %v", s, got, want)
 		}
 	})
 }
