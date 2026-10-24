@@ -674,11 +674,13 @@ func Test_ParseFloat64(t *testing.T) {
 		{"-1.2e3", -1200, true},
 		{"1.", 1, true},
 		{".5", 0.5, true},
-		{"-0", -0, true},
+		{"-0", math.Copysign(0, -1), true},
 		{"+123.45", 123.45, true},
 		{strconv.FormatFloat(math.MaxFloat64, 'g', -1, 64), math.MaxFloat64, true},
 		{strconv.FormatFloat(-math.MaxFloat64, 'g', -1, 64), -math.MaxFloat64, true},
-		{"5e-324", 0, true},
+		{"5e-324", 5e-324, true},
+		{"2.4703282292062327e-324", 0, true}, // just under half the smallest subnormal
+		{"2.4703282292062328e-324", 5e-324, true},
 		{"1e-400", 0, true},
 		{"25000000000000000000e-18", 25, true},
 		{"1234567891234567891234567", 1.2345678912345679e24, true},
@@ -707,7 +709,7 @@ func Test_ParseFloat64(t *testing.T) {
 		{"9999999999999999999", 1e19, true},
 		{"1.2.3", 0, false},
 		{"0e400", 0, true},
-		{"-0e400", 0, true},
+		{"-0e400", math.Copysign(0, -1), true},
 		{"1e400", 0, false},
 		{"0.1e1000", 0, false},
 		{strings.Repeat("9", 400), 0, false},
@@ -717,20 +719,12 @@ func Test_ParseFloat64(t *testing.T) {
 		v, err := ParseFloat64(tt.in)
 		require.Equal(t, tt.success, err == nil, "input: %s", tt.in)
 		if err == nil {
-			if tt.val == 0 {
-				require.InDelta(t, tt.val, v, 1e-9, "input: %s", tt.in)
-			} else {
-				require.InEpsilon(t, tt.val, v, 1e-9, "input: %s", tt.in)
-			}
+			require.Equal(t, math.Float64bits(tt.val), math.Float64bits(v), "input: %s", tt.in)
 		}
 		bts, err := ParseFloat64([]byte(tt.in))
-		require.Equal(t, tt.success, err == nil)
+		require.Equal(t, tt.success, err == nil, "input: %s", tt.in)
 		if err == nil {
-			if tt.val == 0 {
-				require.InDelta(t, tt.val, bts, 1e-9, "input: %s", tt.in)
-			} else {
-				require.InEpsilon(t, tt.val, bts, 1e-9, "input: %s", tt.in)
-			}
+			require.Equal(t, math.Float64bits(tt.val), math.Float64bits(bts), "input: %s", tt.in)
 		}
 	}
 }
@@ -784,7 +778,9 @@ func Test_ParseFloat32(t *testing.T) {
 		{".5", 0.5, true, false},
 		{"3.4028234e38", 3.4028234e38, true, false},
 		{"-3.4028234e38", -3.4028234e38, true, false},
-		{"3.4028235e38", 0, false, false},
+		// Java's Float.MAX_VALUE, less than half an ulp above MaxFloat32: rounds down.
+		{"3.4028235e38", math.MaxFloat32, true, false},
+		{"3.4028236e38", 0, false, false},
 		{"-0", -0, true, true},
 		{"1e39", 0, false, false},
 		{"1e", 0, false, false},
@@ -792,7 +788,7 @@ func Test_ParseFloat32(t *testing.T) {
 		{"1e-", 0, false, false},
 		{"1234567891234567891234567", 1.2345679e24, true, false},
 		{"1.2345678912345678", 1.2345679, true, false},
-		{"0.11111111111111119", 0.11111112, true, false},
+		{"0.11111111111111119", 0.11111111, true, false},
 		{".", 0, false, false},
 		{"e5", 0, false, false},
 		{"1.2.3", 0, false, false},
@@ -815,27 +811,17 @@ func Test_ParseFloat32(t *testing.T) {
 	for _, tt := range tests {
 		v, err := ParseFloat32(tt.in)
 		require.Equal(t, tt.success, err == nil, "input: %s", tt.in)
+		want := tt.val
+		if tt.negzero {
+			want = float32(math.Copysign(0, -1))
+		}
 		if err == nil {
-			if tt.negzero {
-				require.InDelta(t, float32(0), v, 1e-6, "input: %s", tt.in)
-				require.True(t, math.Signbit(float64(v)))
-			} else if tt.val == 0 {
-				require.InDelta(t, tt.val, v, 1e-6, "input: %s", tt.in)
-			} else {
-				require.InEpsilon(t, tt.val, v, 1e-6, "input: %s", tt.in)
-			}
+			require.Equal(t, math.Float32bits(want), math.Float32bits(v), "input: %s", tt.in)
 		}
 		bts, err := ParseFloat32([]byte(tt.in))
-		require.Equal(t, tt.success, err == nil)
+		require.Equal(t, tt.success, err == nil, "input: %s", tt.in)
 		if err == nil {
-			if tt.negzero {
-				require.InDelta(t, float32(0), bts, 1e-6, "input: %s", tt.in)
-				require.True(t, math.Signbit(float64(bts)))
-			} else if tt.val == 0 {
-				require.InDelta(t, tt.val, bts, 1e-6, "input: %s", tt.in)
-			} else {
-				require.InEpsilon(t, tt.val, bts, 1e-6, "input: %s", tt.in)
-			}
+			require.Equal(t, math.Float32bits(want), math.Float32bits(bts), "input: %s", tt.in)
 		}
 	}
 }

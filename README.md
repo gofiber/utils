@@ -811,6 +811,44 @@ Benchmark_AppendPathUnescape/escaped-31B/fiber-4                    52789323    
 Benchmark_AppendPathUnescape/escaped-31B/default-4                  27718658    43.70  ns/op    24  B/op   1  allocs/op
 ```
 
+## Float parsing
+
+`ParseFloat64` and `ParseFloat32` return the float `strconv.ParseFloat`
+returns, bit for bit, for an optional sign, digits with an optional point and
+an optional exponent, in strings or byte slices. The spellings strconv adds
+(`inf`, `nan`, hexadecimal floats, underscores) are syntax errors, and a value
+too large for the type is a range error; every error comes with a zero
+result, where strconv returns ±Inf for a range error. A mantissa up to 2^53
+(2^24 for `ParseFloat32`) with an exponent of at most 22 (10) either way is
+one multiplication or division by an exact power of ten, which rounds
+correctly (Clinger's fast path, strconv's own first step). Every other
+result, subnormals and overflow included, goes through the Eisel-Lemire
+algorithm, strconv's second step: one 128-bit multiplication by a tabulated
+power of ten. A number with more digits than a `uint64` holds is rounded from
+its first digits when they and the same digits plus one agree. What is left
+goes to `strconv.ParseFloat` as at most 768 digits and an exponent, a form it
+reads correctly however long the input was: the rare product too close to a
+halfway point for the approximation (exact halfway points are rounded with
+integer arithmetic), and the number whose dropped digits decide the
+rounding. `Benchmark_ParseFloat_Shapes` times each shape against strconv:
+1.2 to 2.5 times as fast on ordinary decimals, and far faster on subnormals
+and halfway points.
+
+## Size strings
+
+`ConvertToBytes` turns `42`, `42kb`, `1.5GiB` or `130.51MB` into a byte
+count: decimal units are powers of 1000, units with an `i` are powers of
+1024, and the result saturates at `math.MaxInt`. The number may have a
+`+`, a point and an exponent (`+2.01k`, `1.5e3K`), with any number of
+digits, and is scaled with 128-bit integer arithmetic, so the result is the
+exact product rounded down (`65.35KB` is 65350) and never passes through a
+`float64`. A number with more digits than a `uint64` holds is scaled from its
+first digits when they and the same digits plus one agree, and otherwise
+(`0.000000000931322574615478515625Gi` is exactly one byte) from all of them.
+A negative or malformed size is 0, and an unknown unit counts as bytes. A
+whole number, with or without a unit, is one digit loop and a multiplication.
+`Benchmark_ConvertToBytes_Shapes` times each shape.
+
 ## SWAR primitives
 
 The [`swar`](swar/) package exports the SWAR (SIMD within a register)
