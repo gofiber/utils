@@ -387,15 +387,15 @@ func Test_ParseFloat_ExactPathBounds(t *testing.T) {
 
 			want64, err := strconv.ParseFloat(in, 64)
 			require.NoError(t, err, in)
-			if got, ok := scaleExact(m, exp, 64); ok {
-				require.Equal(t, math.Float64bits(want64), math.Float64bits(got), "scaleExact(%s, 64)", in)
+			if exactFloat64(m, exp) {
+				require.Equal(t, math.Float64bits(want64), math.Float64bits(scale64(m, exp)), "scale64(%s)", in)
 			}
 			want32, err := strconv.ParseFloat(in, 32)
 			if err != nil {
 				continue
 			}
-			if got, ok := scaleExact(m, exp, 32); ok {
-				require.Equal(t, math.Float64bits(want32), math.Float64bits(got), "scaleExact(%s, 32)", in)
+			if got, ok := scale32(m, exp); ok {
+				require.Equal(t, math.Float64bits(want32), math.Float64bits(got), "scale32(%s)", in)
 			}
 		}
 	}
@@ -452,61 +452,14 @@ func Test_parseExp(t *testing.T) {
 	require.Equal(t, int64(7), got)
 }
 
-// Test_Pow10Tab derives each table entry again in 4096-bit floating point.
-func Test_Pow10Tab(t *testing.T) {
-	t.Parallel()
-
-	require.Len(t, pow10Tab, pow10Max-pow10Min+1)
-
-	const prec = 4096 // 10^347 has 1153 bits
-	one := new(big.Float).SetPrec(prec).SetInt64(1)
-	mask := new(big.Int).SetUint64(math.MaxUint64)
-	for e := pow10Min; e <= pow10Max; e++ {
-		p := new(big.Float).SetPrec(prec).SetInt(new(big.Int).Exp(big.NewInt(10), big.NewInt(int64(max(e, -e))), nil))
-		if e < 0 {
-			p.Quo(one, p)
-		}
-		var frac big.Float
-		p.MantExp(&frac) // p = frac * 2^exp with frac in [0.5, 1)
-		m, _ := frac.SetMantExp(&frac, 128).Int(nil)
-
-		got := pow10Tab[e-pow10Min]
-		require.Equal(t, new(big.Int).Rsh(m, 64).Uint64(), got.hi, "1e%d high word", e)
-		require.Equal(t, new(big.Int).And(m, mask).Uint64(), got.lo, "1e%d low word", e)
-	}
-}
-
-// requireEiselLemire compares eiselLemire with strconv for both sizes (+Inf is
-// strconv's answer to an overflow) and returns how many results it gave.
-func requireEiselLemire(tb testing.TB, man uint64, exp10 int) int {
-	tb.Helper()
-
-	decided := 0
-	in := strconv.FormatUint(man, 10) + "e" + strconv.Itoa(exp10)
-	for _, bitSize := range []int{64, 32} {
-		got, ok := eiselLemire(man, int64(exp10), bitSize)
-		if !ok {
-			continue
-		}
-		want, err := strconv.ParseFloat(in, bitSize)
-		if err != nil {
-			require.ErrorIs(tb, err, strconv.ErrRange, "eiselLemire(%q, %d)", in, bitSize)
-		}
-		require.Equal(tb, math.Float64bits(want), math.Float64bits(got), "eiselLemire(%q, %d)", in, bitSize)
-		decided++
-	}
-	return decided
-}
-
-// Test_EiselLemire_MatchesStrconv compares random inputs, across the whole
-// exponent range and into overflow and underflow, with strconv. It requires an
-// answer for nearly all of them, so a function that always gives up fails.
-func Test_EiselLemire_MatchesStrconv(t *testing.T) {
+// Test_ParseFloat_MantissaExponent parses random mantissas of up to 20 digits with
+// exponents across the whole range, into overflow and underflow and through the
+// subnormals of both sizes.
+func Test_ParseFloat_MantissaExponent(t *testing.T) {
 	t.Parallel()
 
 	r := rand.New(rand.NewPCG(0xe15e1, 0x1e3a)) //nolint:gosec // deterministic test data
-	total, decided := 0, 0
-	for range 40_000 {
+	for range 20_000 {
 		var man uint64
 		switch r.IntN(3) {
 		case 0:
@@ -516,57 +469,30 @@ func Test_EiselLemire_MatchesStrconv(t *testing.T) {
 		default:
 			man = r.Uint64N(1e17) + 1
 		}
-		if man == 0 {
-			continue
-		}
-		exp10 := r.IntN(2*pow10Max+100) - pow10Max - 50
+		exp10 := r.IntN(800) - 450
 		if r.IntN(3) == 0 { // the subnormal range of float64 and float32
 			exp10 = -345 + r.IntN(30)
 			if r.IntN(2) == 0 {
 				exp10 = -75 + r.IntN(45)
 			}
 		}
-		decided += requireEiselLemire(t, man, exp10)
-		total += 2
+		requireFloatMatches(t, strconv.FormatUint(man, 10)+"e"+strconv.Itoa(exp10))
 	}
-	require.GreaterOrEqual(t, decided, total*999/1000, "eiselLemire gave up on %d of %d", total-decided, total)
 }
 
-// Test_EiselLemire_Range covers the edges of the table: where a 64-bit mantissa
-// becomes zero or infinite whatever its digits, and the subnormals just above.
-func Test_EiselLemire_Range(t *testing.T) {
+// Test_ParseFloat_RangeEdges covers where a 64-bit mantissa becomes zero or infinite
+// whatever its digits, the subnormals just above, and products that look like a
+// halfway point in their top bits but are not one.
+func Test_ParseFloat_RangeEdges(t *testing.T) {
 	t.Parallel()
 
-	for _, tc := range []struct {
-		man  uint64
-		exp  int
-		want float64
-	}{
-		{math.MaxUint64, pow10Min - 1, 0},
-		{math.MaxUint64, pow10Min, 0x1p-1072},
-		{1, pow10Max, 1e308},
-		{1, pow10Max + 1, math.Inf(1)},
-		{math.MaxUint64, pow10Max, math.Inf(1)},
-		{17976931348623157, 292, math.MaxFloat64},
-		{17976931348623159, 292, math.Inf(1)},
-		{5, -324, 0x1p-1074},
-		{2, -324, 0},
-		{3, -324, 0x1p-1074},
-		{22250738585072011, -324, 0x0.fffffffffffffp-1022},
-		{22250738585072012, -324, 0x1p-1022},
+	for _, in := range []string{
+		"18446744073709551615e-343", "18446744073709551615e-342", "1e308", "1e309", "18446744073709551615e308",
+		"17976931348623157e292", "17976931348623159e292",
+		"5e-324", "2e-324", "3e-324", "22250738585072011e-324", "22250738585072012e-324",
+		"1e38", "1e39", "3.4028235e38", "3.4028236e38", "1e-45", "7e-46", "7.1e-46", "1.4e-45", "2.8e-45", "1.1754942e-38", "1.1754943e-38",
+		"37e46", "41e-24", "74e46", "82e-24", "103e-60", "129e47",
 	} {
-		got, ok := eiselLemire(tc.man, int64(tc.exp), 64)
-		in := strconv.FormatUint(tc.man, 10) + "e" + strconv.Itoa(tc.exp)
-		require.True(t, ok, in)
-		want, err := strconv.ParseFloat(in, 64)
-		if err != nil {
-			require.ErrorIs(t, err, strconv.ErrRange, in)
-		}
-		require.Equal(t, math.Float64bits(want), math.Float64bits(got), in)
-		require.Equal(t, math.Float64bits(tc.want), math.Float64bits(got), in)
-		requireEiselLemire(t, tc.man, tc.exp)
-	}
-	for _, in := range []string{"1e38", "1e39", "3.4028235e38", "3.4028236e38", "1e-45", "7e-46", "7.1e-46", "1.4e-45", "2.8e-45", "1.1754942e-38", "1.1754943e-38"} {
 		requireFloatMatches(t, in)
 	}
 }
@@ -598,38 +524,14 @@ func Test_ParseFloat_Halfway(t *testing.T) {
 					requireFloatMatches(t, in)
 					checked++
 				}
-				whole, frac, _ := strings.Cut(text, ".")
-				if man, err := strconv.ParseUint(whole+frac, 10, 64); err == nil {
-					for delta := range uint64(3) {
-						requireEiselLemire(t, man+delta-1, -len(frac))
-					}
-				}
 			}
 		}
 	}
 	require.Greater(t, checked, 1_000)
 }
 
-// Test_EiselLemire_NotHalfway covers products that look like a halfway point in
-// their top bits but are not one.
-func Test_EiselLemire_NotHalfway(t *testing.T) {
-	t.Parallel()
-
-	for _, tc := range []struct {
-		man uint64
-		exp int64
-	}{{37, 46}, {41, -24}, {74, 46}, {82, -24}, {103, -60}, {129, 47}} {
-		got, ok := eiselLemire(tc.man, tc.exp, 64)
-		in := strconv.FormatUint(tc.man, 10) + "e" + strconv.FormatInt(tc.exp, 10)
-		require.True(t, ok, in)
-		want, err := strconv.ParseFloat(in, 64)
-		require.NoError(t, err, in)
-		require.Equal(t, math.Float64bits(want), math.Float64bits(got), in)
-	}
-}
-
-// Test_EiselLemire_Carry covers roundings into the next binade and the edges of the normal range.
-func Test_EiselLemire_Carry(t *testing.T) {
+// Test_ParseFloat_Carry covers roundings into the next binade and the edges of the normal range.
+func Test_ParseFloat_Carry(t *testing.T) {
 	t.Parallel()
 
 	for _, in := range []string{
@@ -643,32 +545,28 @@ func Test_EiselLemire_Carry(t *testing.T) {
 	}
 }
 
-// Test_ParseFloat_UsesEiselLemire pins scaleExact to answer past the exact range,
-// halfway points and exact products included, and to give up only where it must.
-func Test_ParseFloat_UsesEiselLemire(t *testing.T) {
+// Test_scale32 pins which float32 inputs one exact multiplication or division
+// rounds, and that it gives up at a halfway point of the second rounding.
+func Test_scale32(t *testing.T) {
 	t.Parallel()
 
 	for _, tc := range []struct {
 		in       string
 		mantissa uint64
 		exp      int64
-		bitSize  int
 		decided  bool
 	}{
-		{"12345678901234567e-17", 12345678901234567, -17, 64, true},
-		{"1e-300", 1, -300, 64, true},
-		{"17976931348623157e292", 17976931348623157, 292, 64, true},
-		{"314159265e-8", 314159265, -8, 32, true},
-		{"16777219", 16777219, 0, 32, true},                     // halfway, rounds up to the even float32
-		{"9007199254740993", 9007199254740993, 0, 64, true},     // halfway, rounds down to the even float64
-		{"4503599627370497.5", 45035996273704975, -1, 64, true}, // halfway with a fraction
-		{"1.0000000000000000", 10000000000000000, -16, 64, true},
-		{"1e23", 1, 23, 64, false}, // halfway, but 5^23 does not fit a uint64
+		{"314159e-4", 314159, -4, true},                          // float32 holds both
+		{"314159265e-8", 314159265, -8, true},                    // float64 holds both, one more rounding
+		{"16777219", 16777219, 0, false},                         // halfway: rounding twice may differ
+		{"12345678901234567e-17", 12345678901234567, -17, false}, // past 2^53
+		{"1e-300", 1, -300, false},                               // past the exact powers of ten
+		{"1e23", 1, 23, false},
 	} {
-		got, ok := scaleExact(tc.mantissa, tc.exp, tc.bitSize)
+		got, ok := scale32(tc.mantissa, tc.exp)
 		require.Equal(t, tc.decided, ok, tc.in)
 		if ok {
-			want, err := strconv.ParseFloat(tc.in, tc.bitSize)
+			want, err := strconv.ParseFloat(tc.in, 32)
 			require.NoError(t, err, tc.in)
 			require.Equal(t, math.Float64bits(want), math.Float64bits(got), tc.in)
 		}
@@ -740,6 +638,37 @@ func Test_roundBits(t *testing.T) {
 		u := r.Uint64() >> r.IntN(64)
 		check(u)
 		check(u&^(1<<r.IntN(40)-1) | 1<<r.IntN(40)) // near a tie
+	}
+}
+
+// Test_ParseFloat_RawBoundary parses numbers around the length where strconv gets
+// the text itself, with the point and the digits in different places.
+func Test_ParseFloat_RawBoundary(t *testing.T) {
+	t.Parallel()
+
+	r := rand.New(rand.NewPCG(0xb0d, 0x700)) //nolint:gosec // deterministic test data
+	for n := maxRawLen - 6; n <= maxRawLen+6; n++ {
+		for range 40 {
+			digits := make([]byte, n)
+			for i := range digits {
+				digits[i] = byte('0' + r.IntN(10))
+			}
+			switch r.IntN(3) {
+			case 0: // a short significant part, then zeros
+				for i := 2 + r.IntN(30); i < n; i++ {
+					digits[i] = '0'
+				}
+			case 1: // zeros first
+				for i := range r.IntN(n - 20) {
+					digits[i] = '0'
+				}
+			}
+			point := r.IntN(n)
+			text := string(digits[:point]) + "." + string(digits[point:])
+			requireFloatMatches(t, text)
+			requireFloatMatches(t, text+"e"+strconv.Itoa(r.IntN(700)-350))
+			requireFloatMatches(t, "-"+text[:n-1]) // the sign counts toward the length too
+		}
 	}
 }
 

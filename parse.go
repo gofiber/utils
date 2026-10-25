@@ -326,6 +326,15 @@ const (
 	maxExactMantissa64 = 1 << 53 // every integer up to here is a float64
 	maxExactMantissa32 = 1 << 24 // every integer up to here is a float32
 	maxParsedExp       = 1 << 50 // parseExp clamps an exponent to this
+
+	// A 64-bit mantissa times 10^exp is zero below minDecimalExp, whatever its digits,
+	// and infinite above maxDecimalExp, for float32 and float64 alike.
+	minDecimalExp = -342
+	maxDecimalExp = 308
+
+	// strconv reads a number of up to maxRawLen bytes right: it keeps 800 digits and
+	// five digits of an exponent, which that many digits cannot offset.
+	maxRawLen = 700
 )
 
 // parseExp reads the exponent in s[i:]: an optional sign and digits, as in "-12". It
@@ -375,6 +384,7 @@ func parseFloat[S byteSeq](fn string, bitSize int, s S) (float64, error) {
 	if i == len(s) {
 		return 0, &strconv.NumError{Func: fn, Num: string(s), Err: strconv.ErrSyntax}
 	}
+	start := i
 
 	// Collect integer and fractional digits into a single mantissa and track
 	// the decimal exponent. Once the mantissa reaches maxUint64Cutoff it takes no
@@ -443,14 +453,18 @@ func parseFloat[S byteSeq](fn string, bitSize int, s S) (float64, error) {
 
 	var f float64
 	switch {
-	case truncated: // the number lies between mantissa and mantissa+1 times 10^exp
-		f = parseTruncated(bitSize, s, mantissa, exp)
 	case bitSize == 64 && exactFloat64(mantissa, exp): // the common case, without a call
 		f = scale64(mantissa, exp)
+	case exp < minDecimalExp:
+		f = 0
+	case exp > maxDecimalExp:
+		f = math.Inf(1)
+	case truncated:
+		f = parseSlow(bitSize, s, start)
 	default:
 		var ok bool
-		if f, ok = scaleExact(mantissa, exp, bitSize); !ok {
-			f = parseText(bitSize, mantissa, exp)
+		if f, ok = roundExact(mantissa, exp, bitSize); !ok {
+			f = parseSlow(bitSize, s, start)
 		}
 	}
 	if f > math.MaxFloat64 { // +Inf: too large for the type
@@ -462,23 +476,24 @@ func parseFloat[S byteSeq](fn string, bitSize int, s S) (float64, error) {
 	return f, nil
 }
 
-// parseTruncated parses a number that lost a nonzero digit. It lies between
-// mantissa and mantissa+1 times 10^exp, so if both round alike, so does it.
-func parseTruncated[S byteSeq](bitSize int, s S, mantissa uint64, exp int64) float64 {
-	if f, ok := eiselLemire(mantissa, exp, bitSize); ok {
-		if up, ok := eiselLemire(mantissa+1, exp, bitSize); ok && up == f {
-			return f
+// roundExact rounds mantissa * 10^exp with the exact steps that follow Clinger's:
+// one more for a float32, then exactDyadic. mantissa must not be zero.
+func roundExact(mantissa uint64, exp int64, bitSize int) (float64, bool) {
+	if bitSize == 32 {
+		if f, ok := scale32(mantissa, exp); ok {
+			return f, true
 		}
 	}
-	return parseLong(bitSize, s)
+	return exactDyadic(mantissa, exp, bitSize)
 }
 
-// parseText gives strconv the exact mantissa and exponent of a number scaleExact
-// could not round, a form it reads right however long the input was.
-func parseText(bitSize int, mantissa uint64, exp int64) float64 {
-	var buf [32]byte
-	text := strconv.AppendInt(append(strconv.AppendUint(buf[:0], mantissa, 10), 'e'), exp, 10)
-	return parseNormalized(bitSize, text)
+// parseSlow gives strconv the number in s[start:], digits, point and exponent, when it
+// reads that right, and otherwise the form parseLong builds.
+func parseSlow[S byteSeq](bitSize int, s S, start int) float64 {
+	if len(s) <= maxRawLen {
+		return parseNormalized(bitSize, unsafeconv.Bytes(s[start:]))
+	}
+	return parseLong(bitSize, s)
 }
 
 // maxSlowDigits is how many significant digits parseLong gives strconv. A halfway
@@ -486,9 +501,9 @@ func parseText(bitSize int, mantissa uint64, exp int64) float64 {
 // the rounding cannot change, and strconv keeps no more than 800 anyway.
 const maxSlowDigits = 768
 
-// parseLong reads s again for the digits strconv needs when the bracket of
-// parseTruncated is too wide: at most maxSlowDigits of them, then a 1 for any
-// nonzero rest, and an exponent.
+// parseLong parses a number too long for strconv to read as it is. It reads s
+// again for the digits strconv needs: at most maxSlowDigits of them, then a 1 for
+// any nonzero rest, and an exponent.
 func parseLong[S byteSeq](bitSize int, s S) float64 {
 	var buf [maxSlowDigits + 32]byte
 	k, sticky, exp := longDigits(s, buf[:maxSlowDigits])
@@ -568,39 +583,35 @@ func scale64(mantissa uint64, exp int64) float64 {
 	return f
 }
 
-// scaleExact rounds mantissa * 10^exp once to bitSize bits, or reports false if it
-// cannot. mantissa must not be zero. The exact products of 64 bits are parseFloat's.
-func scaleExact(mantissa uint64, exp int64, bitSize int) (float64, bool) {
-	if bitSize == 32 {
-		if mantissa <= maxExactMantissa32 && exp > -int64(len(float32pow10)) && exp < int64(len(float32pow10)) {
-			f := float32(mantissa)
-			switch {
-			case exp > 0:
-				f *= float32pow10[exp]
-			case exp < 0:
-				f /= float32pow10[-exp]
-			}
-			return float64(f), true
+// scale32 rounds mantissa * 10^exp once to a float32, held in a float64, or reports
+// false if one exact multiplication or division cannot. mantissa must not be zero.
+func scale32(mantissa uint64, exp int64) (float64, bool) {
+	if mantissa <= maxExactMantissa32 && exp > -int64(len(float32pow10)) && exp < int64(len(float32pow10)) {
+		f := float32(mantissa)
+		switch {
+		case exp > 0:
+			f *= float32pow10[exp]
+		case exp < 0:
+			f /= float32pow10[-exp]
 		}
-		if exactFloat64(mantissa, exp) {
-			// Rounding the float64 again is exact, except at a float32 halfway point,
-			// where the decimal may lie on either side. It is a normal float32 here.
-			f := scale64(mantissa, exp)
-			const halfway = 1 << 28 // the 29 mantissa bits a float32 drops, half set
-			if math.Float64bits(f)&(1<<29-1) != halfway {
-				return float64(float32(f)), true
-			}
+		return float64(f), true
+	}
+	if exactFloat64(mantissa, exp) {
+		// Rounding the float64 again is exact, except at a float32 halfway point,
+		// where the decimal may lie on either side. It is a normal float32 here.
+		f := scale64(mantissa, exp)
+		const halfway = 1 << 28 // the 29 mantissa bits a float32 drops, half set
+		if math.Float64bits(f)&(1<<29-1) != halfway {
+			return float64(float32(f)), true
 		}
 	}
-	if f, ok := eiselLemire(mantissa, exp, bitSize); ok {
-		return f, true
-	}
-	return exactDyadic(mantissa, exp, bitSize)
+	return 0, false
 }
 
-// exactDyadic rounds mantissa * 10^exp when it is an integer times 2^exp, which
-// is when eiselLemire may meet a halfway point: mantissa * 5^exp for a positive
-// exp, mantissa / 5^-exp for a negative one, each a uint64.
+// exactDyadic rounds mantissa * 10^exp when it is an integer times 2^exp: the
+// halfway points between floats, the integers past 2^53 and decimals padded with
+// zeros. That is mantissa * 5^exp for a positive exp, mantissa / 5^-exp for a
+// negative one, each a uint64.
 func exactDyadic(mantissa uint64, exp int64, bitSize int) (float64, bool) {
 	var u uint64
 	switch {
@@ -612,7 +623,7 @@ func exactDyadic(mantissa uint64, exp int64, bitSize int) (float64, bool) {
 		u = lo
 	case exp < 0 && -exp < int64(len(pow10)):
 		p5 := pow10[-exp] >> -exp
-		if mantissa%p5 != 0 {
+		if mantissa%5 != 0 || mantissa%p5 != 0 { // the first test is cheap and fails for most
 			return 0, false
 		}
 		u = mantissa / p5

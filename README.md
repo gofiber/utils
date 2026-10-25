@@ -816,18 +816,17 @@ too large for the type is a range error; every error comes with a zero
 result, where strconv returns ±Inf for a range error. A mantissa up to 2^53
 (2^24 for `ParseFloat32`) with an exponent of at most 22 (10) either way is
 one multiplication or division by an exact power of ten, which rounds
-correctly (Clinger's fast path, strconv's own first step). Every other
-result, subnormals and overflow included, goes through the Eisel-Lemire
-algorithm, strconv's second step: one 128-bit multiplication by a tabulated
-power of ten. A number with more digits than a `uint64` holds is rounded from
-its first digits when they and the same digits plus one agree. What is left
-goes to `strconv.ParseFloat` as at most 768 digits and an exponent, a form it
-reads correctly however long the input was: the rare product too close to a
-halfway point for the approximation (exact halfway points are rounded with
-integer arithmetic), and the number whose dropped digits decide the
-rounding. `Benchmark_ParseFloat_Shapes` times each shape against strconv:
-1.2 to 2.5 times as fast on ordinary decimals, and far faster on subnormals
-and halfway points.
+correctly (Clinger's fast path, strconv's own first step). An exponent past
+which every 64-bit mantissa is zero or infinity is settled at once, and so is
+a product that is an integer times a power of two (the halfway points between
+floats, integers past 2^53, decimals padded with zeros), with integer
+arithmetic. Everything else goes to `strconv.ParseFloat`: the text itself up
+to 700 bytes, and past that an exact mantissa and exponent or, for a number
+with more digits than a `uint64` holds, at most 768 digits, a final 1 for any
+nonzero digit after them and an exponent, a form strconv reads correctly
+however long the input was. `Benchmark_ParseFloat_Shapes` times each shape
+against strconv: 2 to 3 times as fast on the fast path, and 1.3 to 1.7 times
+slower on the numbers handed over to it, whose digits are read twice.
 
 ## Size strings
 
