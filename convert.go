@@ -108,7 +108,9 @@ func ByteSize(bytes uint64) string {
 	return UnsafeString(buf)
 }
 
-// ToString Change arg to string
+// ToString Change arg to string.
+// A time.Time is formatted with timeFormat[0], or "2006-01-02 15:04:05" without one;
+// so is each time.Time that is an element of a slice or array.
 func ToString(arg any, timeFormat ...string) string {
 	switch v := arg.(type) {
 	case int:
@@ -154,12 +156,12 @@ func ToString(arg any, timeFormat ...string) string {
 	// error before fmt.Stringer to match the fmt package's precedence
 	case error:
 		if isNilPointer(arg) {
-			return nilReceiverString(v.Error)
+			return nilReceiverString(arg, v.Error)
 		}
 		return v.Error()
 	case fmt.Stringer:
 		if isNilPointer(arg) {
-			return nilReceiverString(v.String)
+			return nilReceiverString(arg, v.String)
 		}
 		return v.String()
 	// Handle common pointer types directly to avoid reflection
@@ -257,7 +259,7 @@ func ToString(arg any, timeFormat ...string) string {
 				if i > 0 {
 					buf.WriteByte(' ')
 				}
-				buf.WriteString(ToString(rv.Index(i).Interface()))
+				buf.WriteString(ToString(rv.Index(i).Interface(), timeFormat...))
 			}
 			buf.WriteByte(']')
 			return buf.String()
@@ -268,25 +270,32 @@ func ToString(arg any, timeFormat ...string) string {
 	}
 }
 
-// isNilPointer reports whether v holds a nil pointer, by the data word of the
+// isNilPointer reports whether v may hold a nil pointer, by the data word of the
 // interface: for a pointer, and for the other pointer-shaped types, that word
 // is the value itself. Such a value can still be an error or a fmt.Stringer,
 // because the method set of *T includes the methods of T, and calling those on
-// it dereferences the nil. A true answer only sends the call through
-// nilReceiverString, which returns what the method returns unless it panics, so
-// the nil map or func that also answers true loses nothing by it. Asking
-// reflect instead costs about 1.5ns on every error and Stringer.
+// it dereferences the nil. The answer is only "maybe": a nil map, func or chan
+// and a struct holding a single nil pointer have a nil data word too. A true
+// answer sends the call through nilReceiverString, which tells them apart, and
+// only when the method panics. Asking reflect instead costs about 1.5ns on
+// every error and Stringer.
 func isNilPointer(v any) bool {
 	// #nosec G103
 	return (*[2]unsafe.Pointer)(unsafe.Pointer(&v))[1] == nil
 }
 
-// nilReceiverString calls the Error or String method of a nil pointer as fmt
-// does: it returns what the method returns, which a method written to be
-// called on nil may well do, and "<nil>" if the method panics, as most do.
-func nilReceiverString(method func() string) (s string) { //nolint:nonamedreturns // the deferred recover sets the result
+// nilReceiverString calls the Error or String method of arg, whose data word is
+// nil. It returns what the method returns, which a method written to be called
+// on nil may well do. If the method panics, a nil pointer gets "<nil>", as in
+// fmt, most methods being unguarded; any other value gets its panic back,
+// which is not a nil receiver's doing and which ToString lets through for every
+// other value.
+func nilReceiverString(arg any, method func() string) (s string) { //nolint:nonamedreturns // the deferred recover sets the result
 	defer func() {
-		if recover() != nil {
+		if r := recover(); r != nil {
+			if v := reflect.ValueOf(arg); v.Kind() != reflect.Pointer || !v.IsNil() {
+				panic(r)
+			}
 			s = "<nil>"
 		}
 	}()

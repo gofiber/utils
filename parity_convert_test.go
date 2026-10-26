@@ -54,6 +54,23 @@ type panicky struct{}
 
 func (panicky) String() string { panic("boom") }
 
+// panickyMap is panicky for a map, which like a pointer has a nil data word in
+// an interface when it is nil.
+type panickyMap map[string]int
+
+func (panickyMap) String() string { panic("boom") }
+
+// holder and holderError are pointer-shaped as well: a struct with a single
+// pointer field is stored in an interface as that pointer, so a zero one looks
+// like a nil pointer there, though it is a value whose method dereferences a nil.
+type holder struct{ p *int }
+
+func (h holder) String() string { return strconv.Itoa(*h.p) }
+
+type holderError struct{ p *int }
+
+func (h holderError) Error() string { return strconv.Itoa(*h.p) }
+
 type (
 	namedInt    int
 	namedString string
@@ -229,9 +246,13 @@ func Test_ToString_Differences(t *testing.T) {
 		})
 	}
 
-	// The layout argument is only for time.Time, wherever it is reached.
+	// The layout argument is only for time.Time, wherever it is reached: directly,
+	// through a reflect.Value, or as an element of a slice or array.
 	require.Equal(t, "2001", ToString(moment, "2006"))
 	require.Equal(t, "2001", ToString(reflect.ValueOf(moment), "2006"))
+	require.Equal(t, "[2001 2001]", ToString([]time.Time{moment, moment}, "2006"))
+	require.Equal(t, "[2001]", ToString([1]time.Time{moment}, "2006"))
+	require.Equal(t, "[2001 x]", ToString([]any{moment, "x"}, "2006"))
 }
 
 // Test_ToString_NilReceivers requires a nil pointer whose type implements
@@ -282,4 +303,16 @@ func Test_ToString_NilReceivers(t *testing.T) {
 	// panic in its output, and ToString lets it through as it always has.
 	require.PanicsWithValue(t, "boom", func() { ToString(panicky{}) })
 	require.PanicsWithValue(t, "boom", func() { ToString(&panicky{}) })
+
+	// Only a nil pointer gets "<nil>" for a panic. A nil map, and a struct with a
+	// nil pointer in it, also have a nil data word in an interface, but the panic
+	// of their methods is no nil receiver's: fmt reports it as %!v(PANIC=...) and
+	// ToString lets it through, as it does for every other value.
+	const nilDereference = "runtime error: invalid memory address or nil pointer dereference"
+	require.PanicsWithValue(t, "boom", func() { ToString(panickyMap(nil)) })
+	require.PanicsWithError(t, nilDereference, func() { ToString(holder{}) })
+	require.PanicsWithError(t, nilDereference, func() { ToString(holderError{}) })
+	seven := 7
+	require.Equal(t, "7", ToString(holder{p: &seven}))
+	require.Equal(t, "7", ToString(holderError{p: &seven}))
 }
