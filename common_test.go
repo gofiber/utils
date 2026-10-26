@@ -768,6 +768,22 @@ func Test_GetArgument_Multiple(t *testing.T) {
 	require.False(t, GetArgument("-c"))
 }
 
+// Test_GetArgument_NoArguments: os.Args[1:] panics when os.Args is empty, which a
+// process started without even a program name has (the kernel supplies one from
+// Linux 5.18, not before), and which an embedder or a test may set up.
+func Test_GetArgument_NoArguments(t *testing.T) {
+	original := os.Args
+	defer func() { os.Args = original }()
+
+	for _, args := range [][]string{nil, {}, {"cmd"}} {
+		os.Args = args
+		require.NotPanics(t, func() { require.False(t, GetArgument("-a")) }, "%q", args)
+	}
+	// The program name is not an argument.
+	os.Args = []string{"-a"}
+	require.False(t, GetArgument("-a"))
+}
+
 func Test_IncrementIPRange(t *testing.T) {
 	t.Parallel()
 

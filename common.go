@@ -56,6 +56,7 @@ var whitespaceTable = [256]bool{
 
 // UUIDv4 returns a Random (Version 4) UUID.
 // The strength of the UUIDs is based on the strength of the crypto/rand package.
+// Panics if the random source fails.
 func UUIDv4() string {
 	token, err := uuid.NewRandom()
 	if err != nil {
@@ -73,7 +74,11 @@ func UUID() string {
 // GenerateSecureToken generates a cryptographically secure random token encoded in base64.
 // It uses crypto/rand for randomness and base64.RawURLEncoding for URL-safe output.
 // If length is less than or equal to 0, it defaults to 32 bytes (256 bits of entropy).
-// Panics if the random source fails.
+// The length counts random bytes, and the token is longer than that. It is not capped:
+// a length that comes from outside has to be bounded by the caller.
+// If the random source fails the program ends: since Go 1.24 crypto/rand terminates the
+// process itself instead of returning an error, so there is nothing to recover. A panic
+// stands ready in case that changes.
 func GenerateSecureToken(length int) string {
 	if length <= 0 {
 		length = defaultSecureTokenLength
@@ -96,7 +101,7 @@ func GenerateSecureToken(length int) string {
 }
 
 // SecureToken generates a secure token with 32 bytes of entropy.
-// Panics if the random source fails. See GenerateSecureToken for details.
+// If the random source fails the program ends. See GenerateSecureToken for details.
 func SecureToken() string {
 	return GenerateSecureToken(defaultSecureTokenLength)
 }
@@ -121,12 +126,20 @@ func FunctionName(fn any) string {
 	return v.Type().String()
 }
 
-// GetArgument check if key is in arguments
+// GetArgument check if key is in arguments.
+// The program name, os.Args[0], is not an argument; with no os.Args at all the answer is false.
 func GetArgument(arg string) bool {
+	if len(os.Args) < 2 {
+		return false
+	}
 	return slices.Contains(os.Args[1:], arg)
 }
 
-// IncrementIPRange Find available next IP address
+// IncrementIPRange Find available next IP address.
+// It adds one to ip in place, reading its bytes as one big-endian number, so a carry runs
+// through every byte of the slice and the last address wraps around to all zeros. net.ParseIP
+// returns an IPv4 address in its 16-byte form, where a carry out of 255.255.255.255 changes the
+// ::ffff: prefix; call To4 first to increment within IPv4.
 func IncrementIPRange(ip net.IP) {
 	for j := len(ip) - 1; j >= 0; j-- {
 		ip[j]++
