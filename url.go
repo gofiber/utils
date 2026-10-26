@@ -8,8 +8,6 @@ import (
 	"github.com/gofiber/utils/v2/internal/unsafeconv"
 )
 
-// escapeMode selects between net/url's query-component and path-segment
-// escaping dialects: only the query dialect maps '+' to space.
 type escapeMode uint8
 
 const (
@@ -17,12 +15,9 @@ const (
 	escapePath
 )
 
-// upperHexDigits is the escape alphabet used by the Append*Escape helpers,
-// matching net/url.
 const upperHexDigits = "0123456789ABCDEF"
 
-// unhexTable maps an ASCII byte to its hexadecimal digit value, or 0xFF for
-// bytes that are not hex digits.
+// unhexTable maps ASCII bytes to hex values; 0xFF marks non-hex bytes.
 var unhexTable = buildUnhexTable()
 
 func buildUnhexTable() [256]byte {
@@ -42,21 +37,14 @@ func buildUnhexTable() [256]byte {
 	return t
 }
 
-// queryNoEscapeTable and pathNoEscapeTable flag the bytes net/url leaves
-// verbatim in query components and path segments respectively. They are
-// derived from net/url's shouldEscape rules and pinned to them by
-// exhaustive per-byte tests. Path segments additionally keep the sub-delims
-// net/url's encodePathSegment mode does not escape.
+// The no-escape tables mirror net/url's shouldEscape and are pinned to it by per-byte tests.
 var (
 	queryNoEscapeTable = buildNoEscapeTable("")
 	pathNoEscapeTable  = buildNoEscapeTable("$&+:=@")
-	// A multi-segment path keeps '/', which separates its segments rather than
-	// belonging to one of them.
+	// "$&+:=@" are the sub-delims encodePathSegment keeps; the multi-segment table adds '/'.
 	pathSegmentsNoEscapeTable = buildNoEscapeTable("$&+:=@/")
 )
 
-// buildNoEscapeTable flags the RFC 3986 unreserved bytes plus alsoSafe as
-// not needing escape.
 func buildNoEscapeTable(alsoSafe string) [256]bool {
 	var t [256]bool
 	for i := range 256 {
@@ -68,37 +56,26 @@ func buildNoEscapeTable(alsoSafe string) [256]bool {
 	return t
 }
 
-// AppendQueryEscape appends the percent-encoded form of s to dst and returns
-// the extended slice. The output is byte-identical to net/url.QueryEscape:
-// unreserved bytes pass through, space becomes '+', everything else becomes
-// %XX with uppercase hex. dst must not alias s: escaping can grow the input,
-// so in-place operation is impossible.
+// AppendQueryEscape appends s to dst, percent-encoded exactly like net/url.QueryEscape
+// (space becomes '+'). dst must not alias s.
 func AppendQueryEscape[S byteSeq](dst []byte, s S) []byte {
 	return appendEscape(dst, unsafeconv.Bytes(s), &queryNoEscapeTable, escapeQuery)
 }
 
-// AppendPathEscape appends the percent-encoded path-segment form of s to dst
-// and returns the extended slice. The output is byte-identical to
-// net/url.PathEscape; the aliasing rule matches AppendQueryEscape.
+// AppendPathEscape appends s to dst escaped as one path segment, exactly like net/url.PathEscape.
+// dst must not alias s.
 func AppendPathEscape[S byteSeq](dst []byte, s S) []byte {
 	return appendEscape(dst, unsafeconv.Bytes(s), &pathNoEscapeTable, escapePath)
 }
 
-// AppendPathSegmentsEscape appends the percent-encoded form of the multi-segment
-// path s to dst and returns the extended slice. It escapes every segment as
-// AppendPathEscape does but leaves the '/' between them, so the output matches
-// escaping each segment separately and joining the results with '/'. Use it for
-// a value whose slashes are separators; use AppendPathEscape for one segment,
-// where a slash is data and has to be encoded. Empty and dot segments pass
-// through unchanged, so clean or reject an untrusted value before appending it
-// under a fixed prefix. The aliasing rule matches AppendQueryEscape.
+// AppendPathSegmentsEscape appends the multi-segment path s to dst, escaping each segment
+// like AppendPathEscape but keeping the '/' separators. Empty and dot segments pass through
+// unchanged, so clean or reject untrusted input before appending it under a fixed prefix.
+// dst must not alias s.
 func AppendPathSegmentsEscape[S byteSeq](dst []byte, s S) []byte {
 	return appendEscape(dst, unsafeconv.Bytes(s), &pathSegmentsNoEscapeTable, escapePath)
 }
 
-// appendEscape copies runs of unescaped bytes wholesale and expands the rest,
-// in one pass with no intermediate allocation — unlike net/url, which counts
-// in a first pass and then rebuilds the string byte by byte.
 func appendEscape(dst, s []byte, noEscape *[256]bool, mode escapeMode) []byte {
 	i, n := 0, len(s)
 	for i < n {
@@ -120,32 +97,20 @@ func appendEscape(dst, s []byte, noEscape *[256]bool, mode escapeMode) []byte {
 	return dst
 }
 
-// AppendQueryUnescape appends the decoded form of the query component s to
-// dst and returns the extended slice, converting '+' to space and %XX to the
-// byte it encodes, exactly like net/url.QueryUnescape including its
-// url.EscapeError values for malformed escapes. On error the returned slice
-// is dst with its original length (its backing array may still have been
-// reallocated by growth). Decoding never grows the input, so dst may be
-// s[:0] on a common backing array to decode in place; any other overlap is
-// invalid. Note that an in-place decode that fails has already overwritten
-// the prefix of s before the malformed escape with decoded bytes — treat s
-// as consumed once an in-place decode starts, error or not.
+// AppendQueryUnescape appends the decoded query component s to dst, like net/url.QueryUnescape
+// ('+' becomes space), including its url.EscapeError for malformed escapes. On error it returns
+// dst at its original length. dst may be s[:0] to decode in place; any other overlap is invalid,
+// and a failed in-place decode has already overwritten a prefix of s, so treat s as consumed.
 func AppendQueryUnescape[S byteSeq](dst []byte, s S) ([]byte, error) {
 	return appendUnescape(dst, unsafeconv.Bytes(s), escapeQuery)
 }
 
-// AppendPathUnescape appends the decoded form of the path component s to dst
-// and returns the extended slice, decoding %XX and leaving '+' verbatim,
-// exactly like net/url.PathUnescape. Error and aliasing behavior match
-// AppendQueryUnescape.
+// AppendPathUnescape appends the decoded path component s to dst, like net/url.PathUnescape
+// ('+' is kept). Error and aliasing behavior match AppendQueryUnescape.
 func AppendPathUnescape[S byteSeq](dst []byte, s S) ([]byte, error) {
 	return appendUnescape(dst, unsafeconv.Bytes(s), escapePath)
 }
 
-// appendUnescape jumps between escape sites with vectorized scans —
-// IndexAny2 (SWAR/AVX2) when '+' also needs rewriting, bytes.IndexByte
-// otherwise — and copies the clean spans between them wholesale, so input
-// without escapes costs one scan and one copy.
 func appendUnescape(dst, s []byte, mode escapeMode) ([]byte, error) {
 	off := len(dst)
 	i, n := 0, len(s)
@@ -166,7 +131,7 @@ func appendUnescape(dst, s []byte, mode escapeMode) ([]byte, error) {
 			i = j + 1
 			continue
 		}
-		// s[j] == '%': the error substrings below match net/url's unescape.
+		// s[j] == '%': the error substrings match net/url's unescape.
 		if j >= n-2 {
 			return dst[:off], url.EscapeError(s[j:])
 		}

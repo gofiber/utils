@@ -6,15 +6,13 @@ import (
 
 const durationBufLen = 32 // the longest rendering is "-2562047h47m16.854775808s"
 
-// AppendDuration appends d formatted exactly like time.Duration.String to dst
-// and returns the extended slice, without the string allocation.
+// AppendDuration appends d to dst, formatted exactly like time.Duration.String.
 func AppendDuration(dst []byte, d time.Duration) []byte {
 	var buf [durationBufLen]byte
 	w := durationToBuf(&buf, d)
 	return append(dst, buf[w:]...)
 }
 
-// durationToBuf renders d right-aligned into buf and returns the first offset.
 func durationToBuf(buf *[durationBufLen]byte, d time.Duration) int {
 	w := len(buf)
 	u := uint64(d)
@@ -26,8 +24,6 @@ func durationToBuf(buf *[durationBufLen]byte, d time.Duration) int {
 	w--
 	buf[w] = 's'
 	if u < uint64(time.Second) {
-		// Sub-second: ns, µs (two UTF-8 bytes), or ms. The unit splits are
-		// constant divisions, which compile to multiplies.
 		w--
 		switch {
 		case u == 0:
@@ -72,9 +68,7 @@ func durationToBuf(buf *[durationBufLen]byte, d time.Duration) int {
 	return w
 }
 
-// durationFrac writes the prec-digit fraction frac ending at buf[w] without
-// its trailing zeros (nothing at all when it is zero, the common case) and
-// returns the new offset.
+// durationFrac writes the prec-digit fraction frac before buf[w], minus trailing zeros.
 func durationFrac(buf *[durationBufLen]byte, w int, frac uint64, prec int) int {
 	if frac == 0 {
 		return w
@@ -102,7 +96,6 @@ func durationFrac(buf *[durationBufLen]byte, w int, frac uint64, prec int) int {
 	return w
 }
 
-// durationInt writes the digits of v ending at buf[w] and returns the new offset.
 func durationInt(buf *[durationBufLen]byte, w int, v uint64) int {
 	for v >= 100 {
 		q := v / 100

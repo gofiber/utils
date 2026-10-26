@@ -22,8 +22,7 @@ const usage = `usage: go run ./scripts [-update] [-block N]
 
 var errHelp = errors.New("help requested")
 
-// exit is how main ends with a failure. It is os.Exit; a test replaces it to
-// see the status without ending the test binary.
+// exit is os.Exit; a test replaces it.
 var exit = os.Exit
 
 func main() {
@@ -33,7 +32,6 @@ func main() {
 	}
 }
 
-// run does what the command line asks to the README at readme.
 func run(args []string, readme string) error {
 	update, block, err := parseFlags(args)
 	switch {
@@ -45,7 +43,6 @@ func run(args []string, readme string) error {
 	}
 
 	if update {
-		// A Ctrl-C during a 15 minute measurement should take the go test child with it.
 		ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
 		defer stop()
 		if err := updateBenchmarks(ctx, readme, block); err != nil {

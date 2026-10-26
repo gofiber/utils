@@ -28,35 +28,25 @@ func readRandomOrPanic(dst []byte) {
 	checkRandomRead(rand.Read(dst))
 }
 
-// checkRandomRead panics if reading random bytes failed.
-//
-// On supported Go versions (1.24+), crypto/rand.Read ends the program itself
-// and does not return errors. This check preserves explicit panic semantics if
-// the behavior changes or an alternate implementation is used in the future.
-// See: https://cs.opensource.google/go/go/+/refs/tags/go1.24.0:src/crypto/rand/rand.go
-//
-// It takes the results of the read so that this failure path can be tested
-// without a seam around the read itself: calling the read through a variable
-// would move the token buffers of GenerateSecureToken to the heap.
+// checkRandomRead panics on a failed read, which Go 1.24+ never reports: crypto/rand ends the
+// program itself. It takes the read's results so tests reach the panic; calling the read through
+// a variable would move the token buffers to the heap.
 func checkRandomRead(_ int, err error) {
 	if err != nil {
 		panic(fmt.Errorf("utils: failed to read random bytes for token: %w", err))
 	}
 }
 
-// Lookup table for ASCII whitespace characters (true = whitespace, false = not whitespace)
 var whitespaceTable = [256]bool{
-	'\t': true, // 9 - horizontal tab
-	'\n': true, // 10 - line feed
-	'\v': true, // 11 - vertical tab
-	'\f': true, // 12 - form feed
-	'\r': true, // 13 - carriage return
-	' ':  true, // 32 - space
+	'\t': true,
+	'\n': true,
+	'\v': true,
+	'\f': true,
+	'\r': true,
+	' ':  true,
 }
 
-// UUIDv4 returns a Random (Version 4) UUID.
-// The strength of the UUIDs is based on the strength of the crypto/rand package.
-// Panics if the random source fails.
+// UUIDv4 returns a random (version 4) UUID from crypto/rand; it panics if the random source fails.
 func UUIDv4() string {
 	token, err := uuid.NewRandom()
 	if err != nil {
@@ -65,20 +55,14 @@ func UUIDv4() string {
 	return token.String()
 }
 
-// UUID generates an universally unique identifier (UUID).
-// This is an alias for UUIDv4 for backward compatibility.
+// UUID is an alias for UUIDv4, kept for backward compatibility.
 func UUID() string {
 	return UUIDv4()
 }
 
-// GenerateSecureToken generates a cryptographically secure random token encoded in base64.
-// It uses crypto/rand for randomness and base64.RawURLEncoding for URL-safe output.
-// If length is less than or equal to 0, it defaults to 32 bytes (256 bits of entropy).
-// The length counts random bytes, and the token is longer than that. It is not capped:
-// a length that comes from outside has to be bounded by the caller.
-// If the random source fails the program ends: since Go 1.24 crypto/rand terminates the
-// process itself instead of returning an error, so there is nothing to recover. A panic
-// stands ready in case that changes.
+// GenerateSecureToken returns a cryptographically secure random token of length bytes, encoded with
+// base64.RawURLEncoding, so it is longer; length <= 0 means 32 bytes. The length is not capped, so
+// bound one that comes from outside. If the random source fails, the program ends.
 func GenerateSecureToken(length int) string {
 	if length <= 0 {
 		length = defaultSecureTokenLength
@@ -100,8 +84,7 @@ func GenerateSecureToken(length int) string {
 	return base64.RawURLEncoding.EncodeToString(bytes)
 }
 
-// SecureToken generates a secure token with 32 bytes of entropy.
-// If the random source fails the program ends. See GenerateSecureToken for details.
+// SecureToken generates a secure token with 32 bytes of entropy; see GenerateSecureToken.
 func SecureToken() string {
 	return GenerateSecureToken(defaultSecureTokenLength)
 }
@@ -126,8 +109,7 @@ func FunctionName(fn any) string {
 	return v.Type().String()
 }
 
-// GetArgument check if key is in arguments.
-// The program name, os.Args[0], is not an argument; with no os.Args at all the answer is false.
+// GetArgument reports whether arg is among the program arguments; os.Args[0] does not count.
 func GetArgument(arg string) bool {
 	if len(os.Args) < 2 {
 		return false
@@ -135,11 +117,8 @@ func GetArgument(arg string) bool {
 	return slices.Contains(os.Args[1:], arg)
 }
 
-// IncrementIPRange Find available next IP address.
-// It adds one to ip in place, reading its bytes as one big-endian number, so a carry runs
-// through every byte of the slice and the last address wraps around to all zeros. net.ParseIP
-// returns an IPv4 address in its 16-byte form, where a carry out of 255.255.255.255 changes the
-// ::ffff: prefix; call To4 first to increment within IPv4.
+// IncrementIPRange adds one to ip in place, wrapping the last address to all zeros. A 16-byte IPv4
+// address from net.ParseIP carries out of 255.255.255.255 into the ::ffff: prefix; call To4 first.
 func IncrementIPRange(ip net.IP) {
 	for j := len(ip) - 1; j >= 0; j-- {
 		ip[j]++
@@ -149,23 +128,18 @@ func IncrementIPRange(ip net.IP) {
 	}
 }
 
-// ConvertToBytes returns integer size of bytes from human-readable string, ex. 42kb, 42M
-// The units are k, m, g, t and p in either case: the first letter after the number
-// selects the unit, and anything after it is ignored. Decimal units are powers of 1000
-// (42k = 42000); binary units, with an 'i' right after the letter, as in Ki and KiB, are
-// powers of 1024 (42Ki = 43008). The 'i' of a word such as kilobytes or gigabytes is not
-// that infix. ByteSize writes powers of 1024 as KB, MB and so on, rounded to one decimal
-// place, so this function does not read its output back: write KiB, MiB, ... for 1024.
-// The number may have a '+', a point and an exponent (1.5e3K), with any number of
-// digits. The result is the exact product rounded down, capped at math.MaxInt. It is
-// 0 if there is no number or it is negative or malformed; an unknown unit counts as bytes.
+// ConvertToBytes returns the size in bytes of a human-readable string, ex. 42kb, 42M, 1.5e3K.
+// The first letter after the number picks the unit (k, m, g, t, p in either case; any other
+// letter means bytes); the rest is ignored. Units are powers of 1000 (42k = 42000), or of 1024
+// with an 'i' right after the letter, as in Ki and KiB but not in kilobytes (42Ki = 43008), so
+// the KB that ByteSize writes for 1024 reads back as 1000. The result is rounded down and capped
+// at math.MaxInt; it is 0 for a missing, negative or malformed number.
 func ConvertToBytes(humanReadableString string) int {
 	strLen := len(humanReadableString)
 	if strLen == 0 {
 		return 0
 	}
 
-	// Fast path for plain byte values (e.g. "42", "42B", "42b").
 	var sizeFast uint64
 	maxInt := uint64(math.MaxInt)
 	i := 0
@@ -193,8 +167,6 @@ func ConvertToBytes(humanReadableString string) int {
 		}
 	}
 
-	// Find the last digit position by scanning backwards
-	// Also identify the unit prefix position in the same pass
 	lastNumberPos := -1
 	unitPrefixPos := 0
 	for j := strLen - 1; j >= 0; j-- {
@@ -203,13 +175,11 @@ func ConvertToBytes(humanReadableString string) int {
 			lastNumberPos = j
 			break
 		}
-		// Track the first letter position (unit prefix) from the end
 		if (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') {
 			unitPrefixPos = j
 		}
 	}
 
-	// No digits found
 	if lastNumberPos < 0 {
 		return 0
 	}
@@ -218,8 +188,6 @@ func ConvertToBytes(humanReadableString string) int {
 
 	mult := uint64(1)
 	if unitPrefixPos > 0 {
-		// An 'i' after the unit prefix selects binary units (KiB = 1024), unless it is
-		// the start of a word like "kilobytes", where a letter other than b follows it.
 		binary := false
 		if next := unitPrefixPos + 1; next < strLen && (humanReadableString[next] == 'i' || humanReadableString[next] == 'I') {
 			binary = next+1 == strLen || !continuesUnitWord(humanReadableString[next+1])
@@ -245,7 +213,6 @@ func ConvertToBytes(humanReadableString string) int {
 		}
 	}
 
-	// A whole number is the digits read above, already capped.
 	if lastNumberPos == i-1 {
 		hi, lo := bits.Mul64(sizeFast, mult)
 		if hi != 0 || lo > maxInt {
@@ -258,22 +225,19 @@ func ConvertToBytes(humanReadableString string) int {
 	return scaleDecimal(numPart, mult)
 }
 
-// continuesUnitWord reports whether c is a letter other than b or B, which after the
-// "i" of a unit like "Ki" or "KiB" shows the "i" to belong to a word such as "kilobytes".
+// continuesUnitWord reports whether c makes the "i" of "Ki" part of a word like "kilobytes".
 func continuesUnitWord(c byte) bool {
 	l := c | 0x20
 	return l >= 'a' && l <= 'z' && l != 'b'
 }
 
-// scaleDecimal returns floor(s * mult) capped at math.MaxInt, or 0 if s is not a
-// number or is negative. s is digits with an optional '+', point and exponent.
 func scaleDecimal(s string, mult uint64) int {
 	var mantissa uint64
 	var exp int64
-	end := len(s)            // where the digits end and the exponent starts
-	places, dropped := -1, 0 // places counts the digits after the point, -1 before it
+	end := len(s)
+	places, dropped := -1, 0 // places: digits after the point, -1 before it
 	droppedFrac := 0
-	inexact := false // a nonzero digit did not fit the mantissa
+	inexact := false
 scan:
 	for i := 0; i < len(s); i++ {
 		c := s[i]
@@ -286,7 +250,7 @@ scan:
 					places++
 				}
 			case places < 0:
-				dropped++ // an integer digit still scales the number
+				dropped++
 				inexact = inexact || c != '0'
 			default:
 				droppedFrac++
@@ -310,8 +274,8 @@ scan:
 		return 0
 	}
 
-	// The mantissa holds a prefix of the digits, so the number lies in
-	// [mantissa, mantissa+1) * 10^shift. If both ends give the same result, so does it.
+	// The mantissa is a prefix of the digits, so the number lies in [mantissa, mantissa+1) * 10^shift;
+	// if both ends scale alike, so does it.
 	shift := exp + int64(dropped) - int64(max(places, 0))
 	n := scaleMantissa(mantissa, shift, mult)
 	if inexact && n != scaleMantissa(mantissa+1, shift, mult) {
@@ -320,9 +284,6 @@ scan:
 	return n
 }
 
-// scaleMantissa returns floor(mantissa * 10^shift * mult) capped at math.MaxInt.
-// A 128-bit division costs several times a 64-bit one, so each case does only the
-// work it needs.
 func scaleMantissa(mantissa uint64, shift int64, mult uint64) int {
 	if shift > 0 {
 		if shift >= int64(len(pow10)) {
@@ -348,14 +309,13 @@ func scaleMantissa(mantissa uint64, shift int64, mult uint64) int {
 		switch {
 		case hi == 0:
 			quotient = lo / divisor
-		case hi >= divisor: // the quotient needs more than 64 bits
+		case hi >= divisor:
 			return math.MaxInt
 		default:
 			quotient, _ = bits.Div64(hi, lo, divisor)
 		}
 	} else if down < int64(2*len(pow10)-1) {
-		// The product is below 2^114, so one division by 10^19 cannot overflow
-		// and leaves 51 bits.
+		// The product is below 2^114, so dividing by 10^19 cannot overflow.
 		quotient, _ = bits.Div64(hi, lo, pow10[len(pow10)-1])
 		quotient /= pow10[down-int64(len(pow10)-1)]
 	} // else the product is below 10^down
@@ -365,20 +325,19 @@ func scaleMantissa(mantissa uint64, shift int64, mult uint64) int {
 	return int(quotient)
 }
 
-// scaleDigits multiplies the digits of s[:end] by mult, one at a time from the
-// last, and keeps the digits of the product from the down-th on: the integer part
-// of the number, whose point is down places from the end.
+// scaleDigits multiplies the digits of s[:end] by mult and keeps the product's digits from the
+// down-th on: the integer part, as the point is down places from the end.
 func scaleDigits(s string, end int, down int64, mult uint64) int {
 	if down <= 0 {
-		return math.MaxInt // the digits are a whole number of 10^19 or more
+		return math.MaxInt
 	}
 	var result, carry uint64
-	pos := int64(0) // the product digit made next
+	pos := int64(0)
 	for i := end - 1; i >= 0 || carry != 0; i-- {
 		var d uint64
 		if i >= 0 {
 			c := s[i] - '0'
-			if c > 9 { // the point or the sign
+			if c > 9 {
 				continue
 			}
 			d = uint64(c)
@@ -386,7 +345,7 @@ func scaleDigits(s string, end int, down int64, mult uint64) int {
 		t := d*mult + carry
 		carry = t / 10
 		if digit := t % 10; digit != 0 && pos >= down {
-			if pos-down >= int64(len(pow10)-1) { // 10^19 is more than math.MaxInt
+			if pos-down >= int64(len(pow10)-1) { // 10^19 > math.MaxInt
 				return math.MaxInt
 			}
 			result += digit * pow10[pos-down] // below 2^64 even after the last sum

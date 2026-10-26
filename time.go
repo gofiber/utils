@@ -13,14 +13,7 @@ var (
 	updaterDone chan struct{}
 )
 
-// now and newTicker are this package's clock: every production read of the wall
-// clock goes through them, so replacing the pair is enough to drive the updater
-// from a test without waiting on real time. Neither is reachable from outside
-// the package, and Timestamp itself touches neither.
-//
-// newTicker hands back a channel and a stop function instead of a *time.Ticker
-// because a Ticker the runtime did not build cannot stand in for one: its Stop
-// panics.
+// newTicker returns a channel and stop func because a fake *time.Ticker panics on Stop.
 var (
 	now       = time.Now
 	newTicker = func(d time.Duration) (<-chan time.Time, func()) {
@@ -29,19 +22,14 @@ var (
 	}
 )
 
-// Timestamp returns the Unix timestamp (seconds) that the updater published last:
-// the current time to within about a second, for the price of one atomic load.
-//
-// Nothing is published before StartTimeStampUpdater has run, so until then the
-// result is 0, not the time. Call StartTimeStampUpdater() once at app startup,
-// before the first call. After StopTimeStampUpdater the last published value stays
-// in place and no longer advances.
+// Timestamp returns the Unix time in seconds as last published by the updater.
+// It is 0 until StartTimeStampUpdater has run, and frozen after StopTimeStampUpdater.
 func Timestamp() uint32 {
 	return timestamp.Load()
 }
 
-// StartTimeStampUpdater launches a background goroutine that updates the cached timestamp every second.
-// It is safe to call multiple times and from multiple goroutines; only one updater runs at a time.
+// StartTimeStampUpdater starts a goroutine that refreshes the cached timestamp every second.
+// Repeated and concurrent calls are safe.
 func StartTimeStampUpdater() {
 	updaterMu.Lock()
 	defer updaterMu.Unlock()
@@ -53,14 +41,11 @@ func StartTimeStampUpdater() {
 	stopUpdater = make(chan struct{})
 	updaterDone = make(chan struct{})
 
-	// The tick source is created here, not in the goroutine, so it exists by
-	// the time this returns and a caller cannot race the goroutine's first
-	// statement.
+	// Created before the goroutine so it exists when this returns.
 	tick, stopTick := newTicker(time.Second)
 
 	go func(stop, done chan struct{}) {
-		// stopTick before close(done), so that once StopTimeStampUpdater's
-		// wait returns the tick source is released rather than about to be.
+		// stopTick before close(done): Stop's wait then implies release.
 		defer close(done)
 		defer stopTick()
 
@@ -75,9 +60,8 @@ func StartTimeStampUpdater() {
 	}(stopUpdater, updaterDone)
 }
 
-// StopTimeStampUpdater stops the background updater goroutine.
-// Call this on app shutdown to avoid leaking goroutines.
-// It is safe to call multiple times and from multiple goroutines.
+// StopTimeStampUpdater stops the updater goroutine; call it on shutdown to avoid a leak.
+// Repeated and concurrent calls are safe.
 func StopTimeStampUpdater() {
 	updaterMu.Lock()
 	defer updaterMu.Unlock()

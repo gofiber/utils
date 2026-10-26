@@ -7,22 +7,15 @@ import (
 	"github.com/gofiber/utils/v2/swar"
 )
 
-// ltLanes, gtLanes, and ampLanes broadcast the HTML-escaped characters to
-// every lane; quoteLanes and backslashLanes live in ascii.go.
 const (
 	ltLanes  = uint64('<') * swar.Ones
 	gtLanes  = uint64('>') * swar.Ones
 	ampLanes = uint64('&') * swar.Ones
 )
 
-// jsonHexDigits is the escape alphabet for \u00XX sequences, matching
-// encoding/json.
 const jsonHexDigits = "0123456789abcdef"
 
-// jsonSafeTable flags the ASCII bytes that pass through a JSON string
-// encoder verbatim: 0x20..0x7F, DEL included as in encoding/json, minus '"',
-// '\\', and the HTML-escaped '<', '>', '&'. Bytes >= 0x80 are false so the
-// scalar loop routes them to the UTF-8 path.
+// DEL passes, as in encoding/json; bytes >= 0x80 are false and take the UTF-8 path.
 var jsonSafeTable = buildJSONSafeTable()
 
 func buildJSONSafeTable() [256]bool {
@@ -33,31 +26,18 @@ func buildJSONSafeTable() [256]bool {
 	return t
 }
 
-// AppendJSONString appends s to dst as a double-quoted JSON string and
-// returns the extended slice. The output is byte-identical to
-// encoding/json.Marshal of the same string value, including its default
-// HTML escaping: '"' and '\\' get backslash escapes; control bytes below
-// 0x20 become \b, \f, \n, \r, \t, or \u00XX; '<', '>', '&' become \u00XX; each
-// invalid UTF-8 byte becomes the six literal characters \ufffd; and the
-// line separators U+2028/U+2029 become the \u2028 and \u2029 escapes.
-// Go 1.27's json/v2 writes that replacement raw, so for invalid UTF-8 the two
-// encodings differ from 1.27 on; both still decode to the same string.
-// All other bytes, including multi-byte UTF-8 sequences, are copied
-// verbatim. dst must not alias s: the output is longer than the input (at
-// minimum by the surrounding quotes), so in-place encoding is impossible
-// and an aliased dst would overwrite bytes before they are read. Clean
-// spans are located with a SWAR scan and copied wholesale, so typical log
-// or header values cost one scan and one copy — with none of
-// encoding/json.Marshal's reflection or allocation.
+// AppendJSONString appends s to dst as a double-quoted JSON string and returns the
+// extended slice. The output is byte-identical to encoding/json.Marshal of the same
+// string, including its HTML escaping: '<', '>' and '&' become \u00XX, U+2028 and
+// U+2029 are escaped, and each invalid UTF-8 byte becomes the six characters \ufffd.
+// From Go 1.27, json/v2 writes that replacement raw instead; both decode to the same
+// string. dst must not alias s.
 func AppendJSONString[S byteSeq](dst []byte, s S) []byte {
 	bs := unsafeconv.Bytes(s)
 	n := len(bs)
 	dst = append(dst, '"')
 	start, i := 0, 0
 	for i < n {
-		// Skip to the next byte needing attention. Like nonQuotableMask,
-		// the combined mask is exact in and below its first set lane, which
-		// is all this first-match scan consumes.
 		if i <= n-8 {
 			m := jsonUnsafeMask(swar.Load8(bs, i))
 			if m == 0 {
@@ -87,7 +67,6 @@ func AppendJSONString[S byteSeq](dst []byte, s S) []byte {
 			case '\t':
 				dst = append(dst, 't')
 			default:
-				// Other control bytes and the HTML characters '<', '>', '&'.
 				dst = append(dst, 'u', '0', '0', jsonHexDigits[c>>4], jsonHexDigits[c&0x0F])
 			}
 			i++
@@ -114,11 +93,8 @@ func AppendJSONString[S byteSeq](dst []byte, s S) []byte {
 	return append(dst, '"')
 }
 
-// jsonUnsafeMask flags the lanes of w holding bytes a JSON string encoder
-// cannot copy verbatim: controls below 0x20 (exact range mask), the five
-// escaped ASCII characters (ZeroLanes needle matches, exact in and below
-// their first hit), and all bytes >= 0x80, which the caller inspects as
-// UTF-8.
+// jsonUnsafeMask flags lanes of w needing escaping or UTF-8 handling; exact only in and
+// below the first set lane, which is all the first-match scan uses.
 func jsonUnsafeMask(w uint64) uint64 {
 	return swar.MatchRangeMask(w, 0x00, 0x1F) | w&swar.HighBits |
 		swar.ZeroLanes(w^quoteLanes) | swar.ZeroLanes(w^backslashLanes) |

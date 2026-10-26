@@ -20,24 +20,21 @@ func UnsafeString(b []byte) string {
 	return unsafeconv.UnsafeString(b)
 }
 
-// UnsafeBytes returns a byte pointer without allocation.
-// The slice shares the memory of s and must only be read: a string is immutable, and one
-// that is a literal lives in read-only memory, where a write is a fatal fault.
+// UnsafeBytes returns a byte pointer without allocation. It shares the memory of s and must only
+// be read: a write to a string literal is a fatal fault.
 func UnsafeBytes(s string) []byte {
 	return unsafeconv.UnsafeBytes(s)
 }
 
-// CopyString returns a copy of s in memory of its own. The copy stays as it was when s is a
-// view of a buffer that is reused or modified later, such as one made with UnsafeString.
+// CopyString returns a copy of s, unaffected by later changes to a buffer that s views.
 func CopyString(s string) string {
 	// #nosec G103
 	return string(UnsafeBytes(s))
 }
 
 // #nosec G103
-// CopyBytes returns a copy of b in memory of its own, with capacity equal to its length:
-// writes to either slice no longer reach the other. The copy of a nil or empty b is a
-// non-nil empty slice.
+// CopyBytes returns a copy of b with capacity equal to its length;
+// a nil or empty b gives a non-nil empty slice.
 func CopyBytes(b []byte) []byte {
 	tmp := make([]byte, len(b))
 	copy(tmp, b)
@@ -54,11 +51,8 @@ const (
 	uExabyte
 )
 
-// ByteSize returns a human-readable byte string of the form 10MB, 12.5KB, and so forth.
-// The units are powers of 1024, written KB, MB, GB, TB, PB and EB, and the number is rounded
-// half up to one decimal place. The unit that results in the smallest number greater than or
-// equal to 1 is always chosen, so a size that rounds up to 1024 of a unit is written as 1 of
-// the next: 1048575 bytes is 1MB, not 1024KB. Every uint64 is supported.
+// ByteSize returns a human-readable byte string such as 10MB or 12.5KB, in powers of 1024 and
+// rounded half up to one decimal place: 1048575 bytes is 1MB, not 1024KB.
 func ByteSize(bytes uint64) string {
 	unit := ""
 	div := uint64(1)
@@ -95,12 +89,11 @@ func ByteSize(bytes uint64) string {
 		return UnsafeString(buf)
 	}
 
-	// Tenths of the unit, rounded half up. Nothing here overflows for any uint64: the
-	// largest term, (bytes%div)*10 + div/2, is below 1.21e19 at div = 2^60.
+	// Tenths of the unit, rounded half up. No uint64 overflows:
+	// (bytes%div)*10 + div/2 stays below 1.21e19.
 	scaled := (bytes/div)*10 + ((bytes%div)*10+div/2)/div
 	if scaled >= 1024*10 {
-		// 1023.95 of a unit and more rounds to 1024.0 of it, which is 1.0 of the next.
-		// This cannot happen for EB, whose largest value is 16.
+		// 1023.95 or more of a unit rounds to 1024.0, which is 1.0 of the next; EB tops out at 16.
 		scaled = 10
 		switch unit {
 		case "KB":
@@ -111,7 +104,7 @@ func ByteSize(bytes uint64) string {
 			unit = "TB"
 		case "TB":
 			unit = "PB"
-		default: // "PB"
+		default:
 			unit = "EB"
 		}
 	}
@@ -127,9 +120,8 @@ func ByteSize(bytes uint64) string {
 	return UnsafeString(buf)
 }
 
-// ToString Change arg to string.
-// A time.Time is formatted with timeFormat[0], or "2006-01-02 15:04:05" without one;
-// so is each time.Time that is an element of a slice or array.
+// ToString converts arg to a string; a time.Time, alone or in a slice or array, uses
+// timeFormat[0], else "2006-01-02 15:04:05".
 func ToString(arg any, timeFormat ...string) string {
 	switch v := arg.(type) {
 	case int:
@@ -183,7 +175,6 @@ func ToString(arg any, timeFormat ...string) string {
 			return nilReceiverString(arg, v.String)
 		}
 		return v.String()
-	// Handle common pointer types directly to avoid reflection
 	case *string:
 		if v != nil {
 			return *v
@@ -214,13 +205,10 @@ func ToString(arg any, timeFormat ...string) string {
 			return strconv.FormatBool(*v)
 		}
 		return "false"
-	// Handle common slice types directly to avoid reflection
 	case []string:
 		if len(v) == 0 {
 			return "[]"
 		}
-		// Compute the exact output size for a single allocation:
-		// '[' + ']' + one separating space per gap + all element bytes.
 		size := len(v) + 1
 		for _, s := range v {
 			size += len(s)
@@ -239,8 +227,6 @@ func ToString(arg any, timeFormat ...string) string {
 		if len(v) == 0 {
 			return "[]"
 		}
-		// Compute the exact output size for a single allocation:
-		// '[' + ']' + one separating space per gap + all element digits.
 		size := len(v) + 1
 		for _, n := range v {
 			size += intDigits(int64(n))
@@ -260,12 +246,8 @@ func ToString(arg any, timeFormat ...string) string {
 	}
 }
 
-// toStringReflect renders what ToString has no case of its own for: a pointer is
-// followed, a slice or array is rendered element by element, and anything else is
-// left to fmt.Sprint. It is a function of its own so that the frame of ToString,
-// whose cases are the common ones, stays small.
+// toStringReflect is ToString's reflection fallback, kept apart so ToString's frame stays small.
 func toStringReflect(arg any, timeFormat []string) string {
-	// Check if the type is a pointer by using reflection
 	rv := reflect.ValueOf(arg)
 	if !rv.IsValid() {
 		return ""
@@ -273,18 +255,16 @@ func toStringReflect(arg any, timeFormat []string) string {
 	kind := rv.Kind()
 	if kind == reflect.Pointer && !rv.IsNil() {
 		if endlessPointerType(rv.Type()) {
-			return fmt.Sprint(arg) // a type like T *T has no end to follow
+			return fmt.Sprint(arg)
 		}
-		// Dereference the pointer and recursively call ToString
 		return ToString(rv.Elem().Interface(), timeFormat...)
 	} else if kind == reflect.Slice || kind == reflect.Array {
-		// handle slices
 		n := rv.Len()
 		if n == 0 {
 			return "[]"
 		}
 		var buf strings.Builder
-		buf.Grow(n * 8) // Pre-allocate approximate size
+		buf.Grow(n * 8)
 		buf.WriteByte('[')
 		for i := range n {
 			if i > 0 {
@@ -296,19 +276,14 @@ func toStringReflect(arg any, timeFormat []string) string {
 		return buf.String()
 	}
 
-	// For types not explicitly handled, use fmt.Sprint to generate a string representation
 	return fmt.Sprint(arg)
 }
 
-// maxPointerDepth is how many pointers deep a type may be before ToString takes
-// it for a type that points to itself. Real types stop far short of it.
+// maxPointerDepth is the pointer depth past which ToString takes a type to point to itself.
 const maxPointerDepth = 32
 
-// endlessPointerType reports whether following the pointer type t, one element type
-// after the other, never reaches a type that is not a pointer: t is, or leads to, a
-// type declared as pointing to itself, like type T *T, which makes ToString call itself
-// until the stack is gone. The type, not the value, decides this, so it costs one or two
-// steps for every ordinary pointer.
+// endlessPointerType reports whether pointer type t leads only to pointers, as in type T *T,
+// which would make ToString overflow the stack.
 func endlessPointerType(t reflect.Type) bool {
 	for range maxPointerDepth {
 		if t.Kind() != reflect.Pointer {
@@ -319,29 +294,16 @@ func endlessPointerType(t reflect.Type) bool {
 	return true
 }
 
-// isNilPointer reports whether v may hold a nil pointer, by the data word of the
-// interface: for a pointer, and for the other pointer-shaped types, that word
-// is the value itself. The exception is a pointer to a type that is not in the
-// heap (cgo's incomplete C types), which an interface holds by the address of a
-// box; such a nil pointer goes undetected and its method panics as ever.
-//
-// A nil pointer can still be an error or a fmt.Stringer, because the method set
-// of *T includes the methods of T, and calling those on it dereferences the nil.
-// The answer is only "maybe": a nil map, func or chan and a struct holding a
-// single nil pointer have a nil data word too. A true answer sends the call
-// through nilReceiverString, which tells them apart, and only when the method
-// panics. Asking reflect instead costs about 1.5ns on every error and Stringer.
+// isNilPointer reports whether v may hold a nil pointer, by its interface's data word: a nil
+// map, func, chan or one-pointer struct matches too, and a nil pointer to a cgo incomplete
+// C type does not.
 func isNilPointer(v any) bool {
 	// #nosec G103
 	return (*[2]unsafe.Pointer)(unsafe.Pointer(&v))[1] == nil
 }
 
-// nilReceiverString calls the Error or String method of arg, whose data word is
-// nil. It returns what the method returns, which a method written to be called
-// on nil may well do. If the method panics, a nil pointer gets "<nil>", as in
-// fmt, most methods being unguarded; any other value gets its panic back,
-// which is not a nil receiver's doing and which ToString lets through for every
-// other value.
+// nilReceiverString calls method, the Error or String of arg, whose data word is nil: if it
+// panics, a nil pointer gives "<nil>", as in fmt, and any other value its panic back.
 func nilReceiverString(arg any, method func() string) (s string) { //nolint:nonamedreturns // the deferred recover sets the result
 	defer func() {
 		if r := recover(); r != nil {

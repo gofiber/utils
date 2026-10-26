@@ -20,13 +20,11 @@ const (
 	contentTypePrefixApplicationWithSlash = "application/"
 )
 
-// Extensions are looked up in an open-addressed table keyed by the extension
-// packed into one lower-cased word and built from mimeExtensions at init: a
-// hit is a multiply, a shift, and usually one comparison, with no allocation.
+// Extensions index an open-addressed table by the lower-cased extension packed into one word.
 const (
-	mimeTableBits       = 9 // 512 slots
+	mimeTableBits       = 9
 	mimeTableMask       = 1<<mimeTableBits - 1
-	mimeTableMaxEntries = 1 << (mimeTableBits - 1) // half full at most, so probes stay short and always end at a free slot
+	mimeTableMaxEntries = 1 << (mimeTableBits - 1) // at most half full, so probes end at a free slot
 	mimeHashMul         = 0x9E3779B97F4A7C15       // Fibonacci hashing multiplier
 	mimeKeyMaxLen       = swar.WordLen - 1         // the top lane of a key holds the length
 )
@@ -57,8 +55,7 @@ func buildMIMETable(exts map[string]string) [1 << mimeTableBits]mimeEntry {
 	return t
 }
 
-// packExtension packs 1..mimeKeyMaxLen bytes lower-cased into a little-endian
-// word with the length in the top lane, so "html\x00" and "html" differ.
+// packExtension packs 1..7 bytes into a word with the length in the top lane, so "html\x00" and "html" differ.
 func packExtension(ext string) uint64 {
 	return foldNeedle(ext) | uint64(len(ext))<<(8*mimeKeyMaxLen)
 }
@@ -67,12 +64,10 @@ func mimeHash(key uint64) int {
 	return int(key * mimeHashMul >> (64 - mimeTableBits))
 }
 
-// GetMIME returns the media type of a file extension without parameters, matched
-// case-insensitively with or without the leading dot. The built-in table of common
-// types is consulted first. An extension not in it is looked up with
-// mime.TypeByExtension, so the answer then depends on the MIME databases of the system
-// and on mime.AddExtensionType, which cannot change an extension of the table. What
-// neither knows maps to MIMEOctetStream; an empty extension yields an empty string.
+// GetMIME returns the media type of a file extension, without parameters, with or without the
+// dot and in any case. The built-in table wins over mime.TypeByExtension, which serves other
+// extensions from the system's MIME databases and mime.AddExtensionType. Unknown gives
+// MIMEOctetStream, empty gives "".
 func GetMIME(extension string) string {
 	if len(extension) == 0 {
 		return ""
@@ -91,12 +86,11 @@ func GetMIME(extension string) string {
 		}
 	}
 
-	// Fallback to the mime package, which wants the dotted form.
 	if extension[0] != '.' {
 		extension = "." + extension
 	}
 	if foundMime := mime.TypeByExtension(extension); foundMime != "" {
-		// mime carries parameters ("text/csv; charset=utf-8"), the table does not.
+		// mime adds parameters ("text/csv; charset=utf-8"); the table has none.
 		if i := strings.IndexByte(foundMime, ';'); i != -1 {
 			foundMime = TrimSpace(foundMime[:i])
 		}
@@ -106,29 +100,17 @@ func GetMIME(extension string) string {
 	return MIMEOctetStream
 }
 
-// ParseVendorSpecificContentType check if content type is vendor specific and
-// if it is parsable to any known types. If its not vendor specific then returns
-// the original content type.
-//
-// A vendor specific content type has a "+suffix" in its subtype. It becomes the
-// type and the suffix, without parameters: "application/vnd.api+json; version=1"
-// is "application/json", "text/vnd.example+plain" is "text/plain", and the
-// suffixes json, xml and x-www-form-urlencoded of an application type give the
-// standard type of that name. Whitespace before the ';' or at the end is not part
-// of the suffix. A '+' that first appears in the parameters, as in a multipart
-// boundary, only strips them: "multipart/form-data; boundary=a+b" is
-// "multipart/form-data". Anything else is returned as it is: a content type
-// without a '+', or whose '/' does not come before it.
-//
-// Matching is case-sensitive. With caseInsensitive[0] set the content type is
-// matched in any case, and a result built from it is lower case.
+// ParseVendorSpecificContentType reduces a content type with a "+suffix" in its subtype to its
+// type and suffix, without parameters: "application/vnd.api+json; version=1" is "application/json".
+// Spaces and tabs before the ';' or at the end are ignored. A '+' that first appears in the
+// parameters, as in a multipart boundary, only strips them. Anything else, including a '/' after
+// the '+', is returned as it is. Matching is case-sensitive; with caseInsensitive[0] set it
+// ignores case and builds lower-case results.
 func ParseVendorSpecificContentType(cType string, caseInsensitive ...bool) string {
 	useLower := len(caseInsensitive) > 0 && caseInsensitive[0]
 
 	working := cType
 	if useLower {
-		// Content types are case-insensitive. Normalize if requested using the
-		// strings.ToLower function to avoid allocations when possible.
 		working = casestrings.ToLower(cType)
 	}
 	plusIndex := strings.IndexByte(working, '+')
@@ -146,15 +128,13 @@ func ParseVendorSpecificContentType(cType string, caseInsensitive ...bool) strin
 		return cType[:semiColonIndex]
 	}
 
-	// Only a '/' ahead of the '+' ends the type. One after it belongs to the suffix or
-	// to the parameters, and splicing there makes a type that was never in the input.
+	// A '/' after the '+' belongs to the suffix or parameters; splicing there would invent a type.
 	slashIndex := strings.IndexByte(working, '/')
 
 	if slashIndex == -1 || slashIndex > plusIndex {
 		return cType
 	}
 
-	// Optional whitespace before the ';' or at the end is not part of the suffix.
 	for n := len(parsableType); n > 0 && (parsableType[n-1] == ' ' || parsableType[n-1] == '\t'); n-- {
 		parsableType = parsableType[:n-1]
 	}
@@ -173,7 +153,6 @@ func ParseVendorSpecificContentType(cType string, caseInsensitive ...bool) strin
 	return working[:slashIndex+1] + parsableType
 }
 
-// limits for HTTP statuscodes
 const (
 	statusMessageMin = 100
 	statusMessageMax = 511
@@ -189,81 +168,78 @@ func StatusMessage(status int) string {
 
 // NOTE: Keep this in sync with fiber's status code list
 var statusMessage = []string{
-	100: "Continue",            // StatusContinue
-	101: "Switching Protocols", // StatusSwitchingProtocols
-	102: "Processing",          // StatusProcessing
-	103: "Early Hints",         // StatusEarlyHints
+	100: "Continue",
+	101: "Switching Protocols",
+	102: "Processing",
+	103: "Early Hints",
 
-	200: "OK",                            // StatusOK
-	201: "Created",                       // StatusCreated
-	202: "Accepted",                      // StatusAccepted
-	203: "Non-Authoritative Information", // StatusNonAuthoritativeInformation
-	204: "No Content",                    // StatusNoContent
-	205: "Reset Content",                 // StatusResetContent
-	206: "Partial Content",               // StatusPartialContent
-	207: "Multi-Status",                  // StatusMultiStatus
-	208: "Already Reported",              // StatusAlreadyReported
-	226: "IM Used",                       // StatusIMUsed
+	200: "OK",
+	201: "Created",
+	202: "Accepted",
+	203: "Non-Authoritative Information",
+	204: "No Content",
+	205: "Reset Content",
+	206: "Partial Content",
+	207: "Multi-Status",
+	208: "Already Reported",
+	226: "IM Used",
 
-	300: "Multiple Choices",   // StatusMultipleChoices
-	301: "Moved Permanently",  // StatusMovedPermanently
-	302: "Found",              // StatusFound
-	303: "See Other",          // StatusSeeOther
-	304: "Not Modified",       // StatusNotModified
-	305: "Use Proxy",          // StatusUseProxy
-	306: "Switch Proxy",       // StatusSwitchProxy
-	307: "Temporary Redirect", // StatusTemporaryRedirect
-	308: "Permanent Redirect", // StatusPermanentRedirect
+	300: "Multiple Choices",
+	301: "Moved Permanently",
+	302: "Found",
+	303: "See Other",
+	304: "Not Modified",
+	305: "Use Proxy",
+	306: "Switch Proxy",
+	307: "Temporary Redirect",
+	308: "Permanent Redirect",
 
-	400: "Bad Request",                     // StatusBadRequest
-	401: "Unauthorized",                    // StatusUnauthorized
-	402: "Payment Required",                // StatusPaymentRequired
-	403: "Forbidden",                       // StatusForbidden
-	404: "Not Found",                       // StatusNotFound
-	405: "Method Not Allowed",              // StatusMethodNotAllowed
-	406: "Not Acceptable",                  // StatusNotAcceptable
-	407: "Proxy Authentication Required",   // StatusProxyAuthRequired
-	408: "Request Timeout",                 // StatusRequestTimeout
-	409: "Conflict",                        // StatusConflict
-	410: "Gone",                            // StatusGone
-	411: "Length Required",                 // StatusLengthRequired
-	412: "Precondition Failed",             // StatusPreconditionFailed
-	413: "Request Entity Too Large",        // StatusRequestEntityTooLarge
-	414: "Request URI Too Long",            // StatusRequestURITooLong
-	415: "Unsupported Media Type",          // StatusUnsupportedMediaType
-	416: "Requested Range Not Satisfiable", // StatusRequestedRangeNotSatisfiable
-	417: "Expectation Failed",              // StatusExpectationFailed
-	418: "I'm a teapot",                    // StatusTeapot
-	421: "Misdirected Request",             // StatusMisdirectedRequest
-	422: "Unprocessable Entity",            // StatusUnprocessableEntity
-	423: "Locked",                          // StatusLocked
-	424: "Failed Dependency",               // StatusFailedDependency
-	425: "Too Early",                       // StatusTooEarly
-	426: "Upgrade Required",                // StatusUpgradeRequired
-	428: "Precondition Required",           // StatusPreconditionRequired
-	429: "Too Many Requests",               // StatusTooManyRequests
-	431: "Request Header Fields Too Large", // StatusRequestHeaderFieldsTooLarge
-	451: "Unavailable For Legal Reasons",   // StatusUnavailableForLegalReasons
+	400: "Bad Request",
+	401: "Unauthorized",
+	402: "Payment Required",
+	403: "Forbidden",
+	404: "Not Found",
+	405: "Method Not Allowed",
+	406: "Not Acceptable",
+	407: "Proxy Authentication Required",
+	408: "Request Timeout",
+	409: "Conflict",
+	410: "Gone",
+	411: "Length Required",
+	412: "Precondition Failed",
+	413: "Request Entity Too Large",
+	414: "Request URI Too Long",
+	415: "Unsupported Media Type",
+	416: "Requested Range Not Satisfiable",
+	417: "Expectation Failed",
+	418: "I'm a teapot",
+	421: "Misdirected Request",
+	422: "Unprocessable Entity",
+	423: "Locked",
+	424: "Failed Dependency",
+	425: "Too Early",
+	426: "Upgrade Required",
+	428: "Precondition Required",
+	429: "Too Many Requests",
+	431: "Request Header Fields Too Large",
+	451: "Unavailable For Legal Reasons",
 
-	500: "Internal Server Error",           // StatusInternalServerError
-	501: "Not Implemented",                 // StatusNotImplemented
-	502: "Bad Gateway",                     // StatusBadGateway
-	503: "Service Unavailable",             // StatusServiceUnavailable
-	504: "Gateway Timeout",                 // StatusGatewayTimeout
-	505: "HTTP Version Not Supported",      // StatusHTTPVersionNotSupported
-	506: "Variant Also Negotiates",         // StatusVariantAlsoNegotiates
-	507: "Insufficient Storage",            // StatusInsufficientStorage
-	508: "Loop Detected",                   // StatusLoopDetected
-	510: "Not Extended",                    // StatusNotExtended
-	511: "Network Authentication Required", // StatusNetworkAuthenticationRequired
+	500: "Internal Server Error",
+	501: "Not Implemented",
+	502: "Bad Gateway",
+	503: "Service Unavailable",
+	504: "Gateway Timeout",
+	505: "HTTP Version Not Supported",
+	506: "Variant Also Negotiates",
+	507: "Insufficient Storage",
+	508: "Loop Detected",
+	510: "Not Extended",
+	511: "Network Authentication Required",
 }
 
-// MIME types were copied from https://github.com/nginx/nginx/blob/67d2a9541826ecd5db97d604f23460210fd3e517/conf/mime.types with the following updates:
-// - Use "application/xml" instead of "text/xml" as recommended per https://datatracker.ietf.org/doc/html/rfc7303#section-4.1
-// - Use "text/javascript" instead of "application/javascript" as recommended per https://www.rfc-editor.org/rfc/rfc9239#name-text-javascript
-// - Use "application/vnd.msgpack" from https://www.iana.org/assignments/media-types/application/vnd.msgpack
-// - Add "application/cbor" (https://www.rfc-editor.org/rfc/rfc8949) for cbor and "application/zstd"
-// (https://www.rfc-editor.org/rfc/rfc8878) for zst, neither of which nginx lists
+// Copied from https://github.com/nginx/nginx/blob/67d2a9541826ecd5db97d604f23460210fd3e517/conf/mime.types
+// with xml as application/xml (RFC 7303), js as text/javascript (RFC 9239), msgpack as
+// application/vnd.msgpack (IANA), and cbor (RFC 8949) and zst (RFC 8878) added, which nginx lacks.
 var mimeExtensions = map[string]string{
 	"html":    "text/html",
 	"htm":     "text/html",

@@ -5,8 +5,6 @@ import (
 	"github.com/gofiber/utils/v2/internal/unsafeconv"
 )
 
-// headerTokenTable flags the bytes valid in an HTTP header field name — the
-// RFC 9110 token alphabet, matching net/http's validHeaderFieldByte.
 var headerTokenTable = buildHeaderTokenTable()
 
 func buildHeaderTokenTable() [256]bool {
@@ -26,15 +24,10 @@ func buildHeaderTokenTable() [256]bool {
 	return t
 }
 
-// CanonicalHeaderKey returns the canonical form of the HTTP header key:
-// the first letter and any letter following a hyphen upper-cased, the rest
-// lower-cased. The output matches net/http.CanonicalHeaderKey byte for
-// byte, including its guard: a key containing any byte outside the header
-// token alphabet is returned unchanged. Unlike the stdlib it accepts byte
-// slices as well as strings and allocates only when the key actually needs
-// rewriting — already-canonical keys, the overwhelmingly common case on
-// receive paths, are validated in one table pass and returned as-is
-// without the stdlib's canonical-key cache lookup.
+// CanonicalHeaderKey returns key in canonical HTTP header form, as
+// net/http.CanonicalHeaderKey does: the first letter and any letter after a
+// hyphen upper-cased, the rest lower-cased. A key with a byte outside the
+// token alphabet is returned unchanged. It allocates only if the key changes.
 func CanonicalHeaderKey[S byteSeq](key S) S {
 	upper := true
 	fix := -1
@@ -65,7 +58,6 @@ func CanonicalHeaderKey[S byteSeq](key S) S {
 		buf[i] = c
 		upper = c == '-'
 	}
-	// The zero-copy view is sound: buf is uniquely owned here and is never
-	// written again, which is what the string instantiation requires.
+	// buf is never written again, so the zero-copy string view is sound.
 	return unsafeconv.Seq[S](buf)
 }

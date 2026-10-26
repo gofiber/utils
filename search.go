@@ -7,32 +7,20 @@ import (
 	"github.com/gofiber/utils/v2/swar"
 )
 
-// Multi-needle and case-insensitive searching, built on swar.ZeroLanes
-// first-match masks with needle broadcasts hoisted out of the word loops.
-// IndexAny2/IndexAny3 scan words while i <= n-8 and finish 8+ byte inputs
-// with one overlapping word at n-8 (pure loads; already-scanned lanes are
-// known non-matching, so the first set lane falls in the new bytes).
-// IndexFold instead scans candidate start positions only up to n-k, so its
-// word loop hands the final partial word to a scalar remainder; the
-// overlapping-window trick appears there only inside the verify reads.
-// Inputs shorter than a word use scalar loops throughout.
+// IndexAny2/IndexAny3 finish with an overlapping word at n-8; already-scanned
+// lanes never match, so the first set lane lies in the new bytes.
 
-// IndexAny2 returns the index of the first occurrence in s of either a or b,
-// or -1 if neither is present. On amd64 CPUs with AVX2, inputs of 32+ bytes
-// dispatch to package simd instead.
+// IndexAny2 returns the index of the first occurrence in s of a or b, or -1.
 func IndexAny2[S byteSeq](s S, a, b byte) int {
 	n := len(s)
 	if n >= simd.MinLen && simd.Accelerated() {
 		return simd.Memchr2(unsafeconv.Bytes(s), a, b)
 	}
 	if n >= 8 {
-		// The needle broadcasts are hoisted here so sub-word inputs never
-		// pay for the multiplies.
 		bcA := swar.Broadcast(a)
 		bcB := swar.Broadcast(b)
 		i := 0
-		// Two words per branch: the masks compute independently, and if only
-		// the second word matched, its first set lane is still exact.
+		// Two words per branch: if only the second matched, its first set lane is exact.
 		for ; i <= n-16; i += 16 {
 			w0 := swar.Load8(s, i)
 			w1 := swar.Load8(s, i+8)
@@ -68,9 +56,7 @@ func IndexAny2[S byteSeq](s S, a, b byte) int {
 	return -1
 }
 
-// IndexAny3 returns the index of the first occurrence in s of a, b, or c,
-// or -1 if none is present. On amd64 CPUs with AVX2, inputs of 32+ bytes
-// dispatch to package simd instead.
+// IndexAny3 returns the index of the first occurrence in s of a, b, or c, or -1.
 func IndexAny3[S byteSeq](s S, a, b, c byte) int {
 	n := len(s)
 	if n >= simd.MinLen && simd.Accelerated() {
@@ -81,7 +67,6 @@ func IndexAny3[S byteSeq](s S, a, b, c byte) int {
 		bcB := swar.Broadcast(b)
 		bcC := swar.Broadcast(c)
 		i := 0
-		// Two words per branch; see IndexAny2.
 		for ; i <= n-16; i += 16 {
 			w0 := swar.Load8(s, i)
 			w1 := swar.Load8(s, i+8)
@@ -117,17 +102,11 @@ func IndexAny3[S byteSeq](s S, a, b, c byte) int {
 	return -1
 }
 
-// IndexFold returns the index of the first ASCII case-insensitive occurrence
-// of needle in s, or -1 if absent. An empty needle matches at index 0. Only
-// 'A'..'Z'/'a'..'z' fold; every other byte (including >= 0x80) must match
-// exactly, so e.g. "no\rcache" does NOT match the needle "no-cache".
-// The needle is a plain string by design: call sites pass constant tokens,
-// and a []byte needle would cost its callers a conversion either way.
-//
-// Candidates are the positions of the needle's first byte, each checked in
-// full, so the worst case, a haystack of 'a' and a needle of 'a' ending in 'b',
-// takes time proportional to len(s)*len(needle)/8, where strings.Index stays
-// linear. Do not search for a needle that an outsider chooses.
+// IndexFold returns the index of the first ASCII case-insensitive occurrence of
+// needle in s, or -1; an empty needle matches at 0. Only 'A'..'Z' and 'a'..'z'
+// fold, so "no\rcache" does not match "no-cache". The worst case takes time
+// proportional to len(s)*len(needle)/8, where strings.Index is linear: do not
+// search for a needle an outsider chooses.
 func IndexFold[S byteSeq](s S, needle string) int {
 	n, k := len(s), len(needle)
 	if k == 0 {
@@ -139,27 +118,18 @@ func IndexFold[S byteSeq](s S, needle string) int {
 
 	table := caseconv.ToLowerTable
 	first := table[needle[0]]
-	last := n - k // last valid start position
+	last := n - k
 
 	if n >= 8 {
-		// Scan candidate positions 8 at a time by matching the needle's
-		// first byte in both case variants (no need to fold the haystack),
-		// then verify each candidate. Approximate-mask false positives just
-		// cost a verify; the candidate order stays low-to-high, so the
-		// pos > last cutoff remains a valid global exit.
+		// Mask false positives only cost a verify; candidates run low to high,
+		// so pos > last ends the search.
 		bc1 := swar.Broadcast(first)
 		bc2 := bc1
 		if first >= 'a' && first <= 'z' {
 			bc2 = swar.Broadcast(first - 0x20)
 		}
 
-		// For needles up to one word the verify is a single masked word
-		// compare against the folded needle, built lazily on the first
-		// candidate; longer needles fold-compare word-at-a-time. The lazy
-		// build is load-bearing: building eagerly costs the no-candidate
-		// path +44% on 8-byte misses and +13% to +17% on 32-64B misses
-		// (benchstat -count=10, Go 1.25, Apple M2 Pro). foldPrep keeps the
-		// pair computation in one place for both build sites below.
+		// Built lazily on the first candidate: eager building slows the no-candidate path.
 		var fn foldedNeedle
 		built := false
 
@@ -186,10 +156,7 @@ func IndexFold[S byteSeq](s S, needle string) int {
 				cand &= cand - 1
 			}
 		}
-		// Candidate starts in the final partial word: positions [i, last].
-		// Here i is the word loop's exit index n - n%8, so this region is
-		// non-empty only when k <= n%8 <= 7 — the needle always fits in one
-		// word and only the short-needle verify can apply.
+		// Tail: i = n - n%8, so k <= 7 here and the short-needle verify always applies.
 		for ; i <= last; i++ {
 			if table[s[i]] == first {
 				if !built {
@@ -204,7 +171,6 @@ func IndexFold[S byteSeq](s S, needle string) int {
 		return -1
 	}
 
-	// Scalar path: s shorter than a word (so k <= n < 8).
 outer:
 	for i := 0; i <= last; i++ {
 		if table[s[i]] != first {
@@ -220,21 +186,16 @@ outer:
 	return -1
 }
 
-// foldedNeedle is the short-needle (k <= 8) verify state: the needle
-// lower-cased into one word plus the mask covering its lanes.
+// foldedNeedle is the short-needle (k <= 8) verify state: folded word plus lane mask.
 type foldedNeedle struct {
 	word, mask uint64
 }
 
-// foldPrep builds the foldedNeedle pair; it exists so IndexFold's two lazy
-// build sites share one definition.
 func foldPrep(needle string) foldedNeedle {
 	return foldedNeedle{foldNeedle(needle), ^uint64(0) >> ((8 - len(needle)) * 8)}
 }
 
-// foldNeedle returns needle lower-cased into one little-endian word, lane 0
-// holding needle[0]. len(needle) must be 1..8; lanes past the needle are
-// zero, matching the ^uint64(0) >> ((8-k)*8) mask callers apply to windows.
+// foldNeedle lower-cases needle (len 1..8) into one little-endian word, lanes past it zero.
 func foldNeedle(needle string) uint64 {
 	k := len(needle)
 	if k == 8 {
@@ -248,10 +209,7 @@ func foldNeedle(needle string) uint64 {
 	return word
 }
 
-// foldedWindowAt returns the lower-cased window of s starting at pos, masked
-// to the needle length. Requires len(s) >= 8 and the window to fit in s;
-// windows running past len(s)-8 are read through one overlapping load at
-// len(s)-8 and shifted so lane 0 is s[pos].
+// foldedWindowAt requires len(s) >= 8 and the window at pos to fit in s.
 func foldedWindowAt[S byteSeq](s S, pos int, lenMask uint64) uint64 {
 	if pos <= len(s)-8 {
 		return swar.ToLowerWord(swar.Load8(s, pos)) & lenMask
@@ -261,9 +219,7 @@ func foldedWindowAt[S byteSeq](s S, pos int, lenMask uint64) uint64 {
 	return w & lenMask
 }
 
-// foldEqualAt reports whether s[pos:pos+len(needle)] equals needle ASCII
-// case-insensitively. len(needle) must be >= 8 and pos+len(needle) must be
-// within s; the tail is one overlapping word compare.
+// foldEqualAt requires len(needle) >= 8 and s[pos:pos+len(needle)] within s.
 func foldEqualAt[S byteSeq](s S, pos int, needle string) bool {
 	k := len(needle)
 	i := 0
@@ -283,11 +239,8 @@ func ContainsFold[S byteSeq](s S, needle string) bool {
 	return IndexFold(s, needle) >= 0
 }
 
-// HasPrefixFold reports whether s begins with prefix, ASCII
-// case-insensitively: only 'A'..'Z'/'a'..'z' fold, every other byte
-// (including >= 0x80) must match exactly, mirroring IndexFold. An empty
-// prefix matches any s. Like the other Fold helpers the needle is a plain
-// string, since call sites pass constant tokens.
+// HasPrefixFold reports whether s begins with prefix, ASCII case-insensitively
+// (only 'A'..'Z' and 'a'..'z' fold). An empty prefix matches any s.
 func HasPrefixFold[S byteSeq](s S, prefix string) bool {
 	k := len(prefix)
 	if len(s) < k {
@@ -295,8 +248,6 @@ func HasPrefixFold[S byteSeq](s S, prefix string) bool {
 	}
 	table := caseconv.ToLowerTable
 	if k >= 8 {
-		// First-byte pre-check: typical misses differ immediately, and two
-		// table loads reject them without the word-compare setup.
 		if table[s[0]] != table[prefix[0]] {
 			return false
 		}
@@ -310,9 +261,7 @@ func HasPrefixFold[S byteSeq](s S, prefix string) bool {
 	return true
 }
 
-// HasSuffixFold reports whether s ends with suffix, ASCII
-// case-insensitively, under the same folding contract as HasPrefixFold.
-// An empty suffix matches any s.
+// HasSuffixFold is HasPrefixFold for a suffix; an empty suffix matches any s.
 func HasSuffixFold[S byteSeq](s S, suffix string) bool {
 	k := len(suffix)
 	n := len(s)
@@ -321,7 +270,6 @@ func HasSuffixFold[S byteSeq](s S, suffix string) bool {
 	}
 	table := caseconv.ToLowerTable
 	if k >= 8 {
-		// Pre-check the last byte; see HasPrefixFold.
 		if table[s[n-1]] != table[suffix[k-1]] {
 			return false
 		}
