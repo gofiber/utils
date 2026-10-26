@@ -122,19 +122,26 @@ func AppendHTTPDate(dst []byte, t time.Time) []byte {
 // FormatHTTPDate returns t in the RFC 9110 preferred HTTP date format, equal
 // to t.UTC().Format(http.TimeFormat) with a single allocation for the result.
 func FormatHTTPDate(t time.Time) string {
+	if sec := t.Unix(); sec < httpDateMinUnix || sec > httpDateMaxUnix {
+		// The rendering of a year outside 0..9999 is longer than the stack buffer
+		// below, which would grow it and copy it to a string: two allocations.
+		return t.UTC().Format(httpDateLayout)
+	}
 	var buf [httpDateLen]byte
 	return string(AppendHTTPDate(buf[:0], t))
 }
 
 // ParseHTTPDate parses an HTTP date the way net/http.ParseTime does:
 // the RFC 9110 preferred format ("Mon, 02 Jan 2006 15:04:05 GMT") plus the
-// obsolete RFC 850 and ANSI C asctime forms, with surrounding ASCII
-// whitespace tolerated. Canonical preferred-format input takes a fast scalar
-// path that never calls time.Parse; every other input — legacy formats,
-// unusual casing, non-GMT zone names, padding — falls back to time.Parse
-// with byte-for-byte stdlib semantics, including its errors. The returned
-// time is in time.UTC on the fast path and whatever time.Parse yields on the
-// fallback; the instants agree in both cases.
+// obsolete RFC 850 and ANSI C asctime forms. Unlike ParseTime, it ignores the
+// space, tab, CR and LF around the date, the whitespace net/textproto trims
+// from a header value, so a raw value parses; other whitespace is not ignored.
+// Canonical preferred-format input takes a fast scalar path that never calls
+// time.Parse; every other input — legacy formats, unusual casing, non-GMT
+// zone names, padding — falls back to time.Parse on the trimmed text, with its
+// results and its errors, which quote the trimmed text. The returned time is
+// in time.UTC on the fast path and whatever time.Parse yields on the fallback;
+// the instants agree in both cases.
 func ParseHTTPDate[S byteSeq](s S) (time.Time, error) {
 	if t, ok := parseRFC1123(s); ok {
 		return t, nil

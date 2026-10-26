@@ -67,6 +67,23 @@ func Test_AppendHTTPDate(t *testing.T) {
 	require.Equal(t, "Date: Thu, 01 Jan 1970 00:00:00 GMT", string(got))
 }
 
+// Test_FormatHTTPDate_Allocs holds FormatHTTPDate to its doc comment: one
+// allocation, the string, for every time. A year outside 0..9999 renders longer
+// than the 29-byte stack buffer, which used to be grown and then copied.
+func Test_FormatHTTPDate_Allocs(t *testing.T) {
+	// Not parallel: AllocsPerRun is only meaningful with nothing else allocating.
+	var sink string
+	for _, tm := range append(httpDateSamples(),
+		time.Date(10000, time.January, 1, 0, 0, 0, 0, time.UTC),
+		time.Date(-1, time.December, 31, 23, 59, 59, 0, time.UTC),
+		time.Unix(httpDateMaxUnix+1, 0),
+	) {
+		require.Equal(t, tm.UTC().Format(httpDateLayout), FormatHTTPDate(tm))
+		require.InDelta(t, 1, testing.AllocsPerRun(100, func() { sink = FormatHTTPDate(tm) }), 0, "%v", tm)
+	}
+	_ = sink
+}
+
 func Test_ParseHTTPDate(t *testing.T) {
 	t.Parallel()
 
