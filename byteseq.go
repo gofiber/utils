@@ -121,6 +121,8 @@ func hashFoldMix(a, b uint64) uint64 {
 
 // TrimLeft removes all leading occurrences of the byte cutset from s.
 // Unlike strings/bytes.TrimLeft, cutset is a single byte, not a set of characters.
+// The result is a subslice of s; if nothing is left it is an empty slice of s
+// (nil only for a nil s), where bytes.TrimLeft returns nil.
 func TrimLeft[S byteSeq](s S, cutset byte) S {
 	lenStr, start := len(s), 0
 	for start < lenStr && s[start] == cutset {
@@ -131,6 +133,8 @@ func TrimLeft[S byteSeq](s S, cutset byte) S {
 
 // Trim removes all leading and trailing occurrences of the byte cutset from s.
 // Unlike strings/bytes.Trim, cutset is a single byte, not a set of characters.
+// The result is a subslice of s; if nothing is left it is an empty slice of s
+// (nil only for a nil s), where bytes.Trim returns nil.
 func Trim[S byteSeq](s S, cutset byte) S {
 	i, j := 0, len(s)-1
 	for ; i <= j; i++ {
@@ -149,6 +153,7 @@ func Trim[S byteSeq](s S, cutset byte) S {
 
 // TrimRight removes all trailing occurrences of the byte cutset from s.
 // Unlike strings/bytes.TrimRight, cutset is a single byte, not a set of characters.
+// The result is a subslice of s, as bytes.TrimRight's is.
 func TrimRight[S byteSeq](s S, cutset byte) S {
 	lenStr := len(s)
 	for lenStr > 0 && s[lenStr-1] == cutset {
@@ -160,6 +165,9 @@ func TrimRight[S byteSeq](s S, cutset byte) S {
 // TrimSpace removes leading and trailing whitespace from a string or byte slice.
 // This is an optimized version that's faster than strings/bytes.TrimSpace for ASCII strings.
 // It removes the following ASCII whitespace characters: space, tab, newline, carriage return, vertical tab, and form feed.
+// Unlike the stdlib it leaves the Unicode spaces (U+0085, U+00A0, U+2000 and so on) alone.
+// The result is a subslice of s; if nothing is left it is an empty slice of s
+// (nil only for a nil s), where bytes.TrimSpace returns nil.
 func TrimSpace[S byteSeq](s S) S {
 	n := len(s)
 	if n == 0 {
