@@ -24,7 +24,7 @@ const (
 // packed into one lower-cased word and built from mimeExtensions at init: a
 // hit is a multiply, a shift, and usually one comparison, with no allocation.
 const (
-	mimeTableBits       = 9 // 512 slots for ~130 entries
+	mimeTableBits       = 9 // 512 slots
 	mimeTableMask       = 1<<mimeTableBits - 1
 	mimeTableMaxEntries = 1 << (mimeTableBits - 1) // half full at most, so probes stay short and always end at a free slot
 	mimeHashMul         = 0x9E3779B97F4A7C15       // Fibonacci hashing multiplier
@@ -68,8 +68,11 @@ func mimeHash(key uint64) int {
 }
 
 // GetMIME returns the media type of a file extension without parameters, matched
-// case-insensitively with or without the leading dot. Unknown extensions map
-// to MIMEOctetStream; an empty extension yields an empty string.
+// case-insensitively with or without the leading dot. The built-in table of common
+// types is consulted first. An extension not in it is looked up with
+// mime.TypeByExtension, so the answer then depends on the MIME databases of the system
+// and on mime.AddExtensionType, which cannot change an extension of the table. What
+// neither knows maps to MIMEOctetStream; an empty extension yields an empty string.
 func GetMIME(extension string) string {
 	if len(extension) == 0 {
 		return ""
@@ -106,6 +109,19 @@ func GetMIME(extension string) string {
 // ParseVendorSpecificContentType check if content type is vendor specific and
 // if it is parsable to any known types. If its not vendor specific then returns
 // the original content type.
+//
+// A vendor specific content type has a "+suffix" in its subtype. It becomes the
+// type and the suffix, without parameters: "application/vnd.api+json; version=1"
+// is "application/json", "text/vnd.example+plain" is "text/plain", and the
+// suffixes json, xml and x-www-form-urlencoded of an application type give the
+// standard type of that name. Whitespace before the ';' or at the end is not part
+// of the suffix. A '+' that first appears in the parameters, as in a multipart
+// boundary, only strips them: "multipart/form-data; boundary=a+b" is
+// "multipart/form-data". Anything else is returned as it is: a content type
+// without a '+', or whose '/' does not come before it.
+//
+// Matching is case-sensitive. With caseInsensitive[0] set the content type is
+// matched in any case, and a result built from it is lower case.
 func ParseVendorSpecificContentType(cType string, caseInsensitive ...bool) string {
 	useLower := len(caseInsensitive) > 0 && caseInsensitive[0]
 
@@ -130,10 +146,17 @@ func ParseVendorSpecificContentType(cType string, caseInsensitive ...bool) strin
 		return cType[:semiColonIndex]
 	}
 
+	// Only a '/' ahead of the '+' ends the type. One after it belongs to the suffix or
+	// to the parameters, and splicing there makes a type that was never in the input.
 	slashIndex := strings.IndexByte(working, '/')
 
-	if slashIndex == -1 {
+	if slashIndex == -1 || slashIndex > plusIndex {
 		return cType
+	}
+
+	// Optional whitespace before the ';' or at the end is not part of the suffix.
+	for n := len(parsableType); n > 0 && (parsableType[n-1] == ' ' || parsableType[n-1] == '\t'); n-- {
+		parsableType = parsableType[:n-1]
 	}
 
 	if strings.HasPrefix(working, contentTypePrefixApplicationWithSlash) {
@@ -239,6 +262,8 @@ var statusMessage = []string{
 // - Use "application/xml" instead of "text/xml" as recommended per https://datatracker.ietf.org/doc/html/rfc7303#section-4.1
 // - Use "text/javascript" instead of "application/javascript" as recommended per https://www.rfc-editor.org/rfc/rfc9239#name-text-javascript
 // - Use "application/vnd.msgpack" from https://www.iana.org/assignments/media-types/application/vnd.msgpack
+// - Add "application/cbor" (https://www.rfc-editor.org/rfc/rfc8949) for cbor and "application/zstd"
+// (https://www.rfc-editor.org/rfc/rfc8878) for zst, neither of which nginx lists
 var mimeExtensions = map[string]string{
 	"html":    "text/html",
 	"htm":     "text/html",

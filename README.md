@@ -663,8 +663,8 @@ precomputed table, and the output is pinned to `strconv` by a dense sweep
 plus every decimal and lane-group boundary. `GetMIME` in the same spirit
 looks up extensions through a hash table keyed by the extension packed
 into one lower-cased word with its length in the top lane, so a hit is a
-multiply, a shift, and one slot comparison, with no allocation even for
-upper-case input.
+multiply, a shift, and usually one slot comparison, with no allocation even
+for upper-case input.
 
 These helpers were added on an amd64 machine, so like the `simd` numbers
 their benchmarks are recorded separately from the arm64 catalog above and

@@ -176,6 +176,47 @@ func Test_ParseVendorSpecificContentType(t *testing.T) {
 	require.Equal(t, "invalid+withoutSlash", cType)
 }
 
+// Test_ParseVendorSpecificContentType_Malformed pins the content types that do
+// not have the shape the function reads: it used to splice a '/' from the
+// parameters or from behind the '+' into the result, and to keep the whitespace
+// that RFC 9110 allows before a ';'.
+func Test_ParseVendorSpecificContentType_Malformed(t *testing.T) {
+	t.Parallel()
+	testCases := []struct {
+		input    string
+		expected string
+		desc     string
+	}{
+		{"application/vnd.api+json ; charset=utf-8", "application/json", "space before the semicolon"},
+		{"application/vnd.api+json\t;charset=utf-8", "application/json", "tab before the semicolon"},
+		{"application/vnd.api+json ", "application/json", "trailing space"},
+		{"application/vnd.api+json \t ; v=1", "application/json", "mixed whitespace"},
+		{"text/vnd.example+plain ; v=1", "text/plain", "whitespace with a type of its own"},
+		{"application/vnd.api+ ;v=1", "application/", "nothing left of the suffix"},
+		{"a+b/c", "a+b/c", "plus before the slash"},
+		{"+/", "+/", "plus and slash only"},
+		{"x+y; z=a/b", "x+y; z=a/b", "slash only in the parameters"},
+		{"x+y/z; a=b", "x+y/z; a=b", "plus in the type"},
+	}
+	for _, tc := range testCases {
+		t.Run(tc.desc, func(t *testing.T) {
+			t.Parallel()
+
+			require.Equal(t, tc.expected, ParseVendorSpecificContentType(tc.input), "input: %q", tc.input)
+			require.LessOrEqual(t, len(ParseVendorSpecificContentType(tc.input)), len(tc.input), "the result is never longer than the input")
+
+			// A result built from the input is lower case when asked to match in any
+			// case; one that is the input itself is returned untouched.
+			upper := strings.ToUpper(tc.input)
+			want := strings.ToLower(tc.expected)
+			if tc.expected == tc.input {
+				want = upper
+			}
+			require.Equal(t, want, ParseVendorSpecificContentType(upper, true), "upper case, input: %q", upper)
+		})
+	}
+}
+
 func Test_ParseVendorSpecificContentType_IndexByteOptimization(t *testing.T) {
 	t.Parallel()
 	testCases := []struct {
