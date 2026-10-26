@@ -167,7 +167,7 @@ func appendUnescape(dst, s []byte, mode escapeMode) ([]byte, error) {
 			continue
 		}
 		// s[j] == '%': the error substrings below match net/url's unescape.
-		if j+2 >= n {
+		if j >= n-2 {
 			return dst[:off], url.EscapeError(s[j:])
 		}
 		hi := unhexTable[s[j+1]]

@@ -26,7 +26,7 @@ func scanControl[S byteSeq](s S, exempt byte) int {
 	n := len(s)
 	exemptLanes := swar.Broadcast(exempt)
 	i := 0
-	for ; i+16 <= n; i += 16 {
+	for ; i <= n-16; i += 16 {
 		w := s[i : i+16]
 		w0, w1 := swar.Load8(w, 0), swar.Load8(w, 8)
 		m0, m1 := controlLanes(w0), controlLanes(w1)
@@ -39,7 +39,7 @@ func scanControl[S byteSeq](s S, exempt byte) int {
 			}
 		}
 	}
-	for ; i+8 <= n; i += 8 {
+	for ; i <= n-8; i += 8 {
 		w := swar.Load8(s, i)
 		if m := controlLanes(w); m != 0 {
 			if m &= otherLanes(w, exemptLanes); m != 0 {

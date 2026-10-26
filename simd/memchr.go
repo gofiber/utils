@@ -79,7 +79,7 @@ func memchr2Generic(haystack []byte, needle1, needle2 byte) int {
 	bc1 := swar.Broadcast(needle1)
 	bc2 := swar.Broadcast(needle2)
 	i := 0
-	for ; i+2*swar.WordLen <= n; i += 2 * swar.WordLen {
+	for ; i <= n-2*swar.WordLen; i += 2 * swar.WordLen {
 		// Pinned window: see the note above isASCIIGeneric in ascii.go for
 		// why the loads use constant offsets into it.
 		win := haystack[i : i+2*swar.WordLen : i+2*swar.WordLen]
@@ -93,7 +93,7 @@ func memchr2Generic(haystack []byte, needle1, needle2 byte) int {
 			return i + swar.WordLen + swar.FirstLane(m1)
 		}
 	}
-	for ; i+swar.WordLen <= n; i += swar.WordLen {
+	for ; i <= n-swar.WordLen; i += swar.WordLen {
 		w := swar.Load8(haystack, i)
 		if m := swar.ZeroLanes(w^bc1) | swar.ZeroLanes(w^bc2); m != 0 {
 			return i + swar.FirstLane(m)
@@ -126,7 +126,7 @@ func memchr3Generic(haystack []byte, needle1, needle2, needle3 byte) int {
 	bc2 := swar.Broadcast(needle2)
 	bc3 := swar.Broadcast(needle3)
 	i := 0
-	for ; i+2*swar.WordLen <= n; i += 2 * swar.WordLen {
+	for ; i <= n-2*swar.WordLen; i += 2 * swar.WordLen {
 		win := haystack[i : i+2*swar.WordLen : i+2*swar.WordLen]
 		w0, w1 := swar.Load8(win, 0), swar.Load8(win, swar.WordLen)
 		m0 := swar.ZeroLanes(w0^bc1) | swar.ZeroLanes(w0^bc2) | swar.ZeroLanes(w0^bc3)
@@ -138,7 +138,7 @@ func memchr3Generic(haystack []byte, needle1, needle2, needle3 byte) int {
 			return i + swar.WordLen + swar.FirstLane(m1)
 		}
 	}
-	for ; i+swar.WordLen <= n; i += swar.WordLen {
+	for ; i <= n-swar.WordLen; i += swar.WordLen {
 		w := swar.Load8(haystack, i)
 		if m := swar.ZeroLanes(w^bc1) | swar.ZeroLanes(w^bc2) | swar.ZeroLanes(w^bc3); m != 0 {
 			return i + swar.FirstLane(m)
@@ -176,8 +176,8 @@ func memchr3Generic(haystack []byte, needle1, needle2, needle3 byte) int {
 // scalar, which at 32 bytes ran no faster than a plain scalar loop.
 func memchrPairGeneric(haystack []byte, byte1, byte2 byte, offset int) int {
 	n := len(haystack)
-	if n < swar.WordLen+offset {
-		for i := 0; i+offset < n; i++ {
+	if n-offset < swar.WordLen {
+		for i := 0; i < n-offset; i++ {
 			if haystack[i] == byte1 && haystack[i+offset] == byte2 {
 				return i
 			}
@@ -189,7 +189,7 @@ func memchrPairGeneric(haystack []byte, byte1, byte2 byte, offset int) int {
 	bc2 := swar.Broadcast(byte2)
 	last := n - offset // candidate positions are 0..last-1
 	i := 0
-	for ; i+2*swar.WordLen <= last; i += 2 * swar.WordLen {
+	for ; i <= last-2*swar.WordLen; i += 2 * swar.WordLen {
 		a := haystack[i : i+2*swar.WordLen : i+2*swar.WordLen]
 		b := haystack[i+offset : i+offset+2*swar.WordLen : i+offset+2*swar.WordLen]
 		c0 := swar.ZeroLanes(swar.Load8(a, 0)^bc1) & swar.ZeroLanes(swar.Load8(b, 0)^bc2)
@@ -203,7 +203,7 @@ func memchrPairGeneric(haystack []byte, byte1, byte2 byte, offset int) int {
 			}
 		}
 	}
-	for ; i+swar.WordLen <= last; i += swar.WordLen {
+	for ; i <= last-swar.WordLen; i += swar.WordLen {
 		a := haystack[i : i+swar.WordLen : i+swar.WordLen]
 		b := haystack[i+offset : i+offset+swar.WordLen : i+offset+swar.WordLen]
 		c := swar.ZeroLanes(swar.Load8(a, 0)^bc1) & swar.ZeroLanes(swar.Load8(b, 0)^bc2)

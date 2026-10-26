@@ -43,20 +43,20 @@ func IsASCII[S byteSeq](s S) bool {
 		return (swar.Load8(s, 0)|swar.Load8(s, n-8))&swar.HighBits == 0
 	}
 	i := 0
-	for ; i+32 <= n; i += 32 {
+	for ; i <= n-32; i += 32 {
 		w := s[i : i+32]
 		acc := swar.Load8(w, 0) | swar.Load8(w, 8) | swar.Load8(w, 16) | swar.Load8(w, 24)
 		if acc&swar.HighBits != 0 {
 			return false
 		}
 	}
-	for ; i+16 <= n; i += 16 {
+	for ; i <= n-16; i += 16 {
 		w := s[i : i+16]
 		if (swar.Load8(w, 0)|swar.Load8(w, 8))&swar.HighBits != 0 {
 			return false
 		}
 	}
-	for ; i+8 <= n; i += 8 {
+	for ; i <= n-8; i += 8 {
 		if swar.Load8(s, i)&swar.HighBits != 0 {
 			return false
 		}
@@ -88,7 +88,7 @@ func IndexNonQuotable[S byteSeq](s S) int {
 	i := 0
 	// Two words per branch: the masks compute independently, and if only the
 	// second word matched, its first set lane is still exact.
-	for ; i+16 <= n; i += 16 {
+	for ; i <= n-16; i += 16 {
 		// Pinned window, as in IsASCII above: the two loads land at
 		// constant offsets and skip their bounds checks.
 		w := s[i : i+16]
@@ -101,7 +101,7 @@ func IndexNonQuotable[S byteSeq](s S) int {
 			return i + 8 + swar.FirstLane(m1)
 		}
 	}
-	for ; i+8 <= n; i += 8 {
+	for ; i <= n-8; i += 8 {
 		if m := nonQuotableMask(swar.Load8(s, i)); m != 0 {
 			return i + swar.FirstLane(m)
 		}

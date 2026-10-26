@@ -80,7 +80,7 @@ func isASCIIGeneric(data []byte) bool {
 		return (swar.Load8(data, 0)|swar.Load8(data, n-swar.WordLen))&swar.HighBits == 0
 	}
 	i := 0
-	for ; i+4*swar.WordLen <= n; i += 4 * swar.WordLen {
+	for ; i <= n-4*swar.WordLen; i += 4 * swar.WordLen {
 		w := data[i : i+4*swar.WordLen : i+4*swar.WordLen]
 		acc := swar.Load8(w, 0) |
 			swar.Load8(w, swar.WordLen) |
@@ -90,13 +90,13 @@ func isASCIIGeneric(data []byte) bool {
 			return false
 		}
 	}
-	for ; i+2*swar.WordLen <= n; i += 2 * swar.WordLen {
+	for ; i <= n-2*swar.WordLen; i += 2 * swar.WordLen {
 		w := data[i : i+2*swar.WordLen : i+2*swar.WordLen]
 		if (swar.Load8(w, 0)|swar.Load8(w, swar.WordLen))&swar.HighBits != 0 {
 			return false
 		}
 	}
-	for ; i+swar.WordLen <= n; i += swar.WordLen {
+	for ; i <= n-swar.WordLen; i += swar.WordLen {
 		if swar.Load8(data, i)&swar.HighBits != 0 {
 			return false
 		}
@@ -120,7 +120,7 @@ func firstNonASCIIGeneric(data []byte) int {
 		return -1
 	}
 	i := 0
-	for ; i+2*swar.WordLen <= n; i += 2 * swar.WordLen {
+	for ; i <= n-2*swar.WordLen; i += 2 * swar.WordLen {
 		w := data[i : i+2*swar.WordLen : i+2*swar.WordLen]
 		m0 := swar.Load8(w, 0) & swar.HighBits
 		m1 := swar.Load8(w, swar.WordLen) & swar.HighBits
@@ -131,7 +131,7 @@ func firstNonASCIIGeneric(data []byte) int {
 			return i + swar.WordLen + swar.FirstLane(m1)
 		}
 	}
-	for ; i+swar.WordLen <= n; i += swar.WordLen {
+	for ; i <= n-swar.WordLen; i += swar.WordLen {
 		if m := swar.Load8(data, i) & swar.HighBits; m != 0 {
 			return i + swar.FirstLane(m)
 		}
@@ -156,14 +156,14 @@ func countNonASCIIGeneric(data []byte) int {
 	count := 0
 	i := 0
 	n := len(data)
-	for ; i+4*swar.WordLen <= n; i += 4 * swar.WordLen {
+	for ; i <= n-4*swar.WordLen; i += 4 * swar.WordLen {
 		w := data[i : i+4*swar.WordLen : i+4*swar.WordLen]
 		count += bits.OnesCount64(swar.Load8(w, 0)&swar.HighBits) +
 			bits.OnesCount64(swar.Load8(w, swar.WordLen)&swar.HighBits) +
 			bits.OnesCount64(swar.Load8(w, 2*swar.WordLen)&swar.HighBits) +
 			bits.OnesCount64(swar.Load8(w, 3*swar.WordLen)&swar.HighBits)
 	}
-	for ; i+swar.WordLen <= n; i += swar.WordLen {
+	for ; i <= n-swar.WordLen; i += swar.WordLen {
 		count += bits.OnesCount64(swar.Load8(data, i) & swar.HighBits)
 	}
 	// No overlapping word here: it would double-count. The tail is at most

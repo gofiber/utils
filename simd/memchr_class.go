@@ -110,7 +110,7 @@ func memchrWordGeneric(haystack []byte) int {
 		return -1
 	}
 	i := 0
-	for ; i+2*swar.WordLen <= n; i += 2 * swar.WordLen {
+	for ; i <= n-2*swar.WordLen; i += 2 * swar.WordLen {
 		// Pinned window: see the note above isASCIIGeneric in ascii.go for
 		// why the loads use constant offsets into it.
 		w := haystack[i : i+2*swar.WordLen : i+2*swar.WordLen]
@@ -123,7 +123,7 @@ func memchrWordGeneric(haystack []byte) int {
 			return i + swar.WordLen + swar.FirstLane(m1)
 		}
 	}
-	for ; i+swar.WordLen <= n; i += swar.WordLen {
+	for ; i <= n-swar.WordLen; i += swar.WordLen {
 		if m := wordMask(swar.Load8(haystack, i)); m != 0 {
 			return i + swar.FirstLane(m)
 		}
@@ -151,7 +151,7 @@ func memchrNotWordGeneric(haystack []byte) int {
 		return -1
 	}
 	i := 0
-	for ; i+2*swar.WordLen <= n; i += 2 * swar.WordLen {
+	for ; i <= n-2*swar.WordLen; i += 2 * swar.WordLen {
 		w := haystack[i : i+2*swar.WordLen : i+2*swar.WordLen]
 		m0 := swar.HighBits &^ wordMask(swar.Load8(w, 0))
 		m1 := swar.HighBits &^ wordMask(swar.Load8(w, swar.WordLen))
@@ -162,7 +162,7 @@ func memchrNotWordGeneric(haystack []byte) int {
 			return i + swar.WordLen + swar.FirstLane(m1)
 		}
 	}
-	for ; i+swar.WordLen <= n; i += swar.WordLen {
+	for ; i <= n-swar.WordLen; i += swar.WordLen {
 		if m := swar.HighBits &^ wordMask(swar.Load8(haystack, i)); m != 0 {
 			return i + swar.FirstLane(m)
 		}

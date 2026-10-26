@@ -9,7 +9,7 @@ import (
 
 // Multi-needle and case-insensitive searching, built on swar.ZeroLanes
 // first-match masks with needle broadcasts hoisted out of the word loops.
-// IndexAny2/IndexAny3 scan words while i+8 <= n and finish 8+ byte inputs
+// IndexAny2/IndexAny3 scan words while i <= n-8 and finish 8+ byte inputs
 // with one overlapping word at n-8 (pure loads; already-scanned lanes are
 // known non-matching, so the first set lane falls in the new bytes).
 // IndexFold instead scans candidate start positions only up to n-k, so its
@@ -33,7 +33,7 @@ func IndexAny2[S byteSeq](s S, a, b byte) int {
 		i := 0
 		// Two words per branch: the masks compute independently, and if only
 		// the second word matched, its first set lane is still exact.
-		for ; i+16 <= n; i += 16 {
+		for ; i <= n-16; i += 16 {
 			w0 := swar.Load8(s, i)
 			w1 := swar.Load8(s, i+8)
 			m0 := swar.ZeroLanes(w0^bcA) | swar.ZeroLanes(w0^bcB)
@@ -45,7 +45,7 @@ func IndexAny2[S byteSeq](s S, a, b byte) int {
 				return i + 8 + swar.FirstLane(m1)
 			}
 		}
-		for ; i+8 <= n; i += 8 {
+		for ; i <= n-8; i += 8 {
 			w := swar.Load8(s, i)
 			if m := swar.ZeroLanes(w^bcA) | swar.ZeroLanes(w^bcB); m != 0 {
 				return i + swar.FirstLane(m)
@@ -82,7 +82,7 @@ func IndexAny3[S byteSeq](s S, a, b, c byte) int {
 		bcC := swar.Broadcast(c)
 		i := 0
 		// Two words per branch; see IndexAny2.
-		for ; i+16 <= n; i += 16 {
+		for ; i <= n-16; i += 16 {
 			w0 := swar.Load8(s, i)
 			w1 := swar.Load8(s, i+8)
 			m0 := swar.ZeroLanes(w0^bcA) | swar.ZeroLanes(w0^bcB) | swar.ZeroLanes(w0^bcC)
@@ -94,7 +94,7 @@ func IndexAny3[S byteSeq](s S, a, b, c byte) int {
 				return i + 8 + swar.FirstLane(m1)
 			}
 		}
-		for ; i+8 <= n; i += 8 {
+		for ; i <= n-8; i += 8 {
 			w := swar.Load8(s, i)
 			if m := swar.ZeroLanes(w^bcA) | swar.ZeroLanes(w^bcB) | swar.ZeroLanes(w^bcC); m != 0 {
 				return i + swar.FirstLane(m)
@@ -123,6 +123,11 @@ func IndexAny3[S byteSeq](s S, a, b, c byte) int {
 // exactly, so e.g. "no\rcache" does NOT match the needle "no-cache".
 // The needle is a plain string by design: call sites pass constant tokens,
 // and a []byte needle would cost its callers a conversion either way.
+//
+// Candidates are the positions of the needle's first byte, each checked in
+// full, so the worst case, a haystack of 'a' and a needle of 'a' ending in 'b',
+// takes time proportional to len(s)*len(needle)/8, where strings.Index stays
+// linear. Do not search for a needle that an outsider chooses.
 func IndexFold[S byteSeq](s S, needle string) int {
 	n, k := len(s), len(needle)
 	if k == 0 {
@@ -159,7 +164,7 @@ func IndexFold[S byteSeq](s S, needle string) int {
 		built := false
 
 		i := 0
-		for ; i+8 <= n; i += 8 {
+		for ; i <= n-8; i += 8 {
 			w := swar.Load8(s, i)
 			cand := swar.ZeroLanes(w^bc1) | swar.ZeroLanes(w^bc2)
 			for cand != 0 {
@@ -248,7 +253,7 @@ func foldNeedle(needle string) uint64 {
 // windows running past len(s)-8 are read through one overlapping load at
 // len(s)-8 and shifted so lane 0 is s[pos].
 func foldedWindowAt[S byteSeq](s S, pos int, lenMask uint64) uint64 {
-	if pos+8 <= len(s) {
+	if pos <= len(s)-8 {
 		return swar.ToLowerWord(swar.Load8(s, pos)) & lenMask
 	}
 	from := len(s) - 8
@@ -262,7 +267,7 @@ func foldedWindowAt[S byteSeq](s S, pos int, lenMask uint64) uint64 {
 func foldEqualAt[S byteSeq](s S, pos int, needle string) bool {
 	k := len(needle)
 	i := 0
-	for ; i+8 <= k; i += 8 {
+	for ; i <= k-8; i += 8 {
 		if swar.ToLowerWord(swar.Load8(s, pos+i)) != swar.ToLowerWord(swar.Load8(needle, i)) {
 			return false
 		}

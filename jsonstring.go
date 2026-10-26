@@ -20,9 +20,9 @@ const (
 const jsonHexDigits = "0123456789abcdef"
 
 // jsonSafeTable flags the ASCII bytes that pass through a JSON string
-// encoder verbatim: 0x20..0x7E minus '"', '\\', and the HTML-escaped
-// '<', '>', '&'. Bytes >= 0x80 are false so the scalar loop routes them
-// to the UTF-8 path.
+// encoder verbatim: 0x20..0x7F, DEL included as in encoding/json, minus '"',
+// '\\', and the HTML-escaped '<', '>', '&'. Bytes >= 0x80 are false so the
+// scalar loop routes them to the UTF-8 path.
 var jsonSafeTable = buildJSONSafeTable()
 
 func buildJSONSafeTable() [256]bool {
@@ -58,7 +58,7 @@ func AppendJSONString[S byteSeq](dst []byte, s S) []byte {
 		// Skip to the next byte needing attention. Like nonQuotableMask,
 		// the combined mask is exact in and below its first set lane, which
 		// is all this first-match scan consumes.
-		if i+8 <= n {
+		if i <= n-8 {
 			m := jsonUnsafeMask(swar.Load8(bs, i))
 			if m == 0 {
 				i += 8

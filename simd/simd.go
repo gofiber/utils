@@ -5,7 +5,8 @@
 // Acceleration comes in two tiers. The scan kernels — Memchr2, Memchr3,
 // MemchrPair, MemchrDigit, MemchrWord, MemchrNotWord, IsASCII,
 // FirstNonASCII, and CountNonASCII — dispatch to AVX2 assembly on amd64
-// CPUs (for inputs of MinLen+ bytes) and fall back to portable SWAR loops
+// CPUs (for inputs of MinLen+ bytes, and for MemchrPair MinLen+offset: room
+// for one vector of pair positions) and fall back to portable SWAR loops
 // built on the swar package everywhere else. The kernels consume four
 // 32-byte vectors per iteration. The first-match scans and IsASCII combine
 // the per-vector masks, so a 128-byte block costs one mask extraction and

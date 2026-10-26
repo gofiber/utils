@@ -27,7 +27,7 @@ func EqualFold[S byteSeq](b, s S) bool {
 	// Compare 8 bytes per iteration; case-fold with SWAR only when the raw
 	// words differ, so byte-identical input skips both folds entirely.
 	i := 0
-	for ; i+8 <= n; i += 8 {
+	for ; i <= n-8; i += 8 {
 		x := swar.Load8(b, i)
 		y := swar.Load8(s, i)
 		if x != y && swar.ToUpperWord(x) != swar.ToUpperWord(y) {

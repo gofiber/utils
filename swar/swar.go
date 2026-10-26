@@ -25,7 +25,10 @@ import (
 
 const (
 	// WordLen is the SWAR word width in bytes. Word loops should iterate
-	// while i+WordLen <= len(s) and route shorter inputs to scalar code.
+	// while i <= len(s)-WordLen and route shorter inputs to scalar code.
+	// The condition is written with the subtraction on the length side because
+	// i+WordLen wraps for a length within WordLen of the largest int, which a
+	// 32-bit platform can reach.
 	WordLen = 8
 
 	// Ones has 0x01 in every byte lane.
@@ -39,19 +42,22 @@ const (
 )
 
 // Load8 assembles s[i:i+8] into a little-endian uint64: s[i] becomes the
-// least significant byte (lane 0). The caller must guarantee i+8 <= len(s);
-// the reslice below turns a violation into a bounds panic. The 8-byte
-// reslice pins the length so the constant-index reads are bounds-check free,
-// and the compiler fuses them into a single 8-byte load on little-endian
-// targets (verified for both the string and []byte instantiations).
+// least significant byte (lane 0). The caller must guarantee i+8 <= len(s).
+// A violation is caught by the reslice below only as far as the reslice
+// checks: against len(s) for a string, but against cap(s) for a []byte, so a
+// []byte with len(s) < i+8 <= cap(s) is read past its length without a panic.
+// The 8-byte reslice pins the length so the constant-index reads are
+// bounds-check free, and the compiler fuses them into a single 8-byte load on
+// little-endian targets (verified for both the string and []byte
+// instantiations).
 //
-// The reslice itself is still checked, against the backing array's
-// capacity, which a loop condition written in terms of len does not imply.
+// The reslice itself is checked against that capacity, which a loop condition
+// written in terms of len does not imply.
 // A loop that loads several words per iteration should therefore pin the
 // whole group once and index into it with constants rather than call Load8
 // at a variable offset each time:
 //
-//	for ; i+4*WordLen <= n; i += 4 * WordLen {
+//	for ; i <= n-4*WordLen; i += 4 * WordLen {
 //		w := b[i : i+4*WordLen : i+4*WordLen]
 //		acc := Load8(w, 0) | Load8(w, WordLen) | Load8(w, 2*WordLen) | Load8(w, 3*WordLen)
 //		// ...
@@ -74,10 +80,11 @@ func Load8[S ~string | ~[]byte](s S, i int) uint64 {
 
 // Store8 writes w into b[i:i+8] in Load8's lane order: lane 0 (the least
 // significant byte) lands at the lowest byte index, so a Load8/Store8 round
-// trip is the identity. The caller must guarantee i+8 <= len(b); the
-// reslice below turns a violation into a bounds panic. Like Load8, the
-// constant-index writes are bounds-check free and fuse into a single 8-byte
-// store on little-endian targets.
+// trip is the identity. The caller must guarantee i+8 <= len(b). The reslice
+// below checks i+8 against cap(b), not len(b), so a violation within the
+// capacity overwrites the bytes past len(b) without a panic, and only one
+// beyond it panics. Like Load8, the constant-index writes are bounds-check
+// free and fuse into a single 8-byte store on little-endian targets.
 func Store8(b []byte, i int, w uint64) {
 	d := b[i : i+8]
 	d[0] = byte(w)
