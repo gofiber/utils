@@ -319,6 +319,36 @@ func Test_ConvertToBytes(t *testing.T) {
 	require.Equal(t, 100*1000, ConvertToBytes("100  k")) // multiple spaces
 }
 
+// Test_ConvertToBytes_UnitWords: the 'i' that makes a unit binary comes right after the
+// unit letter, and not at the start of a word. "5 kilobytes" and "5 gigabytes" used to be
+// read as 5 KiB and 5 GiB, 2.4% and 7.4% too much.
+func Test_ConvertToBytes_UnitWords(t *testing.T) {
+	t.Parallel()
+	for in, want := range map[string]int64{
+		"5 kilobytes":  5000,
+		"5 Kilobytes":  5000,
+		"5 gigabytes":  5000000000,
+		"5 GIGABYTES":  5000000000,
+		"5 megabytes":  5000000,
+		"5 terabytes":  5000000000000,
+		"5 petabytes":  5000000000000000,
+		"5 kibibytes":  5120,
+		"5 KIBIBYTES":  5120,
+		"5 gibibytes":  5 << 30,
+		"5 Gi":         5 << 30,
+		"5Ki":          5120,
+		"5KI":          5120,
+		"5KiB":         5120,
+		"5kib":         5120,
+		"5 Ki B":       5120,
+		"5Ki!":         5120,
+		"5Ki.":         5120,
+		"1.5 kilobyte": 1500,
+	} {
+		require.Equal(t, saturate(want), ConvertToBytes(in), in)
+	}
+}
+
 // Test_ConvertToBytes_Fractions pins fractional sizes that a float product
 // truncates ("65.35KB" is 65350, not 65349).
 func Test_ConvertToBytes_Fractions(t *testing.T) {

@@ -255,6 +255,40 @@ func Test_ToString_Differences(t *testing.T) {
 	require.Equal(t, "[2001 x]", ToString([]any{moment, "x"}, "2006"))
 }
 
+// selfPointer points to itself, and pingPointer and pongPointer to each other:
+// types whose values can be followed for ever.
+type (
+	selfPointer *selfPointer
+	pingPointer *pongPointer
+	pongPointer *pingPointer
+)
+
+// Test_ToString_EndlessPointers: ToString follows a pointer to what it points to,
+// which for a value of a type like T *T never ends and overflowed the stack, a fatal
+// error that cannot be recovered. fmt prints such a pointer as an address, and so does
+// ToString now.
+func Test_ToString_EndlessPointers(t *testing.T) {
+	t.Parallel()
+	var self selfPointer
+	self = &self
+	var ping pingPointer
+	var pong pongPointer
+	ping, pong = &pong, &ping
+
+	for name, v := range map[string]any{"self": self, "ping": ping, "pong": pong} {
+		var got string
+		require.NotPanics(t, func() { got = ToString(v) }, name)
+		require.Equal(t, fmt.Sprint(v), got, name)
+	}
+
+	// Ordinary chains of pointers are still followed to the end.
+	n := 7
+	p := &n
+	pp := &p
+	ppp := &pp
+	require.Equal(t, "7", ToString(ppp))
+}
+
 // Test_ToString_NilReceivers requires a nil pointer whose type implements
 // error or fmt.Stringer to be rendered as fmt renders it, where calling its
 // method would panic: "<nil>", or what a method written for nil returns.

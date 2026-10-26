@@ -150,9 +150,12 @@ func IncrementIPRange(ip net.IP) {
 }
 
 // ConvertToBytes returns integer size of bytes from human-readable string, ex. 42kb, 42M
-// Decimal units are powers of 1000 (42k = 42000); binary units with an 'i' infix
-// are powers of 1024 (42Ki = 43008). Note that ByteSize formats with powers of 1024,
-// so use binary suffixes for a lossless round-trip.
+// The units are k, m, g, t and p in either case: the first letter after the number
+// selects the unit, and anything after it is ignored. Decimal units are powers of 1000
+// (42k = 42000); binary units, with an 'i' right after the letter, as in Ki and KiB, are
+// powers of 1024 (42Ki = 43008). The 'i' of a word such as kilobytes or gigabytes is not
+// that infix. ByteSize writes powers of 1024 as KB, MB and so on, rounded to one decimal
+// place, so this function does not read its output back: write KiB, MiB, ... for 1024.
 // The number may have a '+', a point and an exponent (1.5e3K), with any number of
 // digits. The result is the exact product rounded down, capped at math.MaxInt. It is
 // 0 if there is no number or it is negative or malformed; an unknown unit counts as bytes.
@@ -215,9 +218,12 @@ func ConvertToBytes(humanReadableString string) int {
 
 	mult := uint64(1)
 	if unitPrefixPos > 0 {
-		// An 'i' after the unit prefix selects binary units (KiB = 1024).
-		binary := unitPrefixPos+1 < strLen &&
-			(humanReadableString[unitPrefixPos+1] == 'i' || humanReadableString[unitPrefixPos+1] == 'I')
+		// An 'i' after the unit prefix selects binary units (KiB = 1024), unless it is
+		// the start of a word like "kilobytes", where a letter other than b follows it.
+		binary := false
+		if next := unitPrefixPos + 1; next < strLen && (humanReadableString[next] == 'i' || humanReadableString[next] == 'I') {
+			binary = next+1 == strLen || !continuesUnitWord(humanReadableString[next+1])
+		}
 		var decMul, binMul uint64
 		switch humanReadableString[unitPrefixPos] {
 		case 'k', 'K':
@@ -250,6 +256,13 @@ func ConvertToBytes(humanReadableString string) int {
 
 	// Integers, not floats: 1.001 * 1000 is 1000.9999999999999.
 	return scaleDecimal(numPart, mult)
+}
+
+// continuesUnitWord reports whether c is a letter other than b or B, which after the
+// "i" of a unit like "Ki" or "KiB" shows the "i" to belong to a word such as "kilobytes".
+func continuesUnitWord(c byte) bool {
+	l := c | 0x20
+	return l >= 'a' && l <= 'z' && l != 'b'
 }
 
 // scaleDecimal returns floor(s * mult) capped at math.MaxInt, or 0 if s is not a

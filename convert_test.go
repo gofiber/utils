@@ -8,6 +8,9 @@ import (
 	"errors"
 	"fmt"
 	"math"
+	"math/big"
+	"math/bits"
+	"math/rand/v2"
 	"reflect"
 	"strconv"
 	"testing"
@@ -296,24 +299,118 @@ func TestByteSize(t *testing.T) {
 		})
 	}
 
-	const maxSafe = math.MaxUint64 / 10
-	t.Run("MaxSafe", func(t *testing.T) {
-		result := ByteSize(maxSafe)
-		require.Contains(t, result, "B")
-	})
+	// There is no maximum: sizes above math.MaxUint64/10, where the arithmetic once
+	// was capped, are written as what they are.
+	for _, tt := range []struct {
+		bytes    uint64
+		expected string
+	}{
+		{math.MaxUint64 / 10, "1.6EB"},
+		{math.MaxUint64/10 + 1, "1.6EB"},
+		{1902320482601297510, "1.6EB"},
+		{1902320482601297511, "1.7EB"},
+		{2 << 60, "2EB"},
+		{1 << 62, "4EB"},
+		{1 << 63, "8EB"},
+		{math.MaxUint64, "16EB"},
+	} {
+		require.Equal(t, tt.expected, ByteSize(tt.bytes), "%d", tt.bytes)
+	}
+}
 
-	t.Run("Overflow", func(t *testing.T) {
-		result := ByteSize(maxSafe + 1)
-		require.Contains(t, result, "B")
-		require.Equal(t, ByteSize(maxSafe), result)
-	})
+// Test_ByteSize_Rounding pins the numbers next to a unit's upper edge. A size of
+// 1023.95 of a unit or more rounds to 1024.0 of it, and is written as 1 of the next
+// unit: no unit is ever written with a number of 1024 or more.
+func Test_ByteSize_Rounding(t *testing.T) {
+	t.Parallel()
+	for _, tt := range []struct {
+		bytes    uint64
+		expected string
+	}{
+		{1023, "1023B"},
+		{1048524, "1023.9KB"}, // 1023.949 KB
+		{1048525, "1MB"},      // 1023.950 KB: rounds to 1024.0, the first to be carried
+		{1048575, "1MB"},
+		{1 << 20, "1MB"},
+		{1<<30 - 1, "1GB"},
+		{1<<40 - 1, "1TB"},
+		{1<<50 - 1, "1PB"},
+		{1<<60 - 1, "1EB"},
+		{1280, "1.3KB"}, // 1.25 exactly: half rounds up
+		{1792, "1.8KB"}, // 1.75 exactly
+		{1126, "1.1KB"},
+	} {
+		require.Equal(t, tt.expected, ByteSize(tt.bytes), "%d", tt.bytes)
+	}
+}
+
+// byteSizeModel is ByteSize computed with big numbers from its documentation
+// alone: the largest unit that leaves a number of at least 1, tenths rounded half
+// up, and 1024.0 of a unit written as 1 of the next.
+func byteSizeModel(n uint64) string {
+	if n < 1024 {
+		return strconv.FormatUint(n, 10) + "B"
+	}
+	units := []string{"KB", "MB", "GB", "TB", "PB", "EB"}
+	k := (bits.Len64(n) - 1) / 10 // 1 for KB .. 6 for EB
+	unit := new(big.Int).Lsh(big.NewInt(1), uint(10*k))
+	tenths := new(big.Int).Mul(new(big.Int).SetUint64(n), big.NewInt(10))
+	tenths.Add(tenths, new(big.Int).Rsh(unit, 1)) // + half a unit: round half up
+	tenths.Quo(tenths, unit)
+	if tenths.Cmp(big.NewInt(10240)) >= 0 {
+		tenths.SetInt64(10)
+		k++
+	}
+	whole, frac := tenths.Int64()/10, tenths.Int64()%10
+	s := strconv.FormatInt(whole, 10)
+	if frac != 0 {
+		s += "." + strconv.FormatInt(frac, 10)
+	}
+	return s + units[k-1]
+}
+
+// Test_ByteSize_Model compares ByteSize with byteSizeModel across the whole range:
+// every small size, both sides of every power of two, the top of the range, the
+// stretch below every unit edge where sizes are carried to the next unit, and a
+// spread of random sizes of every magnitude.
+func Test_ByteSize_Model(t *testing.T) {
+	t.Parallel()
+	check := func(n uint64) {
+		t.Helper()
+		if got, want := ByteSize(n), byteSizeModel(n); got != want {
+			t.Fatalf("ByteSize(%d) = %q, want %q", n, got, want)
+		}
+	}
+	for n := range uint64(100_000) {
+		check(n)
+	}
+	for shift := range 64 {
+		for d := range uint64(300) {
+			base := uint64(1) << shift
+			check(base + d)
+			check(base - 1 - d)
+		}
+	}
+	for d := range uint64(2000) {
+		check(math.MaxUint64 - d)
+	}
+	rng := rand.New(rand.NewPCG(1, 2)) //nolint:gosec // a fixed sequence for a model test
+	for k := range 6 {
+		edge := uint64(1) << (10 * (k + 1))
+		for range 5000 {
+			check(edge - 1 - rng.Uint64N(edge/16)) // 1023.95 of the unit below is edge - edge/20480
+		}
+	}
+	for range 40_000 {
+		check(rng.Uint64() >> rng.UintN(64))
+	}
 }
 
 // Ensure ConvertToBytes caps values exceeding math.MaxInt
 func Test_ConvertToBytes_MaxInt(t *testing.T) {
 	t.Parallel()
-	big := fmt.Sprintf("%dT", int64(math.MaxInt/1000+1))
-	require.Equal(t, math.MaxInt, ConvertToBytes(big))
+	huge := fmt.Sprintf("%dT", int64(math.MaxInt/1000+1))
+	require.Equal(t, math.MaxInt, ConvertToBytes(huge))
 }
 
 // go test -v -run=^$ -bench=ToString -benchmem -count=4

@@ -6,7 +6,6 @@ package utils
 
 import (
 	"fmt"
-	"math"
 	"reflect"
 	"strconv"
 	"strings"
@@ -55,11 +54,12 @@ const (
 	uExabyte
 )
 
-// ByteSize returns a human-readable byte string of the form 10M, 12.5K, and so forth.
-// The unit that results in the smallest number greater than or equal to 1 is always chosen.
-// Maximum supported input is math.MaxUint64 / 10 (≈ 1844674407370955161).
+// ByteSize returns a human-readable byte string of the form 10MB, 12.5KB, and so forth.
+// The units are powers of 1024, written KB, MB, GB, TB, PB and EB, and the number is rounded
+// half up to one decimal place. The unit that results in the smallest number greater than or
+// equal to 1 is always chosen, so a size that rounds up to 1024 of a unit is written as 1 of
+// the next: 1048575 bytes is 1MB, not 1024KB. Every uint64 is supported.
 func ByteSize(bytes uint64) string {
-	const maxSafe = math.MaxUint64 / 10
 	unit := ""
 	div := uint64(1)
 	switch {
@@ -95,12 +95,26 @@ func ByteSize(bytes uint64) string {
 		return UnsafeString(buf)
 	}
 
-	// Fix: cap bytes to maxSafe for overflow, but format as fractional
-	if bytes > maxSafe {
-		bytes = maxSafe
-	}
-
+	// Tenths of the unit, rounded half up. Nothing here overflows for any uint64: the
+	// largest term, (bytes%div)*10 + div/2, is below 1.21e19 at div = 2^60.
 	scaled := (bytes/div)*10 + ((bytes%div)*10+div/2)/div
+	if scaled >= 1024*10 {
+		// 1023.95 of a unit and more rounds to 1024.0 of it, which is 1.0 of the next.
+		// This cannot happen for EB, whose largest value is 16.
+		scaled = 10
+		switch unit {
+		case "KB":
+			unit = "MB"
+		case "MB":
+			unit = "GB"
+		case "GB":
+			unit = "TB"
+		case "TB":
+			unit = "PB"
+		default: // "PB"
+			unit = "EB"
+		}
+	}
 	integer := scaled / 10
 	fractional := scaled % 10
 
@@ -242,48 +256,81 @@ func ToString(arg any, timeFormat ...string) string {
 		buf = append(buf, ']')
 		return UnsafeString(buf)
 	default:
-		// Check if the type is a pointer by using reflection
-		rv := reflect.ValueOf(arg)
-		if !rv.IsValid() {
-			return ""
-		}
-		kind := rv.Kind()
-		if kind == reflect.Pointer && !rv.IsNil() {
-			// Dereference the pointer and recursively call ToString
-			return ToString(rv.Elem().Interface(), timeFormat...)
-		} else if kind == reflect.Slice || kind == reflect.Array {
-			// handle slices
-			n := rv.Len()
-			if n == 0 {
-				return "[]"
-			}
-			var buf strings.Builder
-			buf.Grow(n * 8) // Pre-allocate approximate size
-			buf.WriteByte('[')
-			for i := range n {
-				if i > 0 {
-					buf.WriteByte(' ')
-				}
-				buf.WriteString(ToString(rv.Index(i).Interface(), timeFormat...))
-			}
-			buf.WriteByte(']')
-			return buf.String()
-		}
-
-		// For types not explicitly handled, use fmt.Sprint to generate a string representation
-		return fmt.Sprint(arg)
+		return toStringReflect(arg, timeFormat)
 	}
+}
+
+// toStringReflect renders what ToString has no case of its own for: a pointer is
+// followed, a slice or array is rendered element by element, and anything else is
+// left to fmt.Sprint. It is a function of its own so that the frame of ToString,
+// whose cases are the common ones, stays small.
+func toStringReflect(arg any, timeFormat []string) string {
+	// Check if the type is a pointer by using reflection
+	rv := reflect.ValueOf(arg)
+	if !rv.IsValid() {
+		return ""
+	}
+	kind := rv.Kind()
+	if kind == reflect.Pointer && !rv.IsNil() {
+		if endlessPointerType(rv.Type()) {
+			return fmt.Sprint(arg) // a type like T *T has no end to follow
+		}
+		// Dereference the pointer and recursively call ToString
+		return ToString(rv.Elem().Interface(), timeFormat...)
+	} else if kind == reflect.Slice || kind == reflect.Array {
+		// handle slices
+		n := rv.Len()
+		if n == 0 {
+			return "[]"
+		}
+		var buf strings.Builder
+		buf.Grow(n * 8) // Pre-allocate approximate size
+		buf.WriteByte('[')
+		for i := range n {
+			if i > 0 {
+				buf.WriteByte(' ')
+			}
+			buf.WriteString(ToString(rv.Index(i).Interface(), timeFormat...))
+		}
+		buf.WriteByte(']')
+		return buf.String()
+	}
+
+	// For types not explicitly handled, use fmt.Sprint to generate a string representation
+	return fmt.Sprint(arg)
+}
+
+// maxPointerDepth is how many pointers deep a type may be before ToString takes
+// it for a type that points to itself. Real types stop far short of it.
+const maxPointerDepth = 32
+
+// endlessPointerType reports whether following the pointer type t, one element type
+// after the other, never reaches a type that is not a pointer: t is, or leads to, a
+// type declared as pointing to itself, like type T *T, which makes ToString call itself
+// until the stack is gone. The type, not the value, decides this, so it costs one or two
+// steps for every ordinary pointer.
+func endlessPointerType(t reflect.Type) bool {
+	for range maxPointerDepth {
+		if t.Kind() != reflect.Pointer {
+			return false
+		}
+		t = t.Elem()
+	}
+	return true
 }
 
 // isNilPointer reports whether v may hold a nil pointer, by the data word of the
 // interface: for a pointer, and for the other pointer-shaped types, that word
-// is the value itself. Such a value can still be an error or a fmt.Stringer,
-// because the method set of *T includes the methods of T, and calling those on
-// it dereferences the nil. The answer is only "maybe": a nil map, func or chan
-// and a struct holding a single nil pointer have a nil data word too. A true
-// answer sends the call through nilReceiverString, which tells them apart, and
-// only when the method panics. Asking reflect instead costs about 1.5ns on
-// every error and Stringer.
+// is the value itself. The exception is a pointer to a type that is not in the
+// heap (cgo's incomplete C types), which an interface holds by the address of a
+// box; such a nil pointer goes undetected and its method panics as ever.
+//
+// A nil pointer can still be an error or a fmt.Stringer, because the method set
+// of *T includes the methods of T, and calling those on it dereferences the nil.
+// The answer is only "maybe": a nil map, func or chan and a struct holding a
+// single nil pointer have a nil data word too. A true answer sends the call
+// through nilReceiverString, which tells them apart, and only when the method
+// panics. Asking reflect instead costs about 1.5ns on every error and Stringer.
 func isNilPointer(v any) bool {
 	// #nosec G103
 	return (*[2]unsafe.Pointer)(unsafe.Pointer(&v))[1] == nil

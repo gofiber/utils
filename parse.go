@@ -684,9 +684,12 @@ func roundBits(u uint64, n int) float64 {
 }
 
 // ParseFloat64 parses a decimal ASCII string or byte slice into the float64 that
-// strconv.ParseFloat returns, bit for bit. Only a sign, digits, a point and an
-// exponent are accepted; inf, nan, hex floats and underscores are syntax errors.
-// It returns (0, error) on error and on overflow, where strconv returns ±Inf.
+// strconv.ParseFloat returns, bit for bit, wherever strconv reads the number right.
+// It does not for more than 800 digits ahead of the point (it keeps 800 and places
+// the point by that many), and there this returns the correctly rounded float
+// instead. Only a sign, digits, a point and an exponent are accepted; inf, nan,
+// hex floats and underscores are syntax errors. It returns (0, error) on error
+// and on overflow, where strconv returns ±Inf.
 func ParseFloat64[S byteSeq](s S) (float64, error) {
 	return parseFloat[S]("ParseFloat64", 64, s)
 }
