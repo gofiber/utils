@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"errors"
 	"math"
 	"math/bits"
 	"strconv"
@@ -241,6 +242,31 @@ func parseDigitsBig[S byteSeq](s S, i int) (uint64, error) {
 	return n, nil
 }
 
+// classifyDigitsError returns the error strconv reports for a run of digits
+// that parseDigits or parseDigitsBig rejected. strconv stops at the first
+// problem it reads, and it compares the running value with the unsigned
+// maximum of the width as it goes, so digits that were already above limit
+// before a stray byte make a range error, not a syntax one. parseDigitsBig
+// finds a 64-bit overflow in that order by itself; this settles the narrower
+// widths, and only on the error path. i is where the digits start.
+func classifyDigitsError[S byteSeq](err error, s S, i int, limit uint64) error {
+	if !errors.Is(err, strconv.ErrSyntax) {
+		return err
+	}
+	var n uint64
+	for ; i < len(s); i++ {
+		c := s[i] - '0'
+		if c > 9 {
+			break
+		}
+		if n > (limit-uint64(c))/10 { // n*10+c > limit, without overflowing
+			return strconv.ErrRange
+		}
+		n = n*10 + uint64(c)
+	}
+	return err
+}
+
 // parseSigned parses a decimal ASCII string or byte slice into a signed integer type T.
 // It supports optional '+' or '-' prefix, checks for overflow and underflow, and returns (0, error) on error.
 func parseSigned[S byteSeq, T Signed](fn string, s S, minRange, maxRange T) (T, error) {
@@ -270,6 +296,8 @@ func parseSigned[S byteSeq, T Signed](fn string, s S, minRange, maxRange T) (T, 
 		n, err = parseDigits(s, i)
 	}
 	if err != nil {
+		// strconv parses the digits as the unsigned type of the same width.
+		err = classifyDigitsError(err, s, i, uint64(int64(maxRange))<<1|1)
 		return 0, &strconv.NumError{Func: fn, Num: string(s), Err: err}
 	}
 
@@ -307,6 +335,7 @@ func parseUnsigned[S byteSeq, T Unsigned](fn string, s S, maxRange T) (T, error)
 		n, err = parseDigits(s, 0)
 	}
 	if err != nil {
+		err = classifyDigitsError(err, s, 0, uint64(maxRange))
 		return 0, &strconv.NumError{Func: fn, Num: string(s), Err: err}
 	}
 	// Check for overflow
