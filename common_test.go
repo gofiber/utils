@@ -229,6 +229,10 @@ func Test_SecureToken(t *testing.T) {
 	require.NotEqual(t, token, token2)
 }
 
+// saturate is v as the int ConvertToBytes returns: a size the platform's int
+// cannot hold comes back as math.MaxInt, which is all of v on a 64-bit target.
+func saturate(v int64) int { return int(min(v, math.MaxInt)) }
+
 func Test_ConvertToBytes(t *testing.T) {
 	t.Parallel()
 	// initial assertions
@@ -266,31 +270,31 @@ func Test_ConvertToBytes(t *testing.T) {
 	require.Equal(t, int(42.5*1000000), ConvertToBytes("42.5MB"))
 
 	// Test sizeMultipliers array usage (g/G - 1e9)
-	require.Equal(t, 42*1000000000, ConvertToBytes("42G"))
-	require.Equal(t, 42*1000000000, ConvertToBytes("42g"))
-	require.Equal(t, 42*1000000000, ConvertToBytes("42GB"))
-	require.Equal(t, 42*1000000000, ConvertToBytes("42gb"))
+	require.Equal(t, saturate(42*1000000000), ConvertToBytes("42G"))
+	require.Equal(t, saturate(42*1000000000), ConvertToBytes("42g"))
+	require.Equal(t, saturate(42*1000000000), ConvertToBytes("42GB"))
+	require.Equal(t, saturate(42*1000000000), ConvertToBytes("42gb"))
 
 	// Test sizeMultipliers array usage (t/T - 1e12)
-	require.Equal(t, 42*1000000000000, ConvertToBytes("42T"))
-	require.Equal(t, 42*1000000000000, ConvertToBytes("42t"))
-	require.Equal(t, 42*1000000000000, ConvertToBytes("42TB"))
-	require.Equal(t, 42*1000000000000, ConvertToBytes("42tb"))
+	require.Equal(t, saturate(42*1000000000000), ConvertToBytes("42T"))
+	require.Equal(t, saturate(42*1000000000000), ConvertToBytes("42t"))
+	require.Equal(t, saturate(42*1000000000000), ConvertToBytes("42TB"))
+	require.Equal(t, saturate(42*1000000000000), ConvertToBytes("42tb"))
 
 	// Test sizeMultipliers array usage (p/P - 1e15)
-	require.Equal(t, 42*1000000000000000, ConvertToBytes("42P"))
-	require.Equal(t, 42*1000000000000000, ConvertToBytes("42p"))
-	require.Equal(t, 42*1000000000000000, ConvertToBytes("42PB"))
-	require.Equal(t, 42*1000000000000000, ConvertToBytes("42pb"))
+	require.Equal(t, saturate(42*1000000000000000), ConvertToBytes("42P"))
+	require.Equal(t, saturate(42*1000000000000000), ConvertToBytes("42p"))
+	require.Equal(t, saturate(42*1000000000000000), ConvertToBytes("42PB"))
+	require.Equal(t, saturate(42*1000000000000000), ConvertToBytes("42pb"))
 
 	// Test binary units (KiB = 1024)
 	require.Equal(t, 42*1024, ConvertToBytes("42Ki"))
 	require.Equal(t, 42*1024, ConvertToBytes("42KiB"))
 	require.Equal(t, 42*1024, ConvertToBytes("42kib"))
 	require.Equal(t, 42*1024*1024, ConvertToBytes("42MiB"))
-	require.Equal(t, 42*1024*1024*1024, ConvertToBytes("42GiB"))
-	require.Equal(t, 42*1024*1024*1024*1024, ConvertToBytes("42TiB"))
-	require.Equal(t, 42*1024*1024*1024*1024*1024, ConvertToBytes("42PiB"))
+	require.Equal(t, saturate(42*1024*1024*1024), ConvertToBytes("42GiB"))
+	require.Equal(t, saturate(42*1024*1024*1024*1024), ConvertToBytes("42TiB"))
+	require.Equal(t, saturate(42*1024*1024*1024*1024*1024), ConvertToBytes("42PiB"))
 	require.Equal(t, int(1.5*1024), ConvertToBytes("1.5KiB"))
 
 	// Negative sizes are unrecognized
