@@ -11,6 +11,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"unsafe"
 
 	"github.com/gofiber/utils/v2/internal/unsafeconv"
 )
@@ -152,8 +153,14 @@ func ToString(arg any, timeFormat ...string) string {
 		return ToString(v.Interface(), timeFormat...)
 	// error before fmt.Stringer to match the fmt package's precedence
 	case error:
+		if isNilPointer(arg) {
+			return nilReceiverString(v.Error)
+		}
 		return v.Error()
 	case fmt.Stringer:
+		if isNilPointer(arg) {
+			return nilReceiverString(v.String)
+		}
 		return v.String()
 	// Handle common pointer types directly to avoid reflection
 	case *string:
@@ -259,4 +266,29 @@ func ToString(arg any, timeFormat ...string) string {
 		// For types not explicitly handled, use fmt.Sprint to generate a string representation
 		return fmt.Sprint(arg)
 	}
+}
+
+// isNilPointer reports whether v holds a nil pointer, by the data word of the
+// interface: for a pointer, and for the other pointer-shaped types, that word
+// is the value itself. Such a value can still be an error or a fmt.Stringer,
+// because the method set of *T includes the methods of T, and calling those on
+// it dereferences the nil. A true answer only sends the call through
+// nilReceiverString, which returns what the method returns unless it panics, so
+// the nil map or func that also answers true loses nothing by it. Asking
+// reflect instead costs about 1.5ns on every error and Stringer.
+func isNilPointer(v any) bool {
+	// #nosec G103
+	return (*[2]unsafe.Pointer)(unsafe.Pointer(&v))[1] == nil
+}
+
+// nilReceiverString calls the Error or String method of a nil pointer as fmt
+// does: it returns what the method returns, which a method written to be
+// called on nil may well do, and "<nil>" if the method panics, as most do.
+func nilReceiverString(method func() string) (s string) { //nolint:nonamedreturns // the deferred recover sets the result
+	defer func() {
+		if recover() != nil {
+			s = "<nil>"
+		}
+	}()
+	return method()
 }
