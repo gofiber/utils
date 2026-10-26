@@ -6,6 +6,7 @@ import (
 	"os/exec"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/gofiber/utils/v2/simd"
 	"github.com/stretchr/testify/require"
@@ -74,6 +75,13 @@ func Test_PortableTier(t *testing.T) {
 	args := []string{"-test.run=^(" + strings.Join(portableTierTests, "|") + ")$", "-test.v", "-test.count=1", "-test.shuffle=off"}
 	if dir := coverDirArg(); dir != "" {
 		args = append(args, "-test.gocoverdir="+dir)
+	}
+	if deadline, ok := t.Deadline(); ok {
+		// The timeout of this run ends this process, not the child, which would
+		// go on to its own default of ten minutes. It gets what is left of ours.
+		if left := time.Until(deadline); left > 0 {
+			args = append(args, "-test.timeout="+left.String())
+		}
 	}
 	cmd := exec.CommandContext(t.Context(), exe, args...) // #nosec G204 -- the child is this test binary
 	godebug := noAVX2

@@ -5,10 +5,12 @@ import (
 	"context"
 	"io"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"runtime"
 	"strings"
 	"testing"
+	"time"
 )
 
 // captureStderr runs fn with os.Stderr pointing at a pipe and returns what fn
@@ -40,23 +42,33 @@ func captureStderr(t *testing.T, fn func()) string {
 
 // writeMiniModule creates a module with one benchmark in a directory of its own
 // and returns the directory. It has no dependencies and no go directive, so
-// `go test` in it needs neither the network nor another toolchain.
+// `go test` in it needs neither the network nor another toolchain, only the go
+// command, without which the tests that run it are skipped.
+//
+// The benchmark sleeps for a millisecond: one iteration of an empty body can
+// measure as 0 ns on a coarse clock, and `go test` prints no ns/op column then,
+// which is a row this tool does not take.
 func writeMiniModule(t *testing.T) string {
 	t.Helper()
+	if _, err := exec.LookPath("go"); err != nil {
+		t.Skipf("the go command is needed to run a benchmark: %v", err)
+	}
 	dir := t.TempDir()
 	for name, content := range map[string]string{
 		"go.mod":       "module example.com/mini\n",
 		"mini.go":      "package mini\n",
-		"mini_test.go": "package mini\n\nimport \"testing\"\n\nfunc Benchmark_Mini(b *testing.B) {\n\tfor i := 0; i < b.N; i++ {\n\t}\n}\n",
+		"mini_test.go": "package mini\n\nimport (\n\t\"testing\"\n\t\"time\"\n)\n\nfunc Benchmark_Mini(b *testing.B) {\n\tfor i := 0; i < b.N; i++ {\n\t\ttime.Sleep(time.Millisecond)\n\t}\n}\n",
 	} {
 		if err := os.WriteFile(filepath.Join(dir, name), []byte(content), 0o600); err != nil {
 			t.Fatal(err)
 		}
 	}
 	// Neither a parent workspace nor flags meant for the real module (-mod=vendor
-	// say) may reach the temporary one.
+	// say) may reach the temporary one. An empty GOFLAGS counts as unset, so the
+	// settings of `go env -w` would still apply without GOENV=off.
 	t.Setenv("GOWORK", "off")
 	t.Setenv("GOFLAGS", "")
+	t.Setenv("GOENV", "off")
 	return dir
 }
 
@@ -182,12 +194,61 @@ func TestRunUpdateReportsAFailingCommand(t *testing.T) {
 }
 
 func TestRunBenchStopsWithItsContext(t *testing.T) {
-	// A canceled context takes the child with it, and the error names the command.
+	// A context that is canceled already keeps the child from starting, and the
+	// error names the command.
 	ctx, cancel := context.WithCancel(context.Background())
 	cancel()
 	_, err := runBench(ctx, t.TempDir(), []string{"go", "version"})
 	if err == nil || !strings.Contains(err.Error(), "go version") {
 		t.Errorf("got %v, want the canceled command in the error", err)
+	}
+}
+
+// TestRunBenchKillsARunningChild is the Ctrl-C case: the context is canceled while
+// the child runs, and the child goes with it. The child is this test binary, run
+// again to do nothing but announce itself and sleep.
+func TestRunBenchKillsARunningChild(t *testing.T) {
+	if marker := os.Getenv("SCRIPTS_TEST_CHILD_MARKER"); marker != "" {
+		err := os.WriteFile(marker, []byte("up"), 0o600) // #nosec G703 -- the marker is the temporary file the parent test named
+		if err != nil {
+			panic(err)
+		}
+		time.Sleep(10 * time.Minute)
+		return
+	}
+
+	exe, err := os.Executable()
+	if err != nil {
+		t.Fatal(err)
+	}
+	marker := filepath.Join(t.TempDir(), "started")
+	t.Setenv("SCRIPTS_TEST_CHILD_MARKER", marker)
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	done := make(chan error, 1)
+	go func() {
+		_, err := runBench(ctx, t.TempDir(), []string{exe, "-test.run=^TestRunBenchKillsARunningChild$"})
+		done <- err
+	}()
+
+	// Cancel only once the child is up, or the kill is not what is tested.
+	for deadline := time.Now().Add(time.Minute); ; time.Sleep(10 * time.Millisecond) {
+		if _, err := os.Stat(marker); err == nil {
+			break
+		}
+		if time.Now().After(deadline) {
+			t.Fatal("the child never started")
+		}
+	}
+	cancel()
+	select {
+	case err := <-done:
+		if err == nil {
+			t.Error("a child that was killed ended without an error")
+		}
+	case <-time.After(time.Minute):
+		t.Fatal("runBench did not return after its context was canceled")
 	}
 }
 
