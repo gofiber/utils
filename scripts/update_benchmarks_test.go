@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -412,5 +413,185 @@ func TestApplyResultsKeepsRowsAMeasurementCannotFill(t *testing.T) {
 	out := strings.Join(lines, "\n")
 	if !strings.Contains(out, "Benchmark_Kept/a-12      100    1.000  ns/op     0  B/op   0  allocs/op") {
 		t.Errorf("a row must not lose the columns the table documents:\n%s", out)
+	}
+}
+
+func TestPadding(t *testing.T) {
+	for _, tc := range []struct {
+		name, got, want string
+	}{
+		{"left pads", padLeft("7", 3), "  7"},
+		{"left keeps a wide value", padLeft("777", 2), "777"},
+		{"left keeps an exact fit", padLeft("77", 2), "77"},
+		{"right pads", padRight("a", 3), "a  "},
+		{"right keeps a wide value", padRight("abc", 2), "abc"},
+		{"right keeps an exact fit", padRight("ab", 2), "ab"},
+	} {
+		if tc.got != tc.want {
+			t.Errorf("%s: got %q, want %q", tc.name, tc.got, tc.want)
+		}
+	}
+
+	row := padRow([]string{"Benchmark_A-4", "7", "1.5", "ns/op", "0", "B/op", "0", "allocs/op"}, []int{16, 4, 6, 5, 3, 4, 3, 9})
+	if want := "Benchmark_A-4     " + "   7" + "     1.5" + "  ns/op" + "    0" + "  B/op" + "  " + "  0" + "  allocs/op"; row != want {
+		t.Errorf("padRow = %q, want %q", row, want)
+	}
+}
+
+func TestReadingAMissingReadmeIsAnError(t *testing.T) {
+	missing := filepath.Join(t.TempDir(), "missing.md")
+	if _, err := readLines(missing); err == nil {
+		t.Error("readLines of a missing file succeeded")
+	}
+	if err := formatBenchmarks(missing); err == nil {
+		t.Error("formatBenchmarks of a missing file succeeded")
+	}
+	if err := updateBenchmarks(context.Background(), missing, 0); err == nil {
+		t.Error("updateBenchmarks of a missing file succeeded")
+	}
+}
+
+func TestUpdateBenchmarksRefusesABrokenFence(t *testing.T) {
+	broken := writeReadme(t, t.TempDir(), "```text\nrow\n")
+	if err := updateBenchmarks(context.Background(), broken, 0); err == nil {
+		t.Error("a README with an unclosed fence was accepted")
+	}
+}
+
+func TestUpdateBenchmarksSelectsOneTable(t *testing.T) {
+	dir := writeMiniModule(t)
+	two := "# Two tables\n\n" +
+		miniTable("// this one has no command to run") + "\n" +
+		miniTable(miniCommand)
+	readme := writeReadme(t, dir, two)
+
+	// Table 1 has nothing to re-run, so asking for it measures nothing, which is
+	// an error and not a silent success.
+	var err error
+	logged := captureStderr(t, func() { err = updateBenchmarks(context.Background(), readme, 1) })
+	if err == nil || !strings.Contains(err.Error(), "no benchmark table was refreshed") {
+		t.Fatalf("got %v, want the refusal to write an unmeasured README", err)
+	}
+	if !strings.Contains(logged, "table 1: skipped, no") {
+		t.Errorf("the reason was not logged:\n%s", logged)
+	}
+	if readFile(t, readme) != two {
+		t.Error("nothing was measured, so nothing may change")
+	}
+
+	// Table 2 is measured and table 1 is left alone.
+	logged = captureStderr(t, func() { err = updateBenchmarks(context.Background(), readme, 2) })
+	if err != nil {
+		t.Fatalf("%v\nlog:\n%s", err, logged)
+	}
+	out := readFile(t, readme)
+	if got := strings.Count(out, "777"); got != 1 {
+		t.Errorf("%d placeholder rows left, want only table 1's:\n%s", got, out)
+	}
+}
+
+func TestApplyResultsReportsWhatItCannotRefresh(t *testing.T) {
+	lines := strings.Split(strings.Join([]string{
+		"Environment:", "goos: darwin", "goarch: arm64", "pkg: m", "cpu: c", "",
+		"```text",
+		"// go test . -bench=.",
+		"Benchmark_Odd/x-12   not a row",
+		"Benchmark_Both/c-12  300  3.000  ns/op  0  B/op  0  allocs/op",
+		"```",
+	}, "\n"), "\n")
+	blocks, err := parseBlocks(lines)
+	if err != nil || len(blocks) != 1 {
+		t.Fatalf("got %d tables, %v", len(blocks), err)
+	}
+
+	logged := captureStderr(t, func() {
+		applyResults(lines, blocks[0], 1, strings.Join([]string{
+			"goos: linux", "goarch: arm64", "cpu: c2",
+			"pkg: m/one", "Benchmark_Both/c-4  1  1.000 ns/op  0 B/op  0 allocs/op",
+			"pkg: m/two", "Benchmark_Both/c-4  1  2.000 ns/op  0 B/op  0 allocs/op",
+		}, "\n"), knownRows(lines, blocks))
+	})
+	for _, want := range []string{
+		"not in a shape this tool can refresh (1): Benchmark_Odd/x-12",
+		"measured by several packages and none of them is the table's, left as they were (1): Benchmark_Both/c",
+		"0 rows refreshed",
+	} {
+		if !strings.Contains(logged, want) {
+			t.Errorf("the log lacks %q:\n%s", want, logged)
+		}
+	}
+	if out := strings.Join(lines, "\n"); !strings.Contains(out, "Benchmark_Both/c-12  300  3.000  ns/op") {
+		t.Errorf("an ambiguous row must keep its numbers:\n%s", out)
+	}
+}
+
+func TestApplyResultsTruncatesLongReports(t *testing.T) {
+	lines := strings.Split(strings.Join([]string{
+		"Environment:", "goos: darwin", "goarch: arm64", "pkg: m", "cpu: c", "",
+		"```text", "// go test . -bench=.", "```",
+	}, "\n"), "\n")
+	blocks, err := parseBlocks(lines)
+	if err != nil || len(blocks) != 1 {
+		t.Fatalf("got %d tables, %v", len(blocks), err)
+	}
+	var out []string
+	for i := range 12 {
+		out = append(out, "Benchmark_New"+string(rune('A'+i))+"-4  1  1.000 ns/op  0 B/op  0 allocs/op")
+	}
+	logged := captureStderr(t, func() {
+		applyResults(lines, blocks[0], 1, strings.Join(out, "\n"), knownRows(lines, blocks))
+	})
+	if !strings.Contains(logged, "measured but in none of the tables (12): Benchmark_NewA") ||
+		!strings.Contains(logged, "... and 2 more") || strings.Contains(logged, "Benchmark_NewL") {
+		t.Errorf("a report of twelve names must show ten and count the rest:\n%s", logged)
+	}
+}
+
+func TestApplyResultsSkipsHeaderLinesTheBlockLacks(t *testing.T) {
+	// parseBlocks never produces a table without its Environment lines, but
+	// applyResults should not trust that to index them.
+	lines := []string{"```text", "// go test .", "```"}
+	block := benchBlock{open: 0, end: 2, env: map[string]int{}}
+	captureStderr(t, func() { applyResults(lines, block, 1, "", map[string]bool{}) })
+	if strings.Join(lines, "\n") != "```text\n// go test .\n```" {
+		t.Errorf("lines changed: %q", lines)
+	}
+}
+
+func TestMedianOfEqualRuns(t *testing.T) {
+	got := median([]benchResult{{ns: 2, fields: []string{"a"}}, {ns: 2, fields: []string{"b"}}, {ns: 1, fields: []string{"c"}}})
+	if got == nil || got.ns != 2 {
+		t.Errorf("got %v, want a run of 2ns", got)
+	}
+}
+
+func TestParseBenchOutputReportsAnUnreadableTime(t *testing.T) {
+	_, results, odd := parseBenchOutput("Benchmark_X-4   1   abc ns/op   0 B/op   0 allocs/op\nBenchmark_Y-4   1   2.5 ns/op   0 B/op   0 allocs/op")
+	if len(odd) != 1 || odd[0] != "Benchmark_X-4" {
+		t.Errorf("got %v, want the unreadable row reported", odd)
+	}
+	if len(results["Benchmark_X"]) != 0 || len(results["Benchmark_Y"]) != 1 {
+		t.Errorf("got %v", results)
+	}
+}
+
+func TestParseBlocksRejectsAnUnbalancedCommand(t *testing.T) {
+	md := "Environment:\ngoos: linux\ngoarch: amd64\npkg: m\ncpu: c\n\n```text\n// go test -bench='^X\nrow\n```\n"
+	_, err := parseBlocks(strings.Split(md, "\n"))
+	if err == nil || !strings.Contains(err.Error(), "line 8") {
+		t.Errorf("got %v, want an error at the command line", err)
+	}
+}
+
+func TestReadEnvHeaderStopsAtAForeignLine(t *testing.T) {
+	// A line of prose that looks like "key: value" ends the header, so the block
+	// below it is not a table: its Environment lines are above the prose.
+	md := "Environment:\ngoos: linux\ngoarch: amd64\npkg: m\ncpu: c\nNote: measured on a laptop\n```text\n// go test .\n```\n"
+	blocks, err := parseBlocks(strings.Split(md, "\n"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(blocks) != 0 {
+		t.Errorf("got %d tables, want none", len(blocks))
 	}
 }

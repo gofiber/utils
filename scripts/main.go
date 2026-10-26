@@ -22,14 +22,19 @@ const usage = `usage: go run ./scripts [-update] [-block N]
 
 var errHelp = errors.New("help requested")
 
+// exit is how main ends with a failure. It is os.Exit; a test replaces it to
+// see the status without ending the test binary.
+var exit = os.Exit
+
 func main() {
-	if err := run(os.Args[1:]); err != nil {
+	if err := run(os.Args[1:], readmePath); err != nil {
 		_, _ = fmt.Fprintln(os.Stderr, err) //nolint:errcheck // printing error only
-		os.Exit(1)
+		exit(1)
 	}
 }
 
-func run(args []string) error {
+// run does what the command line asks to the README at readme.
+func run(args []string, readme string) error {
 	update, block, err := parseFlags(args)
 	switch {
 	case errors.Is(err, errHelp):
@@ -43,12 +48,12 @@ func run(args []string) error {
 		// A Ctrl-C during a 15 minute measurement should take the go test child with it.
 		ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
 		defer stop()
-		if err := updateBenchmarks(ctx, readmePath, block); err != nil {
+		if err := updateBenchmarks(ctx, readme, block); err != nil {
 			return err
 		}
 	}
 
-	return formatBenchmarks(readmePath)
+	return formatBenchmarks(readme)
 }
 
 // Parsed by hand: the repo's depguard rules deny the flag package.

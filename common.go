@@ -25,11 +25,21 @@ const (
 )
 
 func readRandomOrPanic(dst []byte) {
-	if _, err := rand.Read(dst); err != nil {
-		// On supported Go versions (1.24+), crypto/rand.Read panics internally and
-		// does not return errors. This check preserves explicit panic semantics if
-		// the behavior changes or an alternate implementation is used in the future.
-		// See: https://cs.opensource.google/go/go/+/refs/tags/go1.24.0:src/crypto/rand/rand.go
+	checkRandomRead(rand.Read(dst))
+}
+
+// checkRandomRead panics if reading random bytes failed.
+//
+// On supported Go versions (1.24+), crypto/rand.Read ends the program itself
+// and does not return errors. This check preserves explicit panic semantics if
+// the behavior changes or an alternate implementation is used in the future.
+// See: https://cs.opensource.google/go/go/+/refs/tags/go1.24.0:src/crypto/rand/rand.go
+//
+// It takes the results of the read so that this failure path can be tested
+// without a seam around the read itself: calling the read through a variable
+// would move the token buffers of GenerateSecureToken to the heap.
+func checkRandomRead(_ int, err error) {
+	if err != nil {
 		panic(fmt.Errorf("utils: failed to read random bytes for token: %w", err))
 	}
 }

@@ -159,6 +159,17 @@ func Test_IsIPv6_EdgeCases(t *testing.T) {
 	// IPv4 part would exceed length
 	require.False(t, IsIPv6("1:2:3:4:5:6:7:1.2.3.4"))
 
+	// With an ellipsis the IPv4 part is not rejected for its position, only for
+	// the room it needs: seven groups leave two bytes where it takes four.
+	for _, in := range []string{
+		"::2:3:4:5:6:7:8:1.2.3.4",
+		"1::3:4:5:6:7:8:1.2.3.4",
+		"1:2:3:4:5:6:7::1.2.3.4",
+	} {
+		require.False(t, IsIPv6(in), in)
+		require.Nil(t, net.ParseIP(in), in)
+	}
+
 	// ellipsis present but no zero group
 	require.False(t, IsIPv6("1::2:3:4:5:6:7:8"))
 }

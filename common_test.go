@@ -5,16 +5,21 @@
 package utils
 
 import (
+	"errors"
 	"math"
 	"math/big"
 	"math/rand/v2"
 	"net"
 	"os"
+	"reflect"
 	"regexp"
+	"runtime"
 	"strconv"
 	"strings"
 	"testing"
+	"unsafe"
 
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
 )
 
@@ -51,6 +56,29 @@ func Test_FunctionName(t *testing.T) {
 	var s sampleStruct
 	require.Equal(t, "utils.sampleStruct", FunctionName(s))
 	require.Equal(t, "*utils.sampleStruct", FunctionName(&s))
+
+	// methods report the function that implements them, both as a bound value
+	// and as an expression
+	require.Contains(t, FunctionName(failingReader{}.Read), "failingReader.Read")
+	require.Contains(t, FunctionName(failingReader.Read), "failingReader.Read")
+
+	// FuncForPC knows the same name
+	pc := reflect.ValueOf(Test_FunctionName).Pointer()
+	require.Equal(t, runtime.FuncForPC(pc).Name(), FunctionName(Test_FunctionName))
+}
+
+// Test_FunctionName_UnknownCode builds a function value whose code address
+// belongs to no function, which the runtime cannot name: a func value is a
+// pointer to a closure object whose first word is the code address, so a
+// closure object holding a bogus one is such a value.
+func Test_FunctionName_UnknownCode(t *testing.T) {
+	t.Parallel()
+	type closure struct{ code uintptr }
+	bogus := &closure{code: 1} // no function starts at, or contains, address 1
+	// #nosec G103
+	fn := *(*func())(unsafe.Pointer(&bogus))
+	require.NotNil(t, fn)
+	require.Empty(t, FunctionName(fn))
 }
 
 func Test_UUIDv4(t *testing.T) {
@@ -59,6 +87,74 @@ func Test_UUIDv4(t *testing.T) {
 	require.Len(t, res, 36)
 	require.NotEqual(t, "00000000-0000-0000-0000-000000000000", res)
 	require.Regexp(t, `^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$`, res)
+}
+
+func Test_UUID(t *testing.T) {
+	t.Parallel()
+	// UUID is UUIDv4 under its old name: a random version 4, variant 10 UUID in
+	// the canonical lower-case text form, as the uuid package itself reads it.
+	seen := make(map[string]struct{})
+	for range 64 {
+		res := UUID()
+		parsed, err := uuid.Parse(res)
+		require.NoError(t, err)
+		require.Equal(t, res, parsed.String())
+		require.Equal(t, uuid.Version(4), parsed.Version())
+		require.Equal(t, uuid.RFC4122, parsed.Variant())
+		seen[res] = struct{}{}
+	}
+	require.Len(t, seen, 64)
+}
+
+// failingReader is a source of randomness that has run dry.
+type failingReader struct{ err error }
+
+func (r failingReader) Read([]byte) (int, error) { return 0, r.err }
+
+// Test_UUIDv4_RandomFailure is not parallel on purpose: it swaps the random
+// source of the uuid package, and only a test that runs while no parallel test
+// does may.
+func Test_UUIDv4_RandomFailure(t *testing.T) {
+	errDry := errors.New("entropy exhausted")
+	uuid.SetRand(failingReader{err: errDry})
+	t.Cleanup(func() { uuid.SetRand(nil) })
+
+	var recovered any
+	func() {
+		defer func() { recovered = recover() }()
+		UUIDv4()
+	}()
+	err, ok := recovered.(error)
+	require.True(t, ok, "UUIDv4 panicked with %v, want an error", recovered)
+	require.ErrorIs(t, err, errDry)
+	require.EqualError(t, err, "utils: failed to generate secure UUID: entropy exhausted")
+	require.PanicsWithError(t, "utils: failed to generate secure UUID: entropy exhausted", func() { UUID() })
+
+	// Restoring the default source restores the function.
+	uuid.SetRand(nil)
+	require.Len(t, UUIDv4(), 36)
+}
+
+func Test_checkRandomRead(t *testing.T) {
+	t.Parallel()
+	require.NotPanics(t, func() { checkRandomRead(32, nil) })
+
+	errDry := errors.New("entropy exhausted")
+	var recovered any
+	func() {
+		defer func() { recovered = recover() }()
+		checkRandomRead(0, errDry)
+	}()
+	err, ok := recovered.(error)
+	require.True(t, ok, "checkRandomRead panicked with %v, want an error", recovered)
+	require.ErrorIs(t, err, errDry)
+	require.EqualError(t, err, "utils: failed to read random bytes for token: entropy exhausted")
+
+	// The reads GenerateSecureToken makes go through the check and succeed.
+	require.NotPanics(t, func() {
+		readRandomOrPanic(make([]byte, 16))
+		readRandomOrPanic(nil)
+	})
 }
 
 func Test_UUIDv4_Concurrency(t *testing.T) {
