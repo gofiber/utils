@@ -149,6 +149,25 @@ func Test_StopTimeStampUpdater(t *testing.T) {
 	require.Equal(t, uint32(testEpoch.Unix()), Timestamp(), "the timestamp must not move after Stop")
 }
 
+// Test_Timestamp_BeforeStart pins what Timestamp's doc comment says of a program
+// that has not started the updater: nothing is published yet, so the answer is 0
+// and not the time, however far the clock has moved. Reading the clock instead
+// would put a branch on the one-load path that the package benchmark measures.
+func Test_Timestamp_BeforeStart(t *testing.T) {
+	fc, done := withFakeClock(t, testEpoch)
+	defer done()
+
+	// A pristine process: nothing has been published yet.
+	timestamp.Store(0)
+	defer timestamp.Store(0)
+
+	fc.set(testEpoch.Add(time.Hour))
+	require.Zero(t, Timestamp(), "Timestamp must not publish anything itself")
+
+	StartTimeStampUpdater()
+	require.Equal(t, uint32(testEpoch.Unix())+3600, Timestamp(), "Start publishes before it returns")
+}
+
 func Test_StartStopRepeat(t *testing.T) {
 	fc, done := withFakeClock(t, testEpoch)
 	defer done()

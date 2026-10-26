@@ -29,8 +29,13 @@ var (
 	}
 )
 
-// Timestamp returns the current cached Unix timestamp (seconds).
-// Call StartTimeStampUpdater() once at app startup for best performance.
+// Timestamp returns the Unix timestamp (seconds) that the updater published last:
+// the current time to within about a second, for the price of one atomic load.
+//
+// Nothing is published before StartTimeStampUpdater has run, so until then the
+// result is 0, not the time. Call StartTimeStampUpdater() once at app startup,
+// before the first call. After StopTimeStampUpdater the last published value stays
+// in place and no longer advances.
 func Timestamp() uint32 {
 	return timestamp.Load()
 }
