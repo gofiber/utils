@@ -8,8 +8,16 @@ import (
 )
 
 // SplitTrimSeq iterates over the sep-separated elements of s with ASCII
-// whitespace trimmed and empty elements skipped, as HTTP list fields are read
-// (RFC 9110 Section 5.6.1); the elements alias s.
+// whitespace trimmed and empty elements skipped, as HTTP list fields such as
+// Accept-Encoding, Connection and Vary are read (RFC 9110 Section 5.6.1); the
+// elements alias s.
+//
+// Whitespace is what TrimSpace trims: space, tab, CR, LF, VT and FF, a little
+// more than the RFC's optional whitespace (space and tab). Quoted strings are
+// not interpreted, so a sep inside one still separates. That is wrong for a
+// field whose elements can hold a quoted list, such as
+// Cache-Control: no-cache="Set-Cookie, Set-Cookie2", which needs a reader that
+// honors the quotes.
 func SplitTrimSeq[S byteSeq](s S, sep byte) iter.Seq[S] {
 	return func(yield func(S) bool) {
 		rest := s // traversal state stays local, so the sequence can be ranged over again

@@ -32,7 +32,10 @@ import (
 // not follow. A link to a directory is walked as that directory, and a link to one of its
 // own ancestors repeats the tree below it until the operating system refuses the path
 // (ELOOP); with several such links that takes practically forever. To stop it, return
-// filepath.SkipDir for the link. fs and walkFn must not be nil.
+// filepath.SkipDir for the link. Opening each entry also means that a named pipe or
+// another special file can block the walk until the system lets the open return. fs and
+// walkFn must not be nil, and a file whose Stat returns neither a FileInfo nor an error
+// panics the walk.
 func Walk(fs http.FileSystem, root string, walkFn filepath.WalkFunc) error {
 	info, err := stat(fs, root)
 	if err != nil {

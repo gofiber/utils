@@ -496,7 +496,8 @@ without first lower-casing a copy of it. It folds each word with
 multiply: keys under eight bytes, as most are, pack into one word and
 cost one multiply, with the length in the multiplier so that keys which
 pack alike, such as `a` and `aa`, stay apart; longer keys take one
-multiply per sixteen bytes plus a final one. It takes no seed and is no
+multiply for each sixteen bytes before the last sixteen, and two more to
+finish. It takes no seed and is no
 defense against collisions planned in advance, so it suits keys of the
 program's own, such as the fields of a struct, rather than keys an
 attacker picks. Against `maphash.String` of a `strings.ToLower` copy,
@@ -522,8 +523,10 @@ written into the fixed-width template with two-digit table lookups.
 strict scalar fast path whose validated fields feed `time.Unix` directly
 — the same `Time` value `time.Date` builds, minus its normalization pass —
 and everything else — the obsolete RFC 850 and asctime forms, unusual
-casing, non-GMT zone names, padding — falls back to `time.Parse` with
-`net/http.ParseTime` semantics, including its errors. Both directions are
+casing, non-GMT zone names, padding — falls back to `time.Parse` on the
+text with the space, tab, CR, and LF around it trimmed (unlike
+`net/http.ParseTime`, which does not trim), keeping its results and
+its errors. Both directions are
 pinned to the `time` package by a day-by-day sweep over the years
 0..9999. `Date`, `Last-Modified`, and `If-Modified-Since` handling sit on
 every request/response, which makes these the highest-leverage helpers in
@@ -629,9 +632,11 @@ which no longer needs a string conversion first.
 `SplitTrimSeq` returns an iterator over the elements of a list separated
 by one byte, with ASCII whitespace trimmed from each element and empty
 elements skipped — how HTTP list fields such as `Accept-Encoding`,
-`Connection`, `Vary`, and `Cache-Control` are read (RFC 9110 Section
-5.6.1: optional whitespace around the commas, empty elements ignored).
-It replaces the `strings.SplitSeq` + `TrimSpace` + emptiness-check
+`Connection`, and `Vary` are read (RFC 9110 Section 5.6.1: optional
+whitespace around the commas, empty elements ignored). Quoted strings are
+not interpreted, so a field whose elements can hold a quoted comma, such as
+`Cache-Control: no-cache="Set-Cookie, Set-Cookie2"`, needs a reader that
+honors the quotes. It replaces the `strings.SplitSeq` + `TrimSpace` + emptiness-check
 triplet, locates each separator with a single `IndexByte`, works on
 strings and byte slices alike, and yields subslices without copying. In
 an ordinary caller the iterator inlines and allocates nothing, like
@@ -815,7 +820,10 @@ Benchmark_AppendPathUnescape/escaped-31B/default-4                  25162122    
 
 `ParseFloat64` and `ParseFloat32` return the float `strconv.ParseFloat`
 returns, bit for bit, for an optional sign, digits with an optional point and
-an optional exponent, in strings or byte slices. The spellings strconv adds
+an optional exponent, in strings or byte slices, wherever strconv reads the
+number right: with more than 800 digits ahead of the point it keeps 800 and
+places the point by that many (`"2"` and 800 zeros with `E-800` gives 0.2), and
+these functions return the correctly rounded float instead. The spellings strconv adds
 (`inf`, `nan`, hexadecimal floats, underscores) are syntax errors, and a value
 too large for the type is a range error; every error comes with a zero
 result, where strconv returns ±Inf for a range error. A mantissa up to 2^53
@@ -836,11 +844,12 @@ slower on the numbers handed over to it, whose digits are read twice.
 ## Size strings
 
 `ConvertToBytes` turns `42`, `42kb`, `1.5GiB` or `130.51MB` into a byte
-count: decimal units are powers of 1000, units with an `i` are powers of
-1024, and the result saturates at `math.MaxInt`. The number may have a
-`+`, a point and an exponent (`+2.01k`, `1.5e3K`), with any number of
-digits, and is scaled with 128-bit integer arithmetic, so the result is the
-exact product rounded down (`65.35KB` is 65350) and never passes through a
+count: decimal units are powers of 1000, units with an `i` right after the
+letter (`Ki`, `KiB`, `kibibytes`) are powers of 1024, but not the `i` of
+`kilobytes` or `gigabytes`, and the result saturates at `math.MaxInt`. The
+number may have a `+`, a point and an exponent (`+2.01k`, `1.5e3K`), with
+any number of digits, and is scaled with 128-bit integer arithmetic, so the
+result is the exact product rounded down (`65.35KB` is 65350) and never passes through a
 `float64`. A number with more digits than a `uint64` holds is scaled from its
 first digits when they and the same digits plus one agree, and otherwise
 (`0.000000000931322574615478515625Gi` is exactly one byte) from all of them.
@@ -883,9 +892,9 @@ it is deliberately not part of the catalog above.
 The [`simd`](simd/) package is the vector-width counterpart to `swar`: byte
 searching and validation whose scan kernels dispatch to AVX2 assembly (four
 32-byte vectors per iteration) on amd64 CPUs for inputs of `simd.MinLen`
-(32) bytes or more, and fall back to portable loops built on the `swar`
-primitives everywhere else, so it builds and behaves identically on every
-platform.
+(32) bytes or more (`MemchrPair`: 32 bytes past its offset), and fall back
+to portable loops built on the `swar` primitives everywhere else, so it
+builds and behaves identically on every platform.
 `simd.Accelerated()` reports which mode is active. CPU capability detection
 uses [`golang.org/x/sys/cpu`](https://pkg.go.dev/golang.org/x/sys/cpu),
 which also verifies OS support for saving the vector register state.
