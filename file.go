@@ -27,6 +27,12 @@ import (
 // every entry as well. A directory that cannot be opened is therefore reported
 // with a nil FileInfo, and one holding an entry that cannot be statted with
 // the error of its listing, where filepath.Walk would report each entry.
+//
+// Without Lstat, Walk also follows symbolic links, which filepath.Walk reports but does
+// not follow. A link to a directory is walked as that directory, and a link to one of its
+// own ancestors repeats the tree below it until the operating system refuses the path
+// (ELOOP); with several such links that takes practically forever. To stop it, return
+// filepath.SkipDir for the link. fs and walkFn must not be nil.
 func Walk(fs http.FileSystem, root string, walkFn filepath.WalkFunc) error {
 	info, err := stat(fs, root)
 	if err != nil {

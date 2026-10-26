@@ -22,18 +22,23 @@ func UnsafeString(b []byte) string {
 }
 
 // UnsafeBytes returns a byte pointer without allocation.
+// The slice shares the memory of s and must only be read: a string is immutable, and one
+// that is a literal lives in read-only memory, where a write is a fatal fault.
 func UnsafeBytes(s string) []byte {
 	return unsafeconv.UnsafeBytes(s)
 }
 
-// CopyString copies a string to make it immutable
+// CopyString returns a copy of s in memory of its own. The copy stays as it was when s is a
+// view of a buffer that is reused or modified later, such as one made with UnsafeString.
 func CopyString(s string) string {
 	// #nosec G103
 	return string(UnsafeBytes(s))
 }
 
 // #nosec G103
-// CopyBytes copies a slice to make it immutable
+// CopyBytes returns a copy of b in memory of its own, with capacity equal to its length:
+// writes to either slice no longer reach the other. The copy of a nil or empty b is a
+// non-nil empty slice.
 func CopyBytes(b []byte) []byte {
 	tmp := make([]byte, len(b))
 	copy(tmp, b)
