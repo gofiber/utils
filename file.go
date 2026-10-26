@@ -1,7 +1,6 @@
 package utils
 
 import (
-	"errors"
 	"io"
 	"net/http"
 	"os"
@@ -14,12 +13,31 @@ import (
 // directory in the filesystem, including root. All errors that arise visiting files
 // and directories are filtered by walkFn. The files are walked in lexical
 // order.
+//
+// Walk follows path/filepath.Walk step for step, on an http.FileSystem: walkFn
+// is called once for a directory, with the error from reading it if there was
+// one; returning filepath.SkipDir skips the directory (the parent directory of
+// a file) and filepath.SkipAll ends the walk, neither being reported as an
+// error; any other error ends the walk and is returned. As in filepath.Walk,
+// the two sentinels must be returned as they are: a wrapped one is an ordinary
+// error.
+//
+// An http.FileSystem has no Lstat, and its files no Readdirnames, so an entry
+// is statted by opening it and a directory is listed with Readdir, which stats
+// every entry as well. A directory that cannot be opened is therefore reported
+// with a nil FileInfo, and one holding an entry that cannot be statted with
+// the error of its listing, where filepath.Walk would report each entry.
 func Walk(fs http.FileSystem, root string, walkFn filepath.WalkFunc) error {
 	info, err := stat(fs, root)
 	if err != nil {
-		return walkFn(root, nil, err)
+		err = walkFn(root, nil, err)
+	} else {
+		err = walkInternal(fs, root, info, walkFn)
 	}
-	return walkInternal(fs, root, info, walkFn)
+	if err == filepath.SkipDir || err == filepath.SkipAll { //nolint:errorlint,err113 // filepath.Walk compares the sentinels exactly
+		return nil
+	}
+	return err
 }
 
 // ReadFile returns the raw content of a file
@@ -50,36 +68,38 @@ func readDirNames(fs http.FileSystem, dirname string) ([]string, error) {
 	return names, nil
 }
 
-// walkInternal recursively descends path, calling walkFn.
+// walkInternal recursively descends path, calling walkFn. It is path/filepath's
+// walk: it hands filepath.SkipDir and filepath.SkipAll back to the caller, except
+// that a directory's own SkipDir ends there, as Walk would have it end.
 func walkInternal(fs http.FileSystem, path string, info os.FileInfo, walkFn filepath.WalkFunc) error {
-	err := walkFn(path, info, nil)
-	if err != nil {
-		if info.IsDir() && errors.Is(err, filepath.SkipDir) {
+	if !info.IsDir() {
+		return walkFn(path, info, nil)
+	}
+
+	// The directory is read before walkFn sees it, so that a failure to read it
+	// is reported by that one call.
+	names, err := readDirNames(fs, path)
+	err1 := walkFn(path, info, err)
+	// If err != nil the directory cannot be walked into; if err1 != nil walkFn
+	// wants to skip it or to stop. Either way what walkFn returned goes up.
+	if err != nil || err1 != nil {
+		if err1 == filepath.SkipDir { //nolint:errorlint,err113 // filepath.Walk compares the sentinels exactly
 			return nil
 		}
-		return err
-	}
-
-	if !info.IsDir() {
-		return nil
-	}
-
-	names, err := readDirNames(fs, path)
-	if err != nil {
-		return walkFn(path, info, err)
+		return err1
 	}
 
 	for _, name := range names {
 		filename := pathpkg.Join(path, name)
 		fileInfo, err := stat(fs, filename)
 		if err != nil {
-			if err := walkFn(filename, fileInfo, err); err != nil && !errors.Is(err, filepath.SkipDir) {
+			if err := walkFn(filename, fileInfo, err); err != nil && err != filepath.SkipDir { //nolint:errorlint,err113 // filepath.Walk compares the sentinels exactly
 				return err
 			}
 		} else {
 			err = walkInternal(fs, filename, fileInfo, walkFn)
 			if err != nil {
-				if !fileInfo.IsDir() || !errors.Is(err, filepath.SkipDir) {
+				if !fileInfo.IsDir() || err != filepath.SkipDir { //nolint:errorlint,err113 // filepath.Walk compares the sentinels exactly
 					return err
 				}
 			}
