@@ -15,9 +15,8 @@ var (
 	buf  []byte
 )
 
-// Get returns the one slice of math.MaxInt32 zero bytes of the test binary, or skips the test unless
-// GOFIBER_TEST_HUGE_SLICES is set: it takes 2 GiB of address space. It is never written, so its
-// pages stay the shared zero page.
+// Get returns the test binary's one slice of math.MaxInt32 zero bytes, or skips the test unless
+// GOFIBER_TEST_HUGE_SLICES is set: it takes 2 GiB of address space. It must not be written.
 func Get(t testing.TB) []byte {
 	t.Helper()
 	if os.Getenv("GOFIBER_TEST_HUGE_SLICES") == "" {

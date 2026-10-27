@@ -26,11 +26,10 @@ func buildJSONSafeTable() [256]bool {
 	return t
 }
 
-// AppendJSONString appends s to dst as a double-quoted JSON string and returns the
-// extended slice. '<', '>' and '&' become \u00XX, U+2028 and U+2029 are escaped, and each
-// invalid UTF-8 byte becomes the six characters \ufffd. That is byte-identical to
-// json.Marshal of s through Go 1.26; from Go 1.27 Marshal writes a raw U+FFFD for an invalid
-// byte instead, and both decode to the same string. dst must not alias s.
+// AppendJSONString appends s to dst as a double-quoted JSON string. '<', '>' and '&' become
+// \u00XX, U+2028 and U+2029 are escaped, and each invalid UTF-8 byte becomes the six characters
+// \ufffd. That is byte-identical to json.Marshal of s through Go 1.26; from Go 1.27 Marshal writes
+// a raw U+FFFD for an invalid byte instead, and both decode to the same string. dst must not alias s.
 func AppendJSONString[S byteSeq](dst []byte, s S) []byte {
 	bs := unsafeconv.Bytes(s)
 	n := len(bs)

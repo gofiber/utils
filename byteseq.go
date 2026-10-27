@@ -85,7 +85,6 @@ func HashFold[S byteSeq](s S) uint64 {
 	return hashFoldMix(lo^hashFoldK0^uint64(n), hi^hashFoldK1)
 }
 
-// The constants of HashFold, wyhash's.
 const (
 	hashFoldK0 uint64 = 0xa0761d6478bd642f
 	hashFoldK1 uint64 = 0xe7037ed1a0b428db

@@ -132,8 +132,8 @@ func IndexFold[S byteSeq](s S, needle string) int {
 			bc2 = swar.Broadcast(first - 0x20)
 		}
 
-		// The folded needle is built on the first candidate: eagerly it costs +44% on 8-byte misses and
-		// +13% to +17% on 32-64B misses (benchstat -count=10, Go 1.25, Apple M2 Pro).
+		// Built on the first candidate: eagerly it costs +44% on 8-byte and +13% to +17% on 32-64B
+		// misses (benchstat -count=10, Go 1.25, Apple M2 Pro).
 		var fn foldedNeedle
 		built := false
 
@@ -275,8 +275,8 @@ const (
 	primeRK = 16777619
 )
 
-// indexFoldRK searches s[from:] for a needle of 9 bytes or more by Rabin-Karp over the lower-cased
-// bytes, verifying each hash match; -1 if no start remains.
+// indexFoldRK is Rabin-Karp over the lower-cased bytes of s[from:] for a needle of 9 bytes or more;
+// -1 if no start remains.
 func indexFoldRK[S byteSeq](s S, from int, needle string) int {
 	k := len(needle)
 	last := len(s) - k
@@ -306,8 +306,8 @@ func ContainsFold[S byteSeq](s S, needle string) bool {
 	return IndexFold(s, needle) >= 0
 }
 
-// HasPrefixFold reports whether s begins with prefix, ASCII case-insensitively
-// (only 'A'..'Z' and 'a'..'z' fold). An empty prefix matches any s.
+// HasPrefixFold reports whether s begins with prefix, ASCII case-insensitively. An empty prefix
+// matches any s.
 func HasPrefixFold[S byteSeq](s S, prefix string) bool {
 	k := len(prefix)
 	if len(s) < k {

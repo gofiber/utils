@@ -238,7 +238,7 @@ func toStringReflect(arg any, timeFormat []string) string {
 }
 
 // endlessPointerType reports whether pointer type t leads only to pointers, as in type T *T,
-// which would make ToString overflow the stack. It is Floyd's cycle search on the Elem chain.
+// which would make ToString overflow the stack.
 func endlessPointerType(t reflect.Type) bool {
 	slow := t
 	for {

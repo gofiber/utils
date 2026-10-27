@@ -71,9 +71,8 @@ func putPair(b []byte, i int, n uint64) {
 	b[i+1] = decimalPairs[2*n+1]
 }
 
-// AppendHTTPDate appends t to dst in the RFC 9110 HTTP date format and returns
-// the extended slice, byte-identical to t.UTC().AppendFormat(dst, http.TimeFormat)
-// and always 29 bytes for the years 0..9999.
+// AppendHTTPDate appends t to dst in the RFC 9110 HTTP date format, byte-identical to
+// t.UTC().AppendFormat(dst, http.TimeFormat) and always 29 bytes for the years 0..9999.
 func AppendHTTPDate(dst []byte, t time.Time) []byte {
 	sec := t.Unix()
 	if sec < httpDateMinUnix || sec > httpDateMaxUnix {

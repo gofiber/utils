@@ -10,7 +10,6 @@ import (
 
 // ParseIPv4 parses a dotted-decimal IPv4 address into a netip.Addr, accepting exactly the IPv4
 // strings netip.ParseAddr does and reporting ok=false for everything else. It never allocates.
-// IsIPv4 is the validate-only counterpart.
 func ParseIPv4[S byteSeq](s S) (netip.Addr, bool) {
 	var b [4]byte
 	n := len(s)

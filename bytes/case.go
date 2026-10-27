@@ -8,8 +8,8 @@ import (
 // measured +47%/+43% on unchanged three-byte input and +65%/+60% for the in-place forms
 // (benchstat n=15, Go 1.26, linux/amd64).
 
-// ToLower returns an ASCII lower-cased copy of b, or b itself, not a copy, if it has no upper-case
-// letter: a write to the result then writes to b, unlike with bytes.ToLower, which always copies.
+// ToLower returns an ASCII lower-cased copy of b, or b itself if it has no upper-case letter: a
+// write to the result then writes to b, unlike with bytes.ToLower, which always copies.
 func ToLower(b []byte) []byte {
 	n := len(b)
 	if n < caseconv.WordLen {
@@ -37,8 +37,8 @@ func ToLower(b []byte) []byte {
 	return caseconv.ToLowerFrom(b, i)
 }
 
-// ToUpper returns an ASCII upper-cased copy of b, or b itself, not a copy, if it has no lower-case
-// letter: a write to the result then writes to b, unlike with bytes.ToUpper, which always copies.
+// ToUpper returns an ASCII upper-cased copy of b, or b itself if it has no lower-case letter: a
+// write to the result then writes to b, unlike with bytes.ToUpper, which always copies.
 func ToUpper(b []byte) []byte {
 	n := len(b)
 	if n < caseconv.WordLen {

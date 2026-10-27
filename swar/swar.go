@@ -75,7 +75,7 @@ func ToUpperWord(w uint64) uint64 {
 	return w &^ (MatchRangeMask(w, 'a', 'z') >> 2)
 }
 
-// ZeroLanes returns a mask flagging the zero-byte lanes of x; it is two ops cheaper
+// ZeroLanes returns a mask flagging the zero-byte lanes of x; two ops cheaper
 // than MatchByteMask for first-match scans: ZeroLanes(w ^ Broadcast(c)). The
 // mask is zero iff x has no zero byte, every true zero lane is flagged (so OR
 // or AND combinations of masks never lose a match), and the lowest set lane is

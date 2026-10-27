@@ -60,7 +60,7 @@ func IsASCII[S byteSeq](s S) bool {
 // IndexNonQuotable returns the index of the first byte of s that cannot appear
 // verbatim inside an RFC 9110 quoted-string, or -1 if every byte is quotable.
 // Those are backslash, double quote, DEL, and controls below 0x20 except HTAB;
-// HTAB and bytes >= 0x80 are quotable.
+// bytes >= 0x80 are quotable.
 func IndexNonQuotable[S byteSeq](s S) int {
 	n := len(s)
 	i := 0
