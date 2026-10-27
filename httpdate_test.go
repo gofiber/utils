@@ -189,7 +189,7 @@ func Test_HTTPDate_DaySweep(t *testing.T) {
 		if err != nil {
 			t.Fatalf("day %d: parse %q: %v", day, got, err)
 		}
-		if parsed != tm.UTC() { //nolint:revive // the exact Time value (not just the instant) is what is being pinned
+		if !parsed.Equal(tm) || parsed.Location() != time.UTC {
 			t.Fatalf("day %d: parsed %q to %v (%#v), want %v (%#v)", day, got, parsed, parsed, tm.UTC(), tm.UTC())
 		}
 	}
