@@ -493,9 +493,10 @@ for a needle of nine bytes or more, once the candidates that fail their
 verification have cost more than a fixed share of the bytes scanned, a
 Rabin-Karp search over the folded bytes finishes the job, as in
 `strings.Index`. A 1 MiB haystack of `a` searched for `AAAA...b` (63
-`A`s) takes 1.7 ms where the candidate-by-candidate check took 20.8 ms;
+`A`s) takes 1.7 ms where the candidate-by-candidate check took 21 ms;
 benchstat over ten runs on an Intel Xeon @ 2.30GHz, and the ordinary rows
-are unchanged within noise. `Benchmark_IndexFold/adversarial-*` reproduces it.
+stay within 5% of what they were. `Benchmark_IndexFold/adversarial-*`
+reproduces it.
 
 `HashFold` is the hashing half of a case-insensitive lookup table whose
 other half is `EqualFold`: strings `EqualFold` reports equal hash equal,
