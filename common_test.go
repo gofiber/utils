@@ -679,6 +679,144 @@ func FuzzConvertToBytes(f *testing.F) {
 	})
 }
 
+// parseBytesShape is ParseBytes' grammar as a regexp: a number, blanks, and a unit if any. ASCII
+// classes, not (?i), which would fold the Kelvin sign into k.
+var parseBytesShape = regexp.MustCompile(`^\+?(\d+\.?\d*|\.\d+)([eE][+-]?\d+)?[ \t]*([bB]|[kKmMgGtTpP][iI]?[bB]?|[eE](?:[iI][bB]?|[bB]))?$`)
+
+// requireNumError requires err to be the *strconv.NumError ParseBytes gives for in.
+func requireNumError(tb testing.TB, err, want error, in string) {
+	tb.Helper()
+	var ne *strconv.NumError
+	require.ErrorAs(tb, err, &ne, in)
+	require.Equal(tb, "ParseBytes", ne.Func, in)
+	require.Equal(tb, in, ne.Num, in)
+	require.ErrorIs(tb, err, want, in)
+}
+
+func Test_ParseBytes(t *testing.T) {
+	t.Parallel()
+	for in, want := range map[string]int64{
+		"0": 0, "42": 42, "+42": 42, "42b": 42, "42 B": 42, "42\tb": 42, "0.5": 0,
+		"42k": 42000, "42KB": 42000, "42 kb": 42000, "42Ki": 42 << 10, "42KiB": 42 << 10, "42kib": 42 << 10,
+		"1.5M": 1500000, ".5k": 500, "5.k": 5000, "1e3": 1000, "1.5e3K": 1500000, "1e3 B": 1000,
+		"1MiB": 1 << 20, "1GB": 1e9, "1Gi": 1 << 30, "1TB": 1e12, "1PiB": 1 << 50,
+		"1EB": 1e18, "1Eb": 1e18, "1Ei": 1 << 60, "1EiB": 1 << 60, "9EB": 9e18,
+		strconv.Itoa(math.MaxInt - 1): int64(math.MaxInt - 1),
+	} {
+		got, err := ParseBytes(in)
+		if want >= math.MaxInt { // a 32-bit int cannot hold it
+			require.Zero(t, got, in)
+			requireNumError(t, err, strconv.ErrRange, in)
+			continue
+		}
+		require.NoError(t, err, in)
+		require.Equal(t, int(want), got, in)
+	}
+
+	// Where ConvertToBytes guesses, ParseBytes fails: no number, a sign, text after the unit,
+	// a unit that is not listed, a bare E, which is an exponent marker.
+	for _, in := range []string{
+		"", " ", "k", "KB", "-5", "-5k", "+-5", "5 X", "5kilobytes", "5 kb extra", "5k ", " 5k", "5kbb", "5kbi",
+		"5ki b", "5 kB!", "5e", "5E", "5e+", "5e-", "5 e", "5eg", "5ex", "5bi", "5bb", "1.2.3", "1..2", ".", "+.",
+		"5,000", "0x10", "5\n", "5k\n", "1_000", "\u0663kb", "5kb\x00", "5 kib b", strings.Repeat("9", 40) + "x",
+	} {
+		got, err := ParseBytes(in)
+		require.Zero(t, got, in)
+		requireNumError(t, err, strconv.ErrSyntax, in)
+	}
+
+	// MaxInt itself is out of range, as ConvertToBytes saturates there.
+	for _, in := range []string{strconv.Itoa(math.MaxInt), "99999999999999999999999", "10EB", "9.3EB", "8EiB", "1e30"} {
+		got, err := ParseBytes(in)
+		require.Zero(t, got, in)
+		requireNumError(t, err, strconv.ErrRange, in)
+	}
+}
+
+// Test_ParseBytes_AgreesWithConvertToBytes: whatever ParseBytes accepts, ConvertToBytes has scaled,
+// so the two must agree on every spelling of every unit, in both cases.
+func Test_ParseBytes_AgreesWithConvertToBytes(t *testing.T) {
+	t.Parallel()
+	units := []string{
+		"", "b", "k", "kb", "ki", "kib", "m", "mb", "mi", "mib", "g", "gb", "gi", "gib",
+		"t", "tb", "ti", "tib", "p", "pb", "pi", "pib", "eb", "ei", "eib",
+	}
+	for _, num := range []string{"0", "1", "42", "+7", "1.5", ".5", "5.", "0.0009", "1e3", "1.5e3", "12345678901234567890", "99999999999999999999"} {
+		for _, gap := range []string{"", " ", "\t", "  "} {
+			for _, unit := range units {
+				for _, in := range []string{num + gap + unit, num + gap + strings.ToUpper(unit)} {
+					want := ConvertToBytes(in)
+					got, err := ParseBytes(in)
+					if want == math.MaxInt {
+						requireNumError(t, err, strconv.ErrRange, in)
+						continue
+					}
+					require.NoError(t, err, in)
+					require.Equal(t, want, got, in)
+				}
+			}
+		}
+	}
+}
+
+// Test_ParseBytes_Grammar holds validSize to the regexp over random strings from the bytes that
+// make the grammar, and over single-byte edits of valid sizes.
+func Test_ParseBytes_Grammar(t *testing.T) {
+	t.Parallel()
+	r := rand.New(rand.NewPCG(3, 9)) //nolint:gosec // deterministic test data
+	const alphabet = "0123456789.+-eE \tbBkKiImMgGtTpPx"
+	check := func(in string) {
+		t.Helper()
+		_, err := ParseBytes(in)
+		if syntax := errors.Is(err, strconv.ErrSyntax); syntax == parseBytesShape.MatchString(in) {
+			t.Fatalf("ParseBytes(%q) error = %v, but the grammar matches: %v", in, err, !syntax)
+		}
+	}
+	for range 100_000 {
+		b := make([]byte, r.IntN(11))
+		for i := range b {
+			b[i] = alphabet[r.IntN(len(alphabet))]
+		}
+		if len(b) > 0 && r.IntN(4) != 0 {
+			b[0] = byte('0' + r.IntN(10))
+		}
+		check(string(b))
+	}
+	for _, valid := range []string{"42", "+4.2e1 KiB", ".5k", "5.EB", "1e3 b", "7 eib", "0.5Ti"} {
+		for pos := range len(valid) {
+			for _, c := range []byte(alphabet) {
+				check(valid[:pos] + string(c) + valid[pos+1:])
+			}
+			check(valid[:pos])
+			check(valid[:pos] + valid[pos+1:])
+		}
+	}
+}
+
+// The error classes are a partition: a size is rejected as text, out of range, or read as ConvertToBytes does.
+func FuzzParseBytes(f *testing.F) {
+	for _, s := range []string{"42", "42KB", "1.5MiB", "+2.01k", "1e3K", "1EB", "9223372036854775807", "-5K", "5 X", "5e", ""} {
+		f.Add(s)
+	}
+	f.Fuzz(func(t *testing.T, s string) {
+		got, err := ParseBytes(s)
+		switch {
+		case err == nil:
+			require.True(t, parseBytesShape.MatchString(s), s)
+			require.Equal(t, ConvertToBytes(s), got, s)
+			require.Less(t, got, math.MaxInt, s)
+		case errors.Is(err, strconv.ErrRange):
+			require.True(t, parseBytesShape.MatchString(s), s)
+			require.Equal(t, math.MaxInt, ConvertToBytes(s), s)
+			require.Zero(t, got, s)
+		default:
+			requireNumError(t, err, strconv.ErrSyntax, s)
+			require.False(t, parseBytesShape.MatchString(s), s)
+			require.Zero(t, got, s)
+		}
+	})
+}
+
 func Test_ConvertToBytes_DigitDetection(t *testing.T) {
 	t.Parallel()
 	testCases := []struct {

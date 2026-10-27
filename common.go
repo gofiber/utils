@@ -15,6 +15,7 @@ import (
 	"reflect"
 	"runtime"
 	"slices"
+	"strconv"
 
 	"github.com/google/uuid"
 )
@@ -217,6 +218,80 @@ func ConvertToBytes(humanReadableString string) int {
 func continuesUnitWord(c byte) bool {
 	l := c | 0x20
 	return l >= 'a' && l <= 'z' && l != 'b'
+}
+
+// ParseBytes is ConvertToBytes without guessing: a number, blanks and at most one unit (b; k to p,
+// with i and b: KiB; e, with i or b: EB), else 0 and a *strconv.NumError, ErrSyntax or, for
+// math.MaxInt or more, ErrRange. The only sign is '+'.
+func ParseBytes(s string) (int, error) {
+	if !validSize(s) {
+		return 0, &strconv.NumError{Func: "ParseBytes", Num: s, Err: strconv.ErrSyntax}
+	}
+	n := ConvertToBytes(s)
+	if n == math.MaxInt {
+		return 0, &strconv.NumError{Func: "ParseBytes", Num: s, Err: strconv.ErrRange}
+	}
+	return n, nil
+}
+
+func validSize(s string) bool {
+	n := len(s)
+	i := 0
+	if i < n && s[i] == '+' {
+		i++
+	}
+	j := skipDigits(s, i)
+	digits := j - i
+	i = j
+	if i < n && s[i] == '.' {
+		j = skipDigits(s, i+1)
+		digits += j - i - 1
+		i = j
+	}
+	if digits == 0 {
+		return false
+	}
+	// An e without digits after it starts the unit instead.
+	if i < n && s[i]|0x20 == 'e' {
+		j = i + 1
+		if j < n && (s[j] == '+' || s[j] == '-') {
+			j++
+		}
+		if k := skipDigits(s, j); k > j {
+			i = k
+		}
+	}
+	for i < n && (s[i] == ' ' || s[i] == '\t') {
+		i++
+	}
+	return i == n || validSizeUnit(s[i:])
+}
+
+func skipDigits(s string, i int) int {
+	for i < len(s) && s[i]-'0' <= 9 {
+		i++
+	}
+	return i
+}
+
+// validSizeUnit reports whether u, not empty, is a unit ParseBytes accepts.
+func validSizeUnit(u string) bool {
+	c, rest := u[0]|0x20, u[1:]
+	if c == 'b' {
+		return rest == ""
+	}
+	if c != 'k' && c != 'm' && c != 'g' && c != 't' && c != 'p' && c != 'e' {
+		return false
+	}
+	hasI := rest != "" && rest[0]|0x20 == 'i'
+	if hasI {
+		rest = rest[1:]
+	}
+	hasB := rest != "" && rest[0]|0x20 == 'b'
+	if hasB {
+		rest = rest[1:]
+	}
+	return rest == "" && (c != 'e' || hasI || hasB)
 }
 
 func scaleDecimal(s string, mult uint64) int {
