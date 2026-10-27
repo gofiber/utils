@@ -32,6 +32,9 @@ func AddTrailingSlashBytes(b []byte) []byte {
 	if n > 0 && b[n-1] == '/' {
 		return b
 	}
+	if n == 0 {
+		return []byte{'/'} // cheaper than make and copy
+	}
 	// Not AddTrailingSlashString: its "/" is read-only.
 	out := make([]byte, n+1)
 	copy(out, b)
