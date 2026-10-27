@@ -309,8 +309,7 @@ func TestByteSize(t *testing.T) {
 	}
 }
 
-// Test_ByteSize_Rounding pins the numbers next to a unit's upper edge: 1023.95 of a unit
-// rounds to 1024.0 and is written as 1 of the next unit.
+// Test_ByteSize_Rounding pins a unit's upper edge: 1023.95 of a unit is written as 1 of the next.
 func Test_ByteSize_Rounding(t *testing.T) {
 	t.Parallel()
 	for _, tt := range []struct {
@@ -410,9 +409,7 @@ func Benchmark_ToString(b *testing.B) {
 	}
 }
 
-// Test_mayBeNilPointer holds the gc compiler's shortcut to nilPointerReflect: every nil pointer
-// matches and no other value with a data word does. A nil map, func or chan may match too, which
-// is why the check only routes the call through nilReceiverString.
+// Test_mayBeNilPointer holds the gc shortcut to nilPointerReflect; a nil map, func or chan may match.
 func Test_mayBeNilPointer(t *testing.T) {
 	t.Parallel()
 	n := 7

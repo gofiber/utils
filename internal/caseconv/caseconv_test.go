@@ -114,9 +114,8 @@ func Test_CaseConv_Lengths(t *testing.T) {
 	}
 }
 
-// Test_ConvertFrom_PrefixIsTakenOnTrust pins the prefix skip, which no in-contract
-// oracle can see (skipped bytes are unchanged either way): it passes a first above
-// the true first change and fails if the alignment or prefix copy is dropped.
+// Test_ConvertFrom_PrefixIsTakenOnTrust pins the prefix skip, which no in-contract oracle sees: it
+// passes a first above the true first change and fails if the alignment or prefix copy is dropped.
 func Test_ConvertFrom_PrefixIsTakenOnTrust(t *testing.T) {
 	t.Parallel()
 

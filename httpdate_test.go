@@ -64,8 +64,8 @@ func Test_AppendHTTPDate(t *testing.T) {
 	require.Equal(t, "Date: Thu, 01 Jan 1970 00:00:00 GMT", string(got))
 }
 
-// Test_FormatHTTPDate_Allocs holds FormatHTTPDate to one allocation for every time, also years
-// outside 0..9999, which outgrow the stack buffer and used to be grown and copied.
+// Test_FormatHTTPDate_Allocs holds FormatHTTPDate to one allocation for every time, years outside
+// 0..9999 included.
 func Test_FormatHTTPDate_Allocs(t *testing.T) {
 	// Not parallel: AllocsPerRun needs nothing else allocating.
 	var sink string

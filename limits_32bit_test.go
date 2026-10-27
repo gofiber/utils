@@ -10,9 +10,8 @@ import (
 	"github.com/gofiber/utils/v2/internal/hugeslice"
 )
 
-// A word loop testing i+K <= n wraps for lengths near math.MaxInt32 and slices with a negative
-// bound. This scans such a slice; it needs 2 GiB of address space, so it runs only with
-// GOFIBER_TEST_HUGE_SLICES=1.
+// A word loop testing i+K <= n wraps near math.MaxInt32 and slices with a negative bound. This scans
+// such a slice (2 GiB), so it runs only with GOFIBER_TEST_HUGE_SLICES=1.
 func Test_HugeSlice_Scans(t *testing.T) {
 	b := hugeslice.Get(t)
 

@@ -239,8 +239,8 @@ type (
 	pongPointer *pingPointer
 )
 
-// Test_ToString_EndlessPointers: a value of a type like T *T never ends when followed, and once
-// overflowed the stack, which cannot be recovered. ToString now prints the address, as fmt does.
+// Test_ToString_EndlessPointers: a type like T *T never ends when followed, and once overflowed the
+// stack. ToString prints the address, as fmt does.
 func Test_ToString_EndlessPointers(t *testing.T) {
 	t.Parallel()
 	var self selfPointer

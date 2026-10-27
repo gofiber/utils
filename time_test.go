@@ -73,8 +73,7 @@ func checkTimeStamp(tb testing.TB, expectedCurrent, actualCurrent uint32) {
 	}
 }
 
-// Test_NewTicker covers the production tick source, which every other test replaces. The long timeout
-// only turns a hang on a loaded CI box into a failure.
+// Test_NewTicker covers the production tick source, which every other test replaces.
 func Test_NewTicker(t *testing.T) {
 	timerTestMu.Lock()
 	defer timerTestMu.Unlock()
@@ -133,8 +132,7 @@ func Test_StopTimeStampUpdater(t *testing.T) {
 	require.Equal(t, uint32(testEpoch.Unix())+3600, Timestamp(), "after Stop the timestamp must follow the clock")
 }
 
-// Test_Timestamp_WithoutUpdater pins Timestamp's doc: without an updater (before Start, after Stop) it reads
-// the clock; with one running it serves the published value.
+// Test_Timestamp_WithoutUpdater: without an updater (before Start, after Stop) Timestamp reads the clock.
 func Test_Timestamp_WithoutUpdater(t *testing.T) {
 	fc, done := withFakeClock(t, testEpoch)
 	defer done()
@@ -155,8 +153,7 @@ func Test_Timestamp_WithoutUpdater(t *testing.T) {
 	require.Equal(t, base+7200, Timestamp(), "after Stop Timestamp reads the clock again")
 }
 
-// Test_Timestamp_Wraps2106: the count of seconds wraps to 0 on 2106-02-07. The cache then holds 0, which
-// reads as "no updater" and sends Timestamp to the clock, so the wrapped value is the same either way.
+// Test_Timestamp_Wraps2106: Timestamp wraps to 0 on 2106-02-07, whether the cache or the clock answers.
 func Test_Timestamp_Wraps2106(t *testing.T) {
 	wrap := time.Unix(1<<32, 0)
 	fc, done := withFakeClock(t, wrap.Add(-time.Second))

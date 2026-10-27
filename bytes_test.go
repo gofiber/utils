@@ -58,8 +58,7 @@ func Test_AddTrailingSlashBytes_ReturnsSame(t *testing.T) {
 	require.Same(t, &input[0], &result[0], "should return same slice instance")
 }
 
-// Test_AddTrailingSlashBytes_ResultIsOwned: an appended '/' means a new slice; an empty input used to
-// get a view of the constant "/", a fatal fault on write.
+// Test_AddTrailingSlashBytes_ResultIsOwned: an empty input once got a view of the constant "/".
 func Test_AddTrailingSlashBytes_ResultIsOwned(t *testing.T) {
 	t.Parallel()
 

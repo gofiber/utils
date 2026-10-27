@@ -9,9 +9,8 @@ import (
 	"github.com/gofiber/utils/v2/internal/hugeslice"
 )
 
-// Portable scans loop on i+K <= n, which wraps on 32-bit within K of math.MaxInt32
-// and then slices with a negative bound; MemchrPair/far wraps through offset+WordLen
-// too. Opt in with GOFIBER_TEST_HUGE_SLICES=1 (2 GiB).
+// Portable scans loop on i+K <= n, which wraps on 32-bit near math.MaxInt32; MemchrPair/far wraps
+// through offset+WordLen too. Opt in with GOFIBER_TEST_HUGE_SLICES=1 (2 GiB).
 func Test_HugeSlice_Scans(t *testing.T) {
 	b := hugeslice.Get(t)
 	for name, got := range map[string]int{

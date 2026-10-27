@@ -215,11 +215,10 @@ func Benchmark_Memmem(b *testing.B) {
 	}
 }
 
-// Benchmark_Memmem_Prefilter runs the prefilter helpers directly, bypassing Memmem's routing, to
-// measure the memmemMin*Haystack crossovers. The paired scan wins from 65B, where bytes.Index
-// leaves its brute-force kernel. The single scan anchors on 'q', which benchData yields every 23
-// bytes: from a few hundred bytes it exhausts its miss budget and tracks bytes.Index, the bounded
-// worst case.
+// Benchmark_Memmem_Prefilter runs the prefilter helpers directly to measure the memmemMin*Haystack
+// crossovers. The paired scan wins from 65B, where bytes.Index leaves its brute-force kernel. The
+// single scan anchors on 'q', which benchData yields every 23 bytes: from a few hundred bytes it
+// exhausts its miss budget and tracks bytes.Index, the bounded worst case.
 func Benchmark_Memmem_Prefilter(b *testing.B) {
 	pairNeedle := []byte("q7z")
 	pairInfo := SelectRareBytes(pairNeedle)
