@@ -488,6 +488,15 @@ as a plain string because call sites pass constant tokens. Their
 on the [benchmark charts](https://gofiber.github.io/utils/benchmarks/)
 and join the catalog above on its next regeneration.
 
+`IndexFold` stays linear when the haystack is built against the needle:
+for a needle of nine bytes or more, once the candidates that fail their
+verification have cost more than a fixed share of the bytes scanned, a
+Rabin-Karp search over the folded bytes finishes the job, as in
+`strings.Index`. A 1 MiB haystack of `a` searched for `AAAA...b` (63
+`A`s) takes 1.7 ms where the candidate-by-candidate check took 20.8 ms;
+benchstat over ten runs on an Intel Xeon @ 2.30GHz, and the ordinary rows
+are unchanged within noise. `Benchmark_IndexFold/adversarial-*` reproduces it.
+
 `HashFold` is the hashing half of a case-insensitive lookup table whose
 other half is `EqualFold`: strings `EqualFold` reports equal hash equal,
 so a table of field or header names can be probed with a key in any case
@@ -558,10 +567,13 @@ other URL benchmarks are still in the amd64 block below.
 ## JSON string escaping
 
 `AppendJSONString` appends a value as a double-quoted JSON string,
-byte-identical to `encoding/json.Marshal` of the same string — including
-its default HTML escaping (`<`, `>`, `&`), the `\ufffd` replacement of
-invalid UTF-8 bytes, and the U+2028/U+2029 escapes — without any of
-`Marshal`'s reflection or allocation. Clean spans are located with a SWAR
+byte-identical to `encoding/json.Marshal` of the same string through Go
+1.26 — including its default HTML escaping (`<`, `>`, `&`), the `\ufffd`
+replacement of invalid UTF-8 bytes, and the U+2028/U+2029 escapes — without
+any of `Marshal`'s reflection or allocation. From Go 1.27, `Marshal` writes
+a raw U+FFFD for an invalid byte where `AppendJSONString` keeps the
+six-character `\ufffd` escape; both decode to the same string, and every
+other input stays byte-identical. Clean spans are located with a SWAR
 scan (the same first-match-mask technique as `IndexNonQuotable`) and
 copied wholesale. This is the building block for hand-rolled JSON hot
 paths such as access-log lines and error bodies.
@@ -615,6 +627,16 @@ measured against a hand-written `LastIndexByte` split, which it trails by
 the cost of the call — its value is the generic `[]byte` support and the
 readable spelling. Header parameter splits (`;`), `key=value` pairs, and
 host/port and name/extension splits are the intended call sites.
+
+## Single-byte trimming
+
+`Trim`, `TrimLeft` and `TrimRight` remove one repeated byte from the ends of
+a string or byte slice, generic over both. Unlike `strings.Trim` and
+`bytes.Trim`, the cutset is a single `byte`, not a set of characters. The
+result is a subslice of the input, never a copy, and it is nil only for a
+nil input, where `bytes.Trim` and `bytes.TrimLeft` return nil whenever
+nothing is left. `TrimSpace` trims ASCII whitespace only and leaves Unicode
+spaces alone.
 
 ## Host and port splitting
 
@@ -847,6 +869,8 @@ slower on the numbers handed over to it, whose digits are read twice.
 count: decimal units are powers of 1000, units with an `i` right after the
 letter (`Ki`, `KiB`, `kibibytes`) are powers of 1024, but not the `i` of
 `kilobytes` or `gigabytes`, and the result saturates at `math.MaxInt`. The
+units run from `k` to `P`, and to `E` when a `b` or `i` follows it (`1.5EB`,
+`1EiB`), since a bare `E` is an exponent marker. The
 number may have a `+`, a point and an exponent (`+2.01k`, `1.5e3K`), with
 any number of digits, and is scaled with 128-bit integer arithmetic, so the
 result is the exact product rounded down (`65.35KB` is 65350) and never passes through a
