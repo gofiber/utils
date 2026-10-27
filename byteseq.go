@@ -97,8 +97,9 @@ func hashFoldMix(a, b uint64) uint64 {
 	return hi ^ lo
 }
 
-// TrimLeft removes all leading occurrences of the byte cutset from s. The
-// result is a subslice of s, nil only if s is.
+// TrimLeft removes all leading occurrences of the byte cutset from s. Unlike strings.TrimLeft,
+// cutset is a single byte, not a set. The result is a subslice of s, nil only if s is, where
+// bytes.TrimLeft returns nil when nothing is left.
 func TrimLeft[S byteSeq](s S, cutset byte) S {
 	lenStr, start := len(s), 0
 	for start < lenStr && s[start] == cutset {
@@ -107,8 +108,9 @@ func TrimLeft[S byteSeq](s S, cutset byte) S {
 	return s[start:]
 }
 
-// Trim removes all leading and trailing occurrences of the byte cutset from s.
-// The result is a subslice of s, nil only if s is.
+// Trim removes all leading and trailing occurrences of the byte cutset from s. Unlike
+// strings.Trim, cutset is a single byte, not a set. The result is a subslice of s, nil only if
+// s is, where bytes.Trim returns nil when nothing is left.
 func Trim[S byteSeq](s S, cutset byte) S {
 	i, j := 0, len(s)-1
 	for ; i <= j; i++ {
@@ -125,8 +127,8 @@ func Trim[S byteSeq](s S, cutset byte) S {
 	return s[i : j+1]
 }
 
-// TrimRight removes all trailing occurrences of the byte cutset from s. The
-// result is a subslice of s.
+// TrimRight removes all trailing occurrences of the byte cutset from s. Unlike strings.TrimRight,
+// cutset is a single byte, not a set. The result is a subslice of s.
 func TrimRight[S byteSeq](s S, cutset byte) S {
 	lenStr := len(s)
 	for lenStr > 0 && s[lenStr-1] == cutset {

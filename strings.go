@@ -8,6 +8,8 @@ import (
 	casestrings "github.com/gofiber/utils/v2/strings"
 )
 
+// ToLower converts an ASCII string to lower-case.
+//
 // Deprecated: use [github.com/gofiber/utils/v2/strings.ToLower] instead.
 //
 //go:fix inline
@@ -15,6 +17,8 @@ func ToLower(b string) string {
 	return casestrings.ToLower(b)
 }
 
+// ToUpper converts an ASCII string to upper-case.
+//
 // Deprecated: use [github.com/gofiber/utils/v2/strings.ToUpper] instead.
 //
 //go:fix inline

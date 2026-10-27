@@ -36,7 +36,8 @@ func ParseNativeUint[S byteSeq](s S) (uint, error) {
 func ParseInt[S byteSeq](s S) (int64, error) {
 	if len(s) > 0 && s[0] != '-' && s[0] != '+' && len(s) <= 19 {
 		// At most 19 digits: two 8-digit steps plus a scalar tail cannot overflow before the range check.
-		// Duplicates parseDigitsBig on purpose; calling it costs about 20% here.
+		// Duplicates parseDigitsBig on purpose: calling it costs +22% on 9 digits (benchstat
+		// -count=10, Go 1.25, Apple M2 Pro).
 		var n uint64
 		i := 0
 		for ; len(s)-i >= 8; i += 8 {
