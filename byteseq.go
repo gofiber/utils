@@ -76,7 +76,8 @@ func HashFold[S byteSeq](s S) uint64 {
 	// Longer keys follow wyhash: 16 bytes per mix, the last 16 overlapping, a final mix with n.
 	h := hashFoldK2
 	for i := 0; n-i > 16; i += 16 {
-		h = hashFoldMix(swar.ToLowerWord(swar.Load8(s, i))^hashFoldK1, swar.ToLowerWord(swar.Load8(s, i+8))^h)
+		w := s[i : i+16]
+		h = hashFoldMix(swar.ToLowerWord(swar.Load8(w, 0))^hashFoldK1, swar.ToLowerWord(swar.Load8(w, 8))^h)
 	}
 	hi, lo := bits.Mul64(
 		swar.ToLowerWord(swar.Load8(s, max(n-16, 0)))^hashFoldK1,

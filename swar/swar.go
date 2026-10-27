@@ -5,7 +5,7 @@
 // Results are per lane (exact for Match*, approximate for ZeroLanes) and
 // identical on little- and big-endian platforms. Load8 and Store8 always use
 // little-endian lane order (lane 0, the least significant byte, is the lowest
-// byte index) and have unchecked bounds preconditions. No unsafe is used.
+// byte index) and panic unless the eight bytes lie within len. No unsafe is used.
 package swar
 
 import (
@@ -27,11 +27,11 @@ const (
 )
 
 // Load8 assembles s[i:i+8] into a little-endian uint64: s[i] becomes the
-// least significant byte (lane 0). The caller must guarantee i+8 <= len(s).
-// The check is against len(s) for a string but cap(s) for a []byte, so a
-// violation within the capacity reads past len(s) without a panic. In word
-// loops, pin each group with a three-index reslice; load at constant offsets.
+// least significant byte (lane 0). It panics unless i+8 <= len(s), also for a
+// []byte with spare capacity. In word loops, pin each group with a three-index
+// reslice; load at constant offsets.
 func Load8[S ~string | ~[]byte](s S, i int) uint64 {
+	_ = s[i+7] // len, not cap
 	w := s[i : i+8]
 	return uint64(w[0]) |
 		uint64(w[1])<<8 |
@@ -43,11 +43,10 @@ func Load8[S ~string | ~[]byte](s S, i int) uint64 {
 		uint64(w[7])<<56
 }
 
-// Store8 writes w into b[i:i+8] in Load8's lane order (lane 0 at b[i]). The
-// caller must guarantee i+8 <= len(b); the check is against cap(b), so a
-// violation within the capacity overwrites bytes past len(b) without a panic.
+// Store8 writes w into b[i:i+8] in Load8's lane order (lane 0 at b[i]). It
+// panics unless i+8 <= len(b), also with spare capacity.
 func Store8(b []byte, i int, w uint64) {
-	d := b[i : i+8]
+	d := b[:len(b):len(b)][i : i+8] //nolint:modernize // slices.Clip puts Store8 at cost 81 of the inlining budget 80
 	d[0] = byte(w)
 	d[1] = byte(w >> 8)
 	d[2] = byte(w >> 16)

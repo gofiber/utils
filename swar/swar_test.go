@@ -2,6 +2,7 @@ package swar
 
 import (
 	"encoding/binary"
+	"math"
 	"math/rand"
 	"testing"
 
@@ -20,6 +21,31 @@ func Test_Load8_LaneOrder(t *testing.T) {
 	require.Equal(t, want, Load8(string(b), 0))
 	require.Equal(t, uint64(0x0908070605040302), Load8(b, 1))
 	require.Equal(t, uint64(0x0A09080706050403), Load8(string(b), 2))
+}
+
+// Test_Load8_Store8_BoundsAreLen: a []byte is bounded by len, not cap, like a string.
+func Test_Load8_Store8_BoundsAreLen(t *testing.T) {
+	t.Parallel()
+	buf := make([]byte, 12, 64)
+	spare := buf[len(buf):cap(buf)]
+	for i := range spare {
+		spare[i] = 0xAA
+	}
+	str := string(buf)
+	for _, i := range []int{0, 1, 4} {
+		require.NotPanics(t, func() { _ = Load8(buf, i) }, "Load8 []byte at %d", i)
+		require.NotPanics(t, func() { _ = Load8(str, i) }, "Load8 string at %d", i)
+		require.NotPanics(t, func() { Store8(buf, i, 0) }, "Store8 at %d", i)
+	}
+	for _, i := range []int{5, 12, 56, 64, -1, math.MinInt, math.MaxInt - 7, math.MaxInt - 6, math.MaxInt} {
+		require.Panics(t, func() { _ = Load8(buf, i) }, "Load8 []byte at %d", i)
+		require.Panics(t, func() { _ = Load8(str, i) }, "Load8 string at %d", i)
+		require.Panics(t, func() { Store8(buf, i, 0) }, "Store8 at %d", i)
+	}
+	require.Equal(t, byte(0xAA), spare[0], "a rejected Store8 wrote into the spare capacity")
+	for _, b := range spare {
+		require.Equal(t, byte(0xAA), b)
+	}
 }
 
 func Test_Store8_LaneOrder_RoundTrip(t *testing.T) {

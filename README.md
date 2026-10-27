@@ -921,9 +921,17 @@ building blocks the helpers above are composed from: `Load8`/`Store8`,
 `Ones`, `HighBits`, and `LowSeven` constants. They are exported so
 downstream packages (Fiber itself, middleware) can fuse their own byte
 scans — for example, finding a delimiter while classifying the bytes
-before it — without re-deriving the bit tricks. The contracts (unchecked
-bounds preconditions, `ZeroLanes`' approximate mask, the little-endian
-lane order) and runnable examples live in the package documentation.
+before it — without re-deriving the bit tricks. The contracts (`Load8` and
+`Store8` panic outside `len`, `ZeroLanes`' approximate mask, the
+little-endian lane order) and runnable examples live in the package
+documentation.
+
+`Load8` and `Store8` check the offset against `len`, also for a `[]byte`
+with spare capacity, where a plain reslice checks `cap` and a miscounted
+offset would read or write past `len` without a panic. The check costs a
+compare only where the compiler cannot prove the offset and nothing inside
+a pinned group (below); the callers' benchmarks show no net change
+(geomean -0.3% over 49 rows, `benchstat -count=10`).
 
 The package benchmarks its primitives against their stdlib counterparts
 the same way the helpers above do, measuring the canonical loops composed
@@ -1042,7 +1050,7 @@ control legs are quiet.
 
 On the portable side, pinning each unrolled group of words with a reslice
 before loading at constant offsets inside it removes the per-load bounds
-check that `swar.Load8`'s own reslice otherwise repeats. Measured with
+checks that `swar.Load8` otherwise repeats. Measured with
 `benchstat -count=10` against the same fallbacks, at 32B/512B/4KiB:
 `IsASCII` -28%/-60%/-63%, `CountNonASCII` -24%/-44%/-44%,
 `FirstNonASCII` -23%/-37%/-43%, `Memchr2` -19%/-23%/-25%,
