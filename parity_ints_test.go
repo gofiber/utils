@@ -125,18 +125,9 @@ func Test_ParseInts_StrconvParity_Exhaustive(t *testing.T) {
 	t.Parallel()
 	// Every string up to five bytes over digits that straddle the 8-bit and
 	// 16-bit limits, both signs, a stray letter, and a space.
-	const alphabet = "0159+-x "
-	var walk func(prefix []byte, depth int)
-	walk = func(prefix []byte, depth int) {
-		assertAllIntParity(t, string(prefix))
-		if depth == 0 {
-			return
-		}
-		for i := range len(alphabet) {
-			walk(append(prefix, alphabet[i]), depth-1)
-		}
-	}
-	walk(nil, 5)
+	forEachString("0159+-x ", 5, func(s string) {
+		assertAllIntParity(t, s)
+	})
 }
 
 func Test_ParseInts_StrconvParity_EveryByte(t *testing.T) {

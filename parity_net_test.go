@@ -274,73 +274,27 @@ func Test_StatusMessage_StdlibParity(t *testing.T) {
 // ---------------------------------------------------------------------------
 // SplitHostPort, IsIPv4, IsIPv6, ParseIPv4, ParseIPv6
 
-// leanSplitHostPort is checkSplitHostPort for the loops that run it a million
-// times, where the assertion library would dominate: the same comparisons, as
-// plain conditions.
-func leanSplitHostPort(tb testing.TB, in string) {
-	tb.Helper()
-	wantHost, wantPort, err := net.SplitHostPort(in)
-	host, port, ok := SplitHostPort(in)
-	if ok != (err == nil) || (ok && (host != wantHost || port != wantPort)) || (!ok && (host != "" || port != "")) {
-		tb.Fatalf("SplitHostPort(%q) = (%q, %q, %v), net.SplitHostPort gives (%q, %q, %v)", in, host, port, ok, wantHost, wantPort, err)
-	}
-	bh, bp, bok := SplitHostPort([]byte(in))
-	if bok != ok || string(bh) != host || string(bp) != port || (!bok && (bh != nil || bp != nil)) {
-		tb.Fatalf("SplitHostPort(bytes %q) = (%q, %q, %v), string form gives (%q, %q, %v)", in, bh, bp, bok, host, port, ok)
-	}
-}
-
 func Test_SplitHostPort_StdlibParity_Exhaustive(t *testing.T) {
 	t.Parallel()
 	// Every string of at most eight bytes over the bytes that make the grammar:
 	// both brackets, the colon, the percent sign, and a letter.
 	forEachString("[]:%a", 8, func(s string) {
-		leanSplitHostPort(t, s)
+		checkSplitHostPort(t, s)
 	})
 	// And of at most five over a wider set, with a space, the dot and a NUL.
 	forEachString("[]:%a1. \x00", 5, func(s string) {
-		leanSplitHostPort(t, s)
+		checkSplitHostPort(t, s)
 	})
-}
-
-// leanIPParity is assertIPGrammarParity and assertParseIPParity as plain
-// conditions: IsIPv4/IsIPv6 against net.ParseIP, ParseIPv4/ParseIPv6 against
-// netip.ParseAddr.
-func leanIPParity(tb testing.TB, in string) {
-	tb.Helper()
-	std := net.ParseIP(in)
-	stdIsV4 := std != nil && !strings.Contains(in, ":")
-	stdIsV6 := std != nil && strings.Contains(in, ":")
-	if IsIPv4(in) != stdIsV4 || IsIPv6(in) != stdIsV6 {
-		tb.Fatalf("IsIPv4/IsIPv6(%q) = %v/%v, net.ParseIP gives %v", in, IsIPv4(in), IsIPv6(in), std)
-	}
-
-	want, wantErr := netip.ParseAddr(in)
-	hasColon := strings.Contains(in, ":")
-	got4, ok4 := ParseIPv4(in)
-	got6, ok6 := ParseIPv6(in)
-	if ok4 != (wantErr == nil && !hasColon) || ok6 != (wantErr == nil && hasColon) {
-		tb.Fatalf("ParseIPv4/ParseIPv6(%q) ok = %v/%v, netip.ParseAddr gives %v, %v", in, ok4, ok6, want, wantErr)
-	}
-	if ok4 && got4 != want || ok6 && got6 != want || !ok4 && got4 != (netip.Addr{}) || !ok6 && got6 != (netip.Addr{}) {
-		tb.Fatalf("ParseIPv4/ParseIPv6(%q) = %v/%v, netip.ParseAddr gives %v", in, got4, got6, want)
-	}
-	if _, bok := ParseIPv4([]byte(in)); bok != ok4 {
-		tb.Fatalf("ParseIPv4(bytes %q) diverges from the string form", in)
-	}
-	if _, bok := ParseIPv6([]byte(in)); bok != ok6 {
-		tb.Fatalf("ParseIPv6(bytes %q) diverges from the string form", in)
-	}
 }
 
 func Test_IP_StdlibParity_Exhaustive(t *testing.T) {
 	t.Parallel()
-	forEachString("0:.1f", 8, func(s string) {
-		leanIPParity(t, s)
-	})
-	forEachString("0:.%1fg", 5, func(s string) {
-		leanIPParity(t, s)
-	})
+	check := func(s string) {
+		assertIPGrammarParity(t, s)
+		assertParseIPParity(t, s)
+	}
+	forEachString("0:.1f", 8, check)
+	forEachString("0:.%1fg", 5, check)
 }
 
 // ---------------------------------------------------------------------------

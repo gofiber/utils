@@ -229,6 +229,41 @@ func Test_AppendJSONString_UTF8EdgeCases(t *testing.T) {
 	}
 }
 
+// Test_AppendJSONString_InvalidUTF8Escapes pins the exact bytes for invalid UTF-8: one
+// six-character \ufffd per bad byte on every Go version, while a valid U+FFFD stays raw.
+// assertJSONStringParity can only compare the decoded strings from Go 1.27, where Marshal
+// writes the replacement raw, so this is what catches a changed spelling of the escape.
+func Test_AppendJSONString_InvalidUTF8Escapes(t *testing.T) {
+	t.Parallel()
+	const esc = `\ufffd`
+	cases := []struct{ in, want string }{
+		{"a\xffb", `"a` + esc + `b"`},
+		{"\xc3", `"` + esc + `"`},
+		{"x\xe2\x80", `"x` + esc + esc + `"`},
+		{"\xc0\x80", `"` + esc + esc + `"`},
+		{"\xed\xa0\x80", `"` + esc + esc + esc + `"`},
+		{"\xf4\x90\x80\x80", `"` + esc + esc + esc + esc + `"`},
+		{strings.Repeat("\xff", 16), `"` + strings.Repeat(esc, 16) + `"`},
+		{strings.Repeat("a", 20) + "\xff" + strings.Repeat("b", 20), `"` + strings.Repeat("a", 20) + esc + strings.Repeat("b", 20) + `"`},
+		{"\xef\xbf\xbd", "\"\xef\xbf\xbd\""},
+	}
+
+	probe, err := json.Marshal("\xff")
+	require.NoError(t, err)
+	marshalEscapes := string(probe) == `"`+esc+`"`
+
+	for _, c := range cases {
+		for _, got := range [][]byte{AppendJSONString(nil, c.in), AppendJSONString(nil, []byte(c.in))} {
+			require.Equal(t, c.want, string(got), "input %q", c.in)
+		}
+		if marshalEscapes || utf8.ValidString(c.in) {
+			want, err := json.Marshal(c.in)
+			require.NoError(t, err)
+			require.Equal(t, c.want, string(want), "input %q", c.in)
+		}
+	}
+}
+
 // assertJSONStringParity requires AppendJSONString to agree with
 // encoding/json.Marshal byte for byte, for both instantiations. Go 1.27 made
 // json/v2 the default, which writes a raw U+FFFD where v1 escaped it, so for
@@ -307,30 +342,26 @@ func Test_ParseIP_MoreEdgeCases(t *testing.T) {
 
 // assertParseIPParity requires ParseIPv4/ParseIPv6 to accept exactly the
 // per-family netip.ParseAddr inputs and produce identical addresses, for
-// both instantiations.
-func assertParseIPParity(t *testing.T, in string) {
-	t.Helper()
+// both instantiations. It uses plain conditions, not require: the exhaustive
+// loops run it hundreds of thousands of times.
+func assertParseIPParity(tb testing.TB, in string) {
+	tb.Helper()
 	want, wantErr := netip.ParseAddr(in)
 	hasColon := strings.ContainsRune(in, ':')
 
 	got4, ok4 := ParseIPv4(in)
-	_, ok4B := ParseIPv4([]byte(in))
-	require.Equal(t, wantErr == nil && !hasColon, ok4, "ParseIPv4 input %q (netip err: %v)", in, wantErr)
-	require.Equal(t, ok4, ok4B, "ParseIPv4 bytes input %q", in)
-	if ok4 {
-		require.Equal(t, want, got4, "ParseIPv4 input %q", in)
-	} else {
-		require.Equal(t, netip.Addr{}, got4, "ParseIPv4 input %q", in)
-	}
-
 	got6, ok6 := ParseIPv6(in)
-	_, ok6B := ParseIPv6([]byte(in))
-	require.Equal(t, wantErr == nil && hasColon, ok6, "ParseIPv6 input %q (netip err: %v)", in, wantErr)
-	require.Equal(t, ok6, ok6B, "ParseIPv6 bytes input %q", in)
-	if ok6 {
-		require.Equal(t, want, got6, "ParseIPv6 input %q", in)
-	} else {
-		require.Equal(t, netip.Addr{}, got6, "ParseIPv6 input %q", in)
+	if ok4 != (wantErr == nil && !hasColon) || ok6 != (wantErr == nil && hasColon) {
+		tb.Fatalf("ParseIPv4/ParseIPv6(%q) ok = %v/%v, netip.ParseAddr gives %v, %v", in, ok4, ok6, want, wantErr)
+	}
+	if ok4 && got4 != want || ok6 && got6 != want || !ok4 && got4 != (netip.Addr{}) || !ok6 && got6 != (netip.Addr{}) {
+		tb.Fatalf("ParseIPv4/ParseIPv6(%q) = %v/%v, netip.ParseAddr gives %v", in, got4, got6, want)
+	}
+	if _, bok := ParseIPv4([]byte(in)); bok != ok4 {
+		tb.Fatalf("ParseIPv4(bytes %q) diverges from the string form", in)
+	}
+	if _, bok := ParseIPv6([]byte(in)); bok != ok6 {
+		tb.Fatalf("ParseIPv6(bytes %q) diverges from the string form", in)
 	}
 }
 
