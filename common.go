@@ -24,19 +24,6 @@ const (
 	maxFastTokenEncodedLength = 43 // base64.RawURLEncoding.EncodedLen(32)
 )
 
-func readRandomOrPanic(dst []byte) {
-	checkRandomRead(rand.Read(dst))
-}
-
-// checkRandomRead panics on a failed read, which Go 1.24+ never reports: crypto/rand ends the
-// program itself. It takes the read's results so tests reach the panic; calling the read through
-// a variable would move the token buffers to the heap.
-func checkRandomRead(_ int, err error) {
-	if err != nil {
-		panic(fmt.Errorf("utils: failed to read random bytes for token: %w", err))
-	}
-}
-
 var whitespaceTable = [256]bool{
 	'\t': true,
 	'\n': true,
@@ -71,7 +58,7 @@ func GenerateSecureToken(length int) string {
 	if length == defaultSecureTokenLength {
 		var randomBuf [defaultSecureTokenLength]byte
 		src := randomBuf[:]
-		readRandomOrPanic(src)
+		rand.Read(src) //nolint:errcheck // never fails: crypto/rand ends the program instead (Go 1.24+)
 
 		var encoded [maxFastTokenEncodedLength]byte
 		encodedLen := base64.RawURLEncoding.EncodedLen(length)
@@ -80,7 +67,7 @@ func GenerateSecureToken(length int) string {
 	}
 
 	bytes := make([]byte, length)
-	readRandomOrPanic(bytes)
+	rand.Read(bytes) //nolint:errcheck // never fails: crypto/rand ends the program instead (Go 1.24+)
 	return base64.RawURLEncoding.EncodeToString(bytes)
 }
 
@@ -99,12 +86,7 @@ func FunctionName(fn any) string {
 		if v.IsNil() {
 			return ""
 		}
-		pc := v.Pointer()
-		f := runtime.FuncForPC(pc)
-		if f == nil {
-			return ""
-		}
-		return f.Name()
+		return runtime.FuncForPC(v.Pointer()).Name() // "" for an address that belongs to no function
 	}
 	return v.Type().String()
 }
@@ -129,11 +111,12 @@ func IncrementIPRange(ip net.IP) {
 }
 
 // ConvertToBytes returns the size in bytes of a human-readable string, ex. 42kb, 42M, 1.5e3K.
-// The first letter after the number picks the unit (k, m, g, t, p in either case; any other
-// letter means bytes); the rest is ignored. Units are powers of 1000 (42k = 42000), or of 1024
-// with an 'i' right after the letter, as in Ki and KiB but not in kilobytes (42Ki = 43008), so
-// the KB that ByteSize writes for 1024 reads back as 1000. The result is rounded down and capped
-// at math.MaxInt; it is 0 for a missing, negative or malformed number.
+// The first letter after the number picks the unit (k, m, g, t, p in either case, and e before a
+// b or i, as in EB, since a bare E is an exponent; any other letter means bytes); the rest is
+// ignored. Units are powers of 1000 (42k = 42000), or of 1024 with an 'i' right after the letter,
+// as in Ki and KiB but not in kilobytes (42Ki = 43008), so the KB that ByteSize writes for 1024
+// reads back as 1000. The result is rounded down and capped at math.MaxInt; it is 0 for a
+// missing, negative or malformed number.
 func ConvertToBytes(humanReadableString string) int {
 	strLen := len(humanReadableString)
 	if strLen == 0 {
@@ -204,6 +187,11 @@ func ConvertToBytes(humanReadableString string) int {
 			decMul, binMul = 1e12, 1<<40
 		case 'p', 'P':
 			decMul, binMul = 1e15, 1<<50
+		case 'e', 'E':
+			decMul, binMul = 1, 1
+			if next := unitPrefixPos + 1; next < strLen && (humanReadableString[next]|0x20 == 'b' || humanReadableString[next]|0x20 == 'i') {
+				decMul, binMul = 1e18, 1<<60
+			}
 		default:
 			decMul, binMul = 1, 1
 		}

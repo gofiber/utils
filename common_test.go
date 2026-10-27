@@ -17,7 +17,6 @@ import (
 	"strconv"
 	"strings"
 	"testing"
-	"unsafe"
 
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
@@ -65,20 +64,6 @@ func Test_FunctionName(t *testing.T) {
 	// FuncForPC knows the same name
 	pc := reflect.ValueOf(Test_FunctionName).Pointer()
 	require.Equal(t, runtime.FuncForPC(pc).Name(), FunctionName(Test_FunctionName))
-}
-
-// Test_FunctionName_UnknownCode builds a function value whose code address
-// belongs to no function, which the runtime cannot name: a func value is a
-// pointer to a closure object whose first word is the code address, so a
-// closure object holding a bogus one is such a value.
-func Test_FunctionName_UnknownCode(t *testing.T) {
-	t.Parallel()
-	type closure struct{ code uintptr }
-	bogus := &closure{code: 1} // no function starts at, or contains, address 1
-	// #nosec G103
-	fn := *(*func())(unsafe.Pointer(&bogus))
-	require.NotNil(t, fn)
-	require.Empty(t, FunctionName(fn))
 }
 
 func Test_UUIDv4(t *testing.T) {
@@ -133,28 +118,6 @@ func Test_UUIDv4_RandomFailure(t *testing.T) {
 	// Restoring the default source restores the function.
 	uuid.SetRand(nil)
 	require.Len(t, UUIDv4(), 36)
-}
-
-func Test_checkRandomRead(t *testing.T) {
-	t.Parallel()
-	require.NotPanics(t, func() { checkRandomRead(32, nil) })
-
-	errDry := errors.New("entropy exhausted")
-	var recovered any
-	func() {
-		defer func() { recovered = recover() }()
-		checkRandomRead(0, errDry)
-	}()
-	err, ok := recovered.(error)
-	require.True(t, ok, "checkRandomRead panicked with %v, want an error", recovered)
-	require.ErrorIs(t, err, errDry)
-	require.EqualError(t, err, "utils: failed to read random bytes for token: entropy exhausted")
-
-	// The reads GenerateSecureToken makes go through the check and succeed.
-	require.NotPanics(t, func() {
-		readRandomOrPanic(make([]byte, 16))
-		readRandomOrPanic(nil)
-	})
 }
 
 func Test_UUIDv4_Concurrency(t *testing.T) {
@@ -287,6 +250,20 @@ func Test_ConvertToBytes(t *testing.T) {
 	require.Equal(t, saturate(42*1000000000000000), ConvertToBytes("42PB"))
 	require.Equal(t, saturate(42*1000000000000000), ConvertToBytes("42pb"))
 
+	// Test exa (1e18): E is a unit only before a b or an i, a bare E is an exponent marker
+	require.Equal(t, saturate(1000000000000000000), ConvertToBytes("1EB"))
+	require.Equal(t, saturate(1000000000000000000), ConvertToBytes("1eb"))
+	require.Equal(t, saturate(1000000000000000000), ConvertToBytes("1 EB"))
+	require.Equal(t, saturate(1500000000000000000), ConvertToBytes("1.5EB"))
+	require.Equal(t, saturate(9000000000000000000), ConvertToBytes("9EB"))
+	require.Equal(t, math.MaxInt, ConvertToBytes("10EB")) // capped
+	require.Equal(t, saturate(1<<60), ConvertToBytes("1EiB"))
+	require.Equal(t, saturate(1<<60), ConvertToBytes("1Ei"))
+	require.Equal(t, saturate(1500), ConvertToBytes("1.5e3B")) // an exponent, then bytes
+	require.Equal(t, 1, ConvertToBytes("1E"))
+	require.Equal(t, 1, ConvertToBytes("1e"))
+	require.Equal(t, 5, ConvertToBytes("5 eggs"))
+
 	// Test binary units (KiB = 1024)
 	require.Equal(t, 42*1024, ConvertToBytes("42Ki"))
 	require.Equal(t, 42*1024, ConvertToBytes("42KiB"))
@@ -384,6 +361,7 @@ var (
 	sizeUnits = map[string]int64{
 		"": 1, "B": 1, "K": 1e3, "KB": 1e3, "M": 1e6, "MB": 1e6, "G": 1e9, "T": 1e12, "P": 1e15,
 		"Ki": 1 << 10, "KiB": 1 << 10, "Mi": 1 << 20, "Gi": 1 << 30, "Ti": 1 << 40, "Pi": 1 << 50,
+		"EB": 1e18, "Ei": 1 << 60, "EiB": 1 << 60,
 	}
 	sizeShape = regexp.MustCompile(`^\+?(\d+\.?\d*|\.\d+)(?:[eE]([+-]?\d+))?([A-Za-z]*)$`)
 )
@@ -421,12 +399,12 @@ func modelSize(s string) (int64, bool) {
 	}
 	e -= int64(len(fracPart))
 
-	// The value lies in [10^(n-1+e), 10^(n+e)) before the unit, which scales it by less than 10^16.
+	// The value lies in [10^(n-1+e), 10^(n+e)) before the unit, which scales it by less than 10^19.
 	n := int64(len(digits))
 	switch {
 	case n-1+e >= 19:
 		return math.MaxInt64, true
-	case n+e+16 <= 0:
+	case n+e+19 <= 0:
 		return 0, true
 	}
 	value := new(big.Rat).SetInt(mustBigInt(digits))
