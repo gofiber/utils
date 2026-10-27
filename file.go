@@ -28,10 +28,15 @@ func Walk(fs http.FileSystem, root string, walkFn filepath.WalkFunc) error {
 	} else {
 		err = walkInternal(fs, root, info, walkFn)
 	}
-	if err == filepath.SkipDir || err == filepath.SkipAll { //nolint:errorlint,err113 // filepath.Walk compares the sentinels exactly
+	if isSentinel(err, filepath.SkipDir) || isSentinel(err, filepath.SkipAll) {
 		return nil
 	}
 	return err
+}
+
+// isSentinel compares err with a filepath sentinel by identity, as filepath.Walk does, so a wrapped one is an error.
+func isSentinel(err, sentinel error) bool {
+	return err == sentinel //nolint:errorlint,err113 // filepath.Walk compares the sentinels exactly
 }
 
 // ReadFile returns the raw content of a file
@@ -71,7 +76,7 @@ func walkInternal(fs http.FileSystem, path string, info os.FileInfo, walkFn file
 	names, err := readDirNames(fs, path)
 	err1 := walkFn(path, info, err)
 	if err != nil || err1 != nil {
-		if err1 == filepath.SkipDir { //nolint:errorlint,err113 // filepath.Walk compares the sentinels exactly
+		if isSentinel(err1, filepath.SkipDir) {
 			return nil
 		}
 		return err1
@@ -81,13 +86,13 @@ func walkInternal(fs http.FileSystem, path string, info os.FileInfo, walkFn file
 		filename := pathpkg.Join(path, name)
 		fileInfo, err := stat(fs, filename)
 		if err != nil {
-			if err := walkFn(filename, fileInfo, err); err != nil && err != filepath.SkipDir { //nolint:errorlint,err113 // filepath.Walk compares the sentinels exactly
+			if err := walkFn(filename, fileInfo, err); err != nil && !isSentinel(err, filepath.SkipDir) {
 				return err
 			}
 		} else {
 			err = walkInternal(fs, filename, fileInfo, walkFn)
 			if err != nil {
-				if !fileInfo.IsDir() || err != filepath.SkipDir { //nolint:errorlint,err113 // filepath.Walk compares the sentinels exactly
+				if !fileInfo.IsDir() || !isSentinel(err, filepath.SkipDir) {
 					return err
 				}
 			}
