@@ -719,6 +719,7 @@ func Test_ParseBytes(t *testing.T) {
 		"", " ", "k", "KB", "-5", "-5k", "+-5", "5 X", "5kilobytes", "5 kb extra", "5k ", " 5k", "5kbb", "5kbi",
 		"5ki b", "5 kB!", "5e", "5E", "5e+", "5e-", "5 e", "5eg", "5ex", "5bi", "5bb", "1.2.3", "1..2", ".", "+.",
 		"5,000", "0x10", "5\n", "5k\n", "1_000", "\u0663kb", "5kb\x00", "5 kib b", strings.Repeat("9", 40) + "x",
+		"5\u212aB", "5K\u0131B", "5\u017f", // letters that only fold to k, i or s
 	} {
 		got, err := ParseBytes(in)
 		require.Zero(t, got, in)
@@ -733,8 +734,7 @@ func Test_ParseBytes(t *testing.T) {
 	}
 }
 
-// Test_ParseBytes_AgreesWithConvertToBytes: whatever ParseBytes accepts, ConvertToBytes has scaled,
-// so the two must agree on every spelling of every unit, in both cases.
+// Test_ParseBytes_AgreesWithConvertToBytes: an accepted size scales as ConvertToBytes does.
 func Test_ParseBytes_AgreesWithConvertToBytes(t *testing.T) {
 	t.Parallel()
 	units := []string{
@@ -759,8 +759,7 @@ func Test_ParseBytes_AgreesWithConvertToBytes(t *testing.T) {
 	}
 }
 
-// Test_ParseBytes_Grammar holds validSize to the regexp over random strings from the bytes that
-// make the grammar, and over single-byte edits of valid sizes.
+// Test_ParseBytes_Grammar holds ParseBytes to the regexp over random strings, edits and short units.
 func Test_ParseBytes_Grammar(t *testing.T) {
 	t.Parallel()
 	r := rand.New(rand.NewPCG(3, 9)) //nolint:gosec // deterministic test data
@@ -791,9 +790,16 @@ func Test_ParseBytes_Grammar(t *testing.T) {
 			check(valid[:pos] + valid[pos+1:])
 		}
 	}
+	for c := range 256 {
+		check("5" + string([]byte{byte(c)}))
+		check("5 " + string([]byte{byte(c)}))
+		for d := range 256 {
+			check("5" + string([]byte{byte(c), byte(d)}))
+		}
+	}
 }
 
-// The error classes are a partition: a size is rejected as text, out of range, or read as ConvertToBytes does.
+// FuzzParseBytes: a size is rejected as text, out of range, or read as ConvertToBytes does.
 func FuzzParseBytes(f *testing.F) {
 	for _, s := range []string{"42", "42KB", "1.5MiB", "+2.01k", "1e3K", "1EB", "9223372036854775807", "-5K", "5 X", "5e", ""} {
 		f.Add(s)
