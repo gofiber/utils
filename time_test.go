@@ -155,6 +155,25 @@ func Test_Timestamp_WithoutUpdater(t *testing.T) {
 	require.Equal(t, base+7200, Timestamp(), "after Stop Timestamp reads the clock again")
 }
 
+// Test_Timestamp_Wraps2106: the count of seconds wraps to 0 on 2106-02-07. The cache then holds 0, which
+// reads as "no updater" and sends Timestamp to the clock, so the wrapped value is the same either way.
+func Test_Timestamp_Wraps2106(t *testing.T) {
+	wrap := time.Unix(1<<32, 0)
+	fc, done := withFakeClock(t, wrap.Add(-time.Second))
+	defer done()
+	timestamp.Store(0)
+	defer timestamp.Store(0)
+
+	StartTimeStampUpdater()
+	require.Equal(t, uint32(1<<32-1), Timestamp(), "the last second before the wrap")
+
+	fc.advance(wrap)
+	require.Zero(t, Timestamp(), "the wrapped second, whether the cache or the clock answers")
+
+	fc.advance(wrap.Add(time.Second))
+	require.Equal(t, uint32(1), Timestamp(), "the cache is nonzero again")
+}
+
 func Test_StartStopRepeat(t *testing.T) {
 	fc, done := withFakeClock(t, testEpoch)
 	defer done()

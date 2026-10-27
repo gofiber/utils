@@ -22,8 +22,9 @@ var (
 	}
 )
 
-// Timestamp returns the Unix time in seconds. While the updater runs it is the value it last
-// published, at most about a second old, for the cost of one atomic load; otherwise it reads the clock.
+// Timestamp returns the Unix time in seconds as a uint32, which wraps on 2106-02-07. While the updater
+// runs it is the value it last published, at most about a second old, for the cost of one atomic load;
+// otherwise it reads the clock.
 func Timestamp() uint32 {
 	if t := timestamp.Load(); t != 0 {
 		return t
