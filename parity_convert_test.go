@@ -287,6 +287,16 @@ func Test_ToString_EndlessPointers(t *testing.T) {
 	pp := &p
 	ppp := &pp
 	require.Equal(t, "7", ToString(ppp))
+
+	// So is one far deeper than any fixed cap on the depth would allow: only a type that
+	// comes back to itself is endless.
+	deep := reflect.ValueOf(&n)
+	for range 39 {
+		next := reflect.New(deep.Type())
+		next.Elem().Set(deep)
+		deep = next
+	}
+	require.Equal(t, "7", ToString(deep.Interface()))
 }
 
 // Test_ToString_NilReceivers requires a nil pointer whose type implements

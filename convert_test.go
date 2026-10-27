@@ -426,6 +426,28 @@ func Benchmark_ToString(b *testing.B) {
 	}
 }
 
+// Benchmark_ToString_Methods measures the types that go through an Error or String method, where
+// ToString first checks for a nil pointer receiver.
+// go test -run=^$ -bench=ToString_Methods -benchmem -count=10
+func Benchmark_ToString_Methods(b *testing.B) {
+	for _, tc := range []struct {
+		name  string
+		value any
+	}{
+		{"error", errors.New("boom")},
+		{"stringer", MyStringer{value: "Stringer Value"}},
+		{"stringer-ptr", &MyStringer{value: "Stringer Value"}},
+		{"duration", 1500 * time.Millisecond},
+	} {
+		b.Run(tc.name, func(b *testing.B) {
+			b.ReportAllocs()
+			for b.Loop() {
+				_ = ToString(tc.value)
+			}
+		})
+	}
+}
+
 // go test -v -run=^$ -bench=ToString_concurrency -benchmem -count=4
 func Benchmark_ToString_concurrency(b *testing.B) {
 	for _, value := range dataTypeExamples {
@@ -476,6 +498,15 @@ func Benchmark_UnsafeString(b *testing.B) {
 		require.Equal(b, "Hello, World!", res)
 	})
 }
+
+const (
+	uKilobyte = 1 << (10 * (iota + 1))
+	uMegabyte
+	uGigabyte
+	uTerabyte
+	uPetabyte
+	uExabyte
+)
 
 // go test -v -run=^$ -bench=ByteSize -benchmem -count=4
 func Benchmark_ByteSize(b *testing.B) {
