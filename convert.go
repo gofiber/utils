@@ -15,13 +15,13 @@ import (
 	"github.com/gofiber/utils/v2/internal/unsafeconv"
 )
 
-// UnsafeString returns a string pointer without allocation
+// UnsafeString returns a string sharing the memory of b, without allocation; changing b changes it.
 func UnsafeString(b []byte) string {
 	return unsafeconv.UnsafeString(b)
 }
 
-// UnsafeBytes returns a byte pointer without allocation. It shares the memory of s and must only
-// be read: a write to a string literal is a fatal fault.
+// UnsafeBytes returns a byte slice sharing the memory of s, without allocation, to be read only: a
+// write faults for a literal and alters any other string. CopyBytes gives one to write.
 func UnsafeBytes(s string) []byte {
 	return unsafeconv.UnsafeBytes(s)
 }

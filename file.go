@@ -17,10 +17,10 @@ import (
 // directory that cannot be opened is reported with a nil FileInfo, and one holding an entry
 // that cannot be statted with the error of its listing.
 //
-// Unlike filepath.Walk, Walk follows symbolic links: a link to one of its own ancestors repeats
-// the tree until ELOOP, so return filepath.SkipDir for it. A named pipe or other special file
-// can block the walk on open. fs and walkFn must not be nil, and a Stat returning neither a
-// FileInfo nor an error panics.
+// Unlike filepath.Walk, Walk follows symbolic links and, over http.Dir, never reports one: a link to
+// an ancestor repeats the tree until ELOOP and one out of the tree is walked, so check paths against
+// root before serving them. A named pipe can block the walk on open. fs and walkFn must not be nil,
+// and a Stat returning neither a FileInfo nor an error panics.
 func Walk(fs http.FileSystem, root string, walkFn filepath.WalkFunc) error {
 	info, err := stat(fs, root)
 	if err != nil {

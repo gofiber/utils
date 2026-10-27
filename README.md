@@ -864,6 +864,28 @@ however long the input was. `Benchmark_ParseFloat_Shapes` times each shape
 against strconv: 2 to 3 times as fast on the fast path, and 1.3 to 1.7 times
 slower on the numbers handed over to it, whose digits are read twice.
 
+## Unsafe views
+
+`UnsafeString` and `UnsafeBytes` convert between a string and a byte slice
+without copying, so the two share memory and neither side may be modified
+while the other is in use. A write through `UnsafeBytes` faults for a string
+literal and changes any other string for every holder of it, a map key, a
+header or a cache entry among them; a write to the bytes behind an
+`UnsafeString` changes the string under whoever holds it. `CopyBytes` and
+`CopyString` give a copy for the side that outlives or modifies the other.
+
+## Filesystem walking
+
+`Walk` is `filepath.Walk` over an `http.FileSystem`, with the same control
+flow (`filepath.SkipDir` and `filepath.SkipAll` are returned as they are).
+It follows symbolic links, as `http.Dir` does when it opens a file, and the
+`FileInfo` it passes comes from that open file, so it never reports a link:
+a link to an ancestor repeats the tree until `ELOOP`, and a link that leaves
+the tree walks what it points to. A program that serves or indexes what
+`Walk` finds has to keep the paths inside the root itself, for example by
+resolving each one with `filepath.EvalSymlinks` under the real directory;
+`http.FileSystem` has no `Lstat` to do it here.
+
 ## Size strings
 
 `ConvertToBytes` turns `42`, `42kb`, `1.5GiB` or `130.51MB` into a byte
