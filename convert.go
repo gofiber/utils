@@ -204,9 +204,8 @@ func ToString(arg any, timeFormat ...string) string {
 	}
 }
 
-// toStringReflect is ToString's reflection fallback, kept apart so ToString's frame stays small: 336
-// bytes of locals against 472 inlined, and ToString/int64 and /string run 15% and 13% faster
-// (benchstat -count=10, Xeon 2.3 GHz, Go 1.26, linux/amd64).
+// toStringReflect is ToString's reflection fallback, apart so ToString's frame stays small: 336 bytes
+// of locals against 472, and /int64 and /string run 15% and 13% faster (benchstat -count=10, Xeon 2.3 GHz).
 func toStringReflect(arg any, timeFormat []string) string {
 	rv := reflect.ValueOf(arg)
 	if !rv.IsValid() {
@@ -256,11 +255,9 @@ func endlessPointerType(t reflect.Type) bool {
 	}
 }
 
-// mayBeNilPointer reports whether v's interface data word is nil, as a nil pointer's always is. A
-// nil map, func, chan or one-pointer struct matches too, so a match only sends the call through
-// nilReceiverString, which tells them apart. The reflect form, Kind() == Pointer && IsNil(), is exact
-// but costs +2.4 to +4.2 ns on the Error and String of trivial types, 4.2 ns to 8.5 ns for an
-// error (benchstat -count=10, Xeon 2.3 GHz, Go 1.26, linux/amd64).
+// mayBeNilPointer reports whether v's data word is nil, as a nil pointer's is; a nil map, func, chan
+// or one-pointer struct matches too, and nilReceiverString tells them apart. The exact reflect check
+// costs +2.4 to +4.2 ns (an error: 4.2 to 8.5 ns; benchstat -count=10, Xeon 2.3 GHz, Go 1.26).
 func mayBeNilPointer(v any) bool {
 	// #nosec G103
 	return (*[2]unsafe.Pointer)(unsafe.Pointer(&v))[1] == nil

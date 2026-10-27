@@ -1,8 +1,8 @@
 package main
 
 // Refreshes the numbers in the README benchmark tables: each ```text table starts with the
-// `go test` command that produced it, so re-run that, replace the values of the rows it
-// reports, and rewrite the Environment: header above the table with the machine that ran.
+// `go test` command that produced it; re-run it, replace the values of the rows it reports, and
+// rewrite the Environment: header with the machine that ran.
 
 import (
 	"bytes"

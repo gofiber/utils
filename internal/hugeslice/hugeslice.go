@@ -1,6 +1,6 @@
 //go:build 386 || arm
 
-// Package hugeslice hands the 32-bit tests of this module the longest slice there is.
+// Package hugeslice is the longest slice there is, for the 32-bit tests.
 package hugeslice
 
 import (
@@ -15,10 +15,9 @@ var (
 	buf  []byte
 )
 
-// Get returns the one slice of math.MaxInt32 zero bytes of the test binary, allocated on first
-// use, and skips the test unless GOFIBER_TEST_HUGE_SLICES is set: the slice takes 2 GiB of address
-// space and the scans several seconds. It is never written, so its pages stay the shared zero
-// page, and a second slice would not fit the address space.
+// Get returns the one slice of math.MaxInt32 zero bytes of the test binary, or skips the test unless
+// GOFIBER_TEST_HUGE_SLICES is set: it takes 2 GiB of address space. It is never written, so its
+// pages stay the shared zero page.
 func Get(t testing.TB) []byte {
 	t.Helper()
 	if os.Getenv("GOFIBER_TEST_HUGE_SLICES") == "" {

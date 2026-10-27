@@ -132,9 +132,8 @@ func IndexFold[S byteSeq](s S, needle string) int {
 			bc2 = swar.Broadcast(first - 0x20)
 		}
 
-		// The verify is a single masked word compare against the folded needle, built lazily on the
-		// first candidate: eager building costs +44% on 8-byte misses and +13% to +17% on 32-64B
-		// misses (benchstat -count=10, Go 1.25, Apple M2 Pro).
+		// The folded needle is built on the first candidate: eagerly it costs +44% on 8-byte misses and
+		// +13% to +17% on 32-64B misses (benchstat -count=10, Go 1.25, Apple M2 Pro).
 		var fn foldedNeedle
 		built := false
 
@@ -187,9 +186,8 @@ outer:
 	return -1
 }
 
-// indexFoldLong is IndexFold for a needle of 9 bytes or more that fits in s: the first-byte
-// candidates are verified word by word, and when the failed verifications add up, Rabin-Karp
-// takes over for the rest of s.
+// indexFoldLong is IndexFold for a needle of 9 bytes or more: candidates are verified word by
+// word until the failures add up, then Rabin-Karp finishes.
 func indexFoldLong[S byteSeq](s S, needle string) int {
 	n, k := len(s), len(needle)
 	last := n - k
@@ -270,18 +268,15 @@ func foldEqualAt[S byteSeq](s S, pos int, needle string) bool {
 }
 
 const (
-	// indexFoldWorkSlack plus half a unit per byte scanned is what failed long-needle verifications
-	// may cost before IndexFold stops checking candidate by candidate. A failure costs 1 + len/64
-	// units, about the words a verification that fails late compares per 64 bytes of needle, so the
-	// work before the switch stays near two words per byte whatever the needle length.
+	// A failed long-needle verification costs 1 + len/64 units; past indexFoldWorkSlack plus half a
+	// unit per byte scanned IndexFold switches, so the work stays near two words per byte.
 	indexFoldWorkSlack = 64
-	// primeRK is the multiplier of indexFoldRK's rolling hash, the one bytealg's Rabin-Karp uses.
+	// primeRK is bytealg's Rabin-Karp multiplier.
 	primeRK = 16777619
 )
 
-// indexFoldRK is IndexFold's linear-time fallback for a needle of 9 bytes or more: Rabin-Karp over
-// the lower-cased bytes of s[from:], each hash match verified. It returns -1 if no start from from
-// remains.
+// indexFoldRK searches s[from:] for a needle of 9 bytes or more by Rabin-Karp over the lower-cased
+// bytes, verifying each hash match; -1 if no start remains.
 func indexFoldRK[S byteSeq](s S, from int, needle string) int {
 	k := len(needle)
 	last := len(s) - k

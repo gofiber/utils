@@ -26,7 +26,7 @@ const (
 	mimeTableMask       = 1<<mimeTableBits - 1
 	mimeTableMaxEntries = 1 << (mimeTableBits - 1) // at most half full, so probes end at a free slot
 	mimeHashMul         = 0x9E3779B97F4A7C15       // Fibonacci hashing multiplier
-	mimeKeyMaxLen       = swar.WordLen - 1         // the top lane of a key holds the length
+	mimeKeyMaxLen       = swar.WordLen - 1
 )
 
 type mimeEntry struct {

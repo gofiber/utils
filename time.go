@@ -31,7 +31,7 @@ func Timestamp() uint32 {
 	return clockTimestamp()
 }
 
-// clockTimestamp is Timestamp's slow path, kept out of line so Timestamp stays inlinable.
+// clockTimestamp is Timestamp's out-of-line slow path.
 //
 //go:noinline
 func clockTimestamp() uint32 {

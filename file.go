@@ -34,7 +34,7 @@ func Walk(fs http.FileSystem, root string, walkFn filepath.WalkFunc) error {
 	return err
 }
 
-// isSentinel compares err with a filepath sentinel by identity, as filepath.Walk does, so a wrapped one is an error.
+// isSentinel compares by identity, as filepath.Walk does; errors.Is would accept a wrapped sentinel.
 func isSentinel(err, sentinel error) bool {
 	return err == sentinel //nolint:errorlint,err113 // filepath.Walk compares the sentinels exactly
 }
