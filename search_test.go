@@ -194,6 +194,94 @@ func Test_IndexFold_Fixed(t *testing.T) {
 	require.Equal(t, -1, IndexFold("__proxy-authorizaQXYZ", "PROXY-AUTHORIZAT"))
 }
 
+// requireIndexFold checks IndexFold and ContainsFold on both instantiations against refIndexFold.
+func requireIndexFold(tb testing.TB, s, needle string) {
+	tb.Helper()
+	want := refIndexFold(s, needle)
+	if got := IndexFold(s, needle); got != want {
+		tb.Fatalf("IndexFold(%d bytes, %q) = %d, want %d", len(s), needle, got, want)
+	}
+	if got := IndexFold([]byte(s), needle); got != want {
+		tb.Fatalf("IndexFold(bytes %d, %q) = %d, want %d", len(s), needle, got, want)
+	}
+}
+
+// Test_IndexFold_Adversarial covers the inputs that cost len(s)*len(needle)/8 without a bound on
+// the failed verifications: a needle that agrees with the haystack up to its last bytes at every
+// start. The sizes straddle the point where IndexFold hands over to Rabin-Karp, and every shape
+// is searched with the needle absent, at the start, in the middle and at the very end.
+func Test_IndexFold_Adversarial(t *testing.T) {
+	t.Parallel()
+	for _, k := range []int{9, 15, 16, 17, 24, 31, 33, 64, 65, 100, 129, 300} {
+		for _, n := range []int{k, k + 1, 2 * k, 200, 1000, 5000} {
+			hay := strings.Repeat("a", n)
+			for _, needle := range []string{
+				strings.Repeat("A", k-1) + "b",
+				"b" + strings.Repeat("A", k-1),
+				strings.Repeat("A", k/2) + "b" + strings.Repeat("a", k-k/2-1),
+				strings.Repeat("A", k),
+			} {
+				requireIndexFold(t, hay, needle)
+				requireIndexFold(t, needle+hay, needle)
+				requireIndexFold(t, hay+needle, needle)
+				requireIndexFold(t, hay+strings.ToUpper(needle)+hay, needle)
+				requireIndexFold(t, strings.Repeat("ab", n/2)+needle, needle)
+			}
+		}
+	}
+}
+
+// Test_IndexFold_SmallAlphabet searches random strings over four bytes, so that candidates, partial
+// matches and the switch to Rabin-Karp are all common, with needles of 9 bytes or more of any case.
+func Test_IndexFold_SmallAlphabet(t *testing.T) {
+	t.Parallel()
+	rng := rand.New(rand.NewSource(21)) //nolint:gosec // deterministic test data
+	const alphabet = "aAbB"
+	random := func(n int) string {
+		b := make([]byte, n)
+		for i := range b {
+			b[i] = alphabet[rng.Intn(len(alphabet))]
+		}
+		return string(b)
+	}
+	for range 8000 {
+		hay := random(rng.Intn(500))
+		needle := random(9 + rng.Intn(40))
+		if len(hay) > len(needle) && rng.Intn(2) == 0 {
+			at := rng.Intn(len(hay) - len(needle) + 1)
+			hay = hay[:at] + strings.ToUpper(needle) + hay[at+len(needle):]
+		}
+		requireIndexFold(t, hay, needle)
+	}
+}
+
+// Test_indexFoldRK runs the Rabin-Karp fallback on its own from every start, including those with
+// no room for the needle.
+func Test_indexFoldRK(t *testing.T) {
+	t.Parallel()
+	rng := rand.New(rand.NewSource(5)) //nolint:gosec // deterministic test data
+	for range 1200 {
+		hay := make([]byte, rng.Intn(80))
+		for i := range hay {
+			hay[i] = "abAB"[rng.Intn(4)]
+		}
+		needle := make([]byte, 9+rng.Intn(12))
+		for i := range needle {
+			needle[i] = "abAB"[rng.Intn(4)]
+		}
+		for from := 0; from <= len(hay)+2; from++ {
+			want := -1
+			if from <= len(hay) {
+				if i := refIndexFold(string(hay[from:]), string(needle)); i >= 0 {
+					want = from + i
+				}
+			}
+			require.Equal(t, want, indexFoldRK(string(hay), from, string(needle)), "%q %q from %d", hay, needle, from)
+			require.Equal(t, want, indexFoldRK(hay, from, string(needle)), "bytes %q %q from %d", hay, needle, from)
+		}
+	}
+}
+
 // refHasPrefixFold/refHasSuffixFold reduce to refIndexFold on the clipped
 // window: with len(window) == len(needle) a 0 return means "equal folded".
 func refHasPrefixFold(s, prefix string) bool {
@@ -439,6 +527,23 @@ func Benchmark_IndexFold(b *testing.B) {
 			var r int
 			for b.Loop() {
 				r = refIndexFold(s, "no-cache")
+			}
+			_ = r
+		})
+	}
+	// A needle that agrees with the haystack up to its last bytes, at every start: the case
+	// that costs len(s)*len(needle)/8 without a bound on the failed verifications.
+	adversarial := map[string]string{
+		"adversarial-64KiB": strings.Repeat("a", 64<<10),
+		"adversarial-1MiB":  strings.Repeat("a", 1<<20),
+	}
+	for name, s := range adversarial {
+		needle := strings.Repeat("A", 63) + "b"
+		b.Run(name+"/swar", func(b *testing.B) {
+			b.SetBytes(int64(len(s)))
+			var r int
+			for b.Loop() {
+				r = IndexFold(s, needle)
 			}
 			_ = r
 		})
