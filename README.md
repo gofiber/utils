@@ -904,13 +904,13 @@ A negative or malformed size is 0, and an unknown unit counts as bytes. A
 whole number, with or without a unit, is one digit loop and a multiplication.
 `Benchmark_ConvertToBytes_Shapes` times each shape.
 
-`ParseBytes` is the strict form for configuration values, where a guess is
+`ParseByteSize` is the strict form for configuration values, where a guess is
 a bug: it takes the number, any blanks, and at most one unit of `b`, `k` to
 `p` (with an `i` for powers of 1024 and a trailing `b`) and `EB` or `Ei`, in
 either case, and returns a `*strconv.NumError` for anything else, such as
 `10 X`, `5kilobytes`, a negative size, or a size of `math.MaxInt` or more.
 The number is scaled by `ConvertToBytes`, so the two agree on every size
-`ParseBytes` accepts.
+`ParseByteSize` accepts.
 
 ## SWAR primitives
 

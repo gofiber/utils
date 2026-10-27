@@ -679,21 +679,21 @@ func FuzzConvertToBytes(f *testing.F) {
 	})
 }
 
-// parseBytesShape is ParseBytes' grammar as a regexp: a number, blanks, and a unit if any. ASCII
+// parseByteSizeShape is ParseByteSize' grammar as a regexp: a number, blanks, and a unit if any. ASCII
 // classes, not (?i), which would fold the Kelvin sign into k.
-var parseBytesShape = regexp.MustCompile(`^\+?(\d+\.?\d*|\.\d+)([eE][+-]?\d+)?[ \t]*([bB]|[kKmMgGtTpP][iI]?[bB]?|[eE](?:[iI][bB]?|[bB]))?$`)
+var parseByteSizeShape = regexp.MustCompile(`^\+?(\d+\.?\d*|\.\d+)([eE][+-]?\d+)?[ \t]*([bB]|[kKmMgGtTpP][iI]?[bB]?|[eE](?:[iI][bB]?|[bB]))?$`)
 
-// requireNumError requires err to be the *strconv.NumError ParseBytes gives for in.
+// requireNumError requires err to be the *strconv.NumError ParseByteSize gives for in.
 func requireNumError(tb testing.TB, err, want error, in string) {
 	tb.Helper()
 	var ne *strconv.NumError
 	require.ErrorAs(tb, err, &ne, in)
-	require.Equal(tb, "ParseBytes", ne.Func, in)
+	require.Equal(tb, "ParseByteSize", ne.Func, in)
 	require.Equal(tb, in, ne.Num, in)
 	require.ErrorIs(tb, err, want, in)
 }
 
-func Test_ParseBytes(t *testing.T) {
+func Test_ParseByteSize(t *testing.T) {
 	t.Parallel()
 	for in, want := range map[string]int64{
 		"0": 0, "42": 42, "+42": 42, "42b": 42, "42 B": 42, "42\tb": 42, "0.5": 0,
@@ -703,7 +703,7 @@ func Test_ParseBytes(t *testing.T) {
 		"1EB": 1e18, "1Eb": 1e18, "1Ei": 1 << 60, "1EiB": 1 << 60, "9EB": 9e18,
 		strconv.Itoa(math.MaxInt - 1): int64(math.MaxInt - 1),
 	} {
-		got, err := ParseBytes(in)
+		got, err := ParseByteSize(in)
 		if want >= math.MaxInt { // a 32-bit int cannot hold it
 			require.Zero(t, got, in)
 			requireNumError(t, err, strconv.ErrRange, in)
@@ -713,7 +713,7 @@ func Test_ParseBytes(t *testing.T) {
 		require.Equal(t, int(want), got, in)
 	}
 
-	// Where ConvertToBytes guesses, ParseBytes fails: no number, a sign, text after the unit,
+	// Where ConvertToBytes guesses, ParseByteSize fails: no number, a sign, text after the unit,
 	// a unit that is not listed, a bare E, which is an exponent marker.
 	for _, in := range []string{
 		"", " ", "k", "KB", "-5", "-5k", "+-5", "5 X", "5kilobytes", "5 kb extra", "5k ", " 5k", "5kbb", "5kbi",
@@ -721,21 +721,21 @@ func Test_ParseBytes(t *testing.T) {
 		"5,000", "0x10", "5\n", "5k\n", "1_000", "\u0663kb", "5kb\x00", "5 kib b", strings.Repeat("9", 40) + "x",
 		"5\u212aB", "5K\u0131B", "5\u017f", // letters that only fold to k, i or s
 	} {
-		got, err := ParseBytes(in)
+		got, err := ParseByteSize(in)
 		require.Zero(t, got, in)
 		requireNumError(t, err, strconv.ErrSyntax, in)
 	}
 
 	// MaxInt itself is out of range, as ConvertToBytes saturates there.
 	for _, in := range []string{strconv.Itoa(math.MaxInt), "99999999999999999999999", "10EB", "9.3EB", "8EiB", "1e30"} {
-		got, err := ParseBytes(in)
+		got, err := ParseByteSize(in)
 		require.Zero(t, got, in)
 		requireNumError(t, err, strconv.ErrRange, in)
 	}
 }
 
-// Test_ParseBytes_AgreesWithConvertToBytes: an accepted size scales as ConvertToBytes does.
-func Test_ParseBytes_AgreesWithConvertToBytes(t *testing.T) {
+// Test_ParseByteSize_AgreesWithConvertToBytes: an accepted size scales as ConvertToBytes does.
+func Test_ParseByteSize_AgreesWithConvertToBytes(t *testing.T) {
 	t.Parallel()
 	units := []string{
 		"", "b", "k", "kb", "ki", "kib", "m", "mb", "mi", "mib", "g", "gb", "gi", "gib",
@@ -746,7 +746,7 @@ func Test_ParseBytes_AgreesWithConvertToBytes(t *testing.T) {
 			for _, unit := range units {
 				for _, in := range []string{num + gap + unit, num + gap + strings.ToUpper(unit)} {
 					want := ConvertToBytes(in)
-					got, err := ParseBytes(in)
+					got, err := ParseByteSize(in)
 					if want == math.MaxInt {
 						requireNumError(t, err, strconv.ErrRange, in)
 						continue
@@ -759,16 +759,16 @@ func Test_ParseBytes_AgreesWithConvertToBytes(t *testing.T) {
 	}
 }
 
-// Test_ParseBytes_Grammar holds ParseBytes to the regexp over random strings, edits and short units.
-func Test_ParseBytes_Grammar(t *testing.T) {
+// Test_ParseByteSize_Grammar holds ParseByteSize to the regexp over random strings, edits and short units.
+func Test_ParseByteSize_Grammar(t *testing.T) {
 	t.Parallel()
 	r := rand.New(rand.NewPCG(3, 9)) //nolint:gosec // deterministic test data
 	const alphabet = "0123456789.+-eE \tbBkKiImMgGtTpPx"
 	check := func(in string) {
 		t.Helper()
-		_, err := ParseBytes(in)
-		if syntax := errors.Is(err, strconv.ErrSyntax); syntax == parseBytesShape.MatchString(in) {
-			t.Fatalf("ParseBytes(%q) error = %v, but the grammar matches: %v", in, err, !syntax)
+		_, err := ParseByteSize(in)
+		if syntax := errors.Is(err, strconv.ErrSyntax); syntax == parseByteSizeShape.MatchString(in) {
+			t.Fatalf("ParseByteSize(%q) error = %v, but the grammar matches: %v", in, err, !syntax)
 		}
 	}
 	for range 100_000 {
@@ -799,25 +799,25 @@ func Test_ParseBytes_Grammar(t *testing.T) {
 	}
 }
 
-// FuzzParseBytes: a size is rejected as text, out of range, or read as ConvertToBytes does.
-func FuzzParseBytes(f *testing.F) {
+// FuzzParseByteSize: a size is rejected as text, out of range, or read as ConvertToBytes does.
+func FuzzParseByteSize(f *testing.F) {
 	for _, s := range []string{"42", "42KB", "1.5MiB", "+2.01k", "1e3K", "1EB", "9223372036854775807", "-5K", "5 X", "5e", ""} {
 		f.Add(s)
 	}
 	f.Fuzz(func(t *testing.T, s string) {
-		got, err := ParseBytes(s)
+		got, err := ParseByteSize(s)
 		switch {
 		case err == nil:
-			require.True(t, parseBytesShape.MatchString(s), s)
+			require.True(t, parseByteSizeShape.MatchString(s), s)
 			require.Equal(t, ConvertToBytes(s), got, s)
 			require.Less(t, got, math.MaxInt, s)
 		case errors.Is(err, strconv.ErrRange):
-			require.True(t, parseBytesShape.MatchString(s), s)
+			require.True(t, parseByteSizeShape.MatchString(s), s)
 			require.Equal(t, math.MaxInt, ConvertToBytes(s), s)
 			require.Zero(t, got, s)
 		default:
 			requireNumError(t, err, strconv.ErrSyntax, s)
-			require.False(t, parseBytesShape.MatchString(s), s)
+			require.False(t, parseByteSizeShape.MatchString(s), s)
 			require.Zero(t, got, s)
 		}
 	})

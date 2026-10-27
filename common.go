@@ -220,16 +220,16 @@ func continuesUnitWord(c byte) bool {
 	return l >= 'a' && l <= 'z' && l != 'b'
 }
 
-// ParseBytes is ConvertToBytes without guessing: a number, blanks and at most one unit (b; k to p,
+// ParseByteSize is ConvertToBytes without guessing: a number, blanks and at most one unit (b; k to p,
 // with i and b: KiB; e, with i or b: EB), else 0 and a *strconv.NumError, ErrSyntax or, for
 // math.MaxInt or more, ErrRange. The only sign is '+'.
-func ParseBytes(s string) (int, error) {
+func ParseByteSize(s string) (int, error) {
 	if !validSize(s) {
-		return 0, &strconv.NumError{Func: "ParseBytes", Num: s, Err: strconv.ErrSyntax}
+		return 0, &strconv.NumError{Func: "ParseByteSize", Num: s, Err: strconv.ErrSyntax}
 	}
 	n := ConvertToBytes(s)
 	if n == math.MaxInt {
-		return 0, &strconv.NumError{Func: "ParseBytes", Num: s, Err: strconv.ErrRange}
+		return 0, &strconv.NumError{Func: "ParseByteSize", Num: s, Err: strconv.ErrRange}
 	}
 	return n, nil
 }
@@ -274,7 +274,7 @@ func skipDigits(s string, i int) int {
 	return i
 }
 
-// validSizeUnit reports whether u, not empty, is a unit ParseBytes accepts.
+// validSizeUnit reports whether u, not empty, is a unit ParseByteSize accepts.
 func validSizeUnit(u string) bool {
 	c, rest := u[0]|0x20, u[1:]
 	if c == 'b' {
