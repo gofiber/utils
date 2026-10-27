@@ -410,6 +410,59 @@ func Benchmark_ToString(b *testing.B) {
 	}
 }
 
+// Test_mayBeNilPointer holds the gc compiler's shortcut to nilPointerReflect: every nil pointer
+// matches and no other value with a data word does. A nil map, func or chan may match too, which
+// is why the check only routes the call through nilReceiverString.
+func Test_mayBeNilPointer(t *testing.T) {
+	t.Parallel()
+	n := 7
+	var (
+		nilInt  *int
+		nilType *CustomType
+		nilTime *time.Time
+		nilErr  *nilReceiverError
+		nilStr  *nilReceiver
+	)
+	for name, v := range map[string]any{
+		"nil *int":           nilInt,
+		"nil *struct":        nilType,
+		"nil *time.Time":     nilTime,
+		"nil error receiver": nilErr,
+		"nil Stringer":       nilStr,
+		"nil **int":          (**int)(nil),
+		"nil *[]int":         (*[]int)(nil),
+		"nil *uintptr":       (*uintptr)(nil),
+	} {
+		require.True(t, nilPointerReflect(v), name)
+		require.True(t, mayBeNilPointer(v), name)
+	}
+	for name, v := range map[string]any{
+		"non-nil *int":    &n,
+		"non-nil *struct": &CustomType{},
+		"int":             0,
+		"string":          "",
+		"bool":            false,
+		"struct":          CustomType{},
+		"empty struct":    struct{}{},
+		"nil slice":       []int(nil),
+		"slice":           []int{1},
+		"map":             map[string]int{},
+		"func":            func() {},
+		"error":           errors.New("x"),
+		"time":            time.Time{},
+	} {
+		require.False(t, nilPointerReflect(v), name)
+		require.False(t, mayBeNilPointer(v), name)
+	}
+	for name, v := range map[string]any{
+		"nil map":  map[string]int(nil),
+		"nil func": (func())(nil),
+		"nil chan": (chan int)(nil),
+	} {
+		require.False(t, nilPointerReflect(v), name)
+	}
+}
+
 // Benchmark_ToString_Methods measures the types that go through an Error or String method,
 // where ToString first checks for a nil pointer receiver.
 func Benchmark_ToString_Methods(b *testing.B) {

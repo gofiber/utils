@@ -11,7 +11,6 @@ import (
 	"strconv"
 	"strings"
 	"time"
-	"unsafe"
 
 	"github.com/gofiber/utils/v2/internal/unsafeconv"
 )
@@ -255,12 +254,10 @@ func endlessPointerType(t reflect.Type) bool {
 	}
 }
 
-// mayBeNilPointer reports whether v's data word is nil, as a nil pointer's is; a nil map, func, chan
-// or one-pointer struct matches too, and nilReceiverString tells them apart. The exact reflect check
-// costs +2.4 to +4.2 ns (an error: 4.2 to 8.5 ns; benchstat -count=10, Xeon 2.3 GHz, Go 1.26).
-func mayBeNilPointer(v any) bool {
-	// #nosec G103
-	return (*[2]unsafe.Pointer)(unsafe.Pointer(&v))[1] == nil
+// nilPointerReflect is mayBeNilPointer without the gc shortcut.
+func nilPointerReflect(v any) bool {
+	rv := reflect.ValueOf(v)
+	return rv.Kind() == reflect.Pointer && rv.IsNil()
 }
 
 // nilReceiverString calls method, the Error or String of arg, whose data word is nil: if it
