@@ -19,20 +19,14 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// ---------------------------------------------------------------------------
-// ParseHTTPDate, FormatHTTPDate
-
 func Test_HTTPDateLayout_IsTimeFormat(t *testing.T) {
 	t.Parallel()
 	require.Equal(t, http.TimeFormat, httpDateLayout)
 	require.Len(t, http.TimeFormat, httpDateLen)
 }
 
-// assertHTTPDateStdlib requires ParseHTTPDate to answer as net/http.ParseTime
-// does: the same instant in the same location, or the same *time.ParseError.
-// The one thing it adds is leniency about ASCII whitespace around the date, so
-// in is handed to the stdlib trimmed, and the stdlib is shown to refuse it
-// padded.
+// assertHTTPDateStdlib holds ParseHTTPDate to http.ParseTime (same instant and location, or same
+// *time.ParseError), which gets in trimmed since only ParseHTTPDate tolerates padding.
 func assertHTTPDateStdlib(tb testing.TB, in string) {
 	tb.Helper()
 	trimmed := strings.Trim(in, " \t\r\n")
@@ -67,9 +61,9 @@ func assertHTTPDateStdlib(tb testing.TB, in string) {
 func Test_ParseHTTPDate_StdlibParity(t *testing.T) {
 	t.Parallel()
 	bases := []string{
-		"Sun, 06 Nov 1994 08:49:37 GMT",  // RFC 9110 preferred
-		"Sunday, 06-Nov-94 08:49:37 GMT", // RFC 850
-		"Sun Nov  6 08:49:37 1994",       // asctime
+		"Sun, 06 Nov 1994 08:49:37 GMT",
+		"Sunday, 06-Nov-94 08:49:37 GMT",
+		"Sun Nov  6 08:49:37 1994",
 		"Sun Nov 16 08:49:37 1994",
 	}
 	replacements := []byte{' ', ':', ',', '-', '.', '0', '5', '9', 'A', 'M', 'a', 'z', 0x00, 0x7f, 0xff}
@@ -79,7 +73,7 @@ func Test_ParseHTTPDate_StdlibParity(t *testing.T) {
 			for _, r := range replacements {
 				assertHTTPDateStdlib(t, base[:pos]+string([]byte{r})+base[pos+1:])
 			}
-			assertHTTPDateStdlib(t, base[:pos]) // every truncation
+			assertHTTPDateStdlib(t, base[:pos])
 			assertHTTPDateStdlib(t, base[:pos]+base[pos+1:])
 		}
 		assertHTTPDateStdlib(t, base+" ")
@@ -87,8 +81,6 @@ func Test_ParseHTTPDate_StdlibParity(t *testing.T) {
 		assertHTTPDateStdlib(t, "\t "+base+"\r\n")
 	}
 
-	// Every month name and weekday name in each layout, and the case and
-	// spelling variants time.Parse accepts or refuses.
 	months := []string{"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"}
 	days := []string{"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"}
 	longDays := []string{"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"}
@@ -103,7 +95,6 @@ func Test_ParseHTTPDate_StdlibParity(t *testing.T) {
 		assertHTTPDateStdlib(t, name+", 06 Nov 1994 08:49:37 GMT")
 	}
 
-	// Zone names, offsets and clock readings that are or are not accepted.
 	for _, zone := range []string{"GMT", "UTC", "gmt", "Z", "+0000", "-0500", "EST", "GMT+1", ""} {
 		assertHTTPDateStdlib(t, "Sun, 06 Nov 1994 08:49:37 "+zone)
 		assertHTTPDateStdlib(t, "Sunday, 06-Nov-94 08:49:37 "+zone)
@@ -112,7 +103,6 @@ func Test_ParseHTTPDate_StdlibParity(t *testing.T) {
 		assertHTTPDateStdlib(t, "Sat, 15 Jul 2023 "+clock+" GMT")
 	}
 
-	// The calendar: leap years and the days around the end of every month.
 	for _, year := range []int{0, 1, 4, 99, 100, 400, 1600, 1900, 1969, 1970, 1996, 2000, 2023, 2100, 2400, 9999} {
 		for mi, month := range months {
 			for _, day := range []int{0, 1, 28, 29, 30, 31, 32, 99} {
@@ -120,12 +110,12 @@ func Test_ParseHTTPDate_StdlibParity(t *testing.T) {
 			}
 		}
 	}
-	// RFC 850 has two-digit years, which time.Parse maps to 1969..2068.
+	// RFC 850 two-digit years map to 1969..2068.
 	for yy := range 100 {
 		assertHTTPDateStdlib(t, fmt.Sprintf("Monday, 02-Jan-%02d 15:04:05 GMT", yy))
 	}
 
-	// Years that do not have four digits, signs, and other numbers that are not one.
+	// Malformed and boundary years: length, sign, non-ASCII digits.
 	for _, year := range []string{"0000", "0001", "10000", "99999", "-001", "+001", "2x21", "\u0662\u0660\u0662\u0661", " 2021"} {
 		assertHTTPDateStdlib(t, "Sun, 06 Nov "+year+" 08:49:37 GMT")
 	}
@@ -134,9 +124,7 @@ func Test_ParseHTTPDate_StdlibParity(t *testing.T) {
 	}
 }
 
-// Test_ParseHTTPDate_WhitespaceLeniency pins the one difference from
-// http.ParseTime, which the doc comment states: ASCII whitespace around the
-// date is ignored, where the stdlib rejects it.
+// Test_ParseHTTPDate_WhitespaceLeniency pins the documented difference: ASCII padding is ignored, unlike http.ParseTime.
 func Test_ParseHTTPDate_WhitespaceLeniency(t *testing.T) {
 	t.Parallel()
 	const date = "Sun, 06 Nov 1994 08:49:37 GMT"
@@ -151,7 +139,7 @@ func Test_ParseHTTPDate_WhitespaceLeniency(t *testing.T) {
 			require.True(t, got.Equal(want), "%q", in)
 		}
 	}
-	// Anything else around it is as much an error as it is to the stdlib.
+	// \v, \f and the rest are not padding.
 	for _, pad := range []string{"\v", "\f", "\u00a0", "\x00", "x"} {
 		_, err := ParseHTTPDate(pad + date)
 		require.Error(t, err, "%q", pad)
@@ -191,7 +179,7 @@ func Test_FormatHTTPDate_StdlibParity(t *testing.T) {
 		}
 	}
 	for range 20000 {
-		// Every magnitude of Unix second, including the years HTTP cannot say.
+		// Every magnitude of Unix second, out-of-range years included.
 		sec := r.Int64N(1<<40) - 1<<39
 		if r.IntN(8) == 0 {
 			sec = r.Int64N(1<<62) - 1<<61
@@ -213,13 +201,8 @@ func Test_FormatHTTPDate_StdlibParity(t *testing.T) {
 	}
 }
 
-// ---------------------------------------------------------------------------
-// AppendQueryUnescape, AppendPathUnescape in place
-
-// Test_AppendUnescape_InPlaceParity decodes with the destination being the
-// input itself, which the doc comments allow because decoding never grows the
-// input, and requires what net/url gives: the same bytes, or the same error.
-// After an error the input is consumed, so only the error is compared then.
+// Test_AppendUnescape_InPlaceParity decodes into the input itself, as documented; an error
+// consumes the input, so only the error is compared then.
 func Test_AppendUnescape_InPlaceParity(t *testing.T) {
 	t.Parallel()
 	forEachString("%+aF1\x00\xff", 6, func(s string) {
@@ -250,13 +233,9 @@ func Test_AppendUnescape_InPlaceParity(t *testing.T) {
 	})
 }
 
-// ---------------------------------------------------------------------------
-// StatusMessage
-
 func Test_StatusMessage_StdlibParity(t *testing.T) {
 	t.Parallel()
-	// Codes net/http does not name but the status table does, because Fiber
-	// and fasthttp spell them.
+	// Codes net/http lacks but the status table names, for Fiber and fasthttp.
 	extra := map[int]string{
 		306: "Switch Proxy",
 	}
@@ -271,17 +250,11 @@ func Test_StatusMessage_StdlibParity(t *testing.T) {
 	}
 }
 
-// ---------------------------------------------------------------------------
-// SplitHostPort, IsIPv4, IsIPv6, ParseIPv4, ParseIPv6
-
 func Test_SplitHostPort_StdlibParity_Exhaustive(t *testing.T) {
 	t.Parallel()
-	// Every string of at most eight bytes over the bytes that make the grammar:
-	// both brackets, the colon, the percent sign, and a letter.
 	forEachString("[]:%a", 8, func(s string) {
 		checkSplitHostPort(t, s)
 	})
-	// And of at most five over a wider set, with a space, the dot and a NUL.
 	forEachString("[]:%a1. \x00", 5, func(s string) {
 		checkSplitHostPort(t, s)
 	})
@@ -297,13 +270,9 @@ func Test_IP_StdlibParity_Exhaustive(t *testing.T) {
 	forEachString("0:.%1fg", 5, check)
 }
 
-// ---------------------------------------------------------------------------
-// IncrementIPRange
-
 func Test_IncrementIPRange_Parity(t *testing.T) {
 	t.Parallel()
-	// The oracle is arithmetic: an address is a big-endian number, the next one
-	// is the number plus one, and the last wraps to zero.
+	// The oracle is arithmetic: big-endian number plus one, wrapping to zero.
 	bump := func(ip net.IP) net.IP {
 		n := new(big.Int).SetBytes(ip)
 		n.Add(n, big.NewInt(1))
@@ -318,7 +287,6 @@ func Test_IncrementIPRange_Parity(t *testing.T) {
 		if !got.Equal(want) || len(got) != len(ip) || string(got) != string(want) {
 			t.Fatalf("IncrementIPRange(%v) = %v, want %v", []byte(ip), []byte(got), []byte(want))
 		}
-		// netip says the same wherever the successor exists.
 		if addr, ok := netip.AddrFromSlice(ip); ok {
 			if next := addr.Next(); next.IsValid() && string(next.AsSlice()) != string(got) {
 				t.Fatalf("IncrementIPRange(%v) = %v, netip.Addr.Next gives %v", ip, got, next)
@@ -328,11 +296,10 @@ func Test_IncrementIPRange_Parity(t *testing.T) {
 
 	r := rand.New(rand.NewPCG(0x1c4, 0x7fe)) //nolint:gosec // deterministic test data
 	for _, size := range []int{4, 16} {
-		// Every run of 0xff at the end, which is how far the carry travels.
 		for run := 0; run <= size; run++ {
 			ip := make(net.IP, size)
 			for i := range ip {
-				ip[i] = byte(r.IntN(255)) // never 0xff, so the run is exactly what is set below
+				ip[i] = byte(r.IntN(255)) // never 0xff, so the run below is exact
 			}
 			for i := size - run; i < size; i++ {
 				ip[i] = 0xff
@@ -348,13 +315,12 @@ func Test_IncrementIPRange_Parity(t *testing.T) {
 			check(ip)
 		}
 	}
-	// The v4-in-v6 spelling is a 16-byte number to this function.
+	// The v4-in-v6 spelling is a 16-byte number here.
 	check(net.IPv4(192, 168, 1, 255))
 	check(net.IPv4(255, 255, 255, 255))
 	check(net.IPv6zero)
 	check(net.IPv6loopback)
 
-	// Other lengths are numbers too, and nothing is something to leave alone.
 	for _, ip := range []net.IP{{0}, {0xff}, {1, 0xff}, {0xff, 0xff, 0xff}, {0, 0, 0, 0, 0}} {
 		check(ip)
 	}
@@ -363,9 +329,6 @@ func Test_IncrementIPRange_Parity(t *testing.T) {
 		IncrementIPRange(net.IP{})
 	})
 }
-
-// ---------------------------------------------------------------------------
-// ReadFile
 
 func Test_ReadFile_StdlibParity(t *testing.T) {
 	t.Parallel()
@@ -398,7 +361,6 @@ func Test_ReadFile_StdlibParity(t *testing.T) {
 		require.Equal(t, want, fromFS, name)
 	}
 
-	// A missing file is fs.ErrNotExist from either source, as the stdlib has it.
 	_, stdErr := os.ReadFile(filepath.Join(dir, "missing")) // #nosec G304
 	require.ErrorIs(t, stdErr, fs.ErrNotExist)
 	_, err := ReadFile(filepath.Join(dir, "missing"), nil)
@@ -406,7 +368,6 @@ func Test_ReadFile_StdlibParity(t *testing.T) {
 	_, err = ReadFile("/missing", fsys)
 	require.ErrorIs(t, err, fs.ErrNotExist)
 
-	// A directory cannot be read as a file by any of the three.
 	_, stdErr = os.ReadFile(filepath.Join(dir, "sub")) // #nosec G304
 	require.Error(t, stdErr)
 	_, err = ReadFile(filepath.Join(dir, "sub"), nil)
@@ -414,14 +375,10 @@ func Test_ReadFile_StdlibParity(t *testing.T) {
 	_, err = ReadFile("/sub", fsys)
 	require.Error(t, err)
 
-	// An empty file is an empty slice, not an error.
 	empty, err := ReadFile("/empty.txt", fsys)
 	require.NoError(t, err)
 	require.Empty(t, empty)
 }
-
-// ---------------------------------------------------------------------------
-// UnsafeString, UnsafeBytes, CopyString, CopyBytes
 
 func Test_UnsafeConversions_Parity(t *testing.T) {
 	t.Parallel()
@@ -435,7 +392,6 @@ func Test_UnsafeConversions_Parity(t *testing.T) {
 		require.Equal(t, string(src), view, n)
 		require.Len(t, view, n)
 		if n > 0 {
-			// A view, not a copy: it sees what the slice is changed to.
 			src[0] ^= 0xff
 			require.Equal(t, string(src), view, n)
 			require.Same(t, &src[0], &UnsafeBytes(view)[0])
@@ -444,7 +400,7 @@ func Test_UnsafeConversions_Parity(t *testing.T) {
 
 		str := string(src)
 		bs := UnsafeBytes(str)
-		require.Equal(t, str, string(bs)) // an empty string may give a nil slice, which is still empty
+		require.Equal(t, str, string(bs)) // an empty string may give a nil slice
 		require.Len(t, bs, n)
 		require.Equal(t, n, cap(bs))
 

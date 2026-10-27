@@ -12,18 +12,6 @@ import (
 	casestrings "github.com/gofiber/utils/v2/strings"
 )
 
-// The helpers that stand in for a strings or bytes function promise its
-// answers. Each is held to the stdlib function over every string of a small
-// alphabet chosen to hit the interesting bytes (the cutset itself, a letter, a
-// space, a byte above 0x7F), for every cutset or separator byte there is, and
-// for both instantiations, which the stdlib answers with two functions that
-// differ in small ways (a nil result for bytes, a view of the input).
-//
-// Where the contract is ASCII-only on purpose the stdlib is not the oracle and
-// the test says so: a one-byte cutset is a byte, not a UTF-8 sequence, and
-// case folding never leaves ASCII.
-
-// forEachString calls fn with every string over alphabet of at most maxLen bytes.
 func forEachString(alphabet string, maxLen int, fn func(s string)) {
 	buf := make([]byte, 0, maxLen)
 	var walk func(depth int)
@@ -41,8 +29,7 @@ func forEachString(alphabet string, maxLen int, fn func(s string)) {
 	walk(maxLen)
 }
 
-// requireSameView fails unless got is want as the stdlib returns it: the same
-// bytes, nil together or not at all, and the same window of the same array.
+// requireSameView fails unless got is want as the stdlib returns it: same bytes, nil-ness and window.
 func requireSameView(tb testing.TB, what string, in, got, want []byte) {
 	tb.Helper()
 	switch {
@@ -57,13 +44,8 @@ func requireSameView(tb testing.TB, what string, in, got, want []byte) {
 	}
 }
 
-// requireTrimmed is requireSameView for the functions that part from bytes.Trim,
-// bytes.TrimLeft and bytes.TrimSpace in one way. Those return nil when nothing
-// is left, which the stdlib does not document ("what we've historically
-// done"); these return the empty slice they cut from the input, which is nil
-// only if the input was. Returning the slicing expression as it is keeps
-// TrimSpace small enough to be inlined, so that is the contract. A result that
-// has anything in it is held to the stdlib exactly.
+// requireTrimmed is requireSameView except for an empty result: bytes.Trim, TrimLeft and TrimSpace
+// return nil there (undocumented), these return an empty slice of the input, keeping TrimSpace inlinable.
 func requireTrimmed(tb testing.TB, what string, in, got, want []byte) {
 	tb.Helper()
 	if len(want) > 0 {
@@ -77,9 +59,6 @@ func requireTrimmed(tb testing.TB, what string, in, got, want []byte) {
 		tb.Fatalf("%s(%q): an empty result must be a slice of the input, so nil only for nil; got nil = %v for input nil = %v", what, in, got == nil, in == nil)
 	}
 }
-
-// ---------------------------------------------------------------------------
-// Trim, TrimLeft, TrimRight
 
 func refTrimLeft(s string, c byte) string {
 	for len(s) > 0 && s[0] == c {
@@ -111,9 +90,7 @@ func Test_Trim_StdlibParity(t *testing.T) {
 		forEachString(string([]byte{c, 'a', ' ', 0xe9}), 5, func(s string) {
 			wantLeft, wantRight, wantBoth := refTrimLeft(s, c), refTrimRight(s, c), refTrimRight(refTrimLeft(s, c), c)
 			if c < utf8.RuneSelf {
-				// Below 0x80 the stdlib's cutset is the byte itself; above it, it
-				// would be a malformed UTF-8 sequence matching every other
-				// malformed byte, which is not what a byte cutset means.
+				// Below 0x80 the stdlib's cutset is the byte; above it, malformed UTF-8 matching every malformed byte.
 				if strings.TrimLeft(s, cutset) != wantLeft || strings.TrimRight(s, cutset) != wantRight || strings.Trim(s, cutset) != wantBoth {
 					t.Fatalf("reference trims disagree with the stdlib for %q cutset %q", s, cutset)
 				}
@@ -145,14 +122,9 @@ func Test_Trim_StdlibParity(t *testing.T) {
 	}
 }
 
-// ---------------------------------------------------------------------------
-// TrimSpace
-
 func Test_TrimSpace_StdlibParity(t *testing.T) {
 	t.Parallel()
-	// Every ASCII byte that is, or sits next to, whitespace in a table or a
-	// range comparison: the six spaces, NUL, the unit separators below the
-	// space, DEL, and letters.
+	// Whitespace and its neighbors in a table or range test.
 	forEachString("\t\n\v\f\r \x00\x08\x0e\x1f\x7f!a", 5, func(s string) {
 		if got, want := TrimSpace(s), strings.TrimSpace(s); got != want {
 			t.Fatalf("TrimSpace(%q) = %q, stdlib gives %q", s, got, want)
@@ -163,7 +135,6 @@ func Test_TrimSpace_StdlibParity(t *testing.T) {
 	requireTrimmed(t, "TrimSpace(empty)", []byte{}, TrimSpace([]byte{}), bytes.TrimSpace([]byte{}))
 	requireTrimmed(t, "TrimSpace(nil)", nil, TrimSpace([]byte(nil)), bytes.TrimSpace(nil))
 
-	// A named string and byte slice type take the same path.
 	type word string
 	type blob []byte
 	if got := TrimSpace(word(" \tx\n")); got != "x" {
@@ -174,11 +145,8 @@ func Test_TrimSpace_StdlibParity(t *testing.T) {
 	}
 }
 
-// Test_TrimSpace_OnlyASCIIWhitespace pins the one way TrimSpace parts from the
-// stdlib on purpose: it trims the six ASCII whitespace bytes, where the stdlib
-// trims every Unicode space, among them U+0085, U+00A0 and U+2000..U+200A. A
-// byte of such a character is never trimmed on its own, and a malformed or
-// non-space multi-byte sequence is left alone by both.
+// Test_TrimSpace_OnlyASCIIWhitespace pins the deliberate difference: only the six ASCII whitespace
+// bytes are trimmed, not Unicode spaces such as U+00A0.
 func Test_TrimSpace_OnlyASCIIWhitespace(t *testing.T) {
 	t.Parallel()
 	for r := rune(utf8.RuneSelf); r <= unicode.MaxRune; r++ {
@@ -197,9 +165,7 @@ func Test_TrimSpace_OnlyASCIIWhitespace(t *testing.T) {
 			t.Fatalf("the stdlib no longer trims U+%04X: the documented difference is gone", r)
 		}
 	}
-	// A lone byte above 0x7F is not a space to either, whatever rune its value
-	// would be (0x85 and 0xA0 included, which are two bytes when they are the
-	// spaces U+0085 and U+00A0): the stdlib decodes it as a malformed sequence.
+	// A lone byte above 0x7F is no space to either (0x85, 0xA0 too): the stdlib reads it as malformed UTF-8.
 	for b := utf8.RuneSelf; b < 256; b++ {
 		for _, in := range []string{string([]byte{byte(b)}), " " + string([]byte{byte(b)}) + " ", "x" + string([]byte{byte(b)})} {
 			if got, want := TrimSpace(in), strings.TrimSpace(in); got != want {
@@ -211,9 +177,6 @@ func Test_TrimSpace_OnlyASCIIWhitespace(t *testing.T) {
 		t.Fatalf("TrimSpace left %q", got)
 	}
 }
-
-// ---------------------------------------------------------------------------
-// CutByte, LastCutByte
 
 func Test_CutByte_StdlibParity(t *testing.T) {
 	t.Parallel()
@@ -264,13 +227,8 @@ func Test_CutByte_StdlibParity(t *testing.T) {
 	}
 }
 
-// ---------------------------------------------------------------------------
-// EqualFold
-
 func Test_EqualFold_StdlibParity(t *testing.T) {
 	t.Parallel()
-	// Every pair of short strings over the letters at the edges of the two
-	// cases, the bytes just outside the letter ranges, and a digit.
 	const edges = "aAzZ@[`{1"
 	forEachString(edges, 3, func(a string) {
 		forEachString(edges, 3, func(b string) {
@@ -284,9 +242,6 @@ func Test_EqualFold_StdlibParity(t *testing.T) {
 		})
 	})
 
-	// One byte of every value planted at every position of strings of every
-	// length through the word-at-a-time and the tail paths, against a copy
-	// with that byte case-flipped or replaced.
 	for n := 1; n <= 40; n++ {
 		base := []byte(strings.Repeat("aBcDeFgH", 6)[:n])
 		for pos := range n {
@@ -310,16 +265,14 @@ func Test_EqualFold_StdlibParity(t *testing.T) {
 	}
 }
 
-// Test_EqualFold_OnlyASCIIFolds pins the other deliberate difference: the
-// stdlib's simple Unicode folding relates letters of different bytes, and
-// EqualFold folds only A-Z and a-z.
+// Test_EqualFold_OnlyASCIIFolds pins the deliberate difference: the stdlib's Unicode folding relates letters of different bytes.
 func Test_EqualFold_OnlyASCIIFolds(t *testing.T) {
 	t.Parallel()
 	for _, tc := range [][2]string{
 		{"k", "\u212a"}, // KELVIN SIGN folds to k
-		{"s", "\u017f"}, // LATIN SMALL LETTER LONG S folds to s
+		{"s", "\u017f"}, // LONG S folds to s
 		{"\u00e9", "\u00c9"},
-		{"\u03c3", "\u03c2"}, // Greek sigma and final sigma
+		{"\u03c3", "\u03c2"},
 		{"\u01c5", "\u01c6"},
 	} {
 		if !strings.EqualFold(tc[0], tc[1]) {
@@ -334,9 +287,6 @@ func Test_EqualFold_OnlyASCIIFolds(t *testing.T) {
 	}
 }
 
-// ---------------------------------------------------------------------------
-// IndexAny2, IndexAny3
-
 func Test_IndexAny_StdlibParity(t *testing.T) {
 	t.Parallel()
 	needles := [][3]byte{
@@ -349,8 +299,7 @@ func Test_IndexAny_StdlibParity(t *testing.T) {
 	}
 	for _, nd := range needles {
 		a, b, c := nd[0], nd[1], nd[2]
-		// Bytes next to the needles in value or in bit pattern, which are what
-		// an inexact SWAR zero-lane test confuses with them.
+		// Fillers near the needles in value or bit pattern, which an inexact SWAR zero-lane test confuses.
 		fillers := []byte{0x00, 0x7f, 0x80, 0xff, a ^ 0x80, a + 1, a - 1, b ^ 1, c + 1, 'x'}
 		for n := 0; n <= 70; n++ {
 			for _, f := range fillers {
@@ -361,7 +310,6 @@ func Test_IndexAny_StdlibParity(t *testing.T) {
 						h := bytes.Clone(base)
 						h[pos] = planted
 						requireIndexAny(t, h, a, b, c)
-						// A second hit after the first must never win.
 						for later := pos + 1; later < min(n, pos+3); later++ {
 							h2 := bytes.Clone(h)
 							h2[later] = a
@@ -374,9 +322,7 @@ func Test_IndexAny_StdlibParity(t *testing.T) {
 	}
 }
 
-// requireIndexAny checks IndexAny2 and IndexAny3 on h, against bytes.IndexByte
-// (the first hit of a set is the earliest first hit of its members) and, where
-// the needles are ASCII and so mean the same to it, against bytes.IndexAny.
+// requireIndexAny holds IndexAny2/3 to the earliest bytes.IndexByte hit, and ASCII needles to the stdlib IndexAny.
 func requireIndexAny(tb testing.TB, h []byte, a, b, c byte) {
 	tb.Helper()
 	earliest := func(idx ...int) int {
@@ -413,13 +359,8 @@ func requireIndexAny(tb testing.TB, h []byte, a, b, c byte) {
 	}
 }
 
-// ---------------------------------------------------------------------------
-// ToLower, ToUpper and the in-place forms
-
-// deprecated holds the wrappers that predate the bytes and strings packages.
-// They are called through these values because the `//go:fix inline` on them
-// makes vet ask for every direct call to be replaced by its body, and the
-// wrappers are what is under test.
+// deprecated holds the wrappers under test, called through it because their `//go:fix inline`
+// makes vet flag direct calls.
 var deprecated = struct {
 	toLower, toUpper           func(string) string
 	toLowerBytes, toUpperBytes func([]byte) []byte
@@ -458,7 +399,6 @@ func Test_Case_StdlibParity(t *testing.T) {
 			t.Fatalf("bytes.ToLower/ToUpper modified their input: %q became %q", s, b)
 		}
 
-		// The in-place forms return their argument, converted.
 		lower := []byte(s)
 		if got := casebytes.UnsafeToLower(lower); string(got) != wantLower || string(lower) != wantLower || (len(got) > 0 && &got[0] != &lower[0]) {
 			t.Fatalf("bytes.UnsafeToLower(%q) = %q, input %q, want %q in place", s, got, lower, wantLower)
@@ -483,17 +423,14 @@ func Test_Case_StdlibParity(t *testing.T) {
 		}
 	}
 
-	// All 128 ASCII bytes, and all 256, alone and between letters.
 	for c := range 256 {
 		cs := string([]byte{byte(c)})
 		check(cs)
 		check("aB" + cs + "Cd")
 		check(strings.Repeat("xY", 9) + cs + strings.Repeat("Zz", 9))
 	}
-	// Every string of the case boundaries (@ and [ around A-Z, ` and { around a-z).
 	forEachString("aAzZ@[`{\xe9\xc9", 4, check)
-	// Lengths straddling the word and the 32-byte block, with the single
-	// letter that needs converting at every position.
+	// Lengths around the word and 32-byte block sizes, the one letter to convert at every position.
 	for n := range 100 {
 		for pos := range n {
 			plain := []byte(strings.Repeat("-4/", 40)[:n])
@@ -506,8 +443,7 @@ func Test_Case_StdlibParity(t *testing.T) {
 	}
 }
 
-// Test_Case_ASCIIOnly pins that case conversion stays in ASCII, where the
-// stdlib maps every Unicode letter: the bytes of anything else pass through.
+// Test_Case_ASCIIOnly pins that case conversion stays in ASCII, where the stdlib maps every Unicode letter.
 func Test_Case_ASCIIOnly(t *testing.T) {
 	t.Parallel()
 	for _, in := range []string{"\u00e9", "\u00c9", "\u0131", "\u212a", "\u00df", "\u01c5", "\u00e9 \u00c9 123 !", "\xff\xfe"} {
@@ -523,13 +459,11 @@ func Test_Case_ASCIIOnly(t *testing.T) {
 	}
 }
 
-// Test_CaseBytes_Aliasing pins the one way the bytes converters part from
-// bytes.ToLower and bytes.ToUpper besides ASCII: those always return a copy,
-// where these return their argument itself when there is nothing to convert.
+// Test_CaseBytes_Aliasing pins that nothing to convert returns the argument itself, where bytes.ToLower copies.
 func Test_CaseBytes_Aliasing(t *testing.T) {
 	t.Parallel()
 	for _, n := range []int{0, 1, 7, 8, 9, 31, 32, 33, 100} {
-		plain := bytes.Repeat([]byte{'a'}, n) // already lower case
+		plain := bytes.Repeat([]byte{'a'}, n)
 		got := casebytes.ToLower(plain)
 		if n > 0 && &got[0] != &plain[0] {
 			t.Fatalf("ToLower(%d lower-case bytes) copied", n)
@@ -544,7 +478,6 @@ func Test_CaseBytes_Aliasing(t *testing.T) {
 			t.Fatalf("ToUpper(%d upper-case bytes) copied", n)
 		}
 
-		// When something changes, the result is a new array.
 		mixed := bytes.Repeat([]byte{'a'}, n)
 		if n > 0 {
 			mixed[n-1] = 'Q'
@@ -555,12 +488,7 @@ func Test_CaseBytes_Aliasing(t *testing.T) {
 	}
 }
 
-// ---------------------------------------------------------------------------
-// SplitTrimSeq
-
-// Test_SplitTrimSeq_StdlibParity holds SplitTrimSeq to strings.SplitSeq with
-// strings.TrimSpace applied and the empty elements dropped, over every string
-// of five bytes over the separator, the spaces that are trimmed, and letters.
+// Test_SplitTrimSeq_StdlibParity holds SplitTrimSeq to strings.SplitSeq with TrimSpace applied and empty elements dropped.
 func Test_SplitTrimSeq_StdlibParity(t *testing.T) {
 	t.Parallel()
 	for _, sep := range []byte{',', ';', ' ', '\t', 'a', 0x00, 0xff} {
@@ -589,13 +517,7 @@ func Test_SplitTrimSeq_StdlibParity(t *testing.T) {
 	}
 }
 
-// ---------------------------------------------------------------------------
-// IndexControl
-
-// Test_IndexControl_UnicodeParity compares the control scans with
-// unicode.IsControl, byte by byte: they agree on ASCII, where the controls are
-// 0x00-0x1F and 0x7F, and differ on purpose above it, where unicode.IsControl
-// has the C1 range (U+0080-U+009F) that a byte >= 0x80 is never taken for here.
+// Test_IndexControl_UnicodeParity holds the scans to unicode.IsControl on ASCII; the C1 range (U+0080-U+009F) is deliberately ignored.
 func Test_IndexControl_UnicodeParity(t *testing.T) {
 	t.Parallel()
 	for b := range 256 {
@@ -615,7 +537,6 @@ func Test_IndexControl_UnicodeParity(t *testing.T) {
 			t.Fatalf("IndexControlExceptTab(%#x) = %d, want %d", b, got, wantExceptTab)
 		}
 
-		// The same byte after a clean run of every length through the word loops.
 		for n := 0; n <= 40; n++ {
 			s := strings.Repeat("a", n) + in
 			if got := IndexControl(s); got != map[bool]int{true: n, false: -1}[isControl] {
@@ -627,7 +548,6 @@ func Test_IndexControl_UnicodeParity(t *testing.T) {
 		}
 	}
 
-	// The C1 range, as UTF-8, is the documented difference.
 	for r := rune(0x80); r <= 0x9f; r++ {
 		if !unicode.IsControl(r) {
 			t.Fatalf("U+%04X is no longer a control character to the stdlib", r)

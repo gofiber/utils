@@ -8,10 +8,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// Scalar references the SWAR implementations are checked against.
-
-// Tight scalar loops mirroring what fiber's byte-at-a-time call sites do
-// today — the honest baseline for the SWAR versions.
+// Scalar references: oracles and benchmark baselines for the SWAR code.
 func refIndexAny2(s string, a, b byte) int {
 	for i := 0; i < len(s); i++ {
 		if s[i] == a || s[i] == b {
@@ -72,7 +69,7 @@ func Test_IndexAny_Fixed(t *testing.T) {
 	require.Equal(t, 5, IndexAny2("abcde\"fgh,ij", '"', ','))
 	require.Equal(t, -1, IndexAny3("abcdefgh", ',', '"', '\\'))
 	require.Equal(t, 7, IndexAny3("abcdefg\\", ',', '"', '\\'))
-	// Needle equal to 0x00 and >= 0x80 must work exactly.
+	// Needles 0x00 and >= 0x80 must work exactly.
 	require.Equal(t, 2, IndexAny2("ab\x00cd", 0x00, 0x01))
 	require.Equal(t, 4, IndexAny2("abcd\xe9f", 0xE9, 0x01))
 }
@@ -82,12 +79,10 @@ func Test_Search_Randomized(t *testing.T) {
 	rng := rand.New(rand.NewSource(7)) //nolint:gosec // deterministic test data
 
 	for range 30000 {
-		// Lengths 0..100 cover all %8 tails, the overlap reads, and 2+
-		// iterations of IsASCII's 32-byte unrolled loop.
+		// Lengths 0..100: every %8 tail, the overlap reads, 2+ IsASCII 32-byte iterations.
 		n := rng.Intn(101)
 		buf := make([]byte, n)
 		for i := range buf {
-			// Small alphabet so needles hit often, plus occasional raw bytes.
 			if rng.Intn(8) == 0 {
 				buf[i] = byte(rng.Intn(256))
 			} else {
@@ -107,14 +102,12 @@ func Test_Search_Randomized(t *testing.T) {
 		require.Equal(t, isASCIIRef(s), IsASCII(s), "IsASCII %q", s)
 		require.Equal(t, isASCIIRef(s), IsASCII(buf))
 
-		// Needle: random slice of s (guaranteed present) or random bytes.
 		var needle string
 		if n > 0 && rng.Intn(2) == 0 {
 			start := rng.Intn(n)
 			end := start + rng.Intn(min(n-start, 12)+1)
 			needle = s[start:end]
 			if rng.Intn(2) == 0 {
-				// Random-case the needle: must still be found.
 				nb := []byte(needle)
 				for i := range nb {
 					if rng.Intn(2) == 0 {
@@ -157,44 +150,33 @@ func Test_IndexFold_Fixed(t *testing.T) {
 	require.Equal(t, 0, IndexFold("NO-CACHE", "no-cache"))
 	require.Equal(t, 10, IndexFold("max-age=0,No-Cache,private", "no-cache"))
 	require.Equal(t, 4, IndexFold([]byte("xyz BeArEr token"), "bearer"))
-	// Fold must only touch A-Z/a-z lanes: CR|0x20 == '-' would falsely match
-	// with a blanket |0x20 fold.
+	// Fold only A-Z/a-z: |0x20 would match CR as '-' and \xc9 as \xe9.
 	require.Equal(t, -1, IndexFold("no\rcache", "no-cache"))
 	require.Equal(t, -1, IndexFold("NO\rCACHE", "no-cache"))
-	// Non-ASCII bytes must match exactly, never fold.
 	require.Equal(t, 0, IndexFold("\xc9abc", "\xc9ABC"))
 	require.Equal(t, -1, IndexFold("\xe9abc", "\xc9abc"))
-	// Needles longer than 8 bytes take the scalar path.
 	require.Equal(t, 2, IndexFold("__Proxy-Authorization: basic", "proxy-authorization"))
 	require.Equal(t, -1, IndexFold("__Proxy-Authorizatio", "proxy-authorization!"))
-	// Match at the very end, crossing the overlapping tail window.
 	require.Equal(t, 12, IndexFold("aaaaaaaaaaaaNO-CACHE", "no-cache"))
 	require.Equal(t, 5, IndexFold("aaaaaGZip", "gzip"))
-	// First-byte candidates that overrun the last valid start must not match.
+	// First-byte candidates overrunning the last valid start must not match.
 	require.Equal(t, -1, IndexFold("aaaaaaagz", "gzip"))
-	// Same folded word, different case mixes.
 	require.Equal(t, 0, IndexFold("gZiP, deflate", "GzIp"))
 	require.True(t, ContainsFold("Cache-Control: NO-CACHE", "no-cache"))
 	require.False(t, ContainsFold("Cache-Control: no\rcache", "no-cache"))
-	// Long needles (> 8 bytes) use the SWAR candidate scan with a word-wise
-	// fold-compare verify, including matches ending exactly at the tail.
 	require.Equal(t, 21, IndexFold("x-real-ip, x-req-id, Proxy-Authorization", "proxy-authorization"))
 	require.Equal(t, 7, IndexFold("cookie CONTENT-type: text", "content-type"))
 	require.Equal(t, -1, IndexFold("cookie CONTENT-typ: text.", "content-type"))
 	require.Equal(t, 12, IndexFold("abcdefghijklTRANSFER-ENCODING", "transfer-encoding"))
 	require.Equal(t, 0, IndexFold("authorizatioN", "authorization"))
 	require.Equal(t, -1, IndexFold("authorizatio", "authorization"))
-	// The first candidate appears only in the scalar remainder after the
-	// word loop, so the folded needle is built there.
+	// First candidate in the scalar remainder, where the folded needle is built.
 	require.Equal(t, 10, IndexFold("aaaaaaaaaaGZ", "gz"))
 	require.Equal(t, -1, IndexFold("aaaaaaaaaaGx", "gz"))
-	// Needle length an exact multiple of the word size: the fold-compare
-	// covers it with full words only, matching and mismatching.
 	require.Equal(t, 2, IndexFold("__proxy-authorizatXYZ", "PROXY-AUTHORIZAT"))
 	require.Equal(t, -1, IndexFold("__proxy-authorizaQXYZ", "PROXY-AUTHORIZAT"))
 }
 
-// requireIndexFold checks IndexFold and ContainsFold on both instantiations against refIndexFold.
 func requireIndexFold(tb testing.TB, s, needle string) {
 	tb.Helper()
 	want := refIndexFold(s, needle)
@@ -206,10 +188,8 @@ func requireIndexFold(tb testing.TB, s, needle string) {
 	}
 }
 
-// Test_IndexFold_Adversarial covers the inputs that cost len(s)*len(needle)/8 without a bound on
-// the failed verifications: a needle that agrees with the haystack up to its last bytes at every
-// start. The sizes straddle the point where IndexFold hands over to Rabin-Karp, and every shape
-// is searched with the needle absent, at the start, in the middle and at the very end.
+// Test_IndexFold_Adversarial searches needles that match up to their last bytes at every start, which
+// costs len(s)*len(needle)/8 without a bound on failed verifications, at sizes around the Rabin-Karp handover.
 func Test_IndexFold_Adversarial(t *testing.T) {
 	t.Parallel()
 	for _, k := range []int{9, 15, 16, 17, 24, 31, 33, 64, 65, 100, 129, 300} {
@@ -231,8 +211,7 @@ func Test_IndexFold_Adversarial(t *testing.T) {
 	}
 }
 
-// Test_IndexFold_SmallAlphabet searches random strings over four bytes, so that candidates, partial
-// matches and the switch to Rabin-Karp are all common, with needles of 9 bytes or more of any case.
+// Test_IndexFold_SmallAlphabet uses four bytes so candidates, partial matches and the Rabin-Karp switch are common.
 func Test_IndexFold_SmallAlphabet(t *testing.T) {
 	t.Parallel()
 	rng := rand.New(rand.NewSource(21)) //nolint:gosec // deterministic test data
@@ -255,8 +234,6 @@ func Test_IndexFold_SmallAlphabet(t *testing.T) {
 	}
 }
 
-// Test_indexFoldRK runs the Rabin-Karp fallback on its own from every start, including those with
-// no room for the needle.
 func Test_indexFoldRK(t *testing.T) {
 	t.Parallel()
 	rng := rand.New(rand.NewSource(5)) //nolint:gosec // deterministic test data
@@ -282,8 +259,7 @@ func Test_indexFoldRK(t *testing.T) {
 	}
 }
 
-// refHasPrefixFold/refHasSuffixFold reduce to refIndexFold on the clipped
-// window: with len(window) == len(needle) a 0 return means "equal folded".
+// refHasPrefixFold/refHasSuffixFold reduce to refIndexFold on the clipped window, where 0 means equal.
 func refHasPrefixFold(s, prefix string) bool {
 	return len(s) >= len(prefix) && refIndexFold(s[:len(prefix)], prefix) == 0
 }
@@ -294,7 +270,6 @@ func refHasSuffixFold(s, suffix string) bool {
 
 func Test_HasPrefixFold_HasSuffixFold_Fixed(t *testing.T) {
 	t.Parallel()
-	// Empty needles match anything, oversized needles nothing.
 	require.True(t, HasPrefixFold("", ""))
 	require.True(t, HasSuffixFold("", ""))
 	require.True(t, HasPrefixFold("x", ""))
@@ -304,7 +279,6 @@ func Test_HasPrefixFold_HasSuffixFold_Fixed(t *testing.T) {
 	require.False(t, HasPrefixFold("bear", "bearer "))
 	require.False(t, HasSuffixFold("zip", "gzip"))
 
-	// Scalar path (needle < 8 bytes), both hit and miss, string and []byte.
 	require.True(t, HasPrefixFold("Bearer abc.def", "bearer "))
 	require.True(t, HasPrefixFold([]byte("BEARER abc.def"), "bearer "))
 	require.False(t, HasPrefixFold("Basic QWxhZGRpbg==", "bearer "))
@@ -312,7 +286,6 @@ func Test_HasPrefixFold_HasSuffixFold_Fixed(t *testing.T) {
 	require.True(t, HasSuffixFold([]byte("deflate, GZIP"), "gzip"))
 	require.False(t, HasSuffixFold("deflate, GZIPx", "gzip"))
 
-	// Word path (needle >= 8 bytes), including the overlapping tail compare.
 	require.True(t, HasPrefixFold("MULTIPART/FORM-DATA; boundary=X", "multipart/form-data"))
 	require.False(t, HasPrefixFold("multipart/form-datX; boundary=X", "multipart/form-data"))
 	require.True(t, HasPrefixFold("multipart/form-data", "multipart/form-data"))
@@ -320,12 +293,9 @@ func Test_HasPrefixFold_HasSuffixFold_Fixed(t *testing.T) {
 	require.False(t, HasSuffixFold("application/atomxxml", "atom+xml"))
 	require.True(t, HasSuffixFold("PROXY-AUTHORIZATION", "proxy-authorization"))
 
-	// Exact-length inputs on the scalar path.
 	require.True(t, HasPrefixFold("GZip", "gzip"))
 	require.True(t, HasSuffixFold("GZip", "gzip"))
 
-	// Only A-Z/a-z fold: CR|0x20 == '-' style false folds must not match,
-	// and non-ASCII bytes must match exactly.
 	require.False(t, HasPrefixFold("no\rcache", "no-cache"))
 	require.False(t, HasSuffixFold("xno\rcache", "no-cache"))
 	require.True(t, HasPrefixFold("\xc9abcdefgh", "\xc9ABCDEFGH"))
@@ -350,8 +320,6 @@ func Test_PrefixSuffixFold_Randomized(t *testing.T) {
 		}
 		s := string(buf)
 
-		// Needle: prefix/suffix of s (random-cased, guaranteed hit) or
-		// random bytes (usually a miss), lengths crossing the 8-byte split.
 		k := rng.Intn(min(n, 12) + 1)
 		var needle []byte
 		switch rng.Intn(3) {
@@ -393,14 +361,12 @@ func Test_IndexNonQuotable_Fixed(t *testing.T) {
 	require.Equal(t, 7, IndexNonQuotable("abcdefg\x7f"))
 	// obs-text (>= 0x80) is quotable.
 	require.Equal(t, -1, IndexNonQuotable("caf\xc3\xa9 r\xc3\xa9sum\xc3\xa9.pdf"))
-	// HTAB is valid qdtext (RFC 9110) and must NOT be flagged, in the word
-	// path, the scalar path, and directly before a real control byte.
+	// HTAB is valid qdtext (RFC 9110): never flagged, even before a control byte.
 	require.Equal(t, -1, IndexNonQuotable([]byte("aaaaaaaaa\ttab")))
 	require.Equal(t, -1, IndexNonQuotable("a\tb"))
 	require.Equal(t, 9, IndexNonQuotable("aaaaaaaa\t\x1f"))
 	require.Equal(t, 3, IndexNonQuotable("ab\t\x08cdefgh"))
-	// Borrow-stress shapes: obs-text lanes before a quote, and a quote
-	// directly ahead of a control byte.
+	// Borrow-stress: obs-text lanes before a quote, a quote just before a control byte.
 	require.Equal(t, 7, IndexNonQuotable("\xff\xff\xff\xff\xff\xff\xff\""))
 	require.Equal(t, 1, IndexNonQuotable("a\"\x00defgh"))
 }
@@ -412,14 +378,12 @@ func Test_IsASCII_Fixed(t *testing.T) {
 	require.False(t, IsASCII("caf\xc3\xa9"))
 	require.False(t, IsASCII([]byte{0x80}))
 	require.True(t, IsASCII([]byte{0x7f, 0x00, 'a'}))
-	require.False(t, IsASCII("aaaaaaaaaaaaaaa\xff")) // high byte only in the tail
+	require.False(t, IsASCII("aaaaaaaaaaaaaaa\xff"))
 }
 
 func Test_Search_NamedTypes_SIMDDispatch(t *testing.T) {
 	t.Parallel()
-	// Named byteSeq instantiations at 32+ bytes take the amd64 simd dispatch,
-	// whose zero-copy []byte view assumes the header layouts named types
-	// share with plain string/[]byte.
+	// Named types at 32+ bytes take the amd64 simd dispatch, whose zero-copy view assumes string/[]byte layouts.
 	type headerString string
 	type headerBytes []byte
 	long := strings.Repeat("x", 40) + ","
@@ -432,8 +396,6 @@ func Test_Search_NamedTypes_SIMDDispatch(t *testing.T) {
 	require.False(t, IsASCII(headerString(long+"\xe9")))
 	require.False(t, IsASCII(headerBytes(long+"\xe9")))
 }
-
-// --- Benchmarks: SWAR vs scalar reference at HTTP-typical sizes ---
 
 var benchSizes = []int{7, 8, 16, 32, 64, 512}
 
@@ -450,7 +412,7 @@ func benchInput(size, needleAt int, needle byte) string {
 
 func Benchmark_IndexAny2(b *testing.B) {
 	for _, size := range benchSizes {
-		s := benchInput(size, size-1, ',') // worst case: match at the very end
+		s := benchInput(size, size-1, ',')
 		b.Run(FormatInt(int64(size))+"B/swar", func(b *testing.B) {
 			b.SetBytes(int64(size))
 			var r int
@@ -531,8 +493,6 @@ func Benchmark_IndexFold(b *testing.B) {
 			_ = r
 		})
 	}
-	// A needle that agrees with the haystack up to its last bytes, at every start: the case
-	// that costs len(s)*len(needle)/8 without a bound on the failed verifications.
 	adversarial := map[string]string{
 		"adversarial-64KiB": strings.Repeat("a", 64<<10),
 		"adversarial-1MiB":  strings.Repeat("a", 1<<20),
@@ -656,7 +616,7 @@ func Benchmark_IsASCII(b *testing.B) {
 
 func Benchmark_IndexNonQuotable(b *testing.B) {
 	for _, size := range benchSizes {
-		s := benchInput(size, -1, 0) // clean input: full scan
+		s := benchInput(size, -1, 0)
 		b.Run(FormatInt(int64(size))+"B/swar", func(b *testing.B) {
 			b.SetBytes(int64(size))
 			var r int

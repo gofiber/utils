@@ -10,20 +10,9 @@ import (
 	"testing"
 )
 
-// The integer parsers promise strconv's answers for the base-10 grammar: the
-// same value for everything strconv accepts, and the same class of error, by
-// errors.Is against strconv.ErrSyntax and strconv.ErrRange, for everything it
-// rejects. Two things differ on purpose and are pinned here too: the value
-// returned with an error is 0, where strconv clamps it, and the Func of the
-// *strconv.NumError names the parser that failed.
-//
-// strconv fails on the first problem it reads, so a number that is out of
-// range before a stray byte is a range error, whatever follows. The narrow
-// widths used to report a syntax error there.
+// The integer parsers answer as strconv does, except that an error returns 0 where strconv
+// clamps, and the Func of the *strconv.NumError names the parser that failed.
 
-// intParser puts one parser on a common footing: both instantiations, a
-// signed or unsigned result widened to 64 bits, and the strconv call that
-// answers for it.
 type intParser struct {
 	name   string
 	bits   int
@@ -73,7 +62,6 @@ var intParsers = []intParser{
 	signedParser("ParseNativeInt", strconv.IntSize, ParseNativeInt[string], ParseNativeInt[[]byte]),
 }
 
-// assertIntParity requires p to answer in as strconv does.
 func assertIntParity(tb testing.TB, p intParser, in string) {
 	tb.Helper()
 	var wantI int64
@@ -123,8 +111,6 @@ func assertAllIntParity(tb testing.TB, in string) {
 
 func Test_ParseInts_StrconvParity_Exhaustive(t *testing.T) {
 	t.Parallel()
-	// Every string up to five bytes over digits that straddle the 8-bit and
-	// 16-bit limits, both signs, a stray letter, and a space.
 	forEachString("0159+-x ", 5, func(s string) {
 		assertAllIntParity(t, s)
 	})
@@ -132,9 +118,7 @@ func Test_ParseInts_StrconvParity_Exhaustive(t *testing.T) {
 
 func Test_ParseInts_StrconvParity_EveryByte(t *testing.T) {
 	t.Parallel()
-	// A single stray byte, of all 256, before, inside, and after digits that are
-	// in range, at the limit, and out of range, so every byte class meets every
-	// position of the word-at-a-time and the scalar paths.
+	// Every byte at every position of each run, on both the word and scalar paths.
 	runs := []string{"7", "255", "256", "65536", "4294967296", "12345678", "123456789", "9223372036854775808", "18446744073709551616", "99999999999999999999999"}
 	for b := range 256 {
 		c := string([]byte{byte(b)})
@@ -151,9 +135,6 @@ func Test_ParseInts_StrconvParity_EveryByte(t *testing.T) {
 
 func Test_ParseInts_StrconvParity_Boundaries(t *testing.T) {
 	t.Parallel()
-	// For every width: the limits of the signed and unsigned types, and one
-	// either side of them, as they are, with leading zeros, with either sign,
-	// and with a trailing byte that is not a digit.
 	var limits []*big.Int
 	for _, bits := range []uint{8, 16, 32, 63, 64, 65, 128} {
 		hi := new(big.Int).Lsh(big.NewInt(1), bits)
@@ -190,11 +171,11 @@ func Test_ParseInts_StrconvParity_Random(t *testing.T) {
 			b[i] = byte('0' + r.IntN(10))
 		}
 		switch r.IntN(4) {
-		case 0: // one stray byte somewhere
+		case 0:
 			if len(b) > 0 {
 				b[r.IntN(len(b))] = strays[r.IntN(len(strays))]
 			}
-		case 1: // a sign in front, then maybe a stray byte
+		case 1:
 			if len(b) > 0 {
 				b[0] = "+-"[r.IntN(2)]
 			}
@@ -219,9 +200,8 @@ func FuzzParseIntWidths(f *testing.F) {
 	})
 }
 
-// Test_ParseInts_RangeBeforeSyntax names the cases that used to differ: the
-// digits are over the unsigned limit of the width before the stray byte, so
-// strconv has already failed with a range error when it reaches the byte.
+// Cases that used to report a syntax error: digits over the unsigned limit before a stray
+// byte are a range error.
 func Test_ParseInts_RangeBeforeSyntax(t *testing.T) {
 	t.Parallel()
 	check := func(in string, bits int, signedOnly bool, want error) {
@@ -268,9 +248,8 @@ func Test_ParseInts_RangeBeforeSyntax(t *testing.T) {
 			}
 		}
 	}
-	// The same stray bytes are a syntax error as soon as the digits before them
-	// fit the width's unsigned limit, which is what strconv compares with, even
-	// where the signed type is already out of range.
+	// Within the unsigned limit, which strconv compares with, a stray byte is a syntax error
+	// even where the signed type overflows.
 	for _, tc := range []struct {
 		in   string
 		bits int
@@ -296,9 +275,7 @@ func Test_ParseInts_RangeBeforeSyntax(t *testing.T) {
 	}
 }
 
-// Test_Format_StrconvParity_Exhaustive formats every value of the 8-bit and
-// 16-bit types with every formatter wide enough to take it, and compares each
-// with strconv: the narrow formatters have tables and shortcuts of their own.
+// The narrow formatters have tables and shortcuts of their own.
 func Test_Format_StrconvParity_Exhaustive(t *testing.T) {
 	t.Parallel()
 	appended := func(prefix string, got []byte, want string) bool {

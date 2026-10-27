@@ -10,12 +10,9 @@ import (
 	"github.com/gofiber/utils/v2/internal/hugeslice"
 )
 
-// The word loops of this package test whether a word is left before loading
-// it. Written as i+K <= n, the sum wraps on a 32-bit platform for a length
-// within K of math.MaxInt32, the longest slice there is, and the loop then
-// slices with a negative bound. These tests scan such a slice end to end. It
-// takes 2 GiB of address space and several seconds, so they run on request
-// only: GOFIBER_TEST_HUGE_SLICES=1 go test.
+// A word loop testing i+K <= n wraps for lengths near math.MaxInt32 and slices with a negative
+// bound. This scans such a slice; it needs 2 GiB of address space, so it runs only with
+// GOFIBER_TEST_HUGE_SLICES=1.
 func Test_HugeSlice_Scans(t *testing.T) {
 	b := hugeslice.Get(t)
 

@@ -8,7 +8,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// wordFromLanes builds a word with the given 8 lane values, lane 0 first.
 func wordFromLanes(lanes [8]byte) uint64 {
 	return binary.LittleEndian.Uint64(lanes[:])
 }
@@ -28,7 +27,6 @@ func Test_Store8_LaneOrder_RoundTrip(t *testing.T) {
 	b := make([]byte, 12)
 	Store8(b, 2, 0x0807060504030201)
 	require.Equal(t, []byte{0, 0, 1, 2, 3, 4, 5, 6, 7, 8, 0, 0}, b)
-	// Load8/Store8 round trip at every offset, leaving neighbors untouched.
 	src := []byte{0xFF, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0xAA, 0xBB}
 	for i := 0; i+8 <= len(src); i++ {
 		dst := make([]byte, len(src))
@@ -48,8 +46,6 @@ func Test_Broadcast(t *testing.T) {
 
 func Test_ToLowerWord_ToUpperWord_Exhaustive(t *testing.T) {
 	t.Parallel()
-	// Every byte value in every lane position, once with all other lanes
-	// zero and once with all other lanes 0xFF, so lane isolation is proven.
 	for c := range 256 {
 		wantLower := byte(c)
 		if wantLower >= 'A' && wantLower <= 'Z' {
@@ -81,15 +77,11 @@ func Test_ToLowerWord_ToUpperWord_Exhaustive(t *testing.T) {
 
 func Test_MatchByteMask_Exhaustive(t *testing.T) {
 	t.Parallel()
-	// For every needle value and every lane value, the mask must be exact:
-	// 0x80 iff equal, 0 otherwise — including needle 0x00, needle >= 0x80,
-	// and adjacent-lane interference (the borrow-corruption trap).
-	// Plain checks keep the ~1M words fast, as in the range test below.
+	// Exact mask: 0x80 iff equal, whatever the neighbors (borrow trap). Plain checks keep ~1M words fast.
 	for needle := range 256 {
 		for c := range 256 {
 			for lane := range 8 {
-				// Fill other lanes with the needle itself (worst case for
-				// cross-lane borrows) and with needle^1 (no other matches).
+				// Fills: the needle itself (worst case for borrows) and needle^1.
 				for _, fill := range []byte{byte(needle), byte(needle) ^ 1} {
 					var lanes [8]byte
 					for i := range lanes {
@@ -115,10 +107,7 @@ func Test_MatchByteMask_Exhaustive(t *testing.T) {
 
 func Test_MatchRangeMask_Exhaustive(t *testing.T) {
 	t.Parallel()
-	// All valid (lo, hi) pairs, with every byte value rotating through the
-	// lanes. The neighbor lanes hold the range boundaries and both extremes
-	// rather than a constant fill: the carry-freedom claim is exactly about
-	// adjacent-lane interaction. Plain checks keep the ~2M words fast.
+	// Neighbors hold the range boundaries and extremes: carry-freedom is about adjacent lanes.
 	for lo := 0; lo <= 0x7F; lo++ {
 		for hi := lo; hi <= 0x7F; hi++ {
 			base := [8]byte{0x00, byte(lo), byte(hi), byte(lo) - 1, byte(hi) + 1, 0x7F, 0x80, 0xFF}
@@ -140,8 +129,6 @@ func Test_MatchRangeMask_Exhaustive(t *testing.T) {
 		}
 	}
 
-	// Random valid ranges over fully random lanes, as a second angle on
-	// mixed neighbor values.
 	rng := rand.New(rand.NewSource(11)) //nolint:gosec // deterministic test data
 	for range 200000 {
 		lo := byte(rng.Intn(0x80))
@@ -177,13 +164,9 @@ func Test_FirstLane_LastLane(t *testing.T) {
 	}
 }
 
-// Benchmark_Load8_Fusion guards the load-combining requirement: an unfused
-// generic instantiation shows a ~4-8x slower word loop. If this benchmark
-// ever collapses to per-byte speed, the reslice idiom in Load8 has stopped
-// fusing and Load8 needs concrete string/[]byte helpers behind the generic
-// front. The guard is advisory only, it cannot fail CI; eyeball it (or
-// benchstat it against the previous toolchain) when touching Load8/Store8
-// or bumping the Go version. The store leg covers Store8's write fusion.
+// Benchmark_Load8_Fusion guards load combining (unfused, Load8 is ~4-8x slower): per-byte speed
+// means the reslice idiom stopped fusing and Load8 needs concrete string/[]byte helpers.
+// Advisory only: run it when touching Load8/Store8 or bumping Go.
 func Benchmark_Load8_Fusion(b *testing.B) {
 	buf := make([]byte, 4096)
 	for i := range buf {
@@ -223,9 +206,8 @@ func Benchmark_Load8_Fusion(b *testing.B) {
 
 func Test_ZeroLanes_FirstMatchProperty(t *testing.T) {
 	t.Parallel()
-	// For every word shape: the mask is zero iff no lane is zero, and the
-	// lowest set lane is always a true zero lane (false positives may only
-	// appear above it).
+	// The mask is zero iff no lane is zero; its lowest set lane is a true zero
+	// (false positives only above).
 	for zeroAt := range 8 {
 		for fill := range 256 {
 			var lanes [8]byte

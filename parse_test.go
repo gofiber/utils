@@ -684,7 +684,7 @@ func Test_ParseFloat64(t *testing.T) {
 		{"1e-400", 0, true},
 		{"25000000000000000000e-18", 25, true},
 		{"1234567891234567891234567", 1.2345678912345679e24, true},
-		{"1.2345678912345678", 1.2345678912345678, true}, // large number
+		{"1.2345678912345678", 1.2345678912345678, true},
 		{"0.11111111111111119", 0.11111111111111119, true},
 		{".", 0, false},
 		{"+.", 0, false},
@@ -861,7 +861,6 @@ func Benchmark_ParseFloat32(b *testing.B) {
 func Test_ParseInt8_ParseUint8_EdgeCases(t *testing.T) {
 	t.Parallel()
 
-	// Empty, sign-only, and non-digit inputs on the short fast path.
 	for _, s := range []string{"", "+", "-", "1x", "+2y", "-!3"} {
 		_, err := ParseInt8(s)
 		require.Error(t, err, "ParseInt8(%q)", s)
@@ -871,7 +870,6 @@ func Test_ParseInt8_ParseUint8_EdgeCases(t *testing.T) {
 		require.Error(t, err, "ParseUint8(%q)", s)
 	}
 
-	// Explicit '+' sign and the exact negative boundary.
 	v, err := ParseInt8("+127")
 	require.NoError(t, err)
 	require.Equal(t, int8(127), v)
@@ -886,8 +884,7 @@ func Test_ParseInt8_ParseUint8_EdgeCases(t *testing.T) {
 	_, err = ParseInt8("+128")
 	require.Error(t, err)
 
-	// Inputs longer than the short fast path fall back to the generic
-	// parsers, including leading zeros and range errors.
+	// Beyond the short fast path: leading zeros, range errors.
 	v, err = ParseInt8("0127")
 	require.NoError(t, err)
 	require.Equal(t, int8(127), v)
@@ -906,18 +903,8 @@ func Test_ParseInt8_ParseUint8_EdgeCases(t *testing.T) {
 	require.Error(t, err)
 }
 
-// The tests below cover the 8-digit SWAR parse step in ParseUint/ParseInt.
-//
-// A SWAR pre-validation for IsIPv4/IsIPv6 was prototyped alongside this work
-// and dropped: it lost on every shape (+10% to +49%) because the scalar
-// octet parse still has to run after the word checks on <= 15-byte inputs.
-// ParseUint won -16% to -27% at 8+ digits with a one-branch cost on 1-digit
-// inputs; the raw comparison lives in the introducing commit message.
-
 func Test_Parse8Digits_And_IsEightDigits(t *testing.T) {
 	t.Parallel()
-	// checkParse8 zero-pads v to eight digits and pins both SWAR helpers on
-	// the resulting word.
 	checkParse8 := func(v uint64) {
 		t.Helper()
 		s := FormatUint(v)
@@ -932,8 +919,7 @@ func Test_Parse8Digits_And_IsEightDigits(t *testing.T) {
 	for _, v := range []uint64{0, 1, 9, 10, 12345678, 99999999, 10000000, 90000009, 9999990} {
 		checkParse8(v)
 	}
-	// isEightDigits must reject every byte value outside '0'..'9' in every
-	// lane, including bytes >= 0xFA whose +6 carries into the next lane.
+	// Bytes >= 0xFA: their +6 carries into the next lane.
 	for c := range 256 {
 		lanes := []byte("11111111")
 		for lane := range 8 {
@@ -944,8 +930,6 @@ func Test_Parse8Digits_And_IsEightDigits(t *testing.T) {
 		}
 	}
 
-	// Pin parse8Digits itself on random 8-digit words, independent of the
-	// full-parser parity loop.
 	rng := rand.New(rand.NewSource(5)) //nolint:gosec // deterministic test data
 	for range 10000 {
 		checkParse8(uint64(rng.Intn(100000000)))
@@ -966,14 +950,12 @@ func Test_ParseSWAR_Parity(t *testing.T) {
 		wantI, wantErr := strconv.ParseInt(s, 10, 64)
 		require.Equal(t, wantErr == nil, err == nil, s)
 		if wantErr == nil {
-			// On range errors strconv returns the clamped value while utils
-			// returns 0, so values are only comparable on success.
+			// Range errors: strconv clamps, utils returns 0, so compare values on success only.
 			require.Equal(t, wantI, gotI, s)
 		}
 	}
 
-	// Error parity with strconv on syntax/overflow shapes that exercise the
-	// SWAR word steps, including the scalar handoff around 16-19 digits.
+	// Shapes around the SWAR word steps and the 16-19 digit scalar handoff.
 	for _, s := range []string{
 		"", "a", "12345678a", "123456781234567812345", "18446744073709551615",
 		"18446744073709551616", "99999999999999999999", "00000000000000000001",
@@ -987,8 +969,6 @@ func Test_ParseSWAR_Parity(t *testing.T) {
 			require.Equal(t, want, got, "%q", s)
 		} else {
 			require.Zero(t, got, "%q", s)
-			// The error must keep its strconv shape: *NumError carrying the
-			// function name and the ErrSyntax/ErrRange cause.
 			var numErr *strconv.NumError
 			require.ErrorAs(t, gotErr, &numErr, "%q", s)
 			require.Equal(t, "ParseUint", numErr.Func, "%q", s)
@@ -1001,17 +981,15 @@ func Test_ParseSWAR_Parity(t *testing.T) {
 
 func Test_ParseInt_SWARPaths(t *testing.T) {
 	t.Parallel()
-	// Fast path: a non-digit inside the first word falls back to the scalar
-	// loop, which reports the syntax error.
+	// A non-digit in the first word falls back to the scalar loop.
 	for _, s := range []string{"1234x678", "12345678\x00", "123456789012345678x"} {
 		_, err := ParseInt(s)
 		require.Error(t, err, s)
 		want, wantErr := strconv.ParseInt(s, 10, 64)
 		require.Error(t, wantErr, s)
-		require.Equal(t, want, int64(0), s) // strconv returns 0 on syntax errors too
+		require.Equal(t, want, int64(0), s)
 	}
 
-	// Signed inputs with 8+ digit runs route through parseSigned's word path.
 	for _, s := range []string{
 		"-123456789", "+123456789012", "-9223372036854775808", "+9223372036854775807",
 		"-9223372036854775809", "-99999999999999999999", "-12345678a", "-000000001",
@@ -1026,15 +1004,13 @@ func Test_ParseInt_SWARPaths(t *testing.T) {
 		}
 	}
 
-	// The same dispatch feeds the narrower signed parsers.
 	v32, err := ParseInt32("-214748364")
 	require.NoError(t, err)
 	require.Equal(t, int32(-214748364), v32)
 	_, err = ParseInt32("-21474836480")
 	require.Error(t, err)
 
-	// 19-digit boundary on the sign-free fast path: MaxInt64 parses, one
-	// past it is a range error (not a syntax error), matching strconv.
+	// One past MaxInt64 is a range error, not a syntax error.
 	maxV, err := ParseInt("9223372036854775807")
 	require.NoError(t, err)
 	require.Equal(t, int64(math.MaxInt64), maxV)

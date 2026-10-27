@@ -165,10 +165,8 @@ func Benchmark_ToLower(b *testing.B) {
 	}
 }
 
-// Test_Case_FirstChangePositions plants the single case-changing byte at
-// every position of every length up to 100, covering the caseconv scan's
-// 32-byte block loop, the word loop behind it, the overlapping tail, and the
-// identity path, against a byte-wise reference.
+// Test_Case_FirstChangePositions plants one case-changing byte at every position of every length up to 100,
+// covering the 32-byte block loop, word loop, tail and identity path.
 func Test_Case_FirstChangePositions(t *testing.T) {
 	t.Parallel()
 	refLower := func(s string) string {
@@ -194,8 +192,6 @@ func Test_Case_FirstChangePositions(t *testing.T) {
 		for i := range base {
 			base[i] = "40-\xe9/~:9"[i%8] // no letters at all, incl. >= 0x80
 		}
-		// Identity inputs: both directions must return the input itself
-		// (the scans' no-match fast path), not an equal copy.
 		s := string(base)
 		lower, upper := ToLower(s), ToUpper(s)
 		require.Equal(t, s, lower, "identity lower len %d", n)
@@ -219,9 +215,6 @@ func Test_Case_FirstChangePositions(t *testing.T) {
 	}
 }
 
-// Test_Case_PathCoverage exercises every dispatch path of the string case
-// converters in-package: sub-word inputs, word-path inputs, identity
-// returns, and the in-place variants across both length regimes.
 func Test_Case_PathCoverage(t *testing.T) {
 	t.Parallel()
 
@@ -245,7 +238,6 @@ func Test_Case_PathCoverage(t *testing.T) {
 		require.Equal(t, tc.upper, UnsafeToUpper(unsafeconv.UnsafeString(upperBuf)), "UnsafeToUpper %q", tc.in)
 	}
 
-	// Unchanged inputs come back as-is (the fast identity paths).
 	require.Equal(t, "short", ToLower("short"))
 	require.Equal(t, "SHORT", ToUpper("SHORT"))
 	require.Equal(t, "already lower, one word plus", ToLower("already lower, one word plus"))

@@ -13,13 +13,11 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// floatGrammar is the syntax the parsers accept; strconv also takes inf, nan and hex floats.
+// floatGrammar is the accepted syntax; strconv also takes inf, nan and hex floats.
 var floatGrammar = regexp.MustCompile(`^[+-]?([0-9]+\.?[0-9]*|\.[0-9]+)([eE][+-]?[0-9]+)?$`)
 
-// wantFloat is the float a correct parser returns for the number s, in strconv's
-// convention (±Inf and ErrRange on overflow). strconv is right up to 700 bytes; it
-// keeps at most 800 digits, misplaces the point past them and reads five digits of
-// an exponent, so longer numbers go to big.Rat, which rounds exactly.
+// wantFloat is the oracle: strconv while it is right (up to 700 bytes), then big.Rat,
+// which rounds exactly.
 func wantFloat(tb testing.TB, s string, bitSize int) (float64, error) {
 	tb.Helper()
 
@@ -31,8 +29,6 @@ func wantFloat(tb testing.TB, s string, bitSize int) (float64, error) {
 	digits := strings.TrimLeft(intPart+fracPart, "0")
 	trimmed := strings.TrimRight(digits, "0")
 
-	// The number is trimmed * 10^e. An exponent beyond 2^40 is as good as 2^40:
-	// no input has that many digits to offset it.
 	const maxExp = 1 << 40
 	bigExp := new(big.Int)
 	if exp != "" {
@@ -47,8 +43,6 @@ func wantFloat(tb testing.TB, s string, bitSize int) (float64, error) {
 	}
 	e += int64(len(digits)-len(trimmed)) - int64(len(fracPart))
 
-	// It lies in [10^(n-1+e), 10^(n+e)): out of the float range one way or the other
-	// whatever the digits, or big.Rat rounds it.
 	n := int64(len(trimmed))
 	var f float64
 	switch {
@@ -81,8 +75,6 @@ func wantFloat(tb testing.TB, s string, bitSize int) (float64, error) {
 	return f, nil
 }
 
-// requireFloatMatches compares both parsers and input types with the correct
-// answer, bit for bit.
 func requireFloatMatches(tb testing.TB, s string) {
 	tb.Helper()
 
@@ -111,7 +103,7 @@ func requireFloatResult(tb testing.TB, fn, s string, want float64, wantErr error
 	tb.Helper()
 
 	if wantErr != nil {
-		// Inside the grammar only a range error is possible; the reference returns Inf, these 0.
+		// Only range errors occur inside the grammar; the reference returns Inf, the parsers 0.
 		require.ErrorIs(tb, wantErr, strconv.ErrRange, "%s(%.40q): reference", fn, s)
 		require.ErrorIs(tb, err, strconv.ErrRange, "%s(%.40q)", fn, s)
 		require.Zero(tb, got, "%s(%.40q) returned a value with an error", fn, s)
@@ -126,36 +118,28 @@ func Test_ParseFloat_Corpus(t *testing.T) {
 	t.Parallel()
 
 	corpus := []string{
-		// Classic 1-ulp traps of mantissa * 10^-k.
 		"0.1", "0.2", "0.3", "0.7", "0.9631", "1.1", "2.675", "9.95", "123.456", "1328.3",
 		"88.9438", "1024.62342", "4740156.50398", "8544.4627727", "331.075823", "0.30000000000000004",
-		// Zero and its spellings.
 		"0", "-0", "+0", "0.0", "-0.0", "0e0", "-0e0", "0e400", "-0e400", "0.000e-400", "00000", ".0", "-.0e5",
-		// Shapes of the grammar.
 		"1.", ".5", "-.5", "+.5e1", "5.e1", "1e2", "1E2", "1e+2", "1e-2", "-1.2e3", "+123.45", "0001.50", "1.0000000000",
-		// Integers across the exact range of float64 and float32.
 		"16777215", "16777216", "16777217", "16777218", "33554433",
 		"9007199254740991", "9007199254740992", "9007199254740993", "9007199254740994", "9007199254740995",
 		"18446744073709551615", "18446744073709551616", "18446744073709551617", "99999999999999999999",
-		// Edges of the exact path (10^22 for float64, 10^10 for float32).
 		"1e10", "1e11", "1e22", "1e23", "123e-22", "123e-23", "1e-10", "1e-11", "1e-22", "1e-23",
 		"9007199254740992e22", "9007199254740992e-22", "9007199254740993e-22",
-		// Halfway and near-halfway cases.
 		"8.41e21", "5e-324", "4e-324", "2e-324", "2.4703282292062327e-324", "2.4703282292062328e-324",
 		"4.9406564584124654e-324", "2.2250738585072014e-308", "2.2250738585072011e-308", "2.2250738585072012e-308",
 		"1.7976931348623157e308", "1.7976931348623158e308", "1.7976931348623159e308", "1.797693134862315807e308",
 		"3.4028234e38", "3.4028235e38", "3.4028236e38", "3.40282356779733661637539395458142568447e38",
 		"3.4028235677973366e38", "3.4028235677973367e38", "1.1754943508222875e-38", "1.1754942807573643e-38",
-		"1.797693134862315708145274237317043567981e308", "3.4028234663852885981170418348451692544e38", // the largest floats, digits cut off
+		"1.797693134862315708145274237317043567981e308", "3.4028234663852885981170418348451692544e38",
 		"1e-45", "7e-46", "7.006492321624085e-46", "7.006492321624086e-46", "1.401298464324817e-45",
 		"1.00000017881393432617187499", "1.00000017881393432617187500", "1.00000017881393432617187501",
-		// Long digit strings: dropped digits decide the rounding.
 		"0.123456789012345678901234567890", "123456789012345678901234567890", "1234567890123456789.0123456789",
 		"0.30000000000000004440892098500626", "0.1000000000000000055511151231257827",
 		"1." + strings.Repeat("0", 40) + "1", "1." + strings.Repeat("0", 40),
 		"9" + strings.Repeat("0", 30) + "e-30", strings.Repeat("9", 400), strings.Repeat("9", 400) + "e-390",
 		"0." + strings.Repeat("0", 400) + "1", "1" + strings.Repeat("0", 400) + "e-400",
-		// Huge exponents.
 		"1e309", "1e308", "1e-324", "1e-400", "1e400", "1e-999999999999", "1e999999999999", "0e999999999999",
 		"1e99999999999999999999", "1e-99999999999999999999", "1e3000", "1e-3000", "-1e3000", "-1e-3000",
 		"1e1125899906842623", "1e1125899906842624", "1e1125899906842625", "1e-1125899906842625",
@@ -176,8 +160,6 @@ func Test_ParseFloat_Corpus(t *testing.T) {
 	}
 }
 
-// genFloatString draws a string of the grammar with digit counts around the
-// 15, 17 and 19 digit limits.
 func genFloatString(r *rand.Rand) string {
 	var b strings.Builder
 	switch r.IntN(4) {
@@ -222,7 +204,6 @@ func Test_ParseFloat_Generated(t *testing.T) {
 	}
 }
 
-// Test_ParseFloat_ShortestRoundTrip parses the shortest decimal of random floats back to the same bits.
 func Test_ParseFloat_ShortestRoundTrip(t *testing.T) {
 	t.Parallel()
 
@@ -250,7 +231,6 @@ func Test_ParseFloat_ShortestRoundTrip(t *testing.T) {
 		require.NoError(t, err, s)
 		require.Equal(t, math.Float32bits(f), math.Float32bits(got), "ParseFloat32(%q)", s)
 	}
-	// Decimal digits a person writes: few digits, a few places.
 	for range 30_000 {
 		f := float64(r.IntN(10_000_000)) / math.Pow10(r.IntN(8))
 		s := strconv.FormatFloat(f, 'f', -1, 64)
@@ -260,8 +240,7 @@ func Test_ParseFloat_ShortestRoundTrip(t *testing.T) {
 	}
 }
 
-// Test_ParseFloat32_Midpoints checks decimals around the halfway points between
-// float32s, cut to 12 to 17 digits with the neighboring last digits.
+// Test_ParseFloat32_Midpoints checks float32 halfway points cut to 12 to 17 digits, last digit ±1.
 func Test_ParseFloat32_Midpoints(t *testing.T) {
 	t.Parallel()
 
@@ -283,7 +262,6 @@ func Test_ParseFloat32_Midpoints(t *testing.T) {
 			require.NoError(t, err)
 			e10, err := strconv.Atoi(exp10)
 			require.NoError(t, err)
-			// The digits moved the point sig-1 places, so the exponent drops by as much.
 			exponent := strconv.Itoa(e10 - (sig - 1))
 			for delta := int64(-1); delta <= 1; delta++ {
 				in := strconv.FormatInt(base+delta, 10) + "e" + exponent
@@ -375,8 +353,7 @@ func FuzzParseFloat(f *testing.F) {
 	})
 }
 
-// Test_ParseFloat_ExactPathBounds checks both sides of the edges of the exact path
-// (2^24 and 2^53, exponents 10 and 22) against strconv.
+// Both sides of the exact path's edges: 2^24 and 2^53, exponents 10 and 22.
 func Test_ParseFloat_ExactPathBounds(t *testing.T) {
 	t.Parallel()
 
@@ -440,7 +417,6 @@ func Test_parseExp(t *testing.T) {
 		require.Equal(t, tc.want, got, "%q from %d as bytes", tc.in, tc.from)
 	}
 
-	// A long exponent keeps its sign and is clamped.
 	got, ok := parseExp("99999999999999999999999999", 0)
 	require.True(t, ok)
 	require.Equal(t, int64(maxParsedExp), got)
@@ -452,9 +428,6 @@ func Test_parseExp(t *testing.T) {
 	require.Equal(t, int64(7), got)
 }
 
-// Test_ParseFloat_MantissaExponent parses random mantissas of up to 20 digits with
-// exponents across the whole range, into overflow and underflow and through the
-// subnormals of both sizes.
 func Test_ParseFloat_MantissaExponent(t *testing.T) {
 	t.Parallel()
 
@@ -480,9 +453,7 @@ func Test_ParseFloat_MantissaExponent(t *testing.T) {
 	}
 }
 
-// Test_ParseFloat_RangeEdges covers where a 64-bit mantissa becomes zero or infinite
-// whatever its digits, the subnormals just above, and products that look like a
-// halfway point in their top bits but are not one.
+// Where a 64-bit mantissa turns zero or infinite, and products that only look like a halfway point.
 func Test_ParseFloat_RangeEdges(t *testing.T) {
 	t.Parallel()
 
@@ -497,8 +468,7 @@ func Test_ParseFloat_RangeEdges(t *testing.T) {
 	}
 }
 
-// Test_ParseFloat_Halfway parses the exact halfway points between floats, up to
-// 40-digit integers, and the decimals just above and below each.
+// Exact halfway points up to 40-digit integers, and the decimals just above and below.
 func Test_ParseFloat_Halfway(t *testing.T) {
 	t.Parallel()
 
@@ -509,8 +479,8 @@ func Test_ParseFloat_Halfway(t *testing.T) {
 		minExp   int
 		maxExp   int
 	}{
-		{52, 44, 135}, // float64: from fractions of 20 digits to integers of 40
-		{23, 4, 100},  // float32
+		{52, 44, 135},
+		{23, 4, 100},
 	} {
 		for k := f.minExp; k <= f.maxExp; k++ {
 			for range 24 {
@@ -530,7 +500,7 @@ func Test_ParseFloat_Halfway(t *testing.T) {
 	require.Greater(t, checked, 1_000)
 }
 
-// Test_ParseFloat_Carry covers roundings into the next binade and the edges of the normal range.
+// Roundings into the next binade and the edges of the normal range.
 func Test_ParseFloat_Carry(t *testing.T) {
 	t.Parallel()
 
@@ -545,8 +515,7 @@ func Test_ParseFloat_Carry(t *testing.T) {
 	}
 }
 
-// Test_scale32 pins which float32 inputs one exact multiplication or division
-// rounds, and that it gives up at a halfway point of the second rounding.
+// Which float32 inputs one exact multiply or divide rounds; it gives up at a halfway point.
 func Test_scale32(t *testing.T) {
 	t.Parallel()
 
@@ -556,11 +525,11 @@ func Test_scale32(t *testing.T) {
 		exp      int64
 		decided  bool
 	}{
-		{"314159e-4", 314159, -4, true},                          // float32 holds both
-		{"314159265e-8", 314159265, -8, true},                    // float64 holds both, one more rounding
-		{"16777219", 16777219, 0, false},                         // halfway: rounding twice may differ
-		{"12345678901234567e-17", 12345678901234567, -17, false}, // past 2^53
-		{"1e-300", 1, -300, false},                               // past the exact powers of ten
+		{"314159e-4", 314159, -4, true},
+		{"314159265e-8", 314159265, -8, true},
+		{"16777219", 16777219, 0, false}, // halfway: rounding twice may differ
+		{"12345678901234567e-17", 12345678901234567, -17, false},
+		{"1e-300", 1, -300, false},
 		{"1e23", 1, 23, false},
 	} {
 		got, ok := scale32(tc.mantissa, tc.exp)
@@ -573,8 +542,7 @@ func Test_scale32(t *testing.T) {
 	}
 }
 
-// Test_exactDyadic checks the integers and exact fractions it rounds against
-// strconv, and the exponents where the table of powers of ten ends.
+// Integers and exact fractions against strconv, and where the table of powers of ten ends.
 func Test_exactDyadic(t *testing.T) {
 	t.Parallel()
 
@@ -622,7 +590,7 @@ func Test_exactDyadic(t *testing.T) {
 	}
 }
 
-// Test_roundBits compares the rounding to 24 bits with big.Float, ties included.
+// Compares the rounding to 24 bits with big.Float, ties included.
 func Test_roundBits(t *testing.T) {
 	t.Parallel()
 
@@ -641,8 +609,7 @@ func Test_roundBits(t *testing.T) {
 	}
 }
 
-// Test_ParseFloat_RawBoundary parses numbers around the length where strconv gets
-// the text itself, with the point and the digits in different places.
+// Numbers around the length where strconv gets the text itself (maxRawLen).
 func Test_ParseFloat_RawBoundary(t *testing.T) {
 	t.Parallel()
 
@@ -654,11 +621,11 @@ func Test_ParseFloat_RawBoundary(t *testing.T) {
 				digits[i] = byte('0' + r.IntN(10))
 			}
 			switch r.IntN(3) {
-			case 0: // a short significant part, then zeros
+			case 0:
 				for i := 2 + r.IntN(30); i < n; i++ {
 					digits[i] = '0'
 				}
-			case 1: // zeros first
+			case 1:
 				for i := range r.IntN(n - 20) {
 					digits[i] = '0'
 				}
@@ -672,8 +639,7 @@ func Test_ParseFloat_RawBoundary(t *testing.T) {
 	}
 }
 
-// Test_ParseFloat_Long parses random numbers of 20 to 1,500 digits, their
-// decimal point and exponent chosen to land in and just outside the float64 range.
+// Random long numbers with exponents in and just outside the float64 range.
 func Test_ParseFloat_Long(t *testing.T) {
 	t.Parallel()
 
@@ -684,11 +650,11 @@ func Test_ParseFloat_Long(t *testing.T) {
 			digits[i] = byte('0' + r.IntN(10))
 		}
 		switch r.IntN(4) {
-		case 0: // a short significant part, then zeros
+		case 0:
 			for i := 2 + r.IntN(30); i < len(digits); i++ {
 				digits[i] = '0'
 			}
-		case 1: // a digit at each end and zeros between
+		case 1:
 			for i := 1; i < len(digits)-1; i++ {
 				digits[i] = '0'
 			}
@@ -698,8 +664,6 @@ func Test_ParseFloat_Long(t *testing.T) {
 		if point < len(digits) || r.IntN(4) == 0 {
 			text += "." + string(digits[point:])
 		}
-		// The decimal exponent of the leading digit lands between -335 and 315, or
-		// the exponent is far past anything the digits can offset.
 		exp := -335 + r.IntN(651) - point
 		if r.IntN(40) == 0 {
 			exp = (1_000_001 + r.IntN(1_000_000_000)) * (1 - 2*r.IntN(2))
@@ -714,8 +678,6 @@ func Test_ParseFloat_Long(t *testing.T) {
 	}
 }
 
-// halfwayText returns the exact decimal of (2j+1) * 2^(unit-1), which lies halfway
-// between j * 2^unit and its successor.
 func halfwayText(j uint64, unit int) string {
 	tie := new(big.Float).SetPrec(64).SetMantExp(new(big.Float).SetUint64(2*j+1), unit-1)
 	text := tie.Text('f', 1100)
@@ -725,7 +687,6 @@ func halfwayText(j uint64, unit int) string {
 	return text
 }
 
-// belowText returns the decimal text with its last digit one lower.
 func belowText(t *testing.T, text string) string {
 	t.Helper()
 
@@ -742,7 +703,6 @@ func belowText(t *testing.T, text string) string {
 	return below
 }
 
-// aboveText returns the decimal text with a nonzero digit after its last.
 func aboveText(text string) string {
 	if strings.Contains(text, ".") {
 		return text + "1"
@@ -750,9 +710,7 @@ func aboveText(text string) string {
 	return text + ".1"
 }
 
-// Test_ParseFloat_HalfwayEverywhere parses the exact halfway points between
-// floats in every binade, from the subnormals to the largest, and the decimals
-// just above and below each. They have up to 767 digits.
+// Halfway points of up to 767 digits in every binade, and the decimals either side.
 func Test_ParseFloat_HalfwayEverywhere(t *testing.T) {
 	t.Parallel()
 
@@ -761,14 +719,14 @@ func Test_ParseFloat_HalfwayEverywhere(t *testing.T) {
 	for _, f := range []struct {
 		mantBits, minUnit, maxExp int
 	}{
-		{52, -1074, 1023}, // float64
-		{23, -149, 127},   // float32
+		{52, -1074, 1023},
+		{23, -149, 127},
 	} {
 		for k := f.minUnit; k <= f.maxExp; k++ {
 			if k%3 != 0 && k > f.minUnit+30 && k < f.maxExp-30 {
 				continue
 			}
-			unit := max(k-f.mantBits, f.minUnit) // floats of this binade are j * 2^unit
+			unit := max(k-f.mantBits, f.minUnit)
 			nbits := k - unit + 1
 			for range 2 {
 				j := uint64(1)<<(nbits-1) | r.Uint64N(uint64(1)<<(nbits-1))
@@ -788,8 +746,6 @@ func Test_ParseFloat_HalfwayEverywhere(t *testing.T) {
 	require.Greater(t, checked, 1_000)
 }
 
-// Test_ParseFloat_Subnormals parses the shortest and the 17 digit decimals of
-// random subnormals and the smallest normals back to the same bits.
 func Test_ParseFloat_Subnormals(t *testing.T) {
 	t.Parallel()
 
@@ -809,8 +765,7 @@ func Test_ParseFloat_Subnormals(t *testing.T) {
 	}
 }
 
-// Test_ParseFloat_OverflowEdge parses the halfway point above the largest float of
-// each size, which rounds to infinity, and the decimals next to it.
+// Halfway above the largest float of each size, which rounds to infinity, and its neighbors.
 func Test_ParseFloat_OverflowEdge(t *testing.T) {
 	t.Parallel()
 
@@ -818,8 +773,8 @@ func Test_ParseFloat_OverflowEdge(t *testing.T) {
 		j    uint64
 		unit int
 	}{
-		{1<<53 - 1, 971}, // float64: the largest is (2^53-1) * 2^971
-		{1<<24 - 1, 104}, // float32: (2^24-1) * 2^104
+		{1<<53 - 1, 971},
+		{1<<24 - 1, 104},
 	} {
 		text := halfwayText(f.j, f.unit)
 		for _, in := range []string{text, belowText(t, text), aboveText(text)} {
@@ -828,9 +783,7 @@ func Test_ParseFloat_OverflowEdge(t *testing.T) {
 	}
 }
 
-// Test_ParseFloat_Cutoff sweeps the numbers that start around 1844674407370955161,
-// the first mantissa that takes no more digits, followed by digits that would fit
-// the mantissa before it, with the point and an exponent anywhere.
+// Digits after 1844674407370955161, the first mantissa that takes no more digits.
 func Test_ParseFloat_Cutoff(t *testing.T) {
 	t.Parallel()
 
@@ -848,8 +801,7 @@ func Test_ParseFloat_Cutoff(t *testing.T) {
 	}
 }
 
-// Test_ParseFloat_HugeInputs parses numbers whose 11 million digits offset an
-// exponent of 8 digits, which a reader that stops counting at 2^20 gets wrong.
+// 11 million digits offset an 8-digit exponent, which a reader that stops at 2^20 gets wrong.
 func Test_ParseFloat_HugeInputs(t *testing.T) {
 	t.Parallel()
 
@@ -863,13 +815,13 @@ func Test_ParseFloat_HugeInputs(t *testing.T) {
 		{"0.", "1e11000002", 10},
 		{"1", "e-11000000", 1},
 		{"15", "e-11000001", 1.5},
-		{"1", "e-99999999", 0},     // 1e-88999999
-		{"1", "e-110000000", 0},    // 1e-99000000
-		{"0.", "1e99999999", inf},  // 1e88999998
-		{"0.", "1e110000000", inf}, // 1e98999999
+		{"1", "e-99999999", 0},
+		{"1", "e-110000000", 0},
+		{"0.", "1e99999999", inf},
+		{"0.", "1e110000000", inf},
 	} {
 		in := tc.head + zeros + tc.tail
-		// The error text carries the whole input, so a failure prints a part of it.
+		// The error text carries the whole input, hence %.60v.
 		for name, parse := range map[string]func() (float64, error){
 			"string": func() (float64, error) { return ParseFloat64(in) },
 			"bytes":  func() (float64, error) { return ParseFloat64([]byte(in)) },
@@ -890,9 +842,7 @@ func Test_ParseFloat_HugeInputs(t *testing.T) {
 	}
 }
 
-// Test_ParseFloat_SlowPathAllocs pins what the slow paths do not allocate: a
-// number that lost a digit, a halfway point and an overflow cost nothing beyond
-// the error itself.
+// The slow paths allocate nothing beyond the error itself.
 func Test_ParseFloat_SlowPathAllocs(t *testing.T) {
 	long := strings.Repeat("9", 1_000) + ".5"
 	for _, tc := range []struct {
@@ -922,7 +872,6 @@ func Test_ParseFloat_SlowPathAllocs(t *testing.T) {
 	}
 }
 
-// Benchmark_ParseFloat_Shapes covers the shapes that decide which path a value takes.
 func Benchmark_ParseFloat_Shapes(b *testing.B) {
 	for _, tc := range []struct{ name, in string }{
 		{"integer", "42"},

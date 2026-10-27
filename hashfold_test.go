@@ -9,10 +9,8 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// Test_HashFold pins the contract: keys EqualFold reports equal hash equal,
-// as strings and as bytes, at every length across the word boundaries, and
-// keys it tells apart, by case of a non-letter, by a byte past ASCII or by
-// length alone, hash apart.
+// Test_HashFold pins the contract: keys EqualFold reports equal hash equal, at every length across the word
+// boundaries; keys it tells apart (non-letter case pairs, bytes past ASCII, length alone) hash apart.
 func Test_HashFold(t *testing.T) {
 	t.Parallel()
 
@@ -44,7 +42,7 @@ func Test_HashFold(t *testing.T) {
 		{"abcdefgh", "abcdefgi"},
 		{"abcdefghi", "abcdefghj"},
 		{"abcdefghijklmnop", "abcdefghijklmnoq"},
-		// keys that pack into the same words, told apart by length alone
+		// keys packing into the same words, told apart by length alone
 		{"b", "ab"},
 		{"b", "bb"},
 		{"bb", "bbb"},
@@ -57,7 +55,6 @@ func Test_HashFold(t *testing.T) {
 		require.NotEqual(t, HashFold(pair[0]), HashFold(pair[1]), "%q and %q", pair[0], pair[1])
 	}
 
-	// One byte repeated, at every length across the word boundaries.
 	for _, c := range "a-\x00" {
 		seen := make(map[uint64]int)
 		for n := range 64 {
@@ -68,8 +65,6 @@ func Test_HashFold(t *testing.T) {
 		}
 	}
 
-	// Every length across the word boundaries, each byte position flipped in
-	// case in turn.
 	for n := range 40 {
 		key := []byte(strings.Repeat("aB3-", n/4+1)[:n])
 		want := HashFold(string(key))
@@ -83,8 +78,6 @@ func Test_HashFold(t *testing.T) {
 	}
 }
 
-// Test_HashFold_NoCollisions hashes over a hundred thousand keys EqualFold
-// tells apart, short and long, and requires that no two share a hash.
 func Test_HashFold_NoCollisions(t *testing.T) {
 	t.Parallel()
 
@@ -131,7 +124,6 @@ func FuzzHashFold(f *testing.F) {
 		if EqualFold(a, b) && HashFold(b) != ha {
 			t.Fatalf("HashFold(%q) != HashFold(%q) though EqualFold holds", a, b)
 		}
-		// Swapping the case of every letter is still EqualFold.
 		swapped := []byte(a)
 		for i, c := range swapped {
 			if c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z' {
@@ -144,7 +136,6 @@ func FuzzHashFold(f *testing.F) {
 	})
 }
 
-// go test -run=^$ -bench=Benchmark_HashFold -benchmem -count=4
 func Benchmark_HashFold(b *testing.B) {
 	seed := maphash.MakeSeed()
 	for _, key := range []string{"id", "Name", "Content-Type", "X-Forwarded-Proto", strings.Repeat("Header-Name-", 4)} {
@@ -156,8 +147,7 @@ func Benchmark_HashFold(b *testing.B) {
 			_ = sink
 		})
 		b.Run(strconv.Itoa(len(key))+"B/default", func(b *testing.B) {
-			// The case-insensitive hash the standard library offers: fold a
-			// copy, then hash it.
+			// Baseline: fold a copy, then hash.
 			var sink uint64
 			for b.Loop() {
 				sink += maphash.String(seed, strings.ToLower(key))

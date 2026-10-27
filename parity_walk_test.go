@@ -13,16 +13,10 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// Walk promises path/filepath.Walk's contract on an http.FileSystem, so these
-// tests hold it to the stdlib: the same tree is walked by filepath.Walk and by
-// Walk under every combination of "which entry triggers" and "what walkFn
-// returns there", and the traces and returned errors must be identical.
-//
-// A real filesystem cannot be made to fail a directory read or a stat on
-// demand (and a test running as root cannot even lose permissions), so for
-// those failures the oracle is refWalk, a transcription of filepath's walk.
-// refWalk earns that role by agreeing with filepath.Walk on every healthy case
-// first (Test_Walk_RefWalkMatchesFilepath).
+// Walk promises filepath.Walk's contract, so each test walks one tree with both under every
+// (trigger entry, walkFn result) pair and requires equal traces and errors. A real filesystem cannot
+// be made to fail a read or a stat on demand (not even as root), so for those the oracle is refWalk,
+// which earns the role by matching filepath.Walk on every healthy case (Test_Walk_RefWalkMatchesFilepath).
 
 var (
 	errWalkBoom    = errors.New("walkFn boom")
@@ -30,7 +24,6 @@ var (
 	errWalkOpen    = errors.New("open failed")
 )
 
-// walkEvent is one walkFn call, reduced to what the contract specifies.
 type walkEvent struct {
 	Path   string
 	Name   string
@@ -39,7 +32,6 @@ type walkEvent struct {
 	HasErr bool
 }
 
-// walkFixture builds the tree every walk test uses and returns its root.
 func walkFixture(t *testing.T) string {
 	t.Helper()
 	root := t.TempDir()
@@ -58,15 +50,12 @@ func walkFixture(t *testing.T) string {
 	return root
 }
 
-// walkTreePaths lists every slash-separated path of the fixture, "." for the
-// root, followed by one that does not exist.
 var walkTreePaths = []string{
 	".", "a", "a/a1.txt", "a/a2.txt", "a/sub", "a/sub/s1.txt", "a/sub/s2.txt",
 	"b", "b/b1.txt", "c.txt", "d", "d/empty", "z.txt", "nope",
 }
 
-// walkReturns are what a walkFn returns at its trigger path. Wrapped sentinels
-// are ordinary errors to filepath.Walk, which compares them with ==.
+// walkReturns: wrapped sentinels are ordinary errors, since filepath.Walk compares with ==.
 var walkReturns = map[string]error{
 	"SkipDir":         filepath.SkipDir,
 	"SkipAll":         filepath.SkipAll,
@@ -75,13 +64,8 @@ var walkReturns = map[string]error{
 	"wrapped SkipAll": fmt.Errorf("wrapped: %w", filepath.SkipAll),
 }
 
-// walkerFunc walks the fixture from a slash-separated root (relative to the
-// fixture, "." for all of it) and reports the paths it visits relative to the
-// fixture too.
 type walkerFunc func(root string, walkFn func(rel string, info fs.FileInfo, err error) error) error
 
-// traceWalk runs walker with a walkFn returning ret at trigger and nil
-// elsewhere, and returns the calls it saw with the error Walk returned.
 func traceWalk(walker walkerFunc, root, trigger string, ret error) ([]walkEvent, error) {
 	var events []walkEvent
 	err := walker(root, func(rel string, info fs.FileInfo, err error) error {
@@ -101,7 +85,6 @@ func traceWalk(walker walkerFunc, root, trigger string, ret error) ([]walkEvent,
 	return events, err
 }
 
-// relPath maps a path handed to walkFn back to a fixture-relative one.
 func relPath(prefix, path string) string {
 	rel := strings.TrimPrefix(filepath.ToSlash(path), filepath.ToSlash(prefix))
 	rel = strings.TrimPrefix(rel, "/")
@@ -119,7 +102,6 @@ func stdWalker(fixture string) walkerFunc {
 	}
 }
 
-// httpRoot is the http.FileSystem spelling of a fixture-relative root.
 func httpRoot(root string) string {
 	if root == "." {
 		return "/"
@@ -143,9 +125,7 @@ func refWalker(fsys http.FileSystem) walkerFunc {
 	}
 }
 
-// refWalk is filepath.Walk and its walk helper transcribed to an
-// http.FileSystem: the same statements in the same order, with Lstat and the
-// directory read going through fsys.
+// refWalk transcribes filepath.Walk statement for statement; Lstat and the directory read go through fsys.
 func refWalk(fsys http.FileSystem, root string, walkFn filepath.WalkFunc) error {
 	info, err := refStat(fsys, root)
 	if err != nil {
@@ -212,7 +192,6 @@ func refReadDirNames(fsys http.FileSystem, name string) ([]string, error) {
 	for _, info := range infos {
 		names = append(names, info.Name())
 	}
-	// filepath sorts with slices.Sort as well.
 	for i := 1; i < len(names); i++ {
 		for j := i; j > 0 && names[j] < names[j-1]; j-- {
 			names[j], names[j-1] = names[j-1], names[j]
@@ -221,8 +200,6 @@ func refReadDirNames(fsys http.FileSystem, name string) ([]string, error) {
 	return names, nil
 }
 
-// requireSameWalk walks root with both walkers, with walkFn returning ret at
-// trigger, and requires the same calls and the same result.
 func requireSameWalk(t *testing.T, want, got walkerFunc, root, trigger string, ret error) {
 	t.Helper()
 	wantEvents, wantErr := traceWalk(want, root, trigger, ret)
@@ -231,8 +208,6 @@ func requireSameWalk(t *testing.T, want, got walkerFunc, root, trigger string, r
 	require.Equal(t, wantErr, gotErr, "root %q, %v at %q", root, ret, trigger)
 }
 
-// forEveryWalk runs fn for the plain walk of each root and then for every
-// (root, trigger, return value) combination.
 func forEveryWalk(fn func(root, trigger string, ret error)) {
 	for _, root := range []string{".", "a", "a/sub", "c.txt", "d/empty", "nope"} {
 		fn(root, "", nil)
@@ -262,8 +237,7 @@ func Test_Walk_MatchesFilepathWalk(t *testing.T) {
 	})
 }
 
-// Test_Walk_ControlFlow pins the contract in words, on the fixture, so a
-// failure of the sweep above reads as a behavior and not only as a diff.
+// Test_Walk_ControlFlow pins the contract in words, so a sweep failure reads as a behavior, not a diff.
 func Test_Walk_ControlFlow(t *testing.T) {
 	t.Parallel()
 	fixture := walkFixture(t)
@@ -320,7 +294,6 @@ func Test_Walk_ControlFlow(t *testing.T) {
 	})
 }
 
-// faultFS makes chosen opens and directory reads fail.
 type faultFS struct {
 	http.FileSystem
 	openFail    map[string]bool
@@ -357,10 +330,7 @@ func (f faultFile) Readdir(count int) ([]fs.FileInfo, error) {
 	return f.File.Readdir(count)
 }
 
-// Test_Walk_FilesystemErrors compares Walk with refWalk when reading a
-// directory or statting an entry fails, which filepath.Walk reports with one
-// walkFn call (the directory, with its info and the read error) or one for
-// the entry (with no info), and then carries on with the siblings.
+// Test_Walk_FilesystemErrors compares Walk with refWalk when a directory read or a stat fails.
 func Test_Walk_FilesystemErrors(t *testing.T) {
 	t.Parallel()
 	fixture := walkFixture(t)

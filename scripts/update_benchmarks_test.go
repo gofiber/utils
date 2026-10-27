@@ -37,8 +37,6 @@ func TestParseBlocks(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	// The plain ```text block above carries no Environment header and must not
-	// shift the numbering that -block uses.
 	if len(blocks) != 1 {
 		t.Fatalf("got %d tables, want 1", len(blocks))
 	}
@@ -79,11 +77,8 @@ func TestApplyResults(t *testing.T) {
 		"pkg: github.com/gofiber/utils/v2",
 		"cpu: Intel(R) Xeon(R) Processor @ 2.80GHz",
 		"Benchmark_Kept/a-4   	     300	         3.500 ns/op	      16 B/op	       2 allocs/op",
-		// b.SetBytes adds an MB/s column that the table has no room for.
 		"Benchmark_Wide/d-4   	     500	         5.500 ns/op	  181.82 MB/s	       0 B/op	       0 allocs/op",
 		"Benchmark_New/e-4    	     400	         4.500 ns/op	       0 B/op	       0 allocs/op",
-		// Benchmark_Both is measured by two packages, and only one of them is the
-		// one this table's header names.
 		"Benchmark_Both/c-4   	     100	        10.000 ns/op	       0 B/op	       0 allocs/op",
 		"pkg: github.com/gofiber/utils/v2/simd",
 		"Benchmark_Both/c-4   	     600	       600.000 ns/op	       0 B/op	       0 allocs/op",
@@ -123,7 +118,7 @@ func TestApplyResultsNamesNoMachineItCannotRead(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	// arm64 Linux carries no model name, so `go test` prints no cpu line at all.
+	// arm64 Linux prints no cpu line.
 	applyResults(lines, blocks[0], 1, strings.Join([]string{
 		"goos: linux",
 		"goarch: arm64",
@@ -168,7 +163,7 @@ func TestMedianPicksMiddleRun(t *testing.T) {
 	if median(results["Benchmark_missing"]) != nil {
 		t.Error("an unknown benchmark must not resolve to a run")
 	}
-	// An even -count has no middle; the doc comment promises the slower of the two.
+	// An even -count has no middle: the slower of the two is promised.
 	two := []benchResult{{ns: 1}, {ns: 9}}
 	if got := median(two); got == nil || got.ns != 9 {
 		t.Errorf("got %v, want the slower of the two middles", got)
@@ -237,7 +232,7 @@ func TestReadWriteLinesRoundTrip(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "f.md")
 	for in, want := range map[string]string{
 		"a\nb\n": "a\nb\n",
-		"a\nb":   "a\nb\n", // a missing final newline is added
+		"a\nb":   "a\nb\n",
 		"a\n\n":  "a\n\n",
 	} {
 		if err := os.WriteFile(path, []byte(in), 0o600); err != nil {
@@ -260,8 +255,7 @@ func TestReadWriteLinesRoundTrip(t *testing.T) {
 	}
 }
 
-// The tool finds its tables by shape, so a README that drifts out of that shape
-// must fail here rather than silently refreshing nothing.
+// The tool parses tables by shape, so README drift must fail here.
 func TestParseBlocksOnReadme(t *testing.T) {
 	lines, err := readLines(filepath.Join("..", readmePath))
 	if err != nil {
@@ -357,7 +351,7 @@ func TestFormatBenchmarksRefusesABrokenFence(t *testing.T) {
 }
 
 func TestKnownRowsCoversRowsItCannotRefresh(t *testing.T) {
-	// No ns/op column, which is what `go test` prints for a sub-nanosecond result.
+	// No ns/op column, as for a sub-nanosecond result.
 	md := strings.Replace(fixture,
 		"Benchmark_Gone/b-12      200    2.000  ns/op     8  B/op   1  allocs/op",
 		"Benchmark_Gone/b-12      200    8  B/op   1  allocs/op", 1)
@@ -378,8 +372,7 @@ func TestApplyResultsKeepsThePackageTheTableNames(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	// `go test ./...` spans packages, and whichever prints first is not the one the
-	// table documents. Taking it from the run would decide the next run's rows.
+	// go test ./... spans packages; the first to print need not be the table's.
 	applyResults(lines, blocks[0], 1, strings.Join([]string{
 		"goos: darwin",
 		"goarch: arm64",
@@ -401,7 +394,6 @@ func TestApplyResultsKeepsRowsAMeasurementCannotFill(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	// What `go test` prints without -benchmem.
 	applyResults(lines, blocks[0], 1, strings.Join([]string{
 		"goos: darwin",
 		"goarch: arm64",
@@ -465,8 +457,6 @@ func TestUpdateBenchmarksSelectsOneTable(t *testing.T) {
 		miniTable(miniCommand)
 	readme := writeReadme(t, dir, two)
 
-	// Table 1 has nothing to re-run, so asking for it measures nothing, which is
-	// an error and not a silent success.
 	var err error
 	logged := captureStderr(t, func() { err = updateBenchmarks(context.Background(), readme, 1) })
 	if err == nil || !strings.Contains(err.Error(), "no benchmark table was refreshed") {
@@ -479,7 +469,6 @@ func TestUpdateBenchmarksSelectsOneTable(t *testing.T) {
 		t.Error("nothing was measured, so nothing may change")
 	}
 
-	// Table 2 is measured and table 1 is left alone.
 	logged = captureStderr(t, func() { err = updateBenchmarks(context.Background(), readme, 2) })
 	if err != nil {
 		t.Fatalf("%v\nlog:\n%s", err, logged)
@@ -548,8 +537,7 @@ func TestApplyResultsTruncatesLongReports(t *testing.T) {
 }
 
 func TestApplyResultsSkipsHeaderLinesTheBlockLacks(t *testing.T) {
-	// parseBlocks never produces a table without its Environment lines, but
-	// applyResults should not trust that to index them.
+	// applyResults must not trust that parseBlocks always finds the Environment lines.
 	lines := []string{"```text", "// go test .", "```"}
 	block := benchBlock{open: 0, end: 2, env: map[string]int{}}
 	captureStderr(t, func() { applyResults(lines, block, 1, "", map[string]bool{}) })
@@ -584,8 +572,6 @@ func TestParseBlocksRejectsAnUnbalancedCommand(t *testing.T) {
 }
 
 func TestReadEnvHeaderStopsAtAForeignLine(t *testing.T) {
-	// A line of prose that looks like "key: value" ends the header, so the block
-	// below it is not a table: its Environment lines are above the prose.
 	md := "Environment:\ngoos: linux\ngoarch: amd64\npkg: m\ncpu: c\nNote: measured on a laptop\n```text\n// go test .\n```\n"
 	blocks, err := parseBlocks(strings.Split(md, "\n"))
 	if err != nil {

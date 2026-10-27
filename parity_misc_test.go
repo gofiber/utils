@@ -12,10 +12,8 @@ import (
 
 var urlSafeToken = regexp.MustCompile(`^[A-Za-z0-9_-]+$`)
 
-// Test_GenerateSecureToken_EncodingParity holds the tokens to the encoding they
-// are documented to use: base64.RawURLEncoding of the random bytes. Every length
-// is checked, so that both the 32-byte path and the general one, and all three
-// remainders of the encoding, are decoded back to the bytes that were asked for.
+// Test_GenerateSecureToken_EncodingParity decodes every length with base64.RawURLEncoding,
+// covering the 32-byte and general paths and all three remainders.
 func Test_GenerateSecureToken_EncodingParity(t *testing.T) {
 	t.Parallel()
 	strict := base64.RawURLEncoding.Strict() // refuses padding bits that are not zero
@@ -39,7 +37,6 @@ func Test_GenerateSecureToken_EncodingParity(t *testing.T) {
 		check(GenerateSecureToken(n), 32) // anything below one asks for the default
 	}
 
-	// A token is fresh every time, on both paths.
 	seen := make(map[string]struct{})
 	for range 500 {
 		seen[GenerateSecureToken(32)] = struct{}{}
@@ -48,10 +45,8 @@ func Test_GenerateSecureToken_EncodingParity(t *testing.T) {
 	require.Len(t, seen, 1000)
 }
 
-// Test_Fold_StdlibParity_Exhaustive compares the case-insensitive searches with
-// the stdlib searches on lower-cased copies, which is what ASCII folding means,
-// over every haystack and needle of a small alphabet that holds both cases and
-// the bytes next to the letter ranges.
+// Test_Fold_StdlibParity_Exhaustive checks the folded searches against stdlib on lower-cased copies,
+// over small alphabets with both cases and the bytes next to the letter ranges.
 func Test_Fold_StdlibParity_Exhaustive(t *testing.T) {
 	t.Parallel()
 	check := func(s, needle string) {
@@ -78,15 +73,12 @@ func Test_Fold_StdlibParity_Exhaustive(t *testing.T) {
 		}
 	}
 
-	// Short haystacks, which take the byte loops.
 	forEachString("aA@[-", 5, func(s string) {
 		forEachString("aA@[-", 3, func(needle string) { check(s, needle) })
 	})
-	// Haystacks of a word and more, where the word loops and the tails are.
 	forEachString("aA", 12, func(s string) {
 		forEachString("aA", 6, func(needle string) { check(s, needle) })
 	})
-	// Needles that are longer than a word.
 	long := "abcdefghijklmnopqrstuvwxyz"
 	for n := 0; n <= len(long); n++ {
 		for start := 0; start+n <= len(long); start++ {

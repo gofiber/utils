@@ -11,12 +11,8 @@ import (
 
 var timerTestMu sync.Mutex
 
-// testEpoch is an arbitrary fixed instant. Nothing depends on its value, only
-// on the differences between it and the times derived from it.
 var testEpoch = time.Unix(1_700_000_000, 0)
 
-// fakeClock stands in for the package clock so the updater can be stepped
-// instead of waited on.
 type fakeClock struct {
 	mu   sync.Mutex
 	t    time.Time
@@ -26,10 +22,8 @@ type fakeClock struct {
 	stops   atomic.Int32
 }
 
-// withFakeClock locks out the other timestamp tests, installs a fake clock
-// reading start, and returns it with the teardown the caller must defer.
-// Teardown order matters: the updater has to be stopped and the real clock put
-// back before the next test takes the lock.
+// withFakeClock locks out other timestamp tests while it swaps the package clock; the deferred
+// teardown stops the updater and restores the clock before unlocking.
 func withFakeClock(tb testing.TB, start time.Time) (*fakeClock, func()) {
 	tb.Helper()
 	timerTestMu.Lock()
@@ -62,11 +56,8 @@ func (fc *fakeClock) newTicker(time.Duration) (<-chan time.Time, func()) {
 	return fc.tick, func() { fc.stops.Add(1) }
 }
 
-// advance moves the clock to t and ticks the updater, returning once the new
-// value is published. The second send is the synchronization: the updater
-// handles ticks one at a time, so it can only take that one after the store
-// that followed the first. It stores the same value again, so it changes
-// nothing.
+// advance ticks twice: the updater takes the second tick only after storing the first, so the
+// value is published on return.
 func (fc *fakeClock) advance(t time.Time) {
 	fc.set(t)
 	fc.tick <- t
@@ -75,21 +66,15 @@ func (fc *fakeClock) advance(t time.Time) {
 
 func checkTimeStamp(tb testing.TB, expectedCurrent, actualCurrent uint32) {
 	tb.Helper()
-	// Test with buffer of ±2 seconds for CI environment tolerance. The
-	// failure message is built only on failure: boxing require.True's
-	// variadic args allocated on every call, which made the fiber_asserted
-	// benchmark's B/op metric nondeterministic.
+	// Not require.True: its boxed variadic args made fiber_asserted's B/op nondeterministic.
 	if actualCurrent < expectedCurrent-2 || actualCurrent > expectedCurrent+2 {
 		tb.Fatalf("Expected timestamp %d (±2s), got %d (diff: %d)",
 			expectedCurrent, actualCurrent, int64(actualCurrent)-int64(expectedCurrent))
 	}
 }
 
-// Test_NewTicker exercises the production tick source. Every other test here
-// replaces it, so without this one nothing proves that the real one delivers a
-// live channel or that the stop it hands back works. A millisecond period keeps
-// the only real-time wait in this file down to the cost of one tick; the
-// generous timeout is there to fail loudly rather than hang a loaded CI box.
+// Test_NewTicker covers the production tick source, which every other test replaces. The long timeout
+// only turns a hang on a loaded CI box into a failure.
 func Test_NewTicker(t *testing.T) {
 	timerTestMu.Lock()
 	defer timerTestMu.Unlock()
@@ -143,21 +128,17 @@ func Test_StopTimeStampUpdater(t *testing.T) {
 	StopTimeStampUpdater()
 	require.Equal(t, int32(1), fc.stops.Load(), "a second Stop must be a no-op")
 
-	// The updater is gone, so nothing refreshes the cache and Timestamp reads the clock.
-	// No tick is sent because there is nothing left to receive one.
+	// Set, not advance: nothing is left to receive a tick.
 	fc.set(testEpoch.Add(time.Hour))
 	require.Equal(t, uint32(testEpoch.Unix())+3600, Timestamp(), "after Stop the timestamp must follow the clock")
 }
 
-// Test_Timestamp_WithoutUpdater pins what Timestamp's doc comment says: while no updater runs,
-// before the first Start and again after Stop, it reads the clock, and with one running it serves
-// the published value however far the clock has moved. The branch that tells the two apart
-// costs nothing the package benchmark can see.
+// Test_Timestamp_WithoutUpdater pins Timestamp's doc: without an updater (before Start, after Stop) it reads
+// the clock; with one running it serves the published value.
 func Test_Timestamp_WithoutUpdater(t *testing.T) {
 	fc, done := withFakeClock(t, testEpoch)
 	defer done()
 
-	// A pristine process: nothing has been published yet.
 	timestamp.Store(0)
 	defer timestamp.Store(0)
 
@@ -192,8 +173,7 @@ func Test_StartStopRepeat(t *testing.T) {
 	require.Equal(t, uint32(testEpoch.Unix())+6, Timestamp(), "the restarted updater still ticks")
 }
 
-// Benchmark_CalculateTimestamp runs on the real clock: it measures Timestamp
-// against time.Now, and the ±2s tolerance below is the cache's own lag.
+// Benchmark_CalculateTimestamp runs on the real clock; the ±2s tolerance below is the cache's own lag.
 func Benchmark_CalculateTimestamp(b *testing.B) {
 	timerTestMu.Lock()
 	defer timerTestMu.Unlock()
@@ -216,7 +196,6 @@ func Benchmark_CalculateTimestamp(b *testing.B) {
 		}
 	})
 
-	// Simplified asserted benchmarks - measure the realistic cost including validation
 	b.Run("fiber_asserted", func(bb *testing.B) {
 		bb.ReportAllocs()
 		bb.ResetTimer()

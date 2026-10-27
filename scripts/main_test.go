@@ -13,9 +13,7 @@ import (
 	"time"
 )
 
-// captureStderr runs fn with os.Stderr pointing at a pipe and returns what fn
-// wrote to it, which is where the tool logs and where the child go test writes.
-// The tests of this package do not run in parallel, so swapping it is safe.
+// captureStderr swaps the global os.Stderr, so the tests of this package must not run in parallel.
 func captureStderr(t *testing.T, fn func()) string {
 	t.Helper()
 	r, w, err := os.Pipe()
@@ -40,14 +38,9 @@ func captureStderr(t *testing.T, fn func()) string {
 	return <-done
 }
 
-// writeMiniModule creates a module with one benchmark in a directory of its own
-// and returns the directory. It has no dependencies and no go directive, so
-// `go test` in it needs neither the network nor another toolchain, only the go
-// command, without which the tests that run it are skipped.
-//
-// The benchmark sleeps for a millisecond: one iteration of an empty body can
-// measure as 0 ns on a coarse clock, and `go test` prints no ns/op column then,
-// which is a row this tool does not take.
+// writeMiniModule writes a one-benchmark module with no dependencies and no go directive, so go test
+// needs no network or toolchain. The benchmark sleeps: an empty body can measure 0 ns, and go test
+// then prints no ns/op.
 func writeMiniModule(t *testing.T) string {
 	t.Helper()
 	if _, err := exec.LookPath("go"); err != nil {
@@ -63,17 +56,13 @@ func writeMiniModule(t *testing.T) string {
 			t.Fatal(err)
 		}
 	}
-	// Neither a parent workspace nor flags meant for the real module (-mod=vendor
-	// say) may reach the temporary one. An empty GOFLAGS counts as unset, so the
-	// settings of `go env -w` would still apply without GOENV=off.
+	// Isolate from the real module's workspace and flags; an empty GOFLAGS counts as unset, hence GOENV=off.
 	t.Setenv("GOWORK", "off")
 	t.Setenv("GOFLAGS", "")
 	t.Setenv("GOENV", "off")
 	return dir
 }
 
-// miniTable is a README table for the mini module, for this machine's architecture: a placeholder row whose
-// iteration count, 777, no real run of -benchtime=1x can produce.
 func miniTable(command string) string {
 	return "Environment:\ngoos: plan9\ngoarch: " + runtime.GOARCH + "\npkg: example.com/mini\ncpu: an old cpu\n\n" +
 		"```text\n" + command + "\n\nBenchmark_Mini-8   777   9.000  ns/op   8  B/op   1  allocs/op\n```\n"
@@ -132,7 +121,6 @@ func TestRunFormatsTheReadme(t *testing.T) {
 	if !strings.Contains(out, "Benchmark_Kept/a-12  100  1.000  ns/op  0  B/op  0  allocs/op") {
 		t.Errorf("the rows were not aligned:\n%s", out)
 	}
-	// Formatting again changes nothing.
 	if err := run(nil, readme); err != nil {
 		t.Fatal(err)
 	}
@@ -194,8 +182,6 @@ func TestRunUpdateReportsAFailingCommand(t *testing.T) {
 }
 
 func TestRunBenchStopsWithItsContext(t *testing.T) {
-	// A context that is canceled already keeps the child from starting, and the
-	// error names the command.
 	ctx, cancel := context.WithCancel(context.Background())
 	cancel()
 	_, err := runBench(ctx, t.TempDir(), []string{"go", "version"})
@@ -204,9 +190,7 @@ func TestRunBenchStopsWithItsContext(t *testing.T) {
 	}
 }
 
-// TestRunBenchKillsARunningChild is the Ctrl-C case: the context is canceled while
-// the child runs, and the child goes with it. The child is this test binary, run
-// again to do nothing but announce itself and sleep.
+// TestRunBenchKillsARunningChild is the Ctrl-C case: the child is this test binary, run again to sleep.
 func TestRunBenchKillsARunningChild(t *testing.T) {
 	if marker := os.Getenv("SCRIPTS_TEST_CHILD_MARKER"); marker != "" {
 		err := os.WriteFile(marker, []byte("up"), 0o600) // #nosec G703 -- the marker is the temporary file the parent test named
@@ -232,7 +216,6 @@ func TestRunBenchKillsARunningChild(t *testing.T) {
 		done <- err
 	}()
 
-	// Cancel only once the child is up, or the kill is not what is tested.
 	for deadline := time.Now().Add(time.Minute); ; time.Sleep(10 * time.Millisecond) {
 		if _, err := os.Stat(marker); err == nil {
 			break

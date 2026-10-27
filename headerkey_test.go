@@ -42,8 +42,7 @@ func Test_CanonicalHeaderKey(t *testing.T) {
 		require.Equal(t, want, string(CanonicalHeaderKey([]byte(in))), "input %q", in)
 	}
 
-	// Already-canonical and invalid keys come back without copying: for
-	// []byte inputs the same backing array is returned.
+	// Canonical/invalid keys: no copy.
 	for _, in := range []string{"Content-Type", "Bad Key", "X-Id"} {
 		b := []byte(in)
 		out := CanonicalHeaderKey(b)

@@ -14,47 +14,19 @@
 #include "textflag.h"
 #include "block_align_amd64.h"
 
-// Classifying \w = [A-Za-z0-9_] with unsigned clamp-and-compare costs three
-// VPMINUB/VPMAXUB/VPCMPEQB triples plus a VPCMPEQB for '_' and three VPORs:
-// thirteen vector ops per 32 bytes, ten of them on the two general vector
-// ALU ports. A nibble table does the same job in six (five in the block
-// loops, which defer the compare to the reduced block value), and the two
-// VPSHUFBs it adds run on the otherwise idle shuffle port.
+// Nibble classifier for \w = [A-Za-z0-9_]: b is a word character iff its class
+// value lowTable[b&15] & highTable[b>>4] is nonzero. highTable gives rows
+// 0x3_..0x7_ the bits 0x01..0x10, others 0; lowTable[n] is the OR of the
+// bits of the rows where nibble n is a word character. VPSHUFB zeroes lanes
+// whose index has bit 7 set, so bytes >= 0x80 classify as non-word.
 //
-// The table splits each byte into its high and low nibble. Every high
-// nibble that contains word characters gets one bit:
-//
-//	0x3_ -> 0x01   0x4_ -> 0x02   0x5_ -> 0x04   0x6_ -> 0x08   0x7_ -> 0x10
-//
-// and each low-nibble entry carries the set of high-nibble rows in which
-// that low nibble is a word character, so a byte is a word character
-// exactly when lowTable[lo] & highTable[hi] != 0:
-//
-//	lo 0x0        -> 0x15   ('0', 'P', 'p')
-//	lo 0x1..0x9   -> 0x1F   (digits and letters in every row)
-//	lo 0xA        -> 0x1E   ('J', 'Z', 'j', 'z' but not ':')
-//	lo 0xB..0xE   -> 0x0A   ('K'..'N', 'k'..'n' only)
-//	lo 0xF        -> 0x0E   ('O', '_', 'o')
-//
-// Bytes >= 0x80 need no separate guard: VPSHUFB zeroes any lane whose
-// index byte has bit 7 set, so the low-nibble lookup already returns 0 for
-// them and they classify as non-word, matching the SWAR fallback.
-//
-// Both kernels compute the same per-lane class value: the AND of the two
-// lookups, which is nonzero exactly in the word-character lanes. The
-// 32-byte paths compare it against zero at once, giving the "not a word
-// character" mask (0xFF per non-word lane) that VPMOVMSKB can extract;
-// memchrNotWord scans those bits directly and memchrWord inverts them
-// with a single NOTL. The block loops instead reduce the four raw class
-// values first and compare only the reduction: memchrNotWord takes the
-// per-lane minimum (zero exactly where some vector has a non-word lane),
-// memchrWord the per-lane OR (nonzero exactly where some vector has a
-// word lane). That is three reductions and one compare per block instead
-// of four compares and three reductions, and the four raw values stay
-// live so the (rare) hit path can still compare them one at a time.
+// Skeleton and bounds as in memchr_amd64.s: nothing outside haystack[0:len] is
+// read. The block loops reduce the four raw class values (per-lane min for
+// NotWord, OR for Word) and compare once; the raw values stay live for the hit
+// path.
 
-// WORDBITS leaves in dst the class value of every lane of src: nonzero
-// for a word character, zero otherwise. t0 is scratch; dst may alias src.
+// WORDBITS: class value of each lane of src into dst (t0 scratch; dst may
+// alias src).
 #define WORDBITS(src, dst, t0) \
 	VPSRLW   $4, src, t0;  \
 	VPAND    Y2, t0, t0;   \
@@ -62,16 +34,12 @@
 	VPSHUFB  src, Y0, dst; \
 	VPAND    t0, dst, dst
 
-// NOTWORD leaves in dst a mask with 0xFF in every lane of src that is NOT
-// a word character. t0 is scratch; dst may alias src.
+// NOTWORD: 0xFF in each non-word lane.
 #define NOTWORD(src, dst, t0) \
 	WORDBITS(src, dst, t0); \
 	VPCMPEQB Y3, dst, dst
 
-// SETUPTABLES loads the nibble tables, the low-nibble mask and a zero
-// vector into Y0-Y3. The tables are built from immediates rather than a
-// RODATA section so the kernels stay position-independent and free of
-// relocations.
+// SETUPTABLES: Y0 = lowTable, Y1 = highTable, Y2 = 0x0F mask, Y3 = zero.
 #define SETUPTABLES \
 	MOVQ        $0x1F1F1F1F1F1F1F15, AX; \
 	VMOVQ       AX, X0;                  \
@@ -87,35 +55,23 @@
 	VPXOR       Y3, Y3, Y3
 
 // func memchrWordAVX2(haystack []byte) int
-//
-// AVX2 implementation to find the first word character [A-Za-z0-9_].
-//
-// Parameters:
-//   haystack_base+0(FP)  - pointer to haystack (8 bytes)
-//   haystack_len+8(FP)   - length (8 bytes)
-//   haystack_cap+16(FP)  - capacity (8 bytes, unused)
-//   ret+24(FP)           - return value (8 bytes)
-//
 TEXT ·memchrWordAVX2(SB), NOSPLIT, $0-32
-	// Load parameters
-	MOVQ    haystack_base+0(FP), SI    // SI = haystack pointer
-	MOVQ    haystack_len+8(FP), DX     // DX = length
+	MOVQ    haystack_base+0(FP), SI
+	MOVQ    haystack_len+8(FP), DX
 
-	// Empty check
 	TESTQ   DX, DX
 	JZ      word_not_found
 
-	// Save start for offset calculation and compute the end pointer
-	MOVQ    SI, DI                     // DI = start pointer
-	LEAQ    (SI)(DX*1), R8             // R8 = end pointer
+	MOVQ    SI, DI
+	LEAQ    (SI)(DX*1), R8
 
 	CMPQ    DX, $32
-	JB      word_tail_loop             // sub-32 direct call: scalar
+	JB      word_tail_loop
 
 	SETUPTABLES
 
-	LEAQ    -32(R8), R12               // last valid 32-byte window base
-	LEAQ    -128(R8), R11              // last valid 128-byte block base
+	LEAQ    -32(R8), R12
+	LEAQ    -128(R8), R11
 	CMPQ    SI, R11
 	JA      word_loop32_entry
 
@@ -130,9 +86,6 @@ word_loop128:
 	WORDBITS(Y6, Y6, Y8)
 	WORDBITS(Y7, Y7, Y8)
 
-	// A word character exists in the block iff some lane's class value is
-	// nonzero in some vector, so OR the four values and look for a lane
-	// that is not zero.
 	VPOR    Y4, Y5, Y8
 	VPOR    Y6, Y7, Y9
 	VPOR    Y8, Y9, Y8
@@ -163,8 +116,7 @@ word_loop32:
 	JBE     word_loop32
 
 word_last32:
-	// Fewer than 32 bytes remain past SI; rescan the final window. Lanes
-	// before SI were already resolved as non-matching, so BSF stays exact.
+	// Overlapping final window: lanes before SI were ruled out, so BSF is exact.
 	CMPQ    SI, R8
 	JAE     word_not_found
 	MOVQ    R12, SI
@@ -177,34 +129,29 @@ word_last32:
 	JMP     word_not_found
 
 word_tail_loop:
-	MOVBLZX (SI), AX                   // AX = byte
+	MOVBLZX (SI), AX
 
-	// Check [A-Z]: 65 <= b <= 90
 	CMPB    AL, $65
 	JB      word_check_lower
 	CMPB    AL, $90
 	JBE     word_found_scalar
 
 word_check_lower:
-	// Check [a-z]: 97 <= b <= 122
 	CMPB    AL, $97
 	JB      word_check_digit
 	CMPB    AL, $122
 	JBE     word_found_scalar
 
 word_check_digit:
-	// Check [0-9]: 48 <= b <= 57
 	CMPB    AL, $48
 	JB      word_check_underscore
 	CMPB    AL, $57
 	JBE     word_found_scalar
 
 word_check_underscore:
-	// Check '_': 95
 	CMPB    AL, $95
 	JE      word_found_scalar
 
-	// Not a word char, continue
 	INCQ    SI
 	CMPQ    SI, R8
 	JB      word_tail_loop
@@ -216,9 +163,6 @@ word_not_found:
 	RET
 
 word_found_in_block:
-	// Locate the first hit by comparing and extracting the per-vector
-	// class values in address order; only one of the four can hold the
-	// lowest match.
 	VPCMPEQB Y3, Y4, Y4
 	VPMOVMSKB Y4, CX
 	NOTL    CX
@@ -243,8 +187,8 @@ word_found_in_block:
 
 word_found_in_vector:
 	BSFL    CX, BX
-	SUBQ    DI, SI                     // SI = offset to chunk start
-	ADDQ    SI, BX                     // BX = absolute position
+	SUBQ    DI, SI
+	ADDQ    SI, BX
 	MOVQ    BX, ret+24(FP)
 	VZEROUPPER
 	RET
@@ -256,26 +200,18 @@ word_found_scalar:
 	RET
 
 // func memchrNotWordAVX2(haystack []byte) int
-//
-// AVX2 implementation to find the first non-word character, the complement
-// of memchrWordAVX2. The nibble classifier already produces the non-word
-// mask directly, so this kernel skips the NOTL memchrWordAVX2 needs.
-//
 TEXT ·memchrNotWordAVX2(SB), NOSPLIT, $0-32
-	// Load parameters
 	MOVQ    haystack_base+0(FP), SI
 	MOVQ    haystack_len+8(FP), DX
 
-	// Empty check
 	TESTQ   DX, DX
 	JZ      notword_not_found
 
-	// Save start for offset calculation and compute the end pointer
 	MOVQ    SI, DI
 	LEAQ    (SI)(DX*1), R8
 
 	CMPQ    DX, $32
-	JB      notword_tail_loop          // sub-32 direct call: scalar
+	JB      notword_tail_loop
 
 	SETUPTABLES
 
@@ -295,9 +231,6 @@ notword_loop128:
 	WORDBITS(Y6, Y6, Y8)
 	WORDBITS(Y7, Y7, Y8)
 
-	// A non-word character exists in the block iff some lane's class
-	// value is zero in some vector, so take the per-lane minimum of the
-	// four values and look for a zero lane.
 	VPMINUB Y4, Y5, Y8
 	VPMINUB Y6, Y7, Y9
 	VPMINUB Y8, Y9, Y8
@@ -339,40 +272,30 @@ notword_last32:
 notword_tail_loop:
 	MOVBLZX (SI), AX
 
-	// Check if NOT a word char (inverse of word_tail_loop logic)
-	// Word chars: [A-Z], [a-z], [0-9], '_'
-	// If it's a word char, skip; if not, found
-
-	// Check [A-Z]: 65 <= b <= 90
 	CMPB    AL, $65
 	JB      notword_check_lower_gap
 	CMPB    AL, $90
-	JBE     notword_is_word           // It's [A-Z], skip
+	JBE     notword_is_word
 
 notword_check_lower_gap:
-	// Check [a-z]: 97 <= b <= 122
 	CMPB    AL, $97
 	JB      notword_check_digit_gap
 	CMPB    AL, $122
-	JBE     notword_is_word           // It's [a-z], skip
+	JBE     notword_is_word
 
 notword_check_digit_gap:
-	// Check [0-9]: 48 <= b <= 57
 	CMPB    AL, $48
 	JB      notword_check_underscore_gap
 	CMPB    AL, $57
-	JBE     notword_is_word           // It's [0-9], skip
+	JBE     notword_is_word
 
 notword_check_underscore_gap:
-	// Check '_': 95
 	CMPB    AL, $95
-	JE      notword_is_word           // It's '_', skip
+	JE      notword_is_word
 
-	// Not a word char - found!
 	JMP     notword_found_scalar
 
 notword_is_word:
-	// It's a word char, continue searching
 	INCQ    SI
 	CMPQ    SI, R8
 	JB      notword_tail_loop

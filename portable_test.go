@@ -12,28 +12,15 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// IsASCII, IndexAny2 and IndexAny3 hand inputs of simd.MinLen bytes or more to
-// the AVX2 kernels where there are any, and scan them with their own SWAR
-// loops where there are not. On an amd64 machine with AVX2, which is every
-// machine the amd64 CI jobs and most developers use, the SWAR loops for long
-// inputs would therefore never run, and the one tier that is not exercised is
-// the one every other CPU runs.
-//
-// Test_PortableTier closes that gap from inside an ordinary test run: it starts
-// this test binary again with the AVX2 feature switched off through the
-// GODEBUG setting golang.org/x/sys/cpu reads, and has the child run the tests
-// that depend on the tier. When the run measures coverage the child writes its
-// counters to the same directory as the parent, so the report is one that
-// includes the portable tier.
+// IsASCII, IndexAny2 and IndexAny3 run their SWAR loops on inputs of simd.MinLen bytes or more only without
+// the AVX2 kernels, so an ordinary run on AVX2 hardware never reaches them; Test_PortableTier does.
 
 const (
 	portableTierEnv = "UTILS_TEST_PORTABLE_TIER_CHILD"
 	noAVX2          = "cpu.avx2=off"
 )
 
-// portableTierTests are the tests the child runs. They are checked by name in
-// its output, so renaming one without updating this list fails loudly instead
-// of quietly dropping it from the portable run.
+// portableTierTests are checked by name, so renaming one fails loudly instead of dropping it.
 var portableTierTests = []string{
 	"Test_PortableTier_IsPortable",
 	"Test_PortableTier_PositionSweep",
@@ -49,8 +36,6 @@ func isPortableTierChild() bool {
 	return os.Getenv(portableTierEnv) != ""
 }
 
-// coverDirArg returns the directory go test asked this binary to write its
-// coverage counters to, or "" when it is not measuring coverage.
 func coverDirArg() string {
 	for _, arg := range os.Args[1:] {
 		if dir, ok := strings.CutPrefix(arg, "-test.gocoverdir="); ok {
@@ -60,7 +45,7 @@ func coverDirArg() string {
 	return ""
 }
 
-// Test_PortableTier re-runs the tier-dependent tests with AVX2 disabled.
+// Test_PortableTier re-runs the tier-dependent tests in a child with AVX2 off, merging its coverage.
 func Test_PortableTier(t *testing.T) {
 	t.Parallel()
 	if isPortableTierChild() {
@@ -77,8 +62,7 @@ func Test_PortableTier(t *testing.T) {
 		args = append(args, "-test.gocoverdir="+dir)
 	}
 	if deadline, ok := t.Deadline(); ok {
-		// The timeout of this run ends this process, not the child, which would
-		// go on to its own default of ten minutes. It gets what is left of ours.
+		// Our timeout ends this process, not the child; pass on what is left.
 		if left := time.Until(deadline); left > 0 {
 			args = append(args, "-test.timeout="+left.String())
 		}
@@ -96,8 +80,7 @@ func Test_PortableTier(t *testing.T) {
 	}
 }
 
-// Test_PortableTier_IsPortable fails the child run if it somehow still has the
-// AVX2 kernels, which would make the whole exercise a repeat of the parent's.
+// Test_PortableTier_IsPortable fails the child if AVX2 is still on.
 func Test_PortableTier_IsPortable(t *testing.T) {
 	t.Parallel()
 	if !isPortableTierChild() {
@@ -106,10 +89,7 @@ func Test_PortableTier_IsPortable(t *testing.T) {
 	require.False(t, simd.Accelerated(), "%s did not switch the AVX2 kernels off", noAVX2)
 }
 
-// Test_PortableTier_PositionSweep walks inputs of every length through the
-// scan loops' word, block and tail paths with the byte of interest at every
-// position. It runs in both tiers, and in the portable one it is what pins the
-// SWAR loops for lengths the AVX2 kernels otherwise take.
+// Test_PortableTier_PositionSweep moves the byte of interest through every position of every length.
 func Test_PortableTier_PositionSweep(t *testing.T) {
 	t.Parallel()
 	const maxLen = 130
@@ -143,7 +123,7 @@ func Test_PortableTier_PositionSweep(t *testing.T) {
 				if got, want := IndexAny3(s, 'x', planted, 'y'), refIndexAny3(s, 'x', planted, 'y'); got != want {
 					t.Fatalf("IndexAny3(%d bytes with %#x at %d) = %d, want %d", n, planted, pos, got, want)
 				}
-				// A second hit after the first never moves the answer.
+				// A later hit never moves the answer.
 				if pos+1 < n {
 					b[n-1] = planted
 					if got := IndexAny2(b, planted, planted); got != pos {

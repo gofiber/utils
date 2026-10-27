@@ -58,10 +58,8 @@ func Test_AddTrailingSlashBytes_ReturnsSame(t *testing.T) {
 	require.Same(t, &input[0], &result[0], "should return same slice instance")
 }
 
-// Test_AddTrailingSlashBytes_ResultIsOwned holds the doc comment to its word that
-// whenever a '/' is appended the caller gets a new slice. An empty input used to
-// get a view of the constant "/": two results shared one array, and writing to one
-// was a fatal fault, which is what the deprecated ToLowerBytes does to every slice.
+// Test_AddTrailingSlashBytes_ResultIsOwned: an appended '/' means a new slice; an empty input used to
+// get a view of the constant "/", a fatal fault on write.
 func Test_AddTrailingSlashBytes_ResultIsOwned(t *testing.T) {
 	t.Parallel()
 
@@ -78,7 +76,7 @@ func Test_AddTrailingSlashBytes_ResultIsOwned(t *testing.T) {
 		require.Equal(t, want, first, name)
 		require.NotSame(t, &first[0], &second[0], "%s: two results share storage", name)
 
-		first[len(first)-1] = 'x' // a fault if the result is a view of read-only memory
+		first[len(first)-1] = 'x'
 		require.Equal(t, want, second, "%s: writing to one result changed another", name)
 		require.Zero(t, spare[:1][0], "%s: the input's spare capacity was written", name)
 	}

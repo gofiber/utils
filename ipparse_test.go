@@ -10,7 +10,6 @@ import (
 
 func parseIPSamples() []string {
 	return []string{
-		// IPv4
 		"0.0.0.0",
 		"127.0.0.1",
 		"203.0.113.195",
@@ -31,7 +30,6 @@ func parseIPSamples() []string {
 		"a.b.c.d",
 		"1.2.3.-4",
 		"",
-		// IPv6
 		"::",
 		"::1",
 		"1::",
@@ -58,13 +56,12 @@ func parseIPSamples() []string {
 		"::1.2.3.4",
 		"1.2.3.4::",
 		"12345::",
-		// Over-long fields whose value still fits in 0xFFFF.
+		// Over-long fields still within 0xFFFF.
 		"00001::2",
 		"::00000",
 		"00000::",
 		"1:2:3:4:5:6:7:00008",
 		"cec::7dcE:0D568",
-		// Exactly four digits, leading zeros included: valid.
 		"0001:2:3:4:5:6:7:8",
 		"0000::0000",
 		"g::1",

@@ -12,11 +12,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// assertIPGrammarParity pins the three invariants that tie this module's two IP
-// grammars together: IsIPv4 and IsIPv6 accept exactly what net.ParseIP accepts
-// for their family, and each agrees with the netip-based parser beside it once
-// the zone suffix net.ParseIP rejects is accounted for. Test_IsIP_Parity and
-// FuzzIsIP share it, so the two grammars cannot drift apart unnoticed again.
+// assertIPGrammarParity ties IsIPv4/IsIPv6 to net.ParseIP and the netip-based parsers.
 func assertIPGrammarParity(t *testing.T, s string) {
 	t.Helper()
 
@@ -32,8 +28,7 @@ func assertIPGrammarParity(t *testing.T, s string) {
 		t.Fatalf("IsIPv6(%q) = %v, want %v (net.ParseIP)", s, is6, want)
 	}
 
-	// net.ParseIP is netip.ParseAddr minus zones, so the parsers agree with the
-	// validators on every input that carries no zone.
+	// net.ParseIP is netip.ParseAddr minus zones, so only zone-free inputs must agree.
 	if _, ok := ParseIPv4(s); ok != is4 {
 		t.Fatalf("ParseIPv4(%q) ok = %v but IsIPv4 = %v", s, ok, is4)
 	}
@@ -43,7 +38,6 @@ func assertIPGrammarParity(t *testing.T, s string) {
 	}
 }
 
-// Test_IsIP_Parity runs the shared IP corpus through both grammars.
 func Test_IsIP_Parity(t *testing.T) {
 	t.Parallel()
 
@@ -52,9 +46,8 @@ func Test_IsIP_Parity(t *testing.T) {
 	}
 }
 
-// Test_IsIPv6_HexFieldDigitCap covers fields longer than four hex digits whose
-// value still fits in 0xFFFF. A value-only bound accepted these; net.ParseIP,
-// the reference IsIPv6 follows, rejects them.
+// Test_IsIPv6_HexFieldDigitCap covers fields over four hex digits whose value still fits in 0xFFFF:
+// a value-only bound accepted them, net.ParseIP does not.
 func Test_IsIPv6_HexFieldDigitCap(t *testing.T) {
 	t.Parallel()
 
@@ -70,7 +63,6 @@ func Test_IsIPv6_HexFieldDigitCap(t *testing.T) {
 		require.Nil(t, net.ParseIP(in), "net.ParseIP disagrees: %q", in)
 	}
 
-	// Exactly four digits stays valid, leading zeros included.
 	for _, in := range []string{
 		"0001:2:3:4:5:6:7:8",
 		"0000::0000",
@@ -114,7 +106,6 @@ func Test_IsIPv4(t *testing.T) {
 func Test_IsIPv6(t *testing.T) {
 	t.Parallel()
 
-	// Valid Cases
 	require.True(t, IsIPv6("9396:9549:b4f7:8ed0:4791:1330:8c06:e62d"))
 	require.True(t, IsIPv6("2345:0425:2CA1::0567:5673:23b5"))
 	require.True(t, IsIPv6("2001:1:2:3:4:5:6:7"))
@@ -125,10 +116,8 @@ func Test_IsIPv6(t *testing.T) {
 	require.True(t, IsIPv6("::192.168.1.1"), "IPv4-compatible IPv6 address")
 	require.True(t, IsIPv6("ffff::"), "Address with a single non-zero group and leading ellipsis")
 
-	// Boundary values
 	require.True(t, IsIPv6("ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff"), "Maximum value for all groups")
 
-	// Invalid cases
 	require.False(t, IsIPv6("1::2::3"), "IPv6 address with multiple ellipses")
 	require.False(t, IsIPv6("2001::25de::cade"), "IPv6 address with multiple ellipses in the middle")
 	require.False(t, IsIPv6("g:a:b:c:d:e:f:1"), "Invalid character 'g' in address")
@@ -150,17 +139,13 @@ func Test_IsIPv6(t *testing.T) {
 func Test_IsIPv6_EdgeCases(t *testing.T) {
 	t.Parallel()
 
-	// hex group larger than 4 digits
 	require.False(t, IsIPv6("1:2:3:4:5:6:7:12345"))
 
-	// IPv4 part at wrong position
 	require.False(t, IsIPv6("1:2:3:4:1.2.3.4"))
 
-	// IPv4 part would exceed length
 	require.False(t, IsIPv6("1:2:3:4:5:6:7:1.2.3.4"))
 
-	// With an ellipsis the IPv4 part is not rejected for its position, only for
-	// the room it needs: seven groups leave two bytes where it takes four.
+	// Rejected for room, not position: seven groups leave two bytes, an IPv4 part takes four.
 	for _, in := range []string{
 		"::2:3:4:5:6:7:8:1.2.3.4",
 		"1::3:4:5:6:7:8:1.2.3.4",
@@ -183,7 +168,6 @@ func Test_IPWhitespace(t *testing.T) {
 	require.False(t, IsIPv6("::1 "))
 }
 
-// go test -v -run=^$ -bench=Benchmark_IsIPv4 -benchmem -count=6
 func Benchmark_IsIPv4(b *testing.B) {
 	ip := "174.23.33.100"
 	var res bool
@@ -203,7 +187,6 @@ func Benchmark_IsIPv4(b *testing.B) {
 	})
 }
 
-// go test -v -run=^$ -bench=Benchmark_IsIPv6 -benchmem -count=6
 func Benchmark_IsIPv6(b *testing.B) {
 	ip := "9396:9549:b4f7:8ed0:4791:1330:8c06:e62d"
 	var res bool

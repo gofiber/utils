@@ -36,14 +36,12 @@ func Test_GetMIME(t *testing.T) {
 	res = GetMIME("cbor")
 	require.Equal(t, "application/cbor", res)
 
-	// upper-case extensions match case-insensitively
 	res = GetMIME("PNG")
 	require.Equal(t, "image/png", res)
 
 	res = GetMIME(".JSON")
 	require.Equal(t, "application/json", res)
 
-	// empty case
 	res = GetMIME("")
 	require.Empty(t, res)
 
@@ -74,7 +72,6 @@ func Test_GetMIME_FallbackWithoutParameters(t *testing.T) {
 	}
 }
 
-// go test -v -run=^$ -bench=Benchmark_GetMIME -benchmem -count=2
 func Benchmark_GetMIME(b *testing.B) {
 	var res string
 	b.Run("fiber", func(b *testing.B) {
@@ -105,21 +102,17 @@ func Test_ParseVendorSpecificContentType(t *testing.T) {
 	cType := ParseVendorSpecificContentType("application/json")
 	require.Equal(t, "application/json", cType)
 
-	// Test with parameters (semicolon IndexByte optimization)
 	cType = ParseVendorSpecificContentType("multipart/form-data; boundary=abc123")
 	require.Equal(t, "multipart/form-data; boundary=abc123", cType)
 
-	// Test vendor-specific content types (plus IndexByte optimization)
 	cType = ParseVendorSpecificContentType("application/vnd.api+json; version=1")
 	require.Equal(t, "application/json", cType)
 	cType = ParseVendorSpecificContentType("application/vnd.dummy+x-www-form-urlencoded")
 	require.Equal(t, "application/x-www-form-urlencoded", cType)
 
-	// Test invalid cases (slash IndexByte optimization)
 	cType = ParseVendorSpecificContentType("something invalid")
 	require.Equal(t, "something invalid", cType)
 
-	// Additional edge cases for IndexByte optimization
 	cType = ParseVendorSpecificContentType("application/vnd.custom+xml; charset=utf-8")
 	require.Equal(t, "application/xml", cType)
 
@@ -132,15 +125,12 @@ func Test_ParseVendorSpecificContentType(t *testing.T) {
 	cType = ParseVendorSpecificContentType("application/vnd.test+json;boundary=test")
 	require.Equal(t, "application/json", cType)
 
-	// Edge cases with multiple special characters
 	cType = ParseVendorSpecificContentType("application/vnd.api+json+extra; param=value")
 	require.Equal(t, "application/json+extra", cType)
 
-	// Semicolon before plus
 	cType = ParseVendorSpecificContentType("application/json; charset=utf-8+extra")
 	require.Equal(t, "application/json", cType)
 
-	// Empty and single-character inputs
 	require.Empty(t, ParseVendorSpecificContentType(""))
 	require.Equal(t, "+", ParseVendorSpecificContentType("+"))
 	require.Equal(t, ";", ParseVendorSpecificContentType(";"))
@@ -158,8 +148,7 @@ func Test_ParseVendorSpecificContentType(t *testing.T) {
 	cType = ParseVendorSpecificContentType("application/vnd.api+json")
 	require.Equal(t, "application/json", cType)
 
-	// Uppercase vendor specific type should only be parsed when case-insensitive
-	// matching is enabled
+	// Upper case is parsed only with case-insensitive matching.
 	cType = ParseVendorSpecificContentType("APPLICATION/VND.API+JSON")
 	require.Equal(t, "APPLICATION/JSON", cType)
 
@@ -176,10 +165,8 @@ func Test_ParseVendorSpecificContentType(t *testing.T) {
 	require.Equal(t, "invalid+withoutSlash", cType)
 }
 
-// Test_ParseVendorSpecificContentType_Malformed pins the content types that do
-// not have the shape the function reads: it used to splice a '/' from the
-// parameters or from behind the '+' into the result, and to keep the whitespace
-// that RFC 9110 allows before a ';'.
+// Test_ParseVendorSpecificContentType_Malformed pins types without the expected shape: a '/' was once spliced
+// in from the parameters or from behind the '+', and whitespace before a ';' was kept.
 func Test_ParseVendorSpecificContentType_Malformed(t *testing.T) {
 	t.Parallel()
 	testCases := []struct {
@@ -205,8 +192,6 @@ func Test_ParseVendorSpecificContentType_Malformed(t *testing.T) {
 			require.Equal(t, tc.expected, ParseVendorSpecificContentType(tc.input), "input: %q", tc.input)
 			require.LessOrEqual(t, len(ParseVendorSpecificContentType(tc.input)), len(tc.input), "the result is never longer than the input")
 
-			// A result built from the input is lower case when asked to match in any
-			// case; one that is the input itself is returned untouched.
 			upper := strings.ToUpper(tc.input)
 			want := strings.ToLower(tc.expected)
 			if tc.expected == tc.input {
@@ -290,7 +275,6 @@ func Test_StatusMessage(t *testing.T) {
 	require.Equal(t, "I'm a teapot", res)
 }
 
-// go test -run=^$ -bench=Benchmark_StatusMessage -benchmem -count=2
 func Benchmark_StatusMessage(b *testing.B) {
 	b.Run("fiber", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
@@ -304,17 +288,15 @@ func Benchmark_StatusMessage(b *testing.B) {
 	})
 }
 
-// Test_GetMIME_TableCoverage checks every mimeExtensions entry is reachable through the packed-key table.
 func Test_GetMIME_TableCoverage(t *testing.T) {
 	t.Parallel()
 	for ext, want := range mimeExtensions {
 		require.Equal(t, want, GetMIME(ext), "extension %q", ext)
 		require.Equal(t, want, GetMIME("."+ext), "extension .%q", ext)
 		require.Equal(t, want, GetMIME(strings.ToUpper(ext)), "extension %q upper-cased", ext)
-		// A trailing NUL packs like the key's zero padding but is a different extension.
+		// A trailing NUL packs like the key's zero padding but is another extension.
 		require.Equal(t, MIMEOctetStream, GetMIME(ext+"\x00"), "extension %q with a trailing NUL", ext)
 	}
-	// Distinct extensions must never share a packed key.
 	seen := make(map[uint64]string, len(mimeExtensions))
 	for ext := range mimeExtensions {
 		key := packExtension(ext)
@@ -322,7 +304,6 @@ func Test_GetMIME_TableCoverage(t *testing.T) {
 		require.False(t, dup, "extensions %q and %q pack to the same key", prev, ext)
 		seen[key] = ext
 	}
-	// Entries the table cannot hold are build-time mistakes, not silent fallbacks or hangs.
 	require.Panics(t, func() { buildMIMETable(map[string]string{"": "a"}) })
 	require.Panics(t, func() { buildMIMETable(map[string]string{"toolongext": "b"}) })
 	tooMany := make(map[string]string, mimeTableMaxEntries+1)
@@ -331,7 +312,7 @@ func Test_GetMIME_TableCoverage(t *testing.T) {
 	}
 	require.Panics(t, func() { buildMIMETable(tooMany) })
 
-	// Misses of every length; NUL and non-ASCII bytes are in no mime database, so these are octet-stream everywhere.
+	// NUL and non-ASCII bytes are in no mime database: octet-stream everywhere.
 	for _, ext := range []string{"\x00", "ht\x00l", "j\xf3on", "1234567\x00", "toolongext\x01", ".\x00\x00\x00\x00\x00\x00\x00\x00"} {
 		require.Equal(t, MIMEOctetStream, GetMIME(ext), "extension %q", ext)
 	}

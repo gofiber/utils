@@ -13,7 +13,6 @@ const (
 	lowerStr = "/repos/gofiber/fiber/issues/187643/comments/repos/gofiber/fiber/issues/comments"
 )
 
-// Shared test cases for TrimSpace benchmarks
 var trimSpaceBenchmarkCases = []struct {
 	name  string
 	input string
@@ -78,7 +77,6 @@ func Benchmark_EqualFoldBytes(b *testing.B) {
 	})
 }
 
-// go test -v -run=^$ -bench=Benchmark_EqualFold -benchmem -count=4 ./utils/
 func Benchmark_EqualFold(b *testing.B) {
 	var res bool
 	b.Run("fiber", func(b *testing.B) {
@@ -353,15 +351,13 @@ func Test_TrimSpace(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
-			// Test string variant - must match strings.TrimSpace
 			result := TrimSpace(tc.input)
 			stdResult := strings.TrimSpace(tc.input)
 			require.Equal(t, stdResult, result, "TrimSpace should match strings.TrimSpace for %s", tc.name)
 
-			// Test []byte variant - must match bytes.TrimSpace
 			resultBytes := TrimSpace([]byte(tc.input))
 			stdResultBytes := bytes.TrimSpace([]byte(tc.input))
-			// bytes.Equal treats nil and empty slices as equal
+			// bytes.Equal: nil equals empty.
 			require.True(t, bytes.Equal(stdResultBytes, resultBytes), "TrimSpace should match bytes.TrimSpace for %s", tc.name)
 		})
 	}
@@ -418,7 +414,7 @@ func Benchmark_TrimSpaceBytes(b *testing.B) {
 	}
 }
 
-// Benchmark_EqualFold_Short measures token-sized inputs that are equal up to case, so every byte is inspected.
+// Benchmark_EqualFold_Short uses token-sized inputs equal up to case.
 func Benchmark_EqualFold_Short(b *testing.B) {
 	inputs := []struct {
 		name string
@@ -451,7 +447,7 @@ func Benchmark_EqualFold_Short(b *testing.B) {
 	}
 }
 
-// Test_EqualFold_Lengths covers every scan shape with a case-flipped twin and a changed byte at every position.
+// Test_EqualFold_Lengths checks a case-flipped twin and each single-byte mutation.
 func Test_EqualFold_Lengths(t *testing.T) {
 	t.Parallel()
 	base := "Content-Type: Multipart"
@@ -483,7 +479,7 @@ func Test_EqualFold_Lengths(t *testing.T) {
 			}
 		}
 	}
-	// '[' and '{' differ only in bit 5, like a letter pair, and must not fold.
+	// Non-letters differing only in bit 5 must not fold.
 	for n := 1; n <= 16; n++ {
 		require.False(t, EqualFold(strings.Repeat("[", n), strings.Repeat("{", n)), "len %d", n)
 		require.False(t, EqualFold(strings.Repeat("@", n), strings.Repeat("`", n)), "len %d", n)

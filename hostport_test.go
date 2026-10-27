@@ -40,8 +40,7 @@ func hostPortSamples() []string {
 	}
 }
 
-// checkSplitHostPort compares both input types with net.SplitHostPort. It uses plain conditions, not
-// require: the exhaustive and fuzz loops run it millions of times, where the assertions would dominate.
+// checkSplitHostPort avoids require: loops call it millions of times.
 func checkSplitHostPort(tb testing.TB, in string) {
 	tb.Helper()
 	wantHost, wantPort, err := net.SplitHostPort(in)
@@ -61,7 +60,6 @@ func Test_SplitHostPort(t *testing.T) {
 		checkSplitHostPort(t, in)
 	}
 
-	// The parts alias the input.
 	in := []byte("[::1]:8080")
 	host, port, ok := SplitHostPort(in)
 	require.True(t, ok)

@@ -35,7 +35,6 @@ func Test_Bytes(t *testing.T) {
 	require.Empty(t, Bytes(""))
 	require.Empty(t, Bytes([]byte(nil)))
 
-	// The []byte view of a []byte input aliases the original storage.
 	src := []byte("alias")
 	view := Bytes(src)
 	require.Same(t, &src[0], &view[0])
@@ -50,11 +49,9 @@ func Test_Seq(t *testing.T) {
 	require.Empty(t, Seq[string](nil))
 	require.Empty(t, Seq[[]byte](nil))
 
-	// Both instantiations are views over the same storage, not copies.
 	viewB := Seq[[]byte](b)
 	require.Same(t, &b[0], &viewB[0])
 
-	// Seq is Bytes' inverse for every instantiation.
 	require.Equal(t, "inverse", Seq[string](Bytes("inverse")))
 	require.Equal(t, []byte("inverse"), Seq[[]byte](Bytes([]byte("inverse"))))
 }

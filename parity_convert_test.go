@@ -14,12 +14,8 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// ToString is fmt.Sprint with a faster road for the types a web server meets
-// most. These tests pin where the two agree, which is nearly everywhere, and
-// the few places the difference is the point.
+// ToString is fmt.Sprint with faster paths; these tests pin where they agree and where they differ.
 
-// nilReceiver implements the interfaces ToString dispatches on with methods
-// that do not guard against a nil pointer, as most do not.
 type nilReceiver struct{ name string }
 
 func (n *nilReceiver) String() string { return n.name }
@@ -28,7 +24,6 @@ type nilReceiverError struct{ msg string }
 
 func (n *nilReceiverError) Error() string { return n.msg }
 
-// nilSafe is a Stringer written to be called on nil, which fmt honors.
 type nilSafe struct{}
 
 func (n *nilSafe) String() string {
@@ -38,31 +33,24 @@ func (n *nilSafe) String() string {
 	return "a value"
 }
 
-// nilMap has a method that works on a nil map, one of the other nil values
-// whose interface data word is nil.
+// nilMap, nilFunc, panickyMap and holder are not pointers, but zero ones have a nil data word in
+// an interface, as nil pointers do (a struct with one pointer field is stored as that pointer).
 type nilMap map[string]int
 
 func (m nilMap) String() string { return "entries: " + strconv.Itoa(len(m)) }
 
-// nilFunc is the same for a func.
 type nilFunc func()
 
 func (f nilFunc) String() string { return "func is nil: " + strconv.FormatBool(f == nil) }
 
-// panicky panics in its method whatever its receiver.
 type panicky struct{}
 
 func (panicky) String() string { panic("boom") }
 
-// panickyMap is panicky for a map, which like a pointer has a nil data word in
-// an interface when it is nil.
 type panickyMap map[string]int
 
 func (panickyMap) String() string { panic("boom") }
 
-// holder and holderError are pointer-shaped as well: a struct with a single
-// pointer field is stored in an interface as that pointer, so a zero one looks
-// like a nil pointer there, though it is a value whose method dereferences a nil.
 type holder struct{ p *int }
 
 func (h holder) String() string { return strconv.Itoa(*h.p) }
@@ -92,14 +80,12 @@ func Test_ToString_PointersAndEmptyCollections(t *testing.T) {
 		input any
 		want  string
 	}{
-		// The pointer types with a road of their own.
 		{"*string", &s, "value"},
 		{"*int", &i, "42"},
 		{"*int64", &i64, "-64"},
 		{"*uint64", &u64, "64"},
 		{"*float64", &f64, "1.5"},
 		{"*bool", &b, "true"},
-		// Every other pointer is followed by reflection.
 		{"*int8", &i8, "-8"},
 		{"*uint8", &u8, "8"},
 		{"*int32", &i32, "-32"},
@@ -107,7 +93,6 @@ func Test_ToString_PointersAndEmptyCollections(t *testing.T) {
 		{"**int", &ptrToInt, "42"},
 		{"*[]int", &slice, "[1 2]"},
 		{"*struct", &strct, "{example 42}"},
-		// Empty collections of every kind that has a road.
 		{"[]string{}", []string{}, "[]"},
 		{"[]string(nil)", []string(nil), "[]"},
 		{"[]int{}", []int{}, "[]"},
@@ -119,7 +104,6 @@ func Test_ToString_PointersAndEmptyCollections(t *testing.T) {
 		{"[]CustomType{}", []CustomType{}, "[]"},
 		{"empty []byte", []byte{}, ""},
 		{"nil []byte", []byte(nil), ""},
-		// Collections of the less common kinds.
 		{"[]float64", []float64{1.5, 2, 1e21}, "[1.5 2 1000000000000000000000]"},
 		{"[]bool", []bool{true, false}, "[true false]"},
 		{"[2]string", [2]string{"a", "b"}, "[a b]"},
@@ -134,9 +118,7 @@ func Test_ToString_PointersAndEmptyCollections(t *testing.T) {
 	}
 }
 
-// Test_ToString_FmtParity requires ToString to answer as fmt.Sprint does for
-// everything whose rendering is the same by design: integers of every width
-// and sign, strings, booleans, errors, Stringers, and collections of them.
+// Test_ToString_FmtParity requires ToString to answer as fmt.Sprint does wherever they agree by design.
 func Test_ToString_FmtParity(t *testing.T) {
 	t.Parallel()
 
@@ -190,12 +172,10 @@ func Test_ToString_FmtParity(t *testing.T) {
 	check(complex(1, 2))
 	check(uintptr(7))
 	check('x')
-	check(namedFloat(0.5)) // a named type with no road of its own is rendered by fmt
+	check(namedFloat(0.5))
 }
 
-// Test_ToString_FloatsAreNeverExponential pins the first deliberate
-// difference: floats are written in plain decimal at their shortest round-trip
-// length, where fmt switches to an exponent for very large and small values.
+// Test_ToString_FloatsAreNeverExponential: plain decimal at the shortest round-trip length, where fmt uses an exponent.
 func Test_ToString_FloatsAreNeverExponential(t *testing.T) {
 	t.Parallel()
 	for _, v := range []float64{0, 1, -1, 0.1, 1.5, 100, 123456789, 1e20, 1e21, 1e-6, 1e-7, 1.7976931348623157e308, 5e-324, math.Pi, math.Inf(1), math.Inf(-1), math.NaN()} {
@@ -212,7 +192,6 @@ func Test_ToString_FloatsAreNeverExponential(t *testing.T) {
 	require.Equal(t, "0.0000001", ToString(1e-7))
 }
 
-// Test_ToString_Differences pins the rest of the deliberate differences.
 func Test_ToString_Differences(t *testing.T) {
 	t.Parallel()
 	var nilInt *int
@@ -224,7 +203,7 @@ func Test_ToString_Differences(t *testing.T) {
 		name  string
 		input any
 		want  string
-		fmt   string // what fmt.Sprint gives, to prove the difference is real
+		fmt   string
 	}{
 		{"nil", nil, "", "<nil>"},
 		{"[]byte is text", []byte("bytes"), "bytes", "[98 121 116 101 115]"},
@@ -246,8 +225,7 @@ func Test_ToString_Differences(t *testing.T) {
 		})
 	}
 
-	// The layout argument is only for time.Time, wherever it is reached: directly,
-	// through a reflect.Value, or as an element of a slice or array.
+	// The layout applies to time.Time wherever reached: directly, via reflect.Value, in slices and arrays.
 	require.Equal(t, "2001", ToString(moment, "2006"))
 	require.Equal(t, "2001", ToString(reflect.ValueOf(moment), "2006"))
 	require.Equal(t, "[2001 2001]", ToString([]time.Time{moment, moment}, "2006"))
@@ -255,18 +233,14 @@ func Test_ToString_Differences(t *testing.T) {
 	require.Equal(t, "[2001 x]", ToString([]any{moment, "x"}, "2006"))
 }
 
-// selfPointer points to itself, and pingPointer and pongPointer to each other:
-// types whose values can be followed for ever.
 type (
 	selfPointer *selfPointer
 	pingPointer *pongPointer
 	pongPointer *pingPointer
 )
 
-// Test_ToString_EndlessPointers: ToString follows a pointer to what it points to,
-// which for a value of a type like T *T never ends and overflowed the stack, a fatal
-// error that cannot be recovered. fmt prints such a pointer as an address, and so does
-// ToString now.
+// Test_ToString_EndlessPointers: a value of a type like T *T never ends when followed, and once
+// overflowed the stack, which cannot be recovered. ToString now prints the address, as fmt does.
 func Test_ToString_EndlessPointers(t *testing.T) {
 	t.Parallel()
 	var self selfPointer
@@ -281,15 +255,13 @@ func Test_ToString_EndlessPointers(t *testing.T) {
 		require.Equal(t, fmt.Sprint(v), got, name)
 	}
 
-	// Ordinary chains of pointers are still followed to the end.
 	n := 7
 	p := &n
 	pp := &p
 	ppp := &pp
 	require.Equal(t, "7", ToString(ppp))
 
-	// So is one far deeper than any fixed cap on the depth would allow: only a type that
-	// comes back to itself is endless.
+	// No fixed depth cap: only a type that comes back to itself is endless.
 	deep := reflect.ValueOf(&n)
 	for range 39 {
 		next := reflect.New(deep.Type())
@@ -299,9 +271,7 @@ func Test_ToString_EndlessPointers(t *testing.T) {
 	require.Equal(t, "7", ToString(deep.Interface()))
 }
 
-// Test_ToString_NilReceivers requires a nil pointer whose type implements
-// error or fmt.Stringer to be rendered as fmt renders it, where calling its
-// method would panic: "<nil>", or what a method written for nil returns.
+// Test_ToString_NilReceivers requires a nil error or Stringer pointer to render as fmt does, not panic.
 func Test_ToString_NilReceivers(t *testing.T) {
 	t.Parallel()
 	var nilStringer *nilReceiver
@@ -337,21 +307,16 @@ func Test_ToString_NilReceivers(t *testing.T) {
 	require.Equal(t, "<nil>", ToString(nilStringer))
 	require.Equal(t, "<nil>", ToString(nilError))
 
-	// A pointer that is not nil still gets its method.
 	require.Equal(t, "named", ToString(&nilReceiver{name: "named"}))
 	require.Equal(t, "broken", ToString(&nilReceiverError{msg: "broken"}))
 	require.Equal(t, "a value", ToString(&nilSafe{}))
 	require.Equal(t, "entries: 1", ToString(nilMap{"k": 1}))
 
-	// A panic that a nil receiver did not cause is not hidden: fmt reports such a
-	// panic in its output, and ToString lets it through as it always has.
+	// A panic that is not a nil receiver's is not hidden.
 	require.PanicsWithValue(t, "boom", func() { ToString(panicky{}) })
 	require.PanicsWithValue(t, "boom", func() { ToString(&panicky{}) })
 
-	// Only a nil pointer gets "<nil>" for a panic. A nil map, and a struct with a
-	// nil pointer in it, also have a nil data word in an interface, but the panic
-	// of their methods is no nil receiver's: fmt reports it as %!v(PANIC=...) and
-	// ToString lets it through, as it does for every other value.
+	// Only a nil pointer gets "<nil>" for a panic; a nil map or a zero holder panics like any other value.
 	const nilDereference = "runtime error: invalid memory address or nil pointer dereference"
 	require.PanicsWithValue(t, "boom", func() { ToString(panickyMap(nil)) })
 	require.PanicsWithError(t, nilDereference, func() { ToString(holder{}) })

@@ -31,12 +31,10 @@ func Test_AppendJSONString(t *testing.T) {
 		assertJSONStringParity(t, in)
 	}
 
-	// Every single byte value agrees with encoding/json.
 	for i := range 256 {
 		assertJSONStringParity(t, string([]byte{byte(i)}))
 	}
 
-	// Appending must preserve existing dst content.
 	got := AppendJSONString([]byte(`{"msg":`), "hi \"there\"")
 	require.Equal(t, `{"msg":"hi \"there\""`, string(got)) //nolint:testifylint // byte-exact comparison is the contract; JSONEq would hide encoding differences
 }

@@ -12,25 +12,19 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// Test_CaseFold_Randomized cross-checks utils.EqualFold and the bytes/strings
-// converters against the stdlib and a scalar ASCII fold over random inputs.
-// The other folding helpers live in search_test.go and headerkey_test.go, and
-// EqualFold is built on swar rather than internal/caseconv, so its assertions
-// here and in byteseq_test.go are the only ones pinning it to strings.EqualFold.
+// Test_CaseFold_Randomized checks the converters against stdlib and a scalar ASCII fold.
+// EqualFold (swar-based, not internal/caseconv) is pinned to strings.EqualFold only here and in byteseq_test.go.
 func Test_CaseFold_Randomized(t *testing.T) {
 	t.Parallel()
 	rng := rand.New(rand.NewSource(42)) //nolint:gosec // deterministic test data
 
 	for range 20000 {
-		// Lengths 0..100 cover sub-word inputs, all %8 tails, and several
-		// full word iterations.
 		n := rng.Intn(101)
 		a := make([]byte, n)
 		b := make([]byte, n)
 		for i := range n {
 			a[i] = byte(rng.Intn(256))
-			// Bias b towards being a case-variant of a so EqualFold hits
-			// both outcomes.
+			// Bias b so EqualFold hits both outcomes.
 			if rng.Intn(2) == 0 {
 				b[i] = a[i] ^ 0x20
 			} else {
@@ -43,7 +37,6 @@ func Test_CaseFold_Randomized(t *testing.T) {
 		require.Equal(t, strings.ToUpper(asciiOnly(as)), casestrings.ToUpper(asciiOnly(as)))
 		require.Equal(t, strings.EqualFold(asciiOnly(as), asciiOnly(bs)), EqualFold(asciiOnly(as), asciiOnly(bs)))
 
-		// Non-ASCII bytes must pass through unchanged (table semantics).
 		require.Equal(t, asciiFoldLower(as), casestrings.ToLower(as))
 		require.Equal(t, asciiFoldUpper(as), casestrings.ToUpper(as))
 		require.Equal(t, bytes.Equal(asciiFoldUpperB(a), asciiFoldUpperB(b)), EqualFold(a, b))
@@ -53,9 +46,7 @@ func Test_CaseFold_Randomized(t *testing.T) {
 		require.Equal(t, asciiFoldLower(as), string(casebytes.UnsafeToLower(append([]byte(nil), a...))))
 		require.Equal(t, asciiFoldUpper(as), string(casebytes.UnsafeToUpper(append([]byte(nil), a...))))
 
-		// The strings in-place wrappers mutate their backing bytes, so hand
-		// each a string view over a private mutable copy — string(a) may
-		// reference read-only interned memory (e.g. 1-byte strings).
+		// In-place wrappers need a private copy: string(a) may be read-only memory.
 		la := append([]byte(nil), a...)
 		require.Equal(t, asciiFoldLower(as), casestrings.UnsafeToLower(unsafeconv.UnsafeString(la)))
 		ua := append([]byte(nil), a...)

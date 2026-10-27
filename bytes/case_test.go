@@ -182,10 +182,7 @@ func Benchmark_ToUpperBytes(b *testing.B) {
 	}
 }
 
-// Test_Case_PathCoverage exercises every dispatch path of the case
-// converters in-package: sub-word inputs, word-path inputs with the first
-// change at each interesting offset, identity returns when nothing changes,
-// and non-ASCII passthrough.
+// Test_Case_PathCoverage hits each dispatch path: sub-word, word loop, overlap tail, identity.
 func Test_Case_PathCoverage(t *testing.T) {
 	t.Parallel()
 
@@ -195,13 +192,13 @@ func Test_Case_PathCoverage(t *testing.T) {
 		{"A", "a", "A"},
 		{"aBc", "abc", "ABC"},
 		{"1a2B3", "1a2b3", "1A2B3"},
-		{"\xe9\xff!", "\xe9\xff!", "\xe9\xff!"}, // sub-word non-ASCII
-		{"abcdefgh", "abcdefgh", "ABCDEFGH"},    // exactly one word
-		{"ABCDEFGH", "abcdefgh", "ABCDEFGH"},    //
+		{"\xe9\xff!", "\xe9\xff!", "\xe9\xff!"},
+		{"abcdefgh", "abcdefgh", "ABCDEFGH"},
+		{"ABCDEFGH", "abcdefgh", "ABCDEFGH"},
 		{"nochangehere-1234", "nochangehere-1234", "NOCHANGEHERE-1234"},
-		{"aaaaaaaaaXbbbb", "aaaaaaaaaxbbbb", "AAAAAAAAAXBBBB"},             // change starts past word 0
-		{"aaaaaaaaaaaaY", "aaaaaaaaaaaay", "AAAAAAAAAAAAY"},                // change only in overlap tail
-		{"\xc9\xe9aaaaaaaaZz", "\xc9\xe9aaaaaaaazz", "\xc9\xe9AAAAAAAAZZ"}, // word path + non-ASCII
+		{"aaaaaaaaaXbbbb", "aaaaaaaaaxbbbb", "AAAAAAAAAXBBBB"}, // change starts past word 0
+		{"aaaaaaaaaaaaY", "aaaaaaaaaaaay", "AAAAAAAAAAAAY"},    // change only in overlap tail
+		{"\xc9\xe9aaaaaaaaZz", "\xc9\xe9aaaaaaaazz", "\xc9\xe9AAAAAAAAZZ"},
 	}
 	for _, tc := range cases {
 		require.Equal(t, tc.lower, string(ToLower([]byte(tc.in))), "ToLower %q", tc.in)
@@ -210,8 +207,6 @@ func Test_Case_PathCoverage(t *testing.T) {
 		require.Equal(t, tc.upper, string(UnsafeToUpper([]byte(tc.in))), "UnsafeToUpper %q", tc.in)
 	}
 
-	// When no byte needs changing, ToLower/ToUpper must return the input
-	// slice itself, on both the sub-word and word paths.
 	for _, s := range []string{"x", "already-lower", strings.Repeat("k", 23)} {
 		in := []byte(s)
 		out := ToLower(in)
