@@ -22,10 +22,20 @@ var (
 	}
 )
 
-// Timestamp returns the Unix time in seconds as last published by the updater.
-// It is 0 until StartTimeStampUpdater has run, and frozen after StopTimeStampUpdater.
+// Timestamp returns the Unix time in seconds. While the updater runs it is the value it last
+// published, at most about a second old, for the cost of one atomic load; otherwise it reads the clock.
 func Timestamp() uint32 {
-	return timestamp.Load()
+	if t := timestamp.Load(); t != 0 {
+		return t
+	}
+	return clockTimestamp()
+}
+
+// clockTimestamp is Timestamp's slow path, kept out of line so Timestamp stays inlinable.
+//
+//go:noinline
+func clockTimestamp() uint32 {
+	return uint32(now().Unix())
 }
 
 // StartTimeStampUpdater starts a goroutine that refreshes the cached timestamp every second.
@@ -61,7 +71,7 @@ func StartTimeStampUpdater() {
 }
 
 // StopTimeStampUpdater stops the updater goroutine; call it on shutdown to avoid a leak.
-// Repeated and concurrent calls are safe.
+// Timestamp reads the clock afterwards. Repeated and concurrent calls are safe.
 func StopTimeStampUpdater() {
 	updaterMu.Lock()
 	defer updaterMu.Unlock()
@@ -73,4 +83,5 @@ func StopTimeStampUpdater() {
 	<-updaterDone
 	stopUpdater = nil
 	updaterDone = nil
+	timestamp.Store(0) // nothing refreshes the value any more: read the clock instead
 }

@@ -143,17 +143,17 @@ func Test_StopTimeStampUpdater(t *testing.T) {
 	StopTimeStampUpdater()
 	require.Equal(t, int32(1), fc.stops.Load(), "a second Stop must be a no-op")
 
-	// The updater is gone, so the clock can move without the cache following.
+	// The updater is gone, so nothing refreshes the cache and Timestamp reads the clock.
 	// No tick is sent because there is nothing left to receive one.
 	fc.set(testEpoch.Add(time.Hour))
-	require.Equal(t, uint32(testEpoch.Unix()), Timestamp(), "the timestamp must not move after Stop")
+	require.Equal(t, uint32(testEpoch.Unix())+3600, Timestamp(), "after Stop the timestamp must follow the clock")
 }
 
-// Test_Timestamp_BeforeStart pins what Timestamp's doc comment says of a program
-// that has not started the updater: nothing is published yet, so the answer is 0
-// and not the time, however far the clock has moved. Reading the clock instead
-// would put a branch on the one-load path that the package benchmark measures.
-func Test_Timestamp_BeforeStart(t *testing.T) {
+// Test_Timestamp_WithoutUpdater pins what Timestamp's doc comment says: while no updater runs,
+// before the first Start and again after Stop, it reads the clock, and with one running it serves
+// the published value however far the clock has moved. The branch that tells the two apart
+// costs nothing the package benchmark can see.
+func Test_Timestamp_WithoutUpdater(t *testing.T) {
 	fc, done := withFakeClock(t, testEpoch)
 	defer done()
 
@@ -161,11 +161,17 @@ func Test_Timestamp_BeforeStart(t *testing.T) {
 	timestamp.Store(0)
 	defer timestamp.Store(0)
 
+	base := uint32(testEpoch.Unix())
 	fc.set(testEpoch.Add(time.Hour))
-	require.Zero(t, Timestamp(), "Timestamp must not publish anything itself")
+	require.Equal(t, base+3600, Timestamp(), "without an updater Timestamp reads the clock")
 
 	StartTimeStampUpdater()
-	require.Equal(t, uint32(testEpoch.Unix())+3600, Timestamp(), "Start publishes before it returns")
+	require.Equal(t, base+3600, Timestamp(), "Start publishes before it returns")
+	fc.set(testEpoch.Add(2 * time.Hour))
+	require.Equal(t, base+3600, Timestamp(), "a running updater serves what it published")
+
+	StopTimeStampUpdater()
+	require.Equal(t, base+7200, Timestamp(), "after Stop Timestamp reads the clock again")
 }
 
 func Test_StartStopRepeat(t *testing.T) {
