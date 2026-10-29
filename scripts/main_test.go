@@ -169,14 +169,15 @@ func TestRunUpdateMeasuresTableWithItsOwnCommand(t *testing.T) {
 
 func TestRunUpdateReportsAFailingCommand(t *testing.T) {
 	dir := writeMiniModule(t)
-	readme := writeReadme(t, dir, miniTable("// go test ./no-such-package"))
+	original := miniTable("// go test ./no-such-package")
+	readme := writeReadme(t, dir, original)
 
 	var err error
 	captureStderr(t, func() { err = run([]string{"-update"}, readme) })
 	if err == nil || !strings.Contains(err.Error(), "go test ./no-such-package") {
 		t.Fatalf("got %v, want the failing command in the error", err)
 	}
-	if out := readFile(t, readme); !strings.Contains(out, "plan9") || !strings.Contains(out, "777") {
+	if out := readFile(t, readme); out != original {
 		t.Errorf("a failed run must leave the README as it was:\n%s", out)
 	}
 }

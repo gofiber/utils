@@ -82,6 +82,9 @@ func assertIntParity(tb testing.TB, p intParser, in string) {
 	if gotI != gotBI || gotU != gotBU || (err == nil) != (errB == nil) {
 		tb.Fatalf("%s(%q): string form (%d, %d, %v) differs from bytes form (%d, %d, %v)", p.name, in, gotI, gotU, err, gotBI, gotBU, errB)
 	}
+	if wantErr != nil && !errors.Is(errB, wantNum.Err) {
+		tb.Fatalf("%s(bytes %q) error = %v, strconv gives %v", p.name, in, errB, wantErr)
+	}
 
 	if wantErr == nil {
 		if err != nil || gotI != wantI || gotU != wantU {

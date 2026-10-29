@@ -492,7 +492,7 @@ func Test_CaseBytes_Aliasing(t *testing.T) {
 func Test_SplitTrimSeq_StdlibParity(t *testing.T) {
 	t.Parallel()
 	for _, sep := range []byte{',', ';', ' ', '\t', 'a', 0x00, 0xff} {
-		alphabet := string([]byte{sep, ' ', '\t', '\n', 'x', 'a'})
+		alphabet := string([]byte{sep, ' ', '\t', '\n', '"', 'a'})
 		forEachString(alphabet, 6, func(s string) {
 			var want []string
 			for part := range strings.SplitSeq(s, string([]byte{sep})) {

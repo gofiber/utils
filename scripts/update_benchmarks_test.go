@@ -474,8 +474,9 @@ func TestUpdateBenchmarksSelectsOneTable(t *testing.T) {
 		t.Fatalf("%v\nlog:\n%s", err, logged)
 	}
 	out := readFile(t, readme)
-	if got := strings.Count(out, "777"); got != 1 {
-		t.Errorf("%d placeholder rows left, want only table 1's:\n%s", got, out)
+	first, second, _ := strings.Cut(out, miniCommand)
+	if strings.Count(first, "777") != 1 || strings.Contains(second, "777") {
+		t.Errorf("want table 1's placeholder row kept and table 2's replaced:\n%s", out)
 	}
 }
 

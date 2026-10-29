@@ -168,7 +168,7 @@ func Test_Timestamp_Wraps2106(t *testing.T) {
 	require.Zero(t, Timestamp(), "the wrapped second, whether the cache or the clock answers")
 
 	fc.advance(wrap.Add(time.Second))
-	require.Equal(t, uint32(1), Timestamp(), "the cache is nonzero again")
+	require.Equal(t, uint32(1), timestamp.Load(), "the cache is nonzero again")
 }
 
 func Test_StartStopRepeat(t *testing.T) {
