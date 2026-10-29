@@ -13,9 +13,9 @@ import (
 // directory, including root. It follows filepath.Walk step for step, so filepath.SkipDir and
 // filepath.SkipAll must be returned as they are, not wrapped.
 //
-// Without Lstat, Walk stats an entry by opening it and lists a directory with Readdir. A
-// directory that cannot be opened is reported with a nil FileInfo, and one holding an entry
-// that cannot be statted with the error of its listing.
+// Without Lstat, Walk stats an entry by opening it and lists a directory with Readdir. An
+// entry that cannot be opened for stat is reported with a nil FileInfo and the open error. A
+// directory whose listing fails is reported with its FileInfo and the listing error.
 //
 // Unlike filepath.Walk, Walk follows symbolic links and, over http.Dir, never reports one: a link to
 // an ancestor repeats the tree until ELOOP and one out of the tree is walked, so check paths against

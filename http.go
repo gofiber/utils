@@ -104,8 +104,9 @@ func GetMIME(extension string) string {
 // type and suffix, without parameters: "application/vnd.api+json; version=1" is "application/json".
 // Spaces and tabs before the ';' or at the end are ignored, and a '/' after the '+' stays in the
 // result. A '+' that first appears in the parameters, as in a multipart boundary, only strips
-// them. A content type without a '+', or with no '/' before it, is returned as it is. Matching is
-// case-sensitive; with caseInsensitive[0] set it ignores case and builds lower-case results.
+// them, and the blanks before the ';' stay. A content type without a '+', or with no '/' before
+// it, is returned as it is. Matching is case-sensitive; with caseInsensitive[0] set it ignores
+// case and builds lower-case results.
 func ParseVendorSpecificContentType(cType string, caseInsensitive ...bool) string {
 	useLower := len(caseInsensitive) > 0 && caseInsensitive[0]
 
