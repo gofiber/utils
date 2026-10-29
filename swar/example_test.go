@@ -6,9 +6,11 @@ import (
 	"github.com/gofiber/utils/v2/swar"
 )
 
-// ExampleZeroLanes shows the canonical first-match scan. Its overlapping last word is
-// safe: lanes before the loop's exit index are known non-matching, so the first set
-// lane falls in the new bytes.
+// ExampleZeroLanes shows the canonical first-match scan: broadcast the
+// needle once, scan full words, and finish 8+ byte inputs with one
+// overlapping word at len(s)-8. The overlap is safe because lanes before
+// the loop's exit index are known non-matching, so the first set lane
+// always falls into the new bytes.
 func ExampleZeroLanes() {
 	indexByte := func(s string, c byte) int {
 		n := len(s)
@@ -43,10 +45,15 @@ func ExampleZeroLanes() {
 	// -1
 }
 
-// ExampleZeroLanes_blockScan ORs the masks of several words and tests once per block, resolving
-// the lower word first. Safe because a ZeroLanes mask is zero iff its word has no match and its
-// lowest set lane is exact; MatchByteMask and MatchRangeMask combine the same way. Wider blocks
-// add an `if` per word to the ladder.
+// ExampleZeroLanes_blockScan shows the multi-word variant of the
+// first-match scan: compute each word's mask independently, test their OR
+// once per block, and resolve the lower word first. Combining is safe for
+// first-match scans because a ZeroLanes mask is zero iff its word has no
+// match and its lowest set lane is exact — so when only the second word
+// matched, its first set lane is still the true first match. Exact masks
+// (MatchByteMask, MatchRangeMask) may be combined the same way, block width
+// is free to grow (four words per branch is common for long inputs), and
+// the resolve ladder extends one `if` per extra word.
 func ExampleZeroLanes_blockScan() {
 	indexByte := func(s string, c byte) int {
 		needle := swar.Broadcast(c)
@@ -66,6 +73,8 @@ func ExampleZeroLanes_blockScan() {
 				return i + swar.FirstLane(m)
 			}
 		}
+		// A scalar tail keeps the example focused on block combining; see
+		// ExampleZeroLanes for the overlapping-word finish.
 		for ; i < len(s); i++ {
 			if s[i] == c {
 				return i
@@ -81,7 +90,8 @@ func ExampleZeroLanes_blockScan() {
 	// -1
 }
 
-// ExampleMatchRangeMask finds the first and last ASCII digit of one word.
+// ExampleMatchRangeMask classifies one word of input: which lanes hold an
+// ASCII digit, and where the first and last digit sit.
 func ExampleMatchRangeMask() {
 	w := swar.Load8("Fiber123", 0)
 	digits := swar.MatchRangeMask(w, '0', '9')
@@ -89,7 +99,8 @@ func ExampleMatchRangeMask() {
 	// Output: 5 7
 }
 
-// ExampleLoad8 shows the little-endian lane order: the lowest index is lane 0.
+// ExampleLoad8 shows the little-endian lane order: the byte at the lowest
+// index becomes lane 0, the least significant byte of the word.
 func ExampleLoad8() {
 	w := swar.Load8([]byte("ABCDEFGH"), 0)
 	fmt.Printf("lane0=%c lane7=%c\n", byte(w), byte(w>>56)) //nolint:errcheck // example output

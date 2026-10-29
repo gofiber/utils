@@ -4,7 +4,8 @@ import (
 	"strings"
 )
 
-// formatBenchmarks uses the updater's parser, so prose and sample output stay untouched.
+// formatBenchmarks finds the rows through the same parser the updater uses, so
+// prose, sample output and anything that is not a table stay exactly as they are.
 func formatBenchmarks(path string) error {
 	lines, err := readLines(path)
 	if err != nil {
@@ -16,7 +17,7 @@ func formatBenchmarks(path string) error {
 	}
 
 	var rows [][]string
-	at := map[int]int{}
+	at := map[int]int{} // line index -> index in rows
 	for _, b := range blocks {
 		for i := b.open + 1; i < b.end; i++ {
 			if fields, ok := benchFields(lines[i]); ok {
@@ -26,7 +27,8 @@ func formatBenchmarks(path string) error {
 		}
 	}
 
-	// One grid for every table; per-table widths would re-pad existing rows once.
+	// One grid for every table. Per table would re-pad every existing row once and
+	// only narrows which table a refresh reflows, which is not worth that diff.
 	widths := columnWidths(rows)
 	for i, r := range at {
 		lines[i] = padRow(rows[r], widths)
@@ -34,6 +36,8 @@ func formatBenchmarks(path string) error {
 	return writeLines(path, lines)
 }
 
+// padRow puts the name against the left edge and each measured value against the
+// right edge of its column; the units follow whatever they belong to.
 func padRow(fields []string, widths []int) string {
 	out := make([]string, len(fields))
 	for i, f := range fields {

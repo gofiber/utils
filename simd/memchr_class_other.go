@@ -6,6 +6,8 @@
 
 package simd
 
+// The portable implementations are the only ones off amd64.
+
 func memchrWordImpl(haystack []byte) int {
 	return memchrWordGeneric(haystack)
 }

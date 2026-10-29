@@ -10,7 +10,7 @@ import (
 
 func Test_AppendQueryEscape(t *testing.T) {
 	t.Parallel()
-	// Exhaustive single-byte agreement pins the escape tables.
+	// Exhaustive single-byte agreement with net/url pins the escape tables.
 	for i := range 256 {
 		in := string([]byte{byte(i)})
 		require.Equal(t, url.QueryEscape(in), string(AppendQueryEscape(nil, in)), "byte %#x", i)
@@ -35,11 +35,12 @@ func Test_AppendQueryEscape(t *testing.T) {
 		require.Equal(t, url.PathEscape(in), string(AppendPathEscape(nil, []byte(in))), "input %q", in)
 	}
 
+	// Appending must preserve existing dst content.
 	got := AppendQueryEscape([]byte("q="), "a b")
 	require.Equal(t, "q=a+b", string(got))
 }
 
-// escapeSegments is the reference: escape each segment alone, then rejoin.
+// escapeSegments is the reference: escape each segment on its own and rejoin.
 func escapeSegments(s string) string {
 	parts := strings.Split(s, "/")
 	for i, part := range parts {
@@ -50,6 +51,7 @@ func escapeSegments(s string) string {
 
 func Test_AppendPathSegmentsEscape(t *testing.T) {
 	t.Parallel()
+	// Exhaustive single-byte agreement pins the table, '/' included.
 	for i := range 256 {
 		in := string([]byte{byte(i)})
 		require.Equal(t, escapeSegments(in), string(AppendPathSegmentsEscape(nil, in)), "byte %#x", i)
@@ -75,9 +77,11 @@ func Test_AppendPathSegmentsEscape(t *testing.T) {
 		require.Equal(t, want, string(AppendPathSegmentsEscape(nil, []byte(in))), "input %q", in)
 	}
 
+	// A slash is data for AppendPathEscape and a separator here.
 	require.Equal(t, "a%2Fb", string(AppendPathEscape(nil, "a/b")))
 	require.Equal(t, "a/b", string(AppendPathSegmentsEscape(nil, "a/b")))
 
+	// Appending must preserve existing dst content.
 	require.Equal(t, "/x/a%20b", string(AppendPathSegmentsEscape([]byte("/x/"), "a b")))
 }
 
@@ -124,11 +128,12 @@ func Test_AppendQueryUnescape(t *testing.T) {
 		}
 	}
 
+	// On error the original dst content survives with its original length.
 	got, err := AppendQueryUnescape([]byte("keep"), "%zz")
 	require.Error(t, err)
 	require.Equal(t, "keep", string(got))
 
-	// In-place decode: dst aliases src.
+	// In-place decode: dst = src[:0] on the same backing array.
 	buf := []byte("a%20b+c")
 	out, err := AppendQueryUnescape(buf[:0], buf)
 	require.NoError(t, err)
@@ -178,6 +183,7 @@ func Benchmark_AppendPathSegmentsEscape(b *testing.B) {
 				AppendPathSegmentsEscape(dst, input.value)
 			}
 		})
+		// What a caller has to write without this helper.
 		b.Run(input.name+"/split-loop", func(b *testing.B) {
 			b.ReportAllocs()
 			for b.Loop() {

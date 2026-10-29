@@ -10,10 +10,17 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// Each benchmark measures a loop composed from the primitives (see the examples), the unit
-// of work a stdlib function performs; Test_BenchLoops_MatchStdlib pins the loops to the
-// stdlib results.
+// The benchmarks below compare the SWAR primitives against their stdlib
+// counterparts, using the fiber-vs-default sub-run naming shared with the
+// strings and bytes packages.
+// The primitives are exported as building blocks, so each benchmark measures
+// the canonical loop composed from them (documented in the examples), not a
+// bare primitive call: that is the unit of work a stdlib function performs.
+// The composed loops live below and are pinned to the stdlib results by
+// Test_BenchLoops_MatchStdlib.
 
+// swarIndexByte is ExampleZeroLanes' canonical first-match scan: broadcast
+// once, scan full words, and finish 8+ byte inputs with one overlapping word.
 func swarIndexByte(s string, c byte) int {
 	n := len(s)
 	if n < WordLen {
@@ -40,6 +47,8 @@ func swarIndexByte(s string, c byte) int {
 	return -1
 }
 
+// swarLastIndexByte is the reverse scan: MatchByteMask's exact per-lane
+// result feeds LastLane, and the sub-word head falls back to scalar code.
 func swarLastIndexByte(b []byte, c byte) int {
 	i := len(b)
 	for ; i >= WordLen; i -= WordLen {
@@ -55,6 +64,8 @@ func swarLastIndexByte(b []byte, c byte) int {
 	return -1
 }
 
+// swarIndexDigit finds the first ASCII digit via MatchRangeMask, with a
+// scalar tail for the trailing sub-word bytes.
 func swarIndexDigit(s string) int {
 	i := 0
 	for ; i+WordLen <= len(s); i += WordLen {
@@ -70,6 +81,8 @@ func swarIndexDigit(s string) int {
 	return -1
 }
 
+// swarToLower lower-cases ASCII in place, one word at a time, with a scalar
+// tail — the loop internal/caseconv builds from the same primitives.
 func swarToLower(b []byte) {
 	i := 0
 	for ; i+WordLen <= len(b); i += WordLen {
@@ -82,13 +95,16 @@ func swarToLower(b []byte) {
 	}
 }
 
+// Test_BenchLoops_MatchStdlib pins the composed benchmark loops to the
+// stdlib functions they are measured against, across sub-word, exact-word,
+// and multi-word lengths with the needle at every position and absent.
 func Test_BenchLoops_MatchStdlib(t *testing.T) {
 	t.Parallel()
 	sizes := []int{0, 1, 7, 8, 9, 16, 31, 64, 512}
 	for _, n := range sizes {
 		src := make([]byte, n)
 		for i := range src {
-			src[i] = 'A' + byte(i%23)
+			src[i] = 'A' + byte(i%23) // uppercase, no digits, no needle bytes
 		}
 		for at := -1; at < n; at++ {
 			b := append([]byte(nil), src...)
@@ -103,6 +119,8 @@ func Test_BenchLoops_MatchStdlib(t *testing.T) {
 			if at >= 0 {
 				d[at] = '7'
 			}
+			// Pin against strings.IndexAny — the same stdlib function the
+			// benchmark's default leg measures.
 			ds := string(d)
 			require.Equal(t, strings.IndexAny(ds, "0123456789"), swarIndexDigit(ds), "IndexDigit size %d at %d", n, at)
 		}
@@ -172,7 +190,7 @@ func Benchmark_Store8(b *testing.B) {
 
 func Benchmark_IndexByte(b *testing.B) {
 	for _, size := range benchSizes {
-		s := string(benchInput(size, size-1, ',')) // worst case: match at the end
+		s := string(benchInput(size, size-1, ',')) // worst case: match at the very end
 		b.Run(strconv.Itoa(size)+"B/fiber", func(b *testing.B) {
 			b.SetBytes(int64(size))
 			var r int
@@ -194,7 +212,7 @@ func Benchmark_IndexByte(b *testing.B) {
 
 func Benchmark_LastIndexByte(b *testing.B) {
 	for _, size := range benchSizes {
-		buf := benchInput(size, 0, ',') // worst case: match at the start
+		buf := benchInput(size, 0, ',') // worst case for a reverse scan: match at the start
 		b.Run(strconv.Itoa(size)+"B/fiber", func(b *testing.B) {
 			b.SetBytes(int64(size))
 			var r int
@@ -243,8 +261,10 @@ func Benchmark_ToLowerWord(b *testing.B) {
 			b.ReportAllocs()
 			b.SetBytes(int64(size))
 			work := make([]byte, len(template))
-			// The copy is timed on purpose: it resets the buffer and stands in for
-			// the allocation the default leg pays.
+			// The copy is timed on purpose: it resets the in-place buffer
+			// every iteration (as the strings package's fiber/unsafe legs
+			// do) and stands in for the per-iteration allocation the
+			// default leg pays inside bytes.ToLower.
 			for b.Loop() {
 				copy(work, template)
 				swarToLower(work)

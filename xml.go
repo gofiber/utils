@@ -1,7 +1,9 @@
 package utils
 
-// XMLMarshal returns v's XML encoding.
+// XMLMarshal returns the XML encoding of v.
 type XMLMarshal func(v any) ([]byte, error)
 
-// XMLUnmarshal parses XML data into v, which must be a non-nil pointer.
+// XMLUnmarshal parses the XML-encoded data and stores the result
+// in the value pointed to by v. If v is nil or not a pointer,
+// Unmarshal returns an error.
 type XMLUnmarshal func(data []byte, v any) error

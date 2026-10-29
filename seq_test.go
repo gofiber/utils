@@ -7,6 +7,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// refSplitTrim is the reference for SplitTrimSeq: split, trim, drop empties.
 func refSplitTrim(s string, sep byte) []string {
 	var out []string
 	for part := range strings.SplitSeq(s, string(sep)) {
@@ -57,6 +58,7 @@ func Test_SplitTrimSeq(t *testing.T) {
 		}
 	}
 
+	// Breaking out of the loop stops the iteration after the first element.
 	count := 0
 	seq := SplitTrimSeq("a, b, c", ',')
 	for elem := range seq {
@@ -66,7 +68,7 @@ func Test_SplitTrimSeq(t *testing.T) {
 	}
 	require.Equal(t, 1, count)
 
-	// A retained sequence restarts after a break.
+	// A retained sequence starts over on every traversal, even after a break.
 	for range 2 {
 		var got []string
 		for elem := range seq {
@@ -75,6 +77,7 @@ func Test_SplitTrimSeq(t *testing.T) {
 		require.Equal(t, []string{"a", "b", "c"}, got)
 	}
 
+	// Elements alias the input rather than copying it.
 	in := []byte(" gzip , br")
 	for elem := range SplitTrimSeq(in, ',') {
 		require.Same(t, &in[1], &elem[0])
@@ -82,7 +85,8 @@ func Test_SplitTrimSeq(t *testing.T) {
 	}
 }
 
-// countSplitTrimSeq and countSplitSeq range outside b.Loop, whose body disables inlining.
+// countSplitTrimSeq and countSplitSeq range outside the b.Loop body, which
+// disables inlining for calls made directly inside it.
 func countSplitTrimSeq(s string, sep byte) int {
 	n := 0
 	for range SplitTrimSeq(s, sep) {

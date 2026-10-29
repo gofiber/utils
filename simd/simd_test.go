@@ -11,14 +11,21 @@ import (
 	"golang.org/x/sys/cpu"
 )
 
-// Each function AND its portable fallback is checked against a scalar reference, so AVX2 and
-// SWAR both run on amd64.
+// The tests compare every exported function AND its portable fallback
+// against plain scalar references, sweeping sizes across the dispatch
+// boundaries (sub-word, sub-vector, 32+ bytes, unaligned tails) so both the
+// AVX2 kernels and the SWAR paths are exercised on amd64.
 
+// testSizes crosses every dispatch boundary: scalar (<8), SWAR words with
+// tails (8..31), one vector (32..63), several vectors plus tails, and sizes
+// beyond the Memmem bytes.Index crossover (128+).
 var testSizes = []int{
 	0, 1, 2, 3, 7, 8, 9, 15, 16, 17, 23, 24, 31, 32, 33, 39, 47, 48, 63, 64,
 	65, 95, 96, 100, 127, 128, 129, 130, 200, 255, 256, 257, 511, 512, 1000,
 }
 
+// fill produces deterministic pseudo-random bytes over the full 0..255
+// range, seeded per call site, without math/rand (xorshift is plenty here).
 func fill(n int, seed uint64) []byte {
 	b := make([]byte, n)
 	x := seed*2654435761 + 1
@@ -115,32 +122,38 @@ func checkMemchrPair(t *testing.T, h []byte, b1, b2 byte, offset int) {
 func Test_Memchr2(t *testing.T) {
 	t.Parallel()
 	for _, n := range testSizes {
+		// Absent needles force a full scan of clean data.
 		clean := bytes.Repeat([]byte{'x'}, n)
 		checkMemchr2(t, clean, 'a', 'b')
+		// Every single position, for either needle.
 		for pos := range n {
 			h := bytes.Repeat([]byte{'x'}, n)
 			h[pos] = 'a'
 			checkMemchr2(t, h, 'a', 'b')
 			h[pos] = 'b'
 			checkMemchr2(t, h, 'a', 'b')
+			// Identical needles must behave like a single-byte search.
 			checkMemchr2(t, h, 'b', 'b')
 			h[pos] = 0x80 // high-bit byte must not confuse the SWAR masks
 			checkMemchr2(t, h, 0x80, 0xff)
 		}
+		// First match wins when both needles are present.
 		if n >= 2 {
 			h := bytes.Repeat([]byte{'x'}, n)
 			h[n/2] = 'b'
 			h[n-1] = 'a'
 			checkMemchr2(t, h, 'a', 'b')
 		}
+		// Random data over the full byte range.
 		checkMemchr2(t, fill(n, uint64(n)), 0x00, 0x01)
 	}
 }
 
 func Test_Memchr2_SWARBorrow(t *testing.T) {
 	t.Parallel()
-	// 0x00/0x01 adjacency gives SWAR zero-lane false positives above the first match;
-	// the first-lane pick must stay exact.
+	// 0x00/0x01 adjacency is where the SWAR zero-lane formula produces
+	// false positives above the first true match; the first-lane pick must
+	// stay exact.
 	patterns := [][]byte{
 		{0x01, 0x00, 0x01, 0x00, 0x01, 0x00, 0x01, 0x00, 0x01, 0x00},
 		{0x00, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x00, 0x01},
@@ -181,6 +194,7 @@ func Test_Memchr3(t *testing.T) {
 
 func Test_MemchrPair(t *testing.T) {
 	t.Parallel()
+	// Degenerate parameters.
 	require.Equal(t, -1, MemchrPair([]byte("abc"), 'a', 'b', -1))
 	require.Equal(t, -1, MemchrPair([]byte("abc"), 'a', 'b', 3))
 	require.Equal(t, -1, MemchrPair([]byte("abc"), 'a', 'b', 7))
@@ -195,12 +209,14 @@ func Test_MemchrPair(t *testing.T) {
 			if offset >= n {
 				continue
 			}
+			// Plant the pair at every valid start position.
 			for pos := 0; pos+offset < n; pos++ {
 				h := bytes.Repeat([]byte{'x'}, n)
 				h[pos] = 'a'
 				h[pos+offset] = 'b'
 				checkMemchrPair(t, h, 'a', 'b', offset)
 			}
+			// Anchor byte present everywhere, partner absent.
 			checkMemchrPair(t, bytes.Repeat([]byte{'a'}, n), 'a', 'b', offset)
 			checkMemchrPair(t, fill(n, uint64(n*100+offset)), 'a', 'b', offset)
 			checkMemchrPair(t, fill(n, uint64(n*100+offset+1)), 0x00, 0x01, offset)
@@ -236,7 +252,8 @@ func Test_FirstNonASCII_CountNonASCII(t *testing.T) {
 	require.Equal(t, -1, FirstNonASCII([]byte("hello")))
 	require.Equal(t, 1, FirstNonASCII([]byte("h\xc3\xa9llo")))
 	require.Equal(t, 2, CountNonASCII([]byte("h\xc3\xa9llo")))
-	// Non-ASCII only in the overlapping final word.
+	// The only non-ASCII byte sits in the overlapping final word (length
+	// not a multiple of 8, clean words before it).
 	require.Equal(t, 12, FirstNonASCII(append(bytes.Repeat([]byte{'a'}, 12), 0x80)))
 	require.Equal(t, -1, FirstNonASCII(bytes.Repeat([]byte{'a'}, 13)))
 	for _, n := range testSizes {
@@ -257,7 +274,10 @@ func Test_FirstNonASCII_CountNonASCII(t *testing.T) {
 		require.Equal(t, wantCount, countNonASCIIGeneric(h), "generic size %d", n)
 		require.Equal(t, wantFirst == -1, IsASCII(h), "size %d", n)
 
-		// One non-ASCII byte at every position: block loop, per-vector re-extraction, SWAR tail.
+		// A single non-ASCII byte at every position: the position has to
+		// survive the block loop's combined test and the per-vector
+		// re-extraction that locates it, and CountNonASCII has to find it
+		// whether it lands in the vector-aligned prefix or the SWAR tail.
 		clean := make([]byte, n)
 		for i := range clean {
 			clean[i] = byte(i % 0x80)
@@ -276,9 +296,12 @@ func Test_FirstNonASCII_CountNonASCII(t *testing.T) {
 	}
 }
 
-// Test_CountNonASCII_LargeDense crosses the amd64 kernel's accumulator flush: byte lanes must
-// widen before reaching 256, which takes dense data past 127 128-byte blocks; a late flush
-// undercounts by a multiple of 256.
+// Test_CountNonASCII_LargeDense crosses the amd64 kernel's accumulator
+// flush boundary: it counts in vector byte lanes and must fold them into
+// wider lanes before a lane can reach 256, which only dense non-ASCII data
+// of more than 127 128-byte blocks (16256 bytes) can provoke. Every lane
+// position sees a non-ASCII byte in every vector here, so a missing or
+// late flush shows up as a count short by a multiple of 256.
 func Test_CountNonASCII_LargeDense(t *testing.T) {
 	t.Parallel()
 	const block = 128
@@ -291,6 +314,8 @@ func Test_CountNonASCII_LargeDense(t *testing.T) {
 		require.Equal(t, n, CountNonASCII(dense), "all 0xff, size %d", n)
 		require.Equal(t, n, countNonASCIIGeneric(dense), "generic all 0xff, size %d", n)
 
+		// Every other byte non-ASCII, so lanes fill at half rate, plus a
+		// full-range pattern with a few ASCII holes.
 		half := make([]byte, n)
 		for i := range half {
 			half[i] = byte(i%2) << 7
@@ -305,6 +330,7 @@ func Test_CountNonASCII_LargeDense(t *testing.T) {
 func Test_MemchrDigit(t *testing.T) {
 	t.Parallel()
 	require.Equal(t, -1, MemchrDigit(nil))
+	// Every byte value alone: exactly '0'..'9' match.
 	for b := range 256 {
 		want := -1
 		if b >= '0' && b <= '9' {
@@ -324,10 +350,11 @@ func Test_MemchrDigit(t *testing.T) {
 				require.Equal(t, pos, MemchrDigit(h), "size %d pos %d", n, pos)
 				require.Equal(t, pos, memchrDigitGeneric(h), "generic size %d pos %d", n, pos)
 			}
+			// Range neighbors must not match.
 			h := bytes.Repeat([]byte{'x'}, n)
-			h[pos] = '0' - 1
+			h[pos] = '0' - 1 // '/'
 			require.Equal(t, -1, MemchrDigit(h))
-			h[pos] = '9' + 1
+			h[pos] = '9' + 1 // ':'
 			require.Equal(t, -1, MemchrDigit(h))
 			h[pos] = 0xb5 // '5' with the high bit set: signed-compare trap
 			require.Equal(t, -1, MemchrDigit(h))
@@ -346,6 +373,7 @@ func Test_MemchrDigitAt(t *testing.T) {
 	require.Equal(t, -1, MemchrDigitAt(h, 100))
 	require.Equal(t, -1, MemchrDigitAt(h, -1))
 	require.Equal(t, -1, MemchrDigitAt(nil, 0))
+	// In-bounds start with no digit at or after it.
 	require.Equal(t, -1, MemchrDigitAt([]byte("abc123xyz"), 6))
 }
 
@@ -357,6 +385,8 @@ func Test_MemchrWord_NotWord(t *testing.T) {
 	t.Parallel()
 	require.Equal(t, -1, MemchrWord(nil))
 	require.Equal(t, -1, MemchrNotWord(nil))
+	// Every byte value alone, including the range boundaries and their
+	// unsigned-compare neighbors ('A'-1, 'Z'+1, 'a'-1, 'z'+1, '_'±1, 0x80+).
 	for b := range 256 {
 		h := []byte{byte(b)}
 		wantWord := -1
@@ -368,7 +398,9 @@ func Test_MemchrWord_NotWord(t *testing.T) {
 		require.Equal(t, wantWord, MemchrWord(h), "byte %#x", b)
 		require.Equal(t, wantNot, MemchrNotWord(h), "byte %#x", b)
 	}
-	// Again in vector-length buffers, so the class table is checked for all 256 values.
+	// Every byte value again, this time inside a buffer long enough to
+	// reach the vector kernels (and past the 128-byte block loop), so the
+	// class table is checked for all 256 values and not just at length 1.
 	for b := range 256 {
 		for _, size := range []int{32, 33, 63, 64, 129, 200} {
 			for _, pos := range []int{0, 1, 31, 32, size - 1} {
@@ -462,29 +494,35 @@ func Test_SelectRareBytes(t *testing.T) {
 	require.Equal(t, RareByteInfo{}, SelectRareBytes(nil))
 	require.Equal(t, RareByteInfo{Byte1: 'q', Byte2: 'q'}, SelectRareBytes([]byte("q")))
 
-	// 'z' (rank 20) is rarer than 'e' (245) and 'l' (175).
+	// 'z' (rank 20) is rarer than 'e' (rank 245) and 'l' (rank 175).
 	info := SelectRareBytes([]byte("zeel"))
 	require.Equal(t, byte('z'), info.Byte1)
 	require.Equal(t, 0, info.Index1)
 	require.Equal(t, byte('l'), info.Byte2)
 	require.Equal(t, 3, info.Index2)
 
-	// Regression: seeding Byte2 from needle[1] kept the duplicate 'z',
-	// disqualifying the needle from the paired prefilter.
+	// Duplicated leading rare byte: the distinct-preference rule must pick
+	// the common 'e' over the second 'z' (regression: seeding Byte2 from
+	// needle[1] kept the duplicate 'z' and disqualified such needles from
+	// the paired prefilter).
 	info = SelectRareBytes([]byte("zze"))
 	require.Equal(t, byte('z'), info.Byte1)
 	require.Equal(t, 0, info.Index1)
 	require.Equal(t, byte('e'), info.Byte2)
 	require.Equal(t, 2, info.Index2)
 
-	// Late promotions: 'z' then 'Z' displace Byte1, yet Byte2 must improve to 'q'.
+	// Late promotions: 'z' (rank 20) and then 'Z' (rank 10) displace Byte1
+	// in turn, and the direct case must still improve Byte2 to 'q' (rank
+	// 15) afterwards instead of freezing on the demoted 'z'.
 	info = SelectRareBytes([]byte("ezZq"))
 	require.Equal(t, byte('Z'), info.Byte1)
 	require.Equal(t, 2, info.Index1)
 	require.Equal(t, byte('q'), info.Byte2)
 	require.Equal(t, 3, info.Index2)
 
-	// Repeated Byte2: Index2 is its first occurrence; no other case tells first from last.
+	// Byte2's value repeating: Index2 must be its first occurrence. Every
+	// other case's Byte2 value appears exactly once in its needle, so this
+	// is the only case separating first from last occurrence.
 	info = SelectRareBytes([]byte("zzee"))
 	require.Equal(t, byte('z'), info.Byte1)
 	require.Equal(t, 0, info.Index1)
@@ -494,14 +532,20 @@ func Test_SelectRareBytes(t *testing.T) {
 	for _, n := range []int{2, 3, 5, 8, 16, 32, 100} {
 		needle := fill(n, uint64(n)+29)
 		info := SelectRareBytes(needle)
-		// Indices are first occurrences (memmemFallback's resume point relies on it).
+		// The reported bytes really sit at the reported indices, at the
+		// first occurrence of each value (memmemFallback's resume-point
+		// argument depends on the first-occurrence part).
 		require.Equal(t, bytes.IndexByte(needle, info.Byte1), info.Index1, "needle %q", needle)
 		require.Equal(t, bytes.IndexByte(needle, info.Byte2), info.Index2, "needle %q", needle)
+		// Byte1 is a rarest byte of the whole needle.
 		for _, b := range needle {
 			require.LessOrEqual(t, ByteRank(info.Byte1), ByteRank(b), "needle %q", needle)
 		}
 		require.LessOrEqual(t, ByteRank(info.Byte1), ByteRank(info.Byte2))
-		// Distinct values must yield distinct bytes; Byte2 is a rarest other than Byte1.
+		// Any needle with two distinct values must yield distinct bytes,
+		// and Byte2 must be a rarest value among those distinct from
+		// Byte1 (ties allowed) — the "rarest distinct second anchor"
+		// clause of the documented contract.
 		if bytes.Count(needle, needle[:1]) != len(needle) {
 			require.NotEqual(t, info.Byte1, info.Byte2, "needle %q", needle)
 		}
@@ -512,7 +556,8 @@ func Test_SelectRareBytes(t *testing.T) {
 		}
 	}
 
-	// All-identical needle: both slots collapse to the first occurrence.
+	// All-identical needle: no distinct second byte exists, and both
+	// slots collapse to the same first occurrence.
 	info = SelectRareBytes(bytes.Repeat([]byte{'a'}, 10))
 	require.Equal(t, byte('a'), info.Byte1)
 	require.Equal(t, byte('a'), info.Byte2)
@@ -534,6 +579,7 @@ func checkMemmem(t *testing.T, h, needle []byte) {
 
 func Test_Memmem(t *testing.T) {
 	t.Parallel()
+	// bytes.Index contract on edge cases.
 	require.Equal(t, 0, Memmem(nil, nil))
 	require.Equal(t, 0, Memmem([]byte("abc"), nil))
 	require.Equal(t, -1, Memmem(nil, []byte("a")))
@@ -550,6 +596,7 @@ func Test_Memmem(t *testing.T) {
 		append(bytes.Repeat([]byte{'a'}, 40), 'b'),
 	}
 	for _, n := range testSizes {
+		// Text-like haystack (lowercase letters) and full-range haystack.
 		text := make([]byte, n)
 		for i := range text {
 			text[i] = 'a' + byte((i*7)%26)
@@ -558,6 +605,7 @@ func Test_Memmem(t *testing.T) {
 		for _, needle := range needles {
 			checkMemmem(t, text, needle)
 			checkMemmem(t, random, needle)
+			// Plant the needle at the start, middle, and end.
 			if len(needle) <= n {
 				for _, pos := range []int{0, (n - len(needle)) / 2, n - len(needle)} {
 					h := bytes.Clone(text)
@@ -566,11 +614,13 @@ func Test_Memmem(t *testing.T) {
 				}
 			}
 		}
+		// Needle equals the whole haystack.
 		if n > 0 {
 			checkMemmem(t, text, text)
 		}
 	}
 
+	// Repetitive data with many false candidates for the prefilter.
 	big := bytes.Repeat([]byte("ab"), 300)
 	checkMemmem(t, big, []byte("aba"))
 	checkMemmem(t, big, []byte("abb"))
@@ -581,7 +631,9 @@ func Test_Memmem(t *testing.T) {
 	checkMemmem(t, almost, []byte("ab"))
 }
 
-// checkMemmemInternal drives the prefilter helpers directly, whatever Memmem's routing does.
+// checkMemmemInternal drives the prefilter helpers directly, so they are
+// covered on every platform regardless of the hasAVX2 / 128-byte routing
+// inside Memmem.
 func checkMemmemInternal(t *testing.T, h, needle []byte) {
 	t.Helper()
 	want := bytes.Index(h, needle)
@@ -596,6 +648,7 @@ func checkMemmemInternal(t *testing.T, h, needle []byte) {
 
 func Test_Memmem_InternalPaths(t *testing.T) {
 	t.Parallel()
+	// Regular haystacks, planted needles.
 	for _, n := range testSizes {
 		if n == 0 {
 			continue
@@ -617,23 +670,33 @@ func Test_Memmem_InternalPaths(t *testing.T) {
 		}
 	}
 
-	// Miss budget: every position is an anchor, so the loops hand over to memmemFallback.
+	// Miss-budget fallback: every position is a rare-byte anchor, so the
+	// loops exhaust memmemMaxMisses and must hand over to memmemFallback
+	// without missing a late match or returning one out of order.
 	anchors := bytes.Repeat([]byte{'z'}, 400)
-	checkMemmemInternal(t, anchors, append(bytes.Repeat([]byte{'z'}, 50), 'b'))
+	checkMemmemInternal(t, anchors, append(bytes.Repeat([]byte{'z'}, 50), 'b')) // absent
 	late := bytes.Repeat([]byte{'z'}, 400)
 	copy(late[350:], "zzzzb")
-	checkMemmemInternal(t, late, []byte("zzzzb"))
-	// Paired path: dense false ('z','q') pairs exhaust memmemPaired's own budget.
+	checkMemmemInternal(t, late, []byte("zzzzb")) // found only after fallback
+	// Paired-path miss budget: a short needle with two distinct rare bytes
+	// over a haystack dense in false ('z','q')-at-offset-1 pairs, so
+	// memmemPaired itself must exhaust memmemMaxMisses and hand over to
+	// memmemFallback on every platform (the all-'z' needles above exercise
+	// only memmemSingle's budget).
 	pairs := bytes.Repeat([]byte("zqf"), 100)
-	checkMemmemInternal(t, pairs, []byte("zqe"))
+	checkMemmemInternal(t, pairs, []byte("zqe")) // absent
 	pairsLate := bytes.Repeat([]byte("zqf"), 100)
 	copy(pairsLate[len(pairsLate)-3:], "zqe")
-	checkMemmemInternal(t, pairsLate, []byte("zqe"))
-	// Nonzero anchor index, fallback-only match: pins memmemFallback's translation to
-	// haystack coordinates.
+	checkMemmemInternal(t, pairsLate, []byte("zqe")) // found only after fallback
+	// Nonzero anchor index (rare byte 'q' at needle position 2) with the
+	// match found only by the fallback: pins memmemFallback's translation
+	// from its bytes.Index-relative result back to haystack coordinates.
+	// (The start-anchorIdx resume point itself is defensive — no match can
+	// start inside [start-anchorIdx, start), because start-1 is an anchor
+	// and anchorIdx is the rare byte's first occurrence in the needle.)
 	h := bytes.Repeat([]byte{'q'}, 300)
 	for i := range 40 {
-		h[i*2] = 'e'
+		h[i*2] = 'e' // 'e' is common; 'q' stays the rare anchor everywhere
 	}
 	copy(h[60:], "eeq")
 	checkMemmemInternal(t, h, []byte("eeq"))
@@ -641,12 +704,14 @@ func Test_Memmem_InternalPaths(t *testing.T) {
 
 func Test_Memmem_AdversarialBounded(t *testing.T) {
 	t.Parallel()
-	// The O(n*m) trap (rare byte everywhere, almost-matching needle); timing is in
-	// Benchmark_Memmem_Adversarial.
+	// The O(n*m) trap from the code review: rare byte everywhere, long
+	// almost-matching needle. The miss budget must keep this exact (equal
+	// to bytes.Index) — timing is covered by Benchmark_Memmem_Adversarial.
 	haystack := bytes.Repeat([]byte{'z'}, 1<<16)
 	needle := append(bytes.Repeat([]byte{'z'}, 999), 'b')
 	checkMemmem(t, haystack, needle)
 	checkMemmemInternal(t, haystack, needle)
+	// Same shape but with the needle present at the very end.
 	present := bytes.Repeat([]byte{'z'}, 1<<16)
 	present[len(present)-1] = 'b'
 	checkMemmem(t, present, needle)
@@ -655,14 +720,20 @@ func Test_Memmem_AdversarialBounded(t *testing.T) {
 
 func Test_Accelerated(t *testing.T) {
 	t.Parallel()
+	// Pin the detection source: on amd64 the package must mirror the
+	// x/sys/cpu feature flag it initializes from; everywhere else the
+	// kernels do not exist and Accelerated must report false.
 	if runtime.GOARCH == "amd64" {
 		require.Equal(t, cpu.X86.HasAVX2, Accelerated())
 	} else {
 		require.False(t, Accelerated())
 	}
 	t.Logf("simd.Accelerated() = %v", Accelerated())
-	// The Test workflow sets GOFIBER_SIMD_REQUIRE_AVX2=1 on AVX2 runners so a fallback-only run
-	// cannot pass silently.
+	// The Test workflow sets this so runners known to have AVX2 prove the
+	// assembly kernels are actually under test, instead of silently
+	// green-lighting a fallback-only run (QEMU, GOAMD64-baseline VMs,
+	// detection bugs). Non-amd64 builds ignore it: the fallbacks are the
+	// intended implementation there.
 	if runtime.GOARCH == "amd64" && os.Getenv("GOFIBER_SIMD_REQUIRE_AVX2") == "1" {
 		require.True(t, Accelerated(), "GOFIBER_SIMD_REQUIRE_AVX2=1 but AVX2 kernels are not active")
 	}
@@ -670,8 +741,12 @@ func Test_Accelerated(t *testing.T) {
 
 func Test_TestSizesCoverDispatchBoundaries(t *testing.T) {
 	t.Parallel()
-	// 129/130/200 hit the block loop's hand-off to the 32-byte loop and overlapping window;
-	// 128 and 512 skip both.
+	// Guard the sweep against accidental edits: it must include sub-word,
+	// word-with-tail, exactly-one-vector, whole-and-partial 128-byte
+	// block, and beyond-crossover sizes. 129/130/200 are what exercise the
+	// kernels' block loop handing off to the 32-byte loop and then to the
+	// overlapping final window; 128 and 512 divide evenly and leave both
+	// of those untouched.
 	for _, must := range []int{0, 7, 8, 31, 32, 33, 63, 64, 127, 128, 129, 130, 200, 512} {
 		require.Contains(t, testSizes, must, strconv.Itoa(must))
 	}

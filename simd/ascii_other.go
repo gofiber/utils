@@ -6,6 +6,8 @@
 
 package simd
 
+// The portable SWAR implementations are the only ones off amd64.
+
 func isASCIIImpl(data []byte) bool {
 	return isASCIIGeneric(data)
 }

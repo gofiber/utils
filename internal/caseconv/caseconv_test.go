@@ -7,6 +7,8 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// refLower and refUpper are the scalar ASCII folds every test measures against;
+// bytes >= 0x80 pass through, as both the tables and the kernels promise.
 func refLower(b []byte) []byte {
 	out := make([]byte, len(b))
 	for i, c := range b {
@@ -38,7 +40,13 @@ func refFirstIndex(b []byte, lo, hi byte) int {
 	return -1
 }
 
-// Expectations are computed before each call: an illegal write to src is a case-fold too, so a re-read would match it.
+// assertCaseParity drives the whole interface over one input; the randomized and
+// fuzz tests share it.
+//
+// Expectations are computed before each call and src is compared against an
+// untouched copy after: the converters promise to read src only, and an illegal
+// write there is itself a case-fold, so a reference read afterwards would match
+// the corruption rather than catch it.
 func assertCaseParity(t *testing.T, src []byte) {
 	t.Helper()
 
@@ -50,6 +58,7 @@ func assertCaseParity(t *testing.T, src []byte) {
 	require.Equal(t, wantUp, iUp, "FirstUpperIndex(%q)", src)
 	require.Equal(t, wantLow, iLow, "FirstLowerIndex(%q)", src)
 
+	// The From converters require a word of input and the scanner's own index.
 	if len(src) >= WordLen {
 		if iUp >= 0 {
 			require.Equal(t, string(wantLower), string(ToLowerFrom(src, iUp)), "ToLowerFrom(%q, %d)", src, iUp)
@@ -70,6 +79,8 @@ func assertCaseParity(t *testing.T, src []byte) {
 	require.Equal(t, string(wantUpper), string(uppered), "ToUpperInPlace(%q)", untouched)
 }
 
+// Test_CaseConv_Randomized covers sub-word inputs, every %WordLen tail, the
+// block loop and its overlapping tail, with non-ASCII bytes mixed in.
 func Test_CaseConv_Randomized(t *testing.T) {
 	t.Parallel()
 	rng := rand.New(rand.NewSource(42)) //nolint:gosec // deterministic test data
@@ -83,17 +94,20 @@ func Test_CaseConv_Randomized(t *testing.T) {
 	}
 }
 
-// Test_CaseConv_Lengths puts the only letter at every offset of every length. The filler
-// and the byte after the letter carry 0xE9: without MatchRangeMask's high-bit clear it
-// matches 'a'..'z' and this fails.
+// Test_CaseConv_Lengths walks every length with the changing byte at every
+// position, so each word and block offset is the first change once and the
+// overlapping tail store meets every residue. The letter-free filler carries a
+// byte >= 0x80 every fourth offset: without MatchRangeMask's high-bit clear,
+// 0xE9 falsely matches 'a'..'z' and this fails.
 func Test_CaseConv_Lengths(t *testing.T) {
 	t.Parallel()
 
 	for n := range 71 {
 		base := make([]byte, n)
 		for i := range base {
-			base[i] = "40-\xe9/~:9"[i%8]
+			base[i] = "40-\xe9/~:9"[i%8] // no letters at all, incl. >= 0x80
 		}
+		// The untouched filler drives both scanners to -1.
 		assertCaseParity(t, base)
 
 		for pos := range n {
@@ -114,21 +128,27 @@ func Test_CaseConv_Lengths(t *testing.T) {
 	}
 }
 
-// Test_ConvertFrom_PrefixIsTakenOnTrust pins the prefix skip, which no in-contract oracle sees: it
-// passes a first above the true first change and fails if the alignment or prefix copy is dropped.
+// Test_ConvertFrom_PrefixIsTakenOnTrust pins the prefix skip, which no
+// in-contract equality oracle can see: there the skipped bytes are unchanged
+// either way. So these pass a first above the true first change -- the case the
+// doc warns mis-converts -- and fail if the alignment or prefix copy is dropped.
+// The results are not a clean unconverted prefix, because the overlapping tail
+// store folds src back over part of it.
 func Test_ConvertFrom_PrefixIsTakenOnTrust(t *testing.T) {
 	t.Parallel()
 
-	// Tail store re-folds src[n-WordLen:], so only byte 0 survives.
+	// The tail store folds src[n-WordLen:n] over dst, so only byte 0 survives.
 	require.Equal(t, "Aaaaaaaab", string(ToLowerFrom([]byte("AAAAAAAAB"), WordLen)))
 	require.Equal(t, "aAAAAAAAB", string(ToUpperFrom([]byte("aaaaaaaab"), WordLen)))
 
-	// An unaligned first aligns down: the whole word folds.
+	// An unaligned first aligns down, so its whole word folds after all.
 	require.Equal(t, "aaaaaaaab", string(ToLowerFrom([]byte("AAAAAAAAB"), WordLen-1)))
 	require.Equal(t, "AAAAAAAAB", string(ToUpperFrom([]byte("aaaaaaaab"), WordLen-1)))
 }
 
-// FuzzCaseConv's seeds pin the word and block boundaries, with non-ASCII where the kernels fold.
+// FuzzCaseConv is the property test AGENTS.md asks of bit-twiddling code; the
+// seeds pin the word and block boundaries and carry non-ASCII at word lengths
+// and above, where the kernels rather than the tables fold.
 func FuzzCaseConv(f *testing.F) {
 	f.Add([]byte(""))
 	f.Add([]byte("a"))

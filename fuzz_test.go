@@ -15,6 +15,11 @@ import (
 	casestrings "github.com/gofiber/utils/v2/strings"
 )
 
+// Fuzz targets comparing the SWAR implementations against the scalar
+// references from the unit tests. The seeds cover the known traps (HTAB,
+// CR|0x20, overlap tails, 19-20 digit boundaries); go test runs the seeds
+// as regular tests, go test -fuzz explores beyond them.
+
 func FuzzIndexFold(f *testing.F) {
 	f.Add("max-age=0,No-Cache,private", "no-cache")
 	f.Add("no\rcache", "no-cache")
@@ -95,7 +100,8 @@ func FuzzParse(f *testing.F) {
 		case wantErrU == nil && gotU != wantU:
 			t.Fatalf("ParseUint(%q) = %d, want %d", s, gotU, wantU)
 		case wantErrU != nil && gotU != 0:
-			// Unlike strconv, every error returns 0.
+			// Unlike strconv, this library returns 0 (not a clamped value)
+			// alongside every error.
 			t.Fatalf("ParseUint(%q) returned %d with error", s, gotU)
 		}
 
@@ -190,6 +196,8 @@ func FuzzHTTPDate(f *testing.F) {
 			if got.Location().String() != want.Location().String() {
 				t.Fatalf("ParseHTTPDate(%q) location = %v, want %v", s, got.Location(), want.Location())
 			}
+			// Canonical output re-parses through the fast path to the same
+			// instant, and formatting agrees with the stdlib layout.
 			if want.Year() >= 0 && want.Year() <= 9999 {
 				formatted := FormatHTTPDate(want)
 				if formatted != want.UTC().Format(httpDateLayout) {
@@ -223,7 +231,9 @@ func FuzzAppendJSONString(f *testing.F) {
 	})
 }
 
-// FuzzIsIP compares the module's two IP grammars with net.ParseIP.
+// FuzzIsIP is the exception to the file comment above: it compares the two IP
+// grammars in this module against net.ParseIP rather than a SWAR kernel against
+// a scalar reference.
 func FuzzIsIP(f *testing.F) {
 	f.Add("127.0.0.1")
 	f.Add("::1")
@@ -278,7 +288,7 @@ func FuzzParseIP(f *testing.F) {
 	})
 }
 
-// refGetMIME is the map lookup the packed-key table replaced.
+// refGetMIME is the map-based lookup GetMIME's packed-key table replaced; its case fold is ASCII-only, like the original.
 func refGetMIME(extension string) string {
 	if extension == "" {
 		return ""
@@ -293,6 +303,7 @@ func refGetMIME(extension string) string {
 		return found
 	}
 	if found := mime.TypeByExtension(withDot); found != "" {
+		// bare type, like the table entries
 		base, _, _ := strings.Cut(found, ";")
 		return strings.TrimSpace(base)
 	}
@@ -308,7 +319,7 @@ func FuzzGetMIME(f *testing.F) {
 	f.Add("html")
 	f.Add(".JSON")
 	f.Add("html\x00")
-	f.Add("\u212aml") // Kelvin sign: Unicode-lowercases to "kml", ASCII does not
+	f.Add("\u212aml") // Kelvin sign: Unicode-lowercases to "kml", ASCII folding leaves it alone
 	f.Add("msgpack")
 	f.Add("unknown")
 	f.Add("")

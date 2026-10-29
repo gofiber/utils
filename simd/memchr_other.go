@@ -6,6 +6,8 @@
 
 package simd
 
+// The portable SWAR implementations are the only ones off amd64.
+
 func memchr2Impl(haystack []byte, needle1, needle2 byte) int {
 	return memchr2Generic(haystack, needle1, needle2)
 }

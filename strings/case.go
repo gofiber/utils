@@ -5,7 +5,8 @@ import (
 	"github.com/gofiber/utils/v2/internal/unsafeconv"
 )
 
-// ToLower converts an ASCII string to lower-case.
+// Sub-word inputs convert here; see the bytes package for the measurement.
+// ToLower converts an ASCII string to lower-case without modifying the input.
 func ToLower(s string) string {
 	n := len(s)
 	if n < caseconv.WordLen {
@@ -26,16 +27,17 @@ func ToLower(s string) string {
 		return s
 	}
 
-	// caseconv only reads src; its fresh result is never written again.
+	// caseconv only reads src, so the zero-copy view is sound.
 	src := unsafeconv.UnsafeBytes(s)
 	i := caseconv.FirstUpperIndex(src)
 	if i < 0 {
 		return s
 	}
+	// Its result is freshly allocated and never written again.
 	return unsafeconv.UnsafeString(caseconv.ToLowerFrom(src, i))
 }
 
-// ToUpper converts an ASCII string to upper-case.
+// ToUpper converts an ASCII string to upper-case without modifying the input.
 func ToUpper(s string) string {
 	n := len(s)
 	if n < caseconv.WordLen {
@@ -56,15 +58,19 @@ func ToUpper(s string) string {
 		return s
 	}
 
+	// caseconv only reads src, so the zero-copy view is sound.
 	src := unsafeconv.UnsafeBytes(s)
 	i := caseconv.FirstLowerIndex(src)
 	if i < 0 {
 		return s
 	}
+	// Its result is freshly allocated and never written again.
 	return unsafeconv.UnsafeString(caseconv.ToUpperFrom(src, i))
 }
 
-// UnsafeToLower lower-cases the ASCII letters of s in place; s must reference mutable memory.
+// UnsafeToLower converts an ASCII string to lower-case by mutating its backing bytes in-place.
+// This function is unsafe: it breaks string immutability and must only be used when the
+// string is known to reference mutable memory.
 func UnsafeToLower(s string) string {
 	b := unsafeconv.UnsafeBytes(s)
 	if len(b) < caseconv.WordLen {
@@ -78,7 +84,9 @@ func UnsafeToLower(s string) string {
 	return s
 }
 
-// UnsafeToUpper upper-cases the ASCII letters of s in place; s must reference mutable memory.
+// UnsafeToUpper converts an ASCII string to upper-case by mutating its backing bytes in-place.
+// This function is unsafe: it breaks string immutability and must only be used when the
+// string is known to reference mutable memory.
 func UnsafeToUpper(s string) string {
 	b := unsafeconv.UnsafeBytes(s)
 	if len(b) < caseconv.WordLen {

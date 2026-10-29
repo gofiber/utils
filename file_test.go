@@ -13,7 +13,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// errFS fails opening one path.
+// errFS wraps another http.FileSystem and fails opening a specific path.
 type errFS struct {
 	http.FileSystem
 	fail string
@@ -94,14 +94,17 @@ func Test_Walk_Error(t *testing.T) {
 func Test_ReadFile_Error(t *testing.T) {
 	t.Parallel()
 
+	// Test error when file does not exist
 	testFS := http.FS(os.DirFS(".github/tests"))
 	_, err := ReadFile("nonexistent.txt", testFS)
 	require.Error(t, err)
 
+	// Test error when file does not exist and fs is nil
 	_, err = ReadFile("nonexistent.txt", nil)
 	require.Error(t, err)
 }
 
+// Test for readDirNames success and error cases
 func Test_readDirNames(t *testing.T) {
 	t.Parallel()
 
@@ -115,6 +118,7 @@ func Test_readDirNames(t *testing.T) {
 	require.Error(t, err)
 }
 
+// Test for readDir error handling and content retrieval
 func Test_readDir(t *testing.T) {
 	t.Parallel()
 
@@ -128,6 +132,7 @@ func Test_readDir(t *testing.T) {
 	require.Error(t, err)
 }
 
+// Test walkInternal when walkFn returns SkipDir
 func Test_walkInternal_SkipDir(t *testing.T) {
 	testFS := http.FS(os.DirFS(".github/tests"))
 	info, err := stat(testFS, ".")
@@ -142,6 +147,7 @@ func Test_walkInternal_SkipDir(t *testing.T) {
 	require.Equal(t, []string{"."}, visited)
 }
 
+// Test walkInternal returning error from walkFn
 func Test_walkInternal_Error(t *testing.T) {
 	testFS := http.FS(os.DirFS(".github/tests"))
 	info, err := stat(testFS, ".")
@@ -164,7 +170,7 @@ func (e errFS) Open(name string) (http.File, error) {
 	return e.FileSystem.Open(name)
 }
 
-// Test_walkInternal_StatError: stat fails for a child and walkFn returns nil.
+// Test walkInternal when stat returns error for a child and walkFn returns nil
 func Test_walkInternal_StatError(t *testing.T) {
 	testFS := errFS{http.FS(os.DirFS(".github/tests")), filepath.Join("example", "example1.txt")}
 	info, err := stat(testFS, ".")
@@ -176,6 +182,7 @@ func Test_walkInternal_StatError(t *testing.T) {
 	require.NoError(t, err)
 }
 
+// Test walkInternal when stat returns error and walkFn propagates error
 func Test_walkInternal_StatErrorPropagate(t *testing.T) {
 	testFS := errFS{http.FS(os.DirFS(".github/tests")), filepath.Join("example", "example1.txt")}
 	info, err := stat(testFS, ".")
@@ -191,7 +198,7 @@ func Test_walkInternal_StatErrorPropagate(t *testing.T) {
 	require.ErrorIs(t, err, testErr)
 }
 
-// Test_ReadFile_NoFS reads from the OS when no file system is given.
+// Test reading a file directly from the OS when no filesystem is provided
 func Test_ReadFile_NoFS(t *testing.T) {
 	t.Parallel()
 

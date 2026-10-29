@@ -120,7 +120,7 @@ func Test_AppendInt(t *testing.T) {
 
 func Test_AppendInt_SmallNegativeCache(t *testing.T) {
 	t.Parallel()
-	// -1 to -99 use the cache, -100 does not.
+	// Test all small negative integers that should use the cache (-1 to -99)
 	for i := int64(-1); i >= -99; i-- {
 		t.Run(strconv.FormatInt(i, 10), func(t *testing.T) {
 			t.Parallel()
@@ -129,6 +129,7 @@ func Test_AppendInt_SmallNegativeCache(t *testing.T) {
 			require.Equal(t, expected, result)
 		})
 	}
+	// Verify boundary: -100 should NOT use the cache
 	t.Run("boundary/-100", func(t *testing.T) {
 		t.Parallel()
 		expected := strconv.AppendInt([]byte("prefix"), -100, 10)
@@ -136,6 +137,8 @@ func Test_AppendInt_SmallNegativeCache(t *testing.T) {
 		require.Equal(t, expected, result)
 	})
 }
+
+// Benchmarks
 
 func Benchmark_FormatUint(b *testing.B) {
 	inputs := []struct {
@@ -347,6 +350,7 @@ func Test_UintDigits_IntDigits(t *testing.T) {
 	for n := range uint64(100000) {
 		checkU(n)
 	}
+	// Every power-of-ten boundary up to the uint64 limit.
 	p := uint64(1)
 	for range 20 {
 		checkU(p - 1)
@@ -366,10 +370,10 @@ func Test_UintDigits_IntDigits(t *testing.T) {
 	require.Equal(t, 19, intDigits(math.MaxInt64))
 }
 
-// Test_Format_Sweep pins every formatter to strconv.
+// Test_Format_Sweep pins the formatters to strconv over a dense sweep, every decimal and group boundary, and a random spread.
 func Test_Format_Sweep(t *testing.T) {
 	t.Parallel()
-	// Hundreds of thousands of values: compare directly, not through require.
+	// The sweep runs hundreds of thousands of values, so it compares directly instead of through require.
 	eq := func(name, got, want string) {
 		t.Helper()
 		if got != want {
@@ -415,11 +419,11 @@ func Test_Format_Sweep(t *testing.T) {
 		check(p + 1)
 	}
 	for _, n := range []uint64{
-		99999999, 100000000, 100000001,
-		9999999999999999, 10000000000000000, 10000000000000001,
+		99999999, 100000000, 100000001, // one lane group
+		9999999999999999, 10000000000000000, 10000000000000001, // two lane groups
 		math.MaxUint16, math.MaxInt16, math.MaxUint32, math.MaxInt32,
 		math.MaxInt64, math.MaxInt64 + 1, math.MaxUint64,
-		1844674407370955161, 1844674407370955162,
+		1844674407370955161, 1844674407370955162, // largest top groups
 	} {
 		check(n)
 	}
@@ -428,6 +432,7 @@ func Test_Format_Sweep(t *testing.T) {
 	require.Equal(t, "-2147483648", FormatInt32(math.MinInt32))
 	require.Equal(t, "-32768", FormatInt16(math.MinInt16))
 
+	// A deterministic pseudo-random spread: a few values at every bit length.
 	rng := rand.New(rand.NewSource(1)) //nolint:gosec // deterministic test data
 	for range 20000 {
 		x := rng.Uint64()

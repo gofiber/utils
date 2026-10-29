@@ -8,8 +8,13 @@ import (
 	"github.com/gofiber/utils/v2/internal/unsafeconv"
 )
 
-// ParseIPv4 parses a dotted-decimal IPv4 address into a netip.Addr, accepting exactly the IPv4
-// strings netip.ParseAddr does and reporting ok=false for everything else. It never allocates.
+// ParseIPv4 parses a dotted-decimal IPv4 address into a netip.Addr. It
+// accepts exactly the IPv4 strings netip.ParseAddr does — four octets 0-255,
+// no leading zeros, nothing before or after — and reports ok=false for
+// everything else, including IPv6 forms. It never allocates, so []byte
+// callers skip both the string conversion and netip's error construction.
+//
+// IsIPv4 is the validate-only counterpart; it accepts the same strings.
 func ParseIPv4[S byteSeq](s S) (netip.Addr, bool) {
 	var b [4]byte
 	n := len(s)
@@ -40,7 +45,7 @@ func ParseIPv4[S byteSeq](s S) (netip.Addr, bool) {
 			i++
 			digits++
 		}
-		// Reject leading zeros, like netip.
+		// Reject values above 255 and, like netip, leading zeros.
 		if v > 255 || (digits > 1 && s[i-digits] == '0') {
 			return netip.Addr{}, false
 		}
@@ -52,16 +57,24 @@ func ParseIPv4[S byteSeq](s S) (netip.Addr, bool) {
 	return netip.AddrFrom4(b), true
 }
 
-// ParseIPv6 parses an IPv6 address into a netip.Addr, accepting exactly the IPv6 strings
-// netip.ParseAddr does, "%zone" suffix included, and reporting ok=false for everything else.
-// It allocates only for a zone. IsIPv6 is the validate-only counterpart, but it rejects
-// zones like net.ParseIP, so the two disagree on zoned input by design.
+// ParseIPv6 parses an IPv6 address into a netip.Addr. It accepts exactly
+// the IPv6 strings netip.ParseAddr does — 16-bit hex fields, one optional
+// "::", an optional embedded dotted-decimal IPv4 tail, and an optional
+// non-empty "%zone" suffix — and reports ok=false for everything else,
+// including plain IPv4 forms (use ParseIPv4 for those). The parse itself
+// never allocates; only a present zone is materialized as a string because
+// netip.Addr stores zones as strings.
+//
+// IsIPv6 is the validate-only counterpart, but it follows net.ParseIP, which
+// rejects zones. The two therefore disagree on zoned input by design: prefer
+// ParseIPv6 when a zone is acceptable, IsIPv6 when it is not.
 func ParseIPv6[S byteSeq](s S) (netip.Addr, bool) {
 	n := len(s)
 	zone := bytes.IndexByte(unsafeconv.Bytes(s), '%')
 	end := n
 	if zone >= 0 {
 		if zone == n-1 {
+			// Empty zone.
 			return netip.Addr{}, false
 		}
 		end = zone
@@ -75,10 +88,12 @@ func ParseIPv6[S byteSeq](s S) (netip.Addr, bool) {
 		ellipsis = 0
 		i = 2
 	} else if end > 0 && s[0] == ':' {
+		// A single leading colon starts no field.
 		return netip.Addr{}, false
 	}
 
 	for off < 16 && i < end {
+		// Parse up to four hex digits; a fifth is an error.
 		fieldStart := i
 		val := uint32(0)
 		lim := min(i+4, end)
@@ -94,6 +109,7 @@ func ParseIPv6[S byteSeq](s S) (netip.Addr, bool) {
 			return netip.Addr{}, false
 		}
 		if i < end && s[i] == '.' {
+			// Embedded IPv4 tail filling the final four bytes.
 			if off > 12 {
 				return netip.Addr{}, false
 			}
@@ -108,9 +124,10 @@ func ParseIPv6[S byteSeq](s S) (netip.Addr, bool) {
 			break
 		}
 		if i == fieldStart {
+			// Every colon-separated field needs at least one digit.
 			return netip.Addr{}, false
 		}
-		// off is even and < 16 here, so the two-byte store fits.
+		// off is always even and < 16 here, so the two-byte store fits.
 		binary.BigEndian.PutUint16(ip[off:], uint16(val))
 		off += 2
 		if i == end {
@@ -122,6 +139,7 @@ func ParseIPv6[S byteSeq](s S) (netip.Addr, bool) {
 		i++
 		if i < end && s[i] == ':' {
 			if ellipsis >= 0 {
+				// At most one "::".
 				return netip.Addr{}, false
 			}
 			ellipsis = off
@@ -129,6 +147,7 @@ func ParseIPv6[S byteSeq](s S) (netip.Addr, bool) {
 			continue
 		}
 		if i == end {
+			// A trailing single colon is invalid.
 			return netip.Addr{}, false
 		}
 	}
@@ -139,13 +158,14 @@ func ParseIPv6[S byteSeq](s S) (netip.Addr, bool) {
 		if ellipsis < 0 {
 			return netip.Addr{}, false
 		}
-		// Expand "::" by shifting the later fields right.
+		// Expand "::": shift the fields after it to the end, zero the gap.
 		gap := 16 - off
 		for j := off - 1; j >= ellipsis; j-- {
 			ip[j+gap] = ip[j]
 			ip[j] = 0
 		}
 	} else if ellipsis >= 0 {
+		// "::" must stand for at least one field of zeros.
 		return netip.Addr{}, false
 	}
 

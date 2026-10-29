@@ -9,6 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// refIndexControl is the scalar reference; exempt is noControlExemption or '\t'.
 func refIndexControl(s string, exempt byte) int {
 	for i := range len(s) {
 		c := s[i]
@@ -19,6 +20,7 @@ func refIndexControl(s string, exempt byte) int {
 	return -1
 }
 
+// checkIndexControl compares both scanners on both input types with the reference.
 func checkIndexControl(tb testing.TB, s string) {
 	tb.Helper()
 	if want := refIndexControl(s, noControlExemption); IndexControl(s) != want || IndexControl([]byte(s)) != want {
@@ -31,7 +33,7 @@ func checkIndexControl(tb testing.TB, s string) {
 
 func Test_IndexControl(t *testing.T) {
 	t.Parallel()
-	// 40 bytes cover every scan shape.
+	// Every byte value at every position of clean prefixes up to 40 bytes, so each scan shape sees each byte.
 	clean := strings.Repeat("abcdefghijklmnopqrstuvwxyz0123456789", 2)
 	for n := 0; n <= 40; n++ {
 		checkIndexControl(t, clean[:n])
@@ -42,7 +44,7 @@ func Test_IndexControl(t *testing.T) {
 		}
 	}
 
-	// Bytes >= 0x80 never match, even the C1 controls unicode.IsControl flags.
+	// Bytes >= 0x80 never match, including the UTF-8 C1 controls unicode.IsControl flags.
 	require.Equal(t, -1, IndexControl("caf\xc3\xa9 \xc2\x85 \xff\x80\x9f"))
 	require.Equal(t, 6, strings.IndexFunc("caf\xc3\xa9 \xc2\x85", unicode.IsControl))
 	require.Equal(t, -1, IndexControlExceptTab("a\tb\tc"))
@@ -50,6 +52,7 @@ func Test_IndexControl(t *testing.T) {
 	require.Equal(t, 3, IndexControlExceptTab("a\tb\x7f"))
 	require.Equal(t, -1, IndexControl(""))
 	require.Equal(t, 0, IndexControl("\x00"))
+	// Only HTAB is exempt: the neighboring controls still match.
 	require.Equal(t, 0, IndexControlExceptTab("\x08"))
 	require.Equal(t, 0, IndexControlExceptTab("\n"))
 }

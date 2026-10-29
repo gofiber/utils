@@ -4,12 +4,14 @@ import (
 	"github.com/gofiber/utils/v2/internal/caseconv"
 )
 
-// Sub-word inputs skip caseconv: its call costs more than the table lookups. Delegating them
-// measured +47%/+43% on unchanged three-byte input and +65%/+60% for the in-place forms
-// (benchstat n=15, Go 1.26, linux/amd64).
+// Sub-word inputs convert here, not in caseconv: at these lengths the call costs
+// more than the table lookups. Delegating them measured +47%/+43% on unchanged
+// three-byte input and +65%/+60% for the in-place forms (benchstat n=15,
+// interleaved, Go 1.26, linux/amd64; the http-get cases reproduce it).
 
-// ToLower returns an ASCII lower-cased copy of b, or b itself if it has no upper-case letter: a
-// write to the result then writes to b, unlike with bytes.ToLower, which always copies.
+// ToLower converts an ASCII byte slice to lower-case without modifying the input.
+// If b has no upper-case letter it is returned itself, not a copy, so a write to
+// the result then writes to b.
 func ToLower(b []byte) []byte {
 	n := len(b)
 	if n < caseconv.WordLen {
@@ -37,8 +39,9 @@ func ToLower(b []byte) []byte {
 	return caseconv.ToLowerFrom(b, i)
 }
 
-// ToUpper returns an ASCII upper-cased copy of b, or b itself if it has no lower-case letter: a
-// write to the result then writes to b, unlike with bytes.ToUpper, which always copies.
+// ToUpper converts an ASCII byte slice to upper-case without modifying the input.
+// If b has no lower-case letter it is returned itself, not a copy, so a write to
+// the result then writes to b.
 func ToUpper(b []byte) []byte {
 	n := len(b)
 	if n < caseconv.WordLen {
@@ -66,7 +69,8 @@ func ToUpper(b []byte) []byte {
 	return caseconv.ToUpperFrom(b, i)
 }
 
-// UnsafeToLower lower-cases b's ASCII letters in place and returns b.
+// UnsafeToLower converts an ASCII byte slice to lower-case in-place.
+// The passed slice content is modified and the same slice is returned.
 func UnsafeToLower(b []byte) []byte {
 	if len(b) < caseconv.WordLen {
 		table := caseconv.ToLowerTable
@@ -79,7 +83,8 @@ func UnsafeToLower(b []byte) []byte {
 	return b
 }
 
-// UnsafeToUpper upper-cases b's ASCII letters in place and returns b.
+// UnsafeToUpper converts an ASCII byte slice to upper-case in-place.
+// The passed slice content is modified and the same slice is returned.
 func UnsafeToUpper(b []byte) []byte {
 	if len(b) < caseconv.WordLen {
 		table := caseconv.ToUpperTable

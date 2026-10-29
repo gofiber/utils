@@ -16,27 +16,52 @@
 #include "textflag.h"
 #include "block_align_amd64.h"
 
-// A byte is non-ASCII iff its high bit is set, so OR-ing four vectors before one
-// VPMOVMSKB tests 128 bytes. The kernels are self-bounding and never read
-// outside data[0:len] (loads are unaligned): the block loop runs while SI <= R11
-// (end-128), the 32-byte loop while SI <= R12 (end-32); sub-32 direct calls use a
-// scalar loop. All exits run VZEROUPPER.
+// All three kernels share one observation: a byte is non-ASCII exactly when
+// its high bit is set, and VPMOVMSKB gathers those 32 high bits into a
+// scalar register in one instruction. OR-ing four vectors before the
+// extraction therefore preserves "some byte in these 128 was non-ASCII"
+// exactly, which is what lets the block loop test 128 bytes with a single
+// port-0 VPMOVMSKB. Both loops test their bound at the bottom against a
+// precomputed limit pointer.
 
 // func isASCIIAVX2(data []byte) bool
+//
+// AVX2 implementation of ASCII detection that checks if all bytes are < 0x80.
+//
+// Algorithm:
+//  1. Block loop: OR four 32-byte vectors, extract the high bits with
+//     VPMOVMSKB, and return false if any is set. The loads fold into the
+//     VPOR operands, so a block costs four memory ops and one extraction.
+//  2. 32-byte loop for the remainder, then one overlapping 32-byte window
+//     ending at the buffer end (rescanning bytes already proven ASCII
+//     cannot change the outcome). A scalar loop serves only sub-32 direct
+//     calls, unreachable through the Go dispatch.
+//  3. Always call VZEROUPPER before returning (critical for performance)
+//
+// Parameters (FP offsets):
+//   data_base+0(FP)  - pointer to data (8 bytes)
+//   data_len+8(FP)   - data length (8 bytes)
+//   data_cap+16(FP)  - data capacity (8 bytes, unused but part of slice)
+//   ret+24(FP)       - return value: bool (1 byte)
+//
+// Total argument frame size: 25 bytes (8+8+8+1)
 TEXT ·isASCIIAVX2(SB), NOSPLIT, $0-25
-	MOVQ    data_base+0(FP), SI
-	MOVQ    data_len+8(FP), DX
+	// Load parameters
+	MOVQ    data_base+0(FP), SI     // SI = data pointer
+	MOVQ    data_len+8(FP), DX      // DX = data length
 
+	// Empty data check
 	TESTQ   DX, DX
 	JZ      all_ascii
 
-	LEAQ    (SI)(DX*1), R8
+	// Calculate end pointer
+	LEAQ    (SI)(DX*1), R8          // R8 = SI + length (end pointer)
 
 	CMPQ    DX, $32
-	JB      tail_loop
+	JB      tail_loop               // sub-32 direct call: scalar
 
-	LEAQ    -32(R8), R12
-	LEAQ    -128(R8), R11
+	LEAQ    -32(R8), R12            // last valid 32-byte window base
+	LEAQ    -128(R8), R11           // last valid 128-byte block base
 	CMPQ    SI, R11
 	JA      loop32_entry
 
@@ -59,6 +84,8 @@ loop32_entry:
 	JA      last32
 
 loop32:
+	// Load 32 bytes (unaligned load is safe and fast with AVX2) and
+	// extract the high bit of each byte into a 32-bit mask.
 	VMOVDQU (SI), Y0
 	VPMOVMSKB Y0, AX
 	TESTL   AX, AX
@@ -69,7 +96,7 @@ loop32:
 	JBE     loop32
 
 last32:
-	// Overlapping final window; rescanning proven-ASCII bytes is harmless.
+	// Fewer than 32 bytes remain past SI; retest the final window.
 	CMPQ    SI, R8
 	JAE     all_ascii
 	VMOVDQU (R12), Y0
@@ -79,27 +106,38 @@ last32:
 	JMP     all_ascii
 
 tail_loop:
-	MOVBLZX (SI), AX
-	TESTB   $0x80, AL
-	JNZ     found_non_ascii
+	// Load one byte and check high bit
+	MOVBLZX (SI), AX                // AX = data[SI] (zero-extended)
+	TESTB   $0x80, AL               // Check if high bit is set
+	JNZ     found_non_ascii         // If set, non-ASCII found
 
+	// Advance to next byte
 	INCQ    SI
-	CMPQ    SI, R8
-	JB      tail_loop
+	CMPQ    SI, R8                  // Check if reached end
+	JB      tail_loop               // Continue if SI < end
 
 all_ascii:
-	MOVB    $1, ret+24(FP)
-	VZEROUPPER
+	// All bytes are ASCII
+	MOVB    $1, ret+24(FP)          // Return true
+	VZEROUPPER                      // Clear upper YMM bits (CRITICAL!)
 	RET
 
 found_non_ascii:
-	MOVB    $0, ret+24(FP)
-	VZEROUPPER
+	MOVB    $0, ret+24(FP)          // Return false
+	VZEROUPPER                      // Clear upper YMM bits
 	RET
 
 // func firstNonASCIIAVX2(data []byte) int
 //
-// The hit path re-extracts the block's four live vectors in address order.
+// AVX2 kernel behind FirstNonASCII: the same scan as isASCIIAVX2, but the
+// block loop keeps the four source vectors live so the hit path can
+// re-extract them in address order and BSF the first non-ASCII byte.
+//
+// Parameters (FP offsets):
+//   data_base+0(FP)  - pointer to data (8 bytes)
+//   data_len+8(FP)   - data length (8 bytes)
+//   data_cap+16(FP)  - data capacity (8 bytes, unused)
+//   ret+24(FP)       - return value: index or -1 (8 bytes)
 TEXT ·firstNonASCIIAVX2(SB), NOSPLIT, $0-32
 	MOVQ    data_base+0(FP), SI
 	MOVQ    data_len+8(FP), DX
@@ -107,11 +145,11 @@ TEXT ·firstNonASCIIAVX2(SB), NOSPLIT, $0-32
 	TESTQ   DX, DX
 	JZ      fna_not_found
 
-	MOVQ    SI, DI
+	MOVQ    SI, DI                  // DI = data start (preserved)
 	LEAQ    (SI)(DX*1), R8
 
 	CMPQ    DX, $32
-	JB      fna_tail_loop
+	JB      fna_tail_loop           // sub-32 direct call: scalar
 
 	LEAQ    -32(R8), R12
 	LEAQ    -128(R8), R11
@@ -150,7 +188,9 @@ fna_loop32:
 	JBE     fna_loop32
 
 fna_last32:
-	// Overlapping final window; lanes before SI are ASCII, so BSF stays exact.
+	// Fewer than 32 bytes remain past SI; rescan the final window. Lanes
+	// before SI are known ASCII, so the first set lane falls in the new
+	// bytes.
 	CMPQ    SI, R8
 	JAE     fna_not_found
 	MOVQ    R12, SI
@@ -205,14 +245,50 @@ fna_found_scalar:
 
 // func countNonASCIIAVX2(data []byte) int
 //
-// No overlapping final window (rescanned bytes would count twice): vector
-// loops stop at the last whole vector and a byte loop takes the last 0-31 bytes.
-// The block loop subtracts 0 > byte (signed VPCMPGTB: 0xFF exactly for high-bit
-// bytes) from byte accumulators Y4/Y5; a lane holds 255 and gains at most 2 per
-// block, so FLUSH folds them into the 64-bit totals in Y8 every 127 blocks.
-// Leftover vectors use VPMOVMSKB+POPCNT; callers must also check for POPCNT.
+// AVX2 kernel behind CountNonASCII. Counting is the one scan here that
+// cannot finish with the overlapping final window the first-match kernels
+// use — rescanning bytes would count them twice — so instead the vector
+// loops stop at the last whole vector and a branch-free byte loop takes
+// the remaining 0-31 bytes. That keeps the kernel self-bounding for any
+// length, like every other kernel in this package: it never reads past
+// data[len(data)-1], so no caller-side length preconditioning stands
+// between it and an out-of-bounds read.
+//
+// The block loop accumulates in vector byte lanes rather than extracting
+// a mask per vector. A signed compare against zero turns each non-ASCII
+// byte (the only bytes that read as negative) into 0xFF, and subtracting
+// that lane from a byte accumulator adds one to it; the compare takes its
+// input straight from memory, so a vector costs two vector ops and no
+// scalar work. An earlier version extracted every vector's high bits
+// with VPMOVMSKB and population-counted them, four extractions per block
+// on the one port that executes them, which held the block loop to about
+// half the throughput of the ASCII scans. Two accumulators alternate so
+// each carries a two-op dependency chain per block.
+//
+// A byte lane can hold 255 and gains at most two per block, so the block
+// loop flushes both accumulators every 127 blocks: VPSADBW against zero
+// sums each accumulator's bytes into four 64-bit lanes, which are added
+// to a running vector total. After the last block the totals are reduced
+// to one scalar. That reduction is a fixed ten-cycle latency chain, which
+// the 1-3 vectors left after the block loop (or the 1-3 vectors of a
+// sub-block input) could not amortize, so those are still extracted with
+// VPMOVMSKB and population-counted, exactly as before; each POPCNT writes
+// the register its own VPMOVMSKB just produced, so the destination false
+// dependency Intel CPUs carry on POPCNT is already satisfied. Inputs
+// below one block therefore never touch the vector accumulators.
+//
+// POPCNT is a separate CPUID feature from AVX2, so countNonASCIIImpl gates
+// on both; see cpu_amd64.go.
+//
+// Parameters (FP offsets):
+//   data_base+0(FP)  - pointer to data (8 bytes)
+//   data_len+8(FP)   - data length (8 bytes)
+//   data_cap+16(FP)  - data capacity (8 bytes, unused)
+//   ret+24(FP)       - number of bytes >= 0x80 (8 bytes)
 
-// FLUSH needs Y7 = 0 and clobbers Y0/Y1.
+// FLUSH folds the two byte accumulators Y4 and Y5 into the 64-bit lane
+// totals in Y8 and clears them. Y7 is the zero vector; Y0 and Y1 are
+// scratch.
 #define FLUSH \
 	VPSADBW Y7, Y4, Y0; \
 	VPSADBW Y7, Y5, Y1; \
@@ -225,35 +301,41 @@ TEXT ·countNonASCIIAVX2(SB), NOSPLIT, $0-32
 	MOVQ    data_base+0(FP), SI
 	MOVQ    data_len+8(FP), DX
 
-	XORQ    R9, R9
-	XORQ    R10, R10
+	XORQ    R9, R9                  // R9 = block loop total
+	XORQ    R10, R10                // R10 = remainder total (kept apart so
+	                                // the remainder need not wait for the
+	                                // vector reduction)
 
 	TESTQ   DX, DX
 	JZ      cna_done
 
-	LEAQ    (SI)(DX*1), R8
+	LEAQ    (SI)(DX*1), R8          // R8 = end pointer
 	CMPQ    DX, $32
-	JB      cna_tail
+	JB      cna_tail                // no whole vector: byte loop only
 
-	LEAQ    -32(R8), R12
-	LEAQ    -128(R8), R11
+	LEAQ    -32(R8), R12            // last valid 32-byte window base
+	LEAQ    -128(R8), R11           // last valid 128-byte block base
 	CMPQ    SI, R11
-	JA      cna_loop32_entry
+	JA      cna_loop32_entry        // no whole block: extract and count
 
-	VPXOR   Y7, Y7, Y7
-	VPXOR   Y4, Y4, Y4
-	VPXOR   Y5, Y5, Y5
-	VPXOR   Y8, Y8, Y8
-	MOVQ    $127, R13
+	VPXOR   Y7, Y7, Y7              // Y7 = zero (compare and SAD operand)
+	VPXOR   Y4, Y4, Y4              // Y4 = byte accumulator A
+	VPXOR   Y5, Y5, Y5              // Y5 = byte accumulator B
+	VPXOR   Y8, Y8, Y8              // Y8 = 64-bit lane totals
+	MOVQ    $127, R13               // blocks until a byte lane could overflow
 
-	// The DECQ/JZ countdown is a third fused pair: hence BLOCKALIGN_LONG.
+	// This loop carries a third fused pair, the DECQ/JZ flush countdown,
+	// which at BLOCKALIGN's offset would straddle a window boundary; see
+	// block_align_amd64.h.
 	BLOCKALIGN_LONG
 cna_loop128:
+	// 0 > byte is exactly "high bit set"; the compares read their data
+	// operand from memory.
 	VPCMPGTB (SI), Y7, Y0
 	VPCMPGTB 32(SI), Y7, Y1
 	VPCMPGTB 64(SI), Y7, Y2
 	VPCMPGTB 96(SI), Y7, Y3
-	VPSUBB  Y0, Y4, Y4
+	VPSUBB  Y0, Y4, Y4              // lane -= 0xFF, i.e. += 1 where non-ASCII
 	VPSUBB  Y1, Y5, Y5
 	VPSUBB  Y2, Y4, Y4
 	VPSUBB  Y3, Y5, Y5
@@ -273,6 +355,9 @@ cna_flush:
 	JMP     cna_loop128_next
 
 cna_block_done:
+	// Fold the accumulators into the lane totals and the four totals into
+	// one scalar: high half onto low, then the high 64-bit lane onto the
+	// low one.
 	VPSADBW Y7, Y4, Y0
 	VPSADBW Y7, Y5, Y1
 	VPADDQ  Y0, Y8, Y8
@@ -290,7 +375,6 @@ cna_loop32_entry:
 cna_loop32:
 	VMOVDQU (SI), Y0
 	VPMOVMSKB Y0, AX
-	// POPCNT reuses VPMOVMSKB's destination: no false dependency on Intel.
 	POPCNTL AX, AX
 	ADDQ    AX, R10
 	ADDQ    $32, SI
@@ -298,6 +382,8 @@ cna_loop32:
 	JBE     cna_loop32
 
 cna_tail:
+	// 0-31 bytes left. Shifting the byte down to its high bit turns the
+	// test into an add, so the loop carries no data-dependent branch.
 	CMPQ    SI, R8
 	JAE     cna_done
 	MOVBLZX (SI), AX

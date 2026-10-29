@@ -8,7 +8,7 @@ import (
 	casestrings "github.com/gofiber/utils/v2/strings"
 )
 
-// ToLower converts an ASCII string to lower-case.
+// ToLower converts ascii string to lower-case.
 //
 // Deprecated: use [github.com/gofiber/utils/v2/strings.ToLower] instead.
 //
@@ -17,7 +17,7 @@ func ToLower(b string) string {
 	return casestrings.ToLower(b)
 }
 
-// ToUpper converts an ASCII string to upper-case.
+// ToUpper converts ascii string to upper-case.
 //
 // Deprecated: use [github.com/gofiber/utils/v2/strings.ToUpper] instead.
 //
@@ -26,7 +26,9 @@ func ToUpper(b string) string {
 	return casestrings.ToUpper(b)
 }
 
-// AddTrailingSlashString returns s if it ends with '/', else a new string with '/' appended.
+// AddTrailingSlashString appends a trailing '/' to s if it does not already end with one.
+// If the input already ends with '/', the original string is returned.
+// A new string is returned only when a '/' needs to be appended.
 func AddTrailingSlashString(s string) string {
 	n := len(s)
 	if n == 0 {

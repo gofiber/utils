@@ -43,10 +43,11 @@ func Test_CutByte(t *testing.T) {
 			require.Equal(t, wb, bb, "CutByte(%q, %q) bytes", s, sep)
 			require.Equal(t, wa, ba, "CutByte(%q, %q) bytes", s, sep)
 			if !found {
-				// A miss leaves after nil, like bytes.Cut.
+				// Like bytes.Cut, the after part of a miss is nil.
 				require.Nil(t, ba)
 			}
 
+			// LastCutByte splits at the last separator.
 			lb, la, lf := LastCutByte(s, sep)
 			if i := strings.LastIndexByte(s, sep); i >= 0 {
 				require.True(t, lf)
@@ -67,6 +68,7 @@ func Test_CutByte(t *testing.T) {
 		}
 	}
 
+	// The results alias the input: no copies are made.
 	in := []byte("key=value")
 	k, v, ok := CutByte(in, '=')
 	require.True(t, ok)

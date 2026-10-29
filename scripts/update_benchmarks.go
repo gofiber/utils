@@ -1,8 +1,9 @@
 package main
 
-// Refreshes the numbers in the README benchmark tables: each ```text table starts with the
-// `go test` command that produced it; re-run it, replace the values of the rows it reports, and
-// rewrite the Environment: header with the machine that ran.
+// Refreshes the numbers in the README benchmark tables. Each ```text table
+// starts with the `go test` command that produced it, so the table is its own
+// recipe: re-run that command, replace the values of the rows it reports, and
+// rewrite the Environment: header above it with the machine that ran.
 
 import (
 	"bytes"
@@ -20,22 +21,26 @@ import (
 
 var envKeys = []string{"goos", "goarch", "pkg", "cpu"}
 
-// machineKeys omits pkg: pick() needs the table's own package, not the run's.
+// machineKeys are the header lines a run describes. pkg is not one of them: it
+// names the package the table documents and is what pick() disambiguates on, so
+// taking it from the output would let one run decide the next run's rows.
 var machineKeys = []string{"goos", "goarch", "cpu"}
 
+// benchBlock is one ```text table plus the Environment: header above it.
 type benchBlock struct {
-	env    map[string]int
+	env    map[string]int // envKeys -> line index
 	pkg    string
 	goos   string
 	goarch string
-	cmd    []string
-	open   int
-	end    int
+	cmd    []string // the "// go test ..." line inside the table
+	open   int      // the ```text line
+	end    int      // the closing ``` line
 }
 
+// benchResult is one benchmark line of `go test -benchmem` output.
 type benchResult struct {
 	pkg    string
-	fields []string
+	fields []string // name (with its -N suffix) followed by the measured columns
 	ns     float64
 }
 
@@ -61,7 +66,8 @@ func updateBenchmarks(ctx context.Context, path string, only int) error {
 		switch {
 		case only > 0 && only != num:
 			continue
-		// Skip other architectures: unmeasured rows would keep that machine's numbers.
+		// -block picks a table, not the architecture: the rows the command does not
+		// measure would keep the other machine's numbers under this machine's header.
 		case b.goarch != runtime.GOARCH:
 			logf("table %d (%s/%s): skipped, this machine is %s/%s\n", num, b.goos, b.goarch, runtime.GOOS, runtime.GOARCH)
 			continue
@@ -85,7 +91,9 @@ func updateBenchmarks(ctx context.Context, path string, only int) error {
 	return writeLines(path, lines)
 }
 
-// knownRows names every documented benchmark; one table's run can measure another's rows.
+// knownRows names every benchmark any table documents. Table 1's command is
+// `go test ./...`, so it measures the rows of the other tables too, and only the
+// whole set answers "this was measured but is written down nowhere".
 func knownRows(lines []string, blocks []benchBlock) map[string]bool {
 	known := map[string]bool{}
 	for _, b := range blocks {
@@ -98,6 +106,7 @@ func knownRows(lines []string, blocks []benchBlock) map[string]bool {
 	return known
 }
 
+// rowName also matches rows benchFields rejects: those are documented all the same.
 func rowName(line string) (string, bool) {
 	fields := strings.Fields(line)
 	if len(fields) == 0 || !strings.HasPrefix(fields[0], "Benchmark") {
@@ -106,6 +115,7 @@ func rowName(line string) (string, bool) {
 	return fields[0], true
 }
 
+// applyResults rewrites the rows of one table and the Environment: header above it.
 func applyResults(lines []string, b benchBlock, num int, out string, known map[string]bool) {
 	env, results, odd := parseBenchOutput(out)
 
@@ -133,7 +143,8 @@ func applyResults(lines []string, b benchBlock, num int, out string, known map[s
 		}
 		row := canonical(best.fields)
 		if len(row) < len(fields) {
-			// This run measured fewer columns; replacing the row would drop the rest.
+			// Fewer columns than the table documents, so the run measured less than
+			// it did last time. Replacing the row would drop what it no longer has.
 			narrower = append(narrower, name)
 			continue
 		}
@@ -148,7 +159,8 @@ func applyResults(lines []string, b benchBlock, num int, out string, known map[s
 			continue
 		}
 		if env[key] == "" {
-			// Better "unknown" than a stale machine; arm64 Linux reports no cpu line.
+			// A header naming a machine that did not run is worse than one that says
+			// it does not know; arm64 Linux reports no cpu line at all.
 			lines[at] = key + ": unknown"
 			missing = append(missing, key)
 			continue
@@ -173,7 +185,9 @@ func applyResults(lines []string, b benchBlock, num int, out string, known map[s
 	report(num, "not reported by this run, the header says unknown", missing)
 }
 
-// A name can come from two packages; the table's own package decides.
+// pick narrows a name's runs down to one package. `go test ./...` spans packages
+// and the same name can live in two of them, which a table row cannot tell apart,
+// so the package named in the table's own header decides.
 func pick(runs []benchResult, pkg string) ([]benchResult, bool) {
 	packages := map[string]bool{}
 	for _, r := range runs {
@@ -186,7 +200,9 @@ func pick(runs []benchResult, pkg string) ([]benchResult, bool) {
 	return owned, len(owned) > 0
 }
 
-// canonical drops extra columns such as MB/s, which would misalign the table.
+// canonical keeps the columns the tables are built from. `go test` adds an MB/s
+// column for benchmarks that call b.SetBytes, and the tables are aligned by
+// column index, so a wider row would misalign everything around it.
 func canonical(fields []string) []string {
 	row := append([]string{}, fields[:2]...)
 	for i := 2; i+1 < len(fields); i += 2 {
@@ -198,7 +214,9 @@ func canonical(fields []string) []string {
 	return row
 }
 
-// ns/op must be the first metric: tables are aligned by column index.
+// benchFields returns the columns of a benchmark row, in `go test` output and in
+// a README table alike. ns/op has to be the first metric, because the tables are
+// aligned by column index.
 func benchFields(line string) ([]string, bool) {
 	fields := strings.Fields(line)
 	if len(fields) < 4 || !strings.HasPrefix(fields[0], "Benchmark") || fields[3] != "ns/op" {
@@ -222,6 +240,9 @@ func report(num int, title string, names []string) {
 	}
 }
 
+// median returns the run in the middle by ns/op, the slower one of the two when
+// -count is even, so a repeated measurement documents a representative run
+// instead of the last one.
 func median(runs []benchResult) *benchResult {
 	if len(runs) == 0 {
 		return nil
@@ -277,6 +298,8 @@ func parseBenchOutput(out string) (map[string]string, map[string][]benchResult, 
 	return env, results, odd
 }
 
+// stripProcs drops the -N GOMAXPROCS suffix so a table recorded on 12 cores
+// matches the same benchmark measured on 4.
 func stripProcs(name string) string {
 	if i := strings.LastIndexByte(name, '-'); i > 0 {
 		if _, err := strconv.Atoi(name[i+1:]); err == nil {
@@ -316,7 +339,8 @@ func parseBlocks(lines []string) ([]benchBlock, error) {
 		}
 
 		readEnvHeader(lines, &b)
-		// A block without a full Environment: header is sample output, not a table.
+		// A ```text block without a full Environment: header is sample output, not a
+		// benchmark table. Skipping it keeps -block numbering on the tables alone.
 		if len(b.env) == len(envKeys) {
 			blocks = append(blocks, b)
 		}
@@ -324,6 +348,7 @@ func parseBlocks(lines []string) ([]benchBlock, error) {
 	return blocks, nil
 }
 
+// readEnvHeader walks up from the fence over the "goos: ... cpu: ..." lines.
 func readEnvHeader(lines []string, b *benchBlock) {
 	for j := b.open - 1; j >= 0; j-- {
 		text := strings.TrimSpace(lines[j])
@@ -354,6 +379,9 @@ func readEnvHeader(lines []string, b *benchBlock) {
 	}
 }
 
+// splitArgs splits a command line on whitespace, honoring quotes so a
+// -bench='^Benchmark_(A|B)$' survives. Nothing is expanded and the result is
+// executed without a shell, so quoting is the only thing it has to get right.
 func splitArgs(s string) ([]string, error) {
 	var args []string
 	var cur strings.Builder

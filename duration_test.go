@@ -21,6 +21,7 @@ func Test_AppendDuration(t *testing.T) {
 		}
 	}
 
+	// Every unit boundary, the values just around it, and the extremes.
 	for _, base := range []time.Duration{
 		0, 1, 999, 1000, 1001, 999999, time.Millisecond, time.Millisecond + 1,
 		999999999, time.Second, time.Second + 1, 1500 * time.Millisecond,
@@ -33,7 +34,7 @@ func Test_AppendDuration(t *testing.T) {
 		check(base + 1)
 		check(base - 1)
 	}
-	// Every count of trailing fraction zeros, in every unit.
+	// Every count of trailing zeros in the fraction, in every unit.
 	for _, unit := range []time.Duration{time.Microsecond, time.Millisecond, time.Second} {
 		for f := time.Duration(1); f < unit; f *= 10 {
 			check(unit + f)
@@ -41,6 +42,7 @@ func Test_AppendDuration(t *testing.T) {
 			check(unit - f)
 		}
 	}
+	// Dense sweeps through the small units.
 	for d := range 3000 {
 		check(time.Duration(d))
 	}
@@ -48,6 +50,7 @@ func Test_AppendDuration(t *testing.T) {
 		check(d)
 		check(-d)
 	}
+	// A deterministic pseudo-random spread across every magnitude.
 	rng := rand.New(rand.NewSource(1)) //nolint:gosec // deterministic test data
 	for range 200000 {
 		x := rng.Uint64()

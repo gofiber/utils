@@ -13,13 +13,27 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// BLOCKALIGN / BLOCKALIGN_LONG keep every macro-fused compare-and-branch pair of the block
-// loops from crossing or ending on a 32-byte boundary (JCC erratum on Skylake-derived cores:
-// a uop-cache miss per iteration). This test reads each kernel's code from the running binary,
-// so a branch moved onto a boundary fails here; the log gives each pair's offset from the loop
-// head. Branches are matched on exact encodings (fusedPairs), not decoded: a kernel with a new
-// branch shape must add its encoding.
+// The block loops are placed by BLOCKALIGN / BLOCKALIGN_LONG
+// (block_align_amd64.h) so that none of their macro-fused
+// compare-and-branch pairs crosses or ends on a 32-byte boundary, which
+// the JCC erratum mitigation on Skylake-derived cores punishes with a
+// decoded-uop-cache miss per iteration. This test reads each kernel's
+// machine code out of the running binary and checks that property, so a
+// kernel edit that moves a branch onto a boundary fails here instead of
+// silently costing throughput; the log lines give each pair's position
+// relative to the loop head, from which a fitting offset can be chosen.
+//
+// The kernels are ABI0 assembly, so a Go func value points at the
+// ABIInternal wrapper the linker generates; its first CALL leads to the
+// kernel body. The body's block loop starts at the first non-NOP after
+// the macro's nine-byte NOPs, and ends at the backward CMPQ SI, R11 /
+// JBE. Every branch in between is one of the fused pairs enumerated in
+// fusedPairs, matched on its exact encoding; there is no instruction
+// decoding here, so a kernel that introduces a branch of a new shape must
+// add its encoding to the list.
 
+// blockLoopKernels maps each kernel with a BLOCKALIGN block loop to its
+// Go declaration.
 var blockLoopKernels = map[string]any{
 	"memchr2AVX2":       memchr2AVX2,
 	"memchr3AVX2":       memchr3AVX2,
@@ -32,6 +46,11 @@ var blockLoopKernels = map[string]any{
 	"countNonASCIIAVX2": countNonASCIIAVX2,
 }
 
+// fusedPairs lists the encodings of the compare (or decrement) that opens
+// each fused pair the block loops use. The branch that follows it is
+// matched by opcode: a short Jcc (0x70-0x7F, two bytes) or a near Jcc
+// (0x0F 0x80-0x8F, six bytes). The CMPQ SI, R11 / JBE pair is the loop
+// back-edge, where the scan stops.
 var fusedPairs = []struct {
 	name     string
 	prefix   []byte
@@ -43,8 +62,13 @@ var fusedPairs = []struct {
 	{name: "CMPQ SI, R11", prefix: []byte{0x4C, 0x39, 0xDE}, backEdge: true},
 }
 
+// nop9 is the canonical nine-byte NOP BLOCKALIGN emits twice and
+// BLOCKALIGN_LONG three times.
 var nop9 = []byte{0x66, 0x0F, 0x1F, 0x84, 0x00, 0x00, 0x00, 0x00, 0x00}
 
+// nopForms lists the multi-byte NOP encodings the assembler pads with, so
+// the loop head can be found as the first non-NOP after the BLOCKALIGN
+// signature whatever PCALIGN and a kernel's extra pad emitted around it.
 var nopForms = [][]byte{
 	{0x66, 0x66, 0x66, 0x0F, 0x1F, 0x84, 0x00, 0x00, 0x00, 0x00, 0x00},
 	{0x66, 0x66, 0x0F, 0x1F, 0x84, 0x00, 0x00, 0x00, 0x00, 0x00},
@@ -59,6 +83,7 @@ var nopForms = [][]byte{
 	{0x90},
 }
 
+// nopLen returns the length of the NOP encoded at the start of b, or 0.
 func nopLen(b []byte) int {
 	for _, form := range nopForms {
 		if bytes.HasPrefix(b, form) {
@@ -68,14 +93,17 @@ func nopLen(b []byte) int {
 	return 0
 }
 
-// kernelBody returns the kernel's code: an ABI0 kernel's Go func value is a wrapper
-// whose first CALL leads there.
+// kernelBody returns the kernel's code bytes and their address, resolved
+// through the ABI wrapper's first CALL; the body is checked to start with
+// the MOVQ data_base+0(FP), SI every kernel opens with.
 func kernelBody(t *testing.T, name string, fn any) ([]byte, uintptr) {
 	t.Helper()
 	wrapper := reflect.ValueOf(fn).UnsafePointer()
 	w := unsafe.Slice((*byte)(wrapper), 128) //nolint:gosec // reading this binary's own text segment
 	call := bytes.IndexByte(w, 0xE8)
 	require.GreaterOrEqual(t, call, 0, "%s: no CALL in the ABI wrapper", name)
+	// The CALL's rel32 is a signed displacement; the conversion reinterprets
+	// its two's-complement bits.
 	rel := int32(binary.LittleEndian.Uint32(w[call+1:]))
 	body := unsafe.Add(wrapper, call+5+int(rel))
 	code := unsafe.Slice((*byte)(body), 2048) //nolint:gosec // reading this binary's own text segment
@@ -84,13 +112,17 @@ func kernelBody(t *testing.T, name string, fn any) ([]byte, uintptr) {
 	return code, uintptr(body)
 }
 
-// Test_BlockLoopBranchesStayInWindow checks that no fused pair crosses or ends on a 32-byte boundary.
+// Test_BlockLoopBranchesStayInWindow checks, for every kernel with a
+// BLOCKALIGN block loop, that no fused compare-and-branch pair of the loop
+// crosses or ends on a 32-byte boundary; see the file comment.
 func Test_BlockLoopBranchesStayInWindow(t *testing.T) {
 	signature := slices.Concat(nop9, nop9)
 	for name, fn := range blockLoopKernels {
 		code, base := kernelBody(t, name, fn)
 
-		// The signature can also match in PCALIGN padding, so the head is the first non-NOP after it.
+		// The signature may also match inside PCALIGN's own padding, and a
+		// kernel may add a NOP of its own after it, so the head is the
+		// first non-NOP byte after the signature.
 		head := bytes.Index(code, signature)
 		require.GreaterOrEqual(t, head, 0, "%s: BLOCKALIGN padding not found", name)
 		head += len(signature)
