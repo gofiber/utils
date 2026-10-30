@@ -1,22 +1,11 @@
-// Package swar provides SWAR (SIMD within a register) primitives for
-// processing eight ASCII bytes per uint64 word. The building blocks here are
-// the ones the rest of gofiber/utils composes into case conversion,
-// multi-needle scanning, and validation loops, and they are exported so that
-// downstream packages (fiber itself, middleware) can fuse their own scans —
-// e.g. finding a delimiter while simultaneously classifying the bytes before
-// it — without re-deriving the bit tricks.
+// Package swar provides SWAR (SIMD within a register) primitives that process
+// eight ASCII bytes per uint64 word. They are exported so downstream packages
+// can fuse their own scans.
 //
-// Every operation yields per-lane results (exactly for the Match* masks,
-// approximately for ZeroLanes, whose contract allows false positives above
-// the first hit), so results are identical on little- and big-endian
-// platforms. Load8 and Store8 always use little-endian lane order: lane 0
-// (the least significant byte) is the lowest byte index, which is what
-// FirstLane and LastLane assume. The empty-mask sentinels differ on
-// purpose: FirstLane(0) == 8 lets forward scans step past the current word
-// arithmetically, while LastLane(0) == -1 is the conventional not-found
-// result for reverse scans.
-//
-// No unsafe is used anywhere in this package.
+// Results are per lane (exact for Match*, approximate for ZeroLanes) and
+// identical on little- and big-endian platforms. Load8 and Store8 always use
+// little-endian lane order (lane 0, the least significant byte, is the lowest
+// byte index) and panic unless the eight bytes lie within len. No unsafe is used.
 package swar
 
 import (
@@ -24,43 +13,25 @@ import (
 )
 
 const (
-	// WordLen is the SWAR word width in bytes. Word loops should iterate
-	// while i+WordLen <= len(s) and route shorter inputs to scalar code.
+	// WordLen is the SWAR word width in bytes. Loop while i <= len(s)-WordLen,
+	// not i+WordLen <= len(s), which can wrap near the largest int on 32-bit.
 	WordLen = 8
 
 	// Ones has 0x01 in every byte lane.
 	Ones = 0x0101010101010101
-	// HighBits has 0x80 in every byte lane; w&HighBits != 0 iff some byte
-	// has its high bit set, and Match* masks equal HighBits iff every lane
-	// matched.
+	// HighBits has 0x80 in every byte lane; a Match* mask equals it iff every
+	// lane matched.
 	HighBits = 0x8080808080808080
 	// LowSeven has 0x7F in every byte lane.
 	LowSeven = 0x7f7f7f7f7f7f7f7f
 )
 
 // Load8 assembles s[i:i+8] into a little-endian uint64: s[i] becomes the
-// least significant byte (lane 0). The caller must guarantee i+8 <= len(s);
-// the reslice below turns a violation into a bounds panic. The 8-byte
-// reslice pins the length so the constant-index reads are bounds-check free,
-// and the compiler fuses them into a single 8-byte load on little-endian
-// targets (verified for both the string and []byte instantiations).
-//
-// The reslice itself is still checked, against the backing array's
-// capacity, which a loop condition written in terms of len does not imply.
-// A loop that loads several words per iteration should therefore pin the
-// whole group once and index into it with constants rather than call Load8
-// at a variable offset each time:
-//
-//	for ; i+4*WordLen <= n; i += 4 * WordLen {
-//		w := b[i : i+4*WordLen : i+4*WordLen]
-//		acc := Load8(w, 0) | Load8(w, WordLen) | Load8(w, 2*WordLen) | Load8(w, 3*WordLen)
-//		// ...
-//	}
-//
-// That moves four checks and their empty-slice pointer clamps down to one
-// per group; on []byte the three-index form pins the capacity too and
-// removes the rest. It is worth 20-60% on the word loops in package simd.
+// least significant byte (lane 0). It panics unless i+8 <= len(s), also for a
+// []byte with spare capacity. In word loops, pin each group with a three-index
+// reslice; load at constant offsets.
 func Load8[S ~string | ~[]byte](s S, i int) uint64 {
+	_ = s[i+7] // len, not cap
 	w := s[i : i+8]
 	return uint64(w[0]) |
 		uint64(w[1])<<8 |
@@ -72,14 +43,10 @@ func Load8[S ~string | ~[]byte](s S, i int) uint64 {
 		uint64(w[7])<<56
 }
 
-// Store8 writes w into b[i:i+8] in Load8's lane order: lane 0 (the least
-// significant byte) lands at the lowest byte index, so a Load8/Store8 round
-// trip is the identity. The caller must guarantee i+8 <= len(b); the
-// reslice below turns a violation into a bounds panic. Like Load8, the
-// constant-index writes are bounds-check free and fuse into a single 8-byte
-// store on little-endian targets.
+// Store8 writes w into b[i:i+8] in Load8's lane order (lane 0 at b[i]). It
+// panics unless i+8 <= len(b), also with spare capacity.
 func Store8(b []byte, i int, w uint64) {
-	d := b[i : i+8]
+	d := b[:len(b):len(b)][i : i+8] //nolint:modernize // slices.Clip puts Store8 at cost 81 of the inlining budget 80
 	d[0] = byte(w)
 	d[1] = byte(w >> 8)
 	d[2] = byte(w >> 16)
@@ -90,16 +57,13 @@ func Store8(b []byte, i int, w uint64) {
 	d[7] = byte(w >> 56)
 }
 
-// Broadcast returns a word with c in every byte lane, the needle form that
-// ZeroLanes scans consume. Hoist the result out of word loops; it compiles
-// to a single multiply.
+// Broadcast returns a word with c in every byte lane.
 func Broadcast(c byte) uint64 {
 	return uint64(c) * Ones
 }
 
 // ToLowerWord lower-cases every 'A'..'Z' lane in w. All other bytes,
-// including those >= 0x80, pass through unchanged — bit-identical to the
-// ASCII case-conversion tables used elsewhere in this module.
+// including those >= 0x80, pass through unchanged.
 func ToLowerWord(w uint64) uint64 {
 	return w | MatchRangeMask(w, 'A', 'Z')>>2 // 0x80>>2 == 0x20: set bit 5
 }
@@ -107,62 +71,47 @@ func ToLowerWord(w uint64) uint64 {
 // ToUpperWord upper-cases every 'a'..'z' lane in w. All other bytes,
 // including those >= 0x80, pass through unchanged.
 func ToUpperWord(w uint64) uint64 {
-	return w &^ (MatchRangeMask(w, 'a', 'z') >> 2) // clear bit 5 on matched lanes
+	return w &^ (MatchRangeMask(w, 'a', 'z') >> 2)
 }
 
-// ZeroLanes returns a mask flagging the zero-byte lanes of x. Three
-// properties are part of the contract: the mask is zero iff x has no zero
-// byte; the lowest set lane is always the lowest true zero lane; and every
-// true zero lane has its high bit set — a 0x00 lane leaves the subtraction
-// as 0xFF or 0xFE regardless of borrow-in, and &^ x keeps its high bit —
-// so combining masks (OR for multi-needle scans, AND for pair scans, as
-// simd.Memchr2 and simd.MemchrPair's fallbacks do) never loses a true
-// match. Lanes above the first true zero may carry false positives
-// (borrows propagate strictly upward), so anything beyond the lowest set
-// lane must be re-verified. It is two ops cheaper than MatchByteMask,
-// which makes it the right primitive for first-match scans, typically as
-// ZeroLanes(w ^ Broadcast(c)) with the broadcast hoisted out of the word
-// loop. Use MatchByteMask when every lane must be exact.
+// ZeroLanes returns a mask flagging the zero-byte lanes of x; two ops cheaper
+// than MatchByteMask for first-match scans: ZeroLanes(w ^ Broadcast(c)). The
+// mask is zero iff x has no zero byte, every true zero lane is flagged (so OR
+// or AND combinations of masks never lose a match), and the lowest set lane is
+// the lowest true zero lane. Lanes above it may be false positives (borrows
+// propagate upward): re-verify them, or use MatchByteMask for exact lanes.
 func ZeroLanes(x uint64) uint64 {
 	return (x - Ones) &^ x & HighBits
 }
 
 // MatchByteMask returns a word with 0x80 set in exactly the lanes of w whose
-// byte equals c, and zero in all other lanes. The result is per-lane exact
-// (no false positives in lanes above a match), so it is safe to feed to
-// LastLane or to arbitrary lane masking, not just first-match scans; for
-// pure first-match scanning ZeroLanes is cheaper.
+// byte equals c, and zero elsewhere. Unlike ZeroLanes it has no false
+// positives, so its result is safe for LastLane or arbitrary lane masking.
 func MatchByteMask(w uint64, c byte) uint64 {
 	x := w ^ (uint64(c) * Ones)
-	// Setting the high bit before the per-lane subtraction keeps every lane
-	// >= 0x80, so borrows cannot cross lanes and the test stays exact:
-	// after the subtraction the high bit is clear only where the lane was 0,
-	// and OR-ing x back in rejects lanes that had their own high bit set.
+	// x|HighBits keeps lanes >= 0x80: no borrow crosses lanes.
 	return ^(((x | HighBits) - Ones) | x) & HighBits
 }
 
-// MatchRangeMask returns a word with 0x80 set in exactly the lanes of w
-// whose byte is within [lo, hi]. It requires lo <= hi <= 0x7F; lanes with
-// the high bit set (bytes >= 0x80) never match.
+// MatchRangeMask returns a word with 0x80 set in exactly the lanes of w whose
+// byte is within [lo, hi]. It requires lo <= hi <= 0x7F, and bytes >= 0x80
+// never match.
 func MatchRangeMask(w uint64, lo, hi byte) uint64 {
 	b := w & LowSeven
-	// After masking, every lane is <= 0x7F, so the biased additions below
-	// cannot carry into a neighboring lane.
-	ge := b + (0x80-uint64(lo))*Ones   // high bit set where lane >= lo
-	gt := b + (0x80-uint64(hi)-1)*Ones // high bit set where lane > hi
+	// Masked lanes are <= 0x7F, so the biased sums cannot carry across lanes.
+	ge := b + (0x80-uint64(lo))*Ones
+	gt := b + (0x80-uint64(hi)-1)*Ones
 	return ge &^ gt &^ w & HighBits
 }
 
-// FirstLane returns the index (0..7) of the lowest-addressed set lane in
-// mask — the smallest byte index, given Load8's lane order — or 8 if mask
-// is zero. mask must contain only 0x80 lane markers, as produced by the
-// Match* functions.
+// FirstLane returns the index (0..7) of the lowest-addressed set lane in mask,
+// or 8 if mask is zero. mask must contain only 0x80 lane markers.
 func FirstLane(mask uint64) int {
 	return bits.TrailingZeros64(mask) >> 3
 }
 
-// LastLane returns the index (0..7) of the highest-addressed set lane in
-// mask, or -1 if mask is zero. mask must contain only 0x80 lane markers.
+// LastLane returns the index (0..7) of the highest-addressed set lane in mask,
+// or -1 if mask is zero. mask must contain only 0x80 lane markers.
 func LastLane(mask uint64) int {
 	return (63 - bits.LeadingZeros64(mask)) >> 3
 }

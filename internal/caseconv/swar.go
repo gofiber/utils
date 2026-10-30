@@ -6,45 +6,23 @@ import (
 	"github.com/gofiber/utils/v2/swar"
 )
 
-// Word-at-a-time ASCII case conversion built on the public SWAR primitives
-// in github.com/gofiber/utils/v2/swar. Byte order inside a word does not
-// matter for the case folds themselves (every operation is per byte lane),
-// so these helpers are correct on both little- and big-endian platforms.
-//
-// Words move through encoding/binary rather than swar.Load8/swar.Store8 on
-// purpose: the binary.LittleEndian forms measure ~9% faster in the in-place
-// word loops here (benchstat -count=10, Go 1.25, Apple M2 Pro). The lane
-// order is identical, so swar words and binary.LittleEndian loads/stores
-// can be mixed freely.
-//
-// The word loops pin each group of four words with a three-index reslice
-// and address the words at constant offsets inside it. A two-index
-// reslice at a variable offset costs a capacity check plus the
-// four-instruction pointer clamp the compiler emits when the new
-// capacity is not a known nonzero constant; the pinned form pays one
-// check per group and no clamp, and the constant-offset accesses inside
-// it are check-free. See swar.Load8 for the same note.
+// Words move through encoding/binary, which measures ~9% faster than swar.Load8/Store8 in the
+// in-place loops (benchstat -count=10, Go 1.25, Apple M2 Pro); the lane order is identical.
 
-// WordLen is the SWAR word width in bytes, and the length from which these
-// helpers are worth a call: below it the conversion is a table lookup per byte,
-// cheaper inline. The case packages gate on it; the From converters require it.
+// WordLen is the SWAR word width in bytes, and the minimum length worth a call.
 const WordLen = swar.WordLen
 
 // ToLowerFrom returns a lower-cased copy of src. first must be FirstUpperIndex's
-// own result, with 0 <= first < len(src) and len(src) >= WordLen: a larger first
-// silently mis-converts, so it must not be cached or derived elsewhere.
-//
-// src is only read, so it may be an unsafe view over immutable string memory;
-// the result is freshly allocated and unaliased. strings.ToLower needs both.
+// own result (0 <= first < len(src); a larger one silently mis-converts) and
+// len(src) >= WordLen. src is only read, so it may alias a string.
 func ToLowerFrom(src []byte, first int) []byte {
 	n := len(src)
 	dst := make([]byte, n)
 
-	// Copy verbatim up to the word holding first, then convert from there.
 	i := first &^ (WordLen - 1)
 	copy(dst, src[:i])
 
-	for ; i+4*WordLen <= n; i += 4 * WordLen {
+	for ; i <= n-4*WordLen; i += 4 * WordLen {
 		sw := src[i : i+4*WordLen : i+4*WordLen]
 		d := dst[i : i+4*WordLen : i+4*WordLen]
 		binary.LittleEndian.PutUint64(d[0:WordLen], swar.ToLowerWord(binary.LittleEndian.Uint64(sw[0:WordLen])))
@@ -52,16 +30,14 @@ func ToLowerFrom(src []byte, first int) []byte {
 		binary.LittleEndian.PutUint64(d[2*WordLen:3*WordLen], swar.ToLowerWord(binary.LittleEndian.Uint64(sw[2*WordLen:3*WordLen])))
 		binary.LittleEndian.PutUint64(d[3*WordLen:4*WordLen], swar.ToLowerWord(binary.LittleEndian.Uint64(sw[3*WordLen:4*WordLen])))
 	}
-	for ; i+WordLen <= n; i += WordLen {
+	for ; i <= n-WordLen; i += WordLen {
 		binary.LittleEndian.PutUint64(dst[i:i+WordLen:i+WordLen], swar.ToLowerWord(binary.LittleEndian.Uint64(src[i:i+WordLen:i+WordLen])))
 	}
 	if i == n {
 		return dst
 	}
-	// One overlapping word finishes the tail. It re-reads src, so above the
-	// aligned start it recomputes what the loops wrote, and below it folds over
-	// the verbatim prefix -- harmless only because every byte under first is
-	// unchanged by the fold, which is what makes first's upper bound matter.
+	// The overlapping tail word may re-cover bytes below first; harmless only
+	// because the fold leaves every byte under first unchanged.
 	binary.LittleEndian.PutUint64(dst[n-WordLen:n:n], swar.ToLowerWord(binary.LittleEndian.Uint64(src[n-WordLen:n:n])))
 	return dst
 }
@@ -71,11 +47,10 @@ func ToUpperFrom(src []byte, first int) []byte {
 	n := len(src)
 	dst := make([]byte, n)
 
-	// Copy verbatim up to the word holding first, then convert from there.
 	i := first &^ (WordLen - 1)
 	copy(dst, src[:i])
 
-	for ; i+4*WordLen <= n; i += 4 * WordLen {
+	for ; i <= n-4*WordLen; i += 4 * WordLen {
 		sw := src[i : i+4*WordLen : i+4*WordLen]
 		d := dst[i : i+4*WordLen : i+4*WordLen]
 		binary.LittleEndian.PutUint64(d[0:WordLen], swar.ToUpperWord(binary.LittleEndian.Uint64(sw[0:WordLen])))
@@ -83,7 +58,7 @@ func ToUpperFrom(src []byte, first int) []byte {
 		binary.LittleEndian.PutUint64(d[2*WordLen:3*WordLen], swar.ToUpperWord(binary.LittleEndian.Uint64(sw[2*WordLen:3*WordLen])))
 		binary.LittleEndian.PutUint64(d[3*WordLen:4*WordLen], swar.ToUpperWord(binary.LittleEndian.Uint64(sw[3*WordLen:4*WordLen])))
 	}
-	for ; i+WordLen <= n; i += WordLen {
+	for ; i <= n-WordLen; i += WordLen {
 		binary.LittleEndian.PutUint64(dst[i:i+WordLen:i+WordLen], swar.ToUpperWord(binary.LittleEndian.Uint64(src[i:i+WordLen:i+WordLen])))
 	}
 	if i == n {
@@ -94,25 +69,17 @@ func ToUpperFrom(src []byte, first int) []byte {
 	return dst
 }
 
-// FirstUpperIndex returns the index of the first ASCII uppercase byte in b,
-// or -1 if b contains none. b is only ever read; it may be an unsafe view
-// over immutable string memory.
+// FirstUpperIndex returns b's first ASCII uppercase index, or -1; b is only read.
 func FirstUpperIndex(b []byte) int {
 	n := len(b)
 	i := 0
 	if n >= 32 {
-		// Check the first word alone: canonical mixed-case values
-		// ("Content-Type") change case right at the start, and that path
-		// must stay one mask.
+		// First word alone: mixed-case names (Content-Type) hit at the start.
 		if m := swar.MatchRangeMask(binary.LittleEndian.Uint64(b[0:8]), 'A', 'Z'); m != 0 {
 			return swar.FirstLane(m)
 		}
-		// Then four words per branch: the masks compute independently, so
-		// the common no-uppercase case pays one test per 32 bytes. The
-		// MatchRangeMask computations stay inline so their constant ranges
-		// fold; only the cold hit-resolution ladder is shared, and it
-		// inlines (the no-match loop never reaches it).
-		for i = 8; i+32 <= n; i += 32 {
+		// Four masks per branch; MatchRangeMask stays inline so its range folds.
+		for i = 8; i <= n-32; i += 32 {
 			w := b[i : i+32 : i+32]
 			m0 := swar.MatchRangeMask(binary.LittleEndian.Uint64(w[0:8]), 'A', 'Z')
 			m1 := swar.MatchRangeMask(binary.LittleEndian.Uint64(w[8:16]), 'A', 'Z')
@@ -125,9 +92,7 @@ func FirstUpperIndex(b []byte) int {
 		if i == n {
 			return -1
 		}
-		// Finish with one overlapping block at n-32. MatchRangeMask is
-		// per-lane exact, so re-scanned lanes are known non-matching and the
-		// first set lane always falls in the new bytes.
+		// Overlapping tail: MatchRangeMask is exact, so scanned lanes stay zero.
 		i = n - 32
 		w := b[i : i+32 : i+32]
 		m0 := swar.MatchRangeMask(binary.LittleEndian.Uint64(w[0:8]), 'A', 'Z')
@@ -139,7 +104,7 @@ func FirstUpperIndex(b []byte) int {
 		}
 		return -1
 	}
-	for ; i+8 <= n; i += 8 {
+	for ; i <= n-8; i += 8 {
 		if m := swar.MatchRangeMask(binary.LittleEndian.Uint64(b[i:i+8]), 'A', 'Z'); m != 0 {
 			return i + swar.FirstLane(m)
 		}
@@ -148,8 +113,6 @@ func FirstUpperIndex(b []byte) int {
 		return -1
 	}
 	if n >= 8 {
-		// Scan the tail with one overlapping word; lanes that were already
-		// scanned are known to be zero, so FirstLane lands in the new bytes.
 		if m := swar.MatchRangeMask(binary.LittleEndian.Uint64(b[n-8:n]), 'A', 'Z'); m != 0 {
 			return n - 8 + swar.FirstLane(m)
 		}
@@ -163,11 +126,8 @@ func FirstUpperIndex(b []byte) int {
 	return -1
 }
 
-// firstSetLane32 resolves a hit inside a 32-byte block: given the block's
-// four per-word masks, it returns the index of the first marked byte
-// relative to base, the block's starting offset. It runs at most once per
-// scan — only after a block's combined mask tested non-zero — and is small
-// enough to inline, so the hot no-match loops pay nothing for the sharing.
+// firstSetLane32 returns the index of the first marked byte in the 32-byte block
+// starting at base, given its four word masks, at least one of them non-zero.
 func firstSetLane32(base int, m0, m1, m2, m3 uint64) int {
 	if m0 != 0 {
 		return base + swar.FirstLane(m0)
@@ -181,9 +141,7 @@ func firstSetLane32(base int, m0, m1, m2, m3 uint64) int {
 	return base + 24 + swar.FirstLane(m3)
 }
 
-// FirstLowerIndex returns the index of the first ASCII lowercase byte in b,
-// or -1 if b contains none. b is only ever read; it may be an unsafe view
-// over immutable string memory.
+// FirstLowerIndex is FirstUpperIndex for ASCII lowercase bytes.
 func FirstLowerIndex(b []byte) int {
 	n := len(b)
 	i := 0
@@ -192,7 +150,7 @@ func FirstLowerIndex(b []byte) int {
 		if m := swar.MatchRangeMask(binary.LittleEndian.Uint64(b[0:8]), 'a', 'z'); m != 0 {
 			return swar.FirstLane(m)
 		}
-		for i = 8; i+32 <= n; i += 32 {
+		for i = 8; i <= n-32; i += 32 {
 			w := b[i : i+32 : i+32]
 			m0 := swar.MatchRangeMask(binary.LittleEndian.Uint64(w[0:8]), 'a', 'z')
 			m1 := swar.MatchRangeMask(binary.LittleEndian.Uint64(w[8:16]), 'a', 'z')
@@ -216,7 +174,7 @@ func FirstLowerIndex(b []byte) int {
 		}
 		return -1
 	}
-	for ; i+8 <= n; i += 8 {
+	for ; i <= n-8; i += 8 {
 		if m := swar.MatchRangeMask(binary.LittleEndian.Uint64(b[i:i+8]), 'a', 'z'); m != 0 {
 			return i + swar.FirstLane(m)
 		}
@@ -238,42 +196,39 @@ func FirstLowerIndex(b []byte) int {
 	return -1
 }
 
-// ToLowerInPlace lower-cases every ASCII uppercase byte of b in place:
-// four words per pinned group, then single words, then bytes.
+// ToLowerInPlace lower-cases every ASCII uppercase byte of b in place.
 func ToLowerInPlace(b []byte) {
 	n := len(b)
 	i := 0
-	for ; i+32 <= n; i += 32 {
+	for ; i <= n-32; i += 32 {
 		w := b[i : i+32 : i+32]
 		binary.LittleEndian.PutUint64(w[0:8], swar.ToLowerWord(binary.LittleEndian.Uint64(w[0:8])))
 		binary.LittleEndian.PutUint64(w[8:16], swar.ToLowerWord(binary.LittleEndian.Uint64(w[8:16])))
 		binary.LittleEndian.PutUint64(w[16:24], swar.ToLowerWord(binary.LittleEndian.Uint64(w[16:24])))
 		binary.LittleEndian.PutUint64(w[24:32], swar.ToLowerWord(binary.LittleEndian.Uint64(w[24:32])))
 	}
-	for ; i+8 <= n; i += 8 {
+	for ; i <= n-8; i += 8 {
 		w := b[i : i+8 : i+8]
 		binary.LittleEndian.PutUint64(w, swar.ToLowerWord(binary.LittleEndian.Uint64(w)))
 	}
-	// Finish byte-wise: an overlapping word here would partially overlap the
-	// previous 8-byte store and stall on store-to-load forwarding.
+	// Finish byte-wise: an overlapping word stalls on store-to-load forwarding.
 	for ; i < n; i++ {
 		b[i] = ToLowerTable[b[i]]
 	}
 }
 
-// ToUpperInPlace upper-cases every ASCII lowercase byte of b in place; the
-// loop shape mirrors ToLowerInPlace.
+// ToUpperInPlace upper-cases every ASCII lowercase byte of b in place.
 func ToUpperInPlace(b []byte) {
 	n := len(b)
 	i := 0
-	for ; i+32 <= n; i += 32 {
+	for ; i <= n-32; i += 32 {
 		w := b[i : i+32 : i+32]
 		binary.LittleEndian.PutUint64(w[0:8], swar.ToUpperWord(binary.LittleEndian.Uint64(w[0:8])))
 		binary.LittleEndian.PutUint64(w[8:16], swar.ToUpperWord(binary.LittleEndian.Uint64(w[8:16])))
 		binary.LittleEndian.PutUint64(w[16:24], swar.ToUpperWord(binary.LittleEndian.Uint64(w[16:24])))
 		binary.LittleEndian.PutUint64(w[24:32], swar.ToUpperWord(binary.LittleEndian.Uint64(w[24:32])))
 	}
-	for ; i+8 <= n; i += 8 {
+	for ; i <= n-8; i += 8 {
 		w := b[i : i+8 : i+8]
 		binary.LittleEndian.PutUint64(w, swar.ToUpperWord(binary.LittleEndian.Uint64(w)))
 	}

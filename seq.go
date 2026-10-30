@@ -9,7 +9,8 @@ import (
 
 // SplitTrimSeq iterates over the sep-separated elements of s with ASCII
 // whitespace trimmed and empty elements skipped, as HTTP list fields are read
-// (RFC 9110 Section 5.6.1); the elements alias s.
+// (RFC 9110 Section 5.6.1); the elements alias s. Quoted strings are not
+// interpreted, so a sep inside one still separates.
 func SplitTrimSeq[S byteSeq](s S, sep byte) iter.Seq[S] {
 	return func(yield func(S) bool) {
 		rest := s // traversal state stays local, so the sequence can be ranged over again

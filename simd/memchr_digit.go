@@ -9,12 +9,7 @@ import (
 )
 
 // MemchrDigit returns the index of the first ASCII digit '0'..'9' in
-// haystack, or -1 if no digit is present. Only ASCII digits match; Unicode
-// digit characters do not.
-//
-// On amd64 with AVX2 the range check runs on 32 bytes per vector, four
-// vectors per iteration, which is useful for locating numeric fields
-// (ports, lengths, IP octets) in request data.
+// haystack, or -1 if none. Unicode digits do not match.
 func MemchrDigit(haystack []byte) int {
 	if len(haystack) == 0 {
 		return -1
@@ -22,9 +17,8 @@ func MemchrDigit(haystack []byte) int {
 	return memchrDigitImpl(haystack)
 }
 
-// MemchrDigitAt is MemchrDigit(haystack[at:]) with the result translated
-// back to an absolute index in haystack. It returns -1 when no digit is
-// found or when at is out of bounds.
+// MemchrDigitAt is MemchrDigit(haystack[at:]) with an absolute result index.
+// It returns -1 when no digit is found or at is out of bounds.
 func MemchrDigitAt(haystack []byte, at int) int {
 	if at < 0 || at >= len(haystack) {
 		return -1
@@ -36,10 +30,6 @@ func MemchrDigitAt(haystack []byte, at int) int {
 	return pos + at
 }
 
-// memchrDigitGeneric is the portable SWAR fallback for MemchrDigit: a
-// MatchRangeMask first-match scan (exact per lane; bytes >= 0x80 never
-// match), two words per branch, finishing 8+ byte inputs with one
-// overlapping word at n-8.
 func memchrDigitGeneric(haystack []byte) int {
 	n := len(haystack)
 	if n < swar.WordLen {
@@ -51,9 +41,8 @@ func memchrDigitGeneric(haystack []byte) int {
 		return -1
 	}
 	i := 0
-	for ; i+2*swar.WordLen <= n; i += 2 * swar.WordLen {
-		// Pinned window: see the note above isASCIIGeneric in ascii.go for
-		// why the loads use constant offsets into it.
+	for ; i <= n-2*swar.WordLen; i += 2 * swar.WordLen {
+		// Pinned window: see the note in ascii.go.
 		w := haystack[i : i+2*swar.WordLen : i+2*swar.WordLen]
 		m0 := swar.MatchRangeMask(swar.Load8(w, 0), '0', '9')
 		m1 := swar.MatchRangeMask(swar.Load8(w, swar.WordLen), '0', '9')
@@ -64,7 +53,7 @@ func memchrDigitGeneric(haystack []byte) int {
 			return i + swar.WordLen + swar.FirstLane(m1)
 		}
 	}
-	for ; i+swar.WordLen <= n; i += swar.WordLen {
+	for ; i <= n-swar.WordLen; i += swar.WordLen {
 		if m := swar.MatchRangeMask(swar.Load8(haystack, i), '0', '9'); m != 0 {
 			return i + swar.FirstLane(m)
 		}

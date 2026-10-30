@@ -5,16 +5,20 @@
 package utils
 
 import (
+	"errors"
 	"math"
 	"math/big"
 	"math/rand/v2"
 	"net"
 	"os"
+	"reflect"
 	"regexp"
+	"runtime"
 	"strconv"
 	"strings"
 	"testing"
 
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
 )
 
@@ -26,31 +30,31 @@ func Test_FunctionName(t *testing.T) {
 	dummyint := 20
 	require.Equal(t, "int", FunctionName(dummyint))
 
-	// nil interface should return empty string
 	require.Empty(t, FunctionName(nil))
 
-	// typed nil function should also return empty string
 	var nilFunc func()
 	require.Empty(t, FunctionName(nilFunc))
 
-	// typed nil custom func should return empty string
 	type myFunc func()
 	var mf myFunc
 	require.Empty(t, FunctionName(mf))
 
-	// typed nil function inside interface should return empty string
 	var iface any = mf
 	require.Empty(t, FunctionName(iface))
 
-	// typed nil pointer should return its type name
 	var ptr *int
 	require.Equal(t, "*int", FunctionName(ptr))
 
-	// struct and pointer types should include package name
 	type sampleStruct struct{}
 	var s sampleStruct
 	require.Equal(t, "utils.sampleStruct", FunctionName(s))
 	require.Equal(t, "*utils.sampleStruct", FunctionName(&s))
+
+	require.Contains(t, FunctionName(failingReader{}.Read), "failingReader.Read")
+	require.Contains(t, FunctionName(failingReader.Read), "failingReader.Read")
+
+	pc := reflect.ValueOf(Test_FunctionName).Pointer()
+	require.Equal(t, runtime.FuncForPC(pc).Name(), FunctionName(Test_FunctionName))
 }
 
 func Test_UUIDv4(t *testing.T) {
@@ -59,6 +63,47 @@ func Test_UUIDv4(t *testing.T) {
 	require.Len(t, res, 36)
 	require.NotEqual(t, "00000000-0000-0000-0000-000000000000", res)
 	require.Regexp(t, `^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$`, res)
+}
+
+func Test_UUID(t *testing.T) {
+	t.Parallel()
+	seen := make(map[string]struct{})
+	for range 64 {
+		res := UUID()
+		parsed, err := uuid.Parse(res)
+		require.NoError(t, err)
+		require.Equal(t, res, parsed.String())
+		require.Equal(t, uuid.Version(4), parsed.Version())
+		require.Equal(t, uuid.RFC4122, parsed.Variant())
+		seen[res] = struct{}{}
+	}
+	require.Len(t, seen, 64)
+}
+
+type failingReader struct{ err error }
+
+func (r failingReader) Read([]byte) (int, error) { return 0, r.err }
+
+// Test_UUIDv4_RandomFailure is not parallel: it swaps the random source of the uuid
+// package, which parallel tests use too.
+func Test_UUIDv4_RandomFailure(t *testing.T) {
+	errDry := errors.New("entropy exhausted")
+	uuid.SetRand(failingReader{err: errDry})
+	t.Cleanup(func() { uuid.SetRand(nil) })
+
+	var recovered any
+	func() {
+		defer func() { recovered = recover() }()
+		UUIDv4()
+	}()
+	err, ok := recovered.(error)
+	require.True(t, ok, "UUIDv4 panicked with %v, want an error", recovered)
+	require.ErrorIs(t, err, errDry)
+	require.EqualError(t, err, "utils: failed to generate secure UUID: entropy exhausted")
+	require.PanicsWithError(t, "utils: failed to generate secure UUID: entropy exhausted", func() { UUID() })
+
+	uuid.SetRand(nil)
+	require.Len(t, UUIDv4(), 36)
 }
 
 func Test_UUIDv4_Concurrency(t *testing.T) {
@@ -81,23 +126,20 @@ func Test_UUIDv4_Concurrency(t *testing.T) {
 
 func Test_GenerateSecureToken(t *testing.T) {
 	t.Parallel()
-	// Test with 32 bytes
 	token := GenerateSecureToken(32)
-	require.Len(t, token, 43) // base64 encoding of 32 bytes
+	require.Len(t, token, 43) // unpadded base64
 	require.NotEmpty(t, token)
 
-	// Test custom length
 	token8 := GenerateSecureToken(8)
-	require.Len(t, token8, 11) // base64 of 8 bytes ~11 chars
+	require.Len(t, token8, 11)
 
 	token16 := GenerateSecureToken(16)
-	require.Len(t, token16, 22) // base64 of 16 bytes ~22 chars
+	require.Len(t, token16, 22)
 
-	// Test uniqueness
 	token2 := GenerateSecureToken(32)
 	require.NotEqual(t, token, token2)
 
-	// Test invalid length defaults to 32
+	// A length below 1 means 32 bytes.
 	tokenZero := GenerateSecureToken(0)
 	require.Len(t, tokenZero, 43)
 
@@ -128,33 +170,29 @@ func Test_SecureToken(t *testing.T) {
 	require.Len(t, token, 43)
 	require.NotEmpty(t, token)
 
-	// Test uniqueness
 	token2 := SecureToken()
 	require.NotEqual(t, token, token2)
 }
 
+func saturate(v int64) int { return int(min(v, math.MaxInt)) }
+
 func Test_ConvertToBytes(t *testing.T) {
 	t.Parallel()
-	// initial assertions
 	require.Equal(t, 0, ConvertToBytes(""))
 	require.Equal(t, 42, ConvertToBytes("42"))
 
-	// Test empty string
 	require.Equal(t, 0, ConvertToBytes(""))
 
-	// Test basic numbers (digit detection optimization)
 	require.Equal(t, 42, ConvertToBytes("42"))
 	require.Equal(t, 0, ConvertToBytes("0"))
 	require.Equal(t, 1, ConvertToBytes("1"))
 	require.Equal(t, 999, ConvertToBytes("999"))
 
-	// Test with 'b' and 'B' suffixes
 	require.Equal(t, 42, ConvertToBytes("42b"))
 	require.Equal(t, 42, ConvertToBytes("42B"))
 	require.Equal(t, 42, ConvertToBytes("42 b"))
 	require.Equal(t, 42, ConvertToBytes("42 B"))
 
-	// Test sizeMultipliers array usage (k/K - 1e3)
 	require.Equal(t, 42*1000, ConvertToBytes("42k"))
 	require.Equal(t, 42*1000, ConvertToBytes("42K"))
 	require.Equal(t, 42*1000, ConvertToBytes("42kb"))
@@ -162,65 +200,98 @@ func Test_ConvertToBytes(t *testing.T) {
 	require.Equal(t, 42*1000, ConvertToBytes("42 kb"))
 	require.Equal(t, 42*1000, ConvertToBytes("42 KB"))
 
-	// Test sizeMultipliers array usage (m/M - 1e6)
 	require.Equal(t, 42*1000000, ConvertToBytes("42M"))
 	require.Equal(t, 42*1000000, ConvertToBytes("42m"))
 	require.Equal(t, 42*1000000, ConvertToBytes("42MB"))
 	require.Equal(t, 42*1000000, ConvertToBytes("42mb"))
 	require.Equal(t, int(42.5*1000000), ConvertToBytes("42.5MB"))
 
-	// Test sizeMultipliers array usage (g/G - 1e9)
-	require.Equal(t, 42*1000000000, ConvertToBytes("42G"))
-	require.Equal(t, 42*1000000000, ConvertToBytes("42g"))
-	require.Equal(t, 42*1000000000, ConvertToBytes("42GB"))
-	require.Equal(t, 42*1000000000, ConvertToBytes("42gb"))
+	require.Equal(t, saturate(42*1000000000), ConvertToBytes("42G"))
+	require.Equal(t, saturate(42*1000000000), ConvertToBytes("42g"))
+	require.Equal(t, saturate(42*1000000000), ConvertToBytes("42GB"))
+	require.Equal(t, saturate(42*1000000000), ConvertToBytes("42gb"))
 
-	// Test sizeMultipliers array usage (t/T - 1e12)
-	require.Equal(t, 42*1000000000000, ConvertToBytes("42T"))
-	require.Equal(t, 42*1000000000000, ConvertToBytes("42t"))
-	require.Equal(t, 42*1000000000000, ConvertToBytes("42TB"))
-	require.Equal(t, 42*1000000000000, ConvertToBytes("42tb"))
+	require.Equal(t, saturate(42*1000000000000), ConvertToBytes("42T"))
+	require.Equal(t, saturate(42*1000000000000), ConvertToBytes("42t"))
+	require.Equal(t, saturate(42*1000000000000), ConvertToBytes("42TB"))
+	require.Equal(t, saturate(42*1000000000000), ConvertToBytes("42tb"))
 
-	// Test sizeMultipliers array usage (p/P - 1e15)
-	require.Equal(t, 42*1000000000000000, ConvertToBytes("42P"))
-	require.Equal(t, 42*1000000000000000, ConvertToBytes("42p"))
-	require.Equal(t, 42*1000000000000000, ConvertToBytes("42PB"))
-	require.Equal(t, 42*1000000000000000, ConvertToBytes("42pb"))
+	require.Equal(t, saturate(42*1000000000000000), ConvertToBytes("42P"))
+	require.Equal(t, saturate(42*1000000000000000), ConvertToBytes("42p"))
+	require.Equal(t, saturate(42*1000000000000000), ConvertToBytes("42PB"))
+	require.Equal(t, saturate(42*1000000000000000), ConvertToBytes("42pb"))
 
-	// Test binary units (KiB = 1024)
+	// E is a unit only before b or i, else an exponent marker.
+	require.Equal(t, saturate(1000000000000000000), ConvertToBytes("1EB"))
+	require.Equal(t, saturate(1000000000000000000), ConvertToBytes("1eb"))
+	require.Equal(t, saturate(1000000000000000000), ConvertToBytes("1 EB"))
+	require.Equal(t, saturate(1500000000000000000), ConvertToBytes("1.5EB"))
+	require.Equal(t, saturate(9000000000000000000), ConvertToBytes("9EB"))
+	require.Equal(t, math.MaxInt, ConvertToBytes("10EB")) // capped
+	require.Equal(t, saturate(1<<60), ConvertToBytes("1EiB"))
+	require.Equal(t, saturate(1<<60), ConvertToBytes("1Ei"))
+	require.Equal(t, saturate(1500), ConvertToBytes("1.5e3B")) // an exponent, then bytes
+	require.Equal(t, 1, ConvertToBytes("1E"))
+	require.Equal(t, 1, ConvertToBytes("1e"))
+	require.Equal(t, 5, ConvertToBytes("5 eggs"))
+
 	require.Equal(t, 42*1024, ConvertToBytes("42Ki"))
 	require.Equal(t, 42*1024, ConvertToBytes("42KiB"))
 	require.Equal(t, 42*1024, ConvertToBytes("42kib"))
 	require.Equal(t, 42*1024*1024, ConvertToBytes("42MiB"))
-	require.Equal(t, 42*1024*1024*1024, ConvertToBytes("42GiB"))
-	require.Equal(t, 42*1024*1024*1024*1024, ConvertToBytes("42TiB"))
-	require.Equal(t, 42*1024*1024*1024*1024*1024, ConvertToBytes("42PiB"))
+	require.Equal(t, saturate(42*1024*1024*1024), ConvertToBytes("42GiB"))
+	require.Equal(t, saturate(42*1024*1024*1024*1024), ConvertToBytes("42TiB"))
+	require.Equal(t, saturate(42*1024*1024*1024*1024*1024), ConvertToBytes("42PiB"))
 	require.Equal(t, int(1.5*1024), ConvertToBytes("1.5KiB"))
 
-	// Negative sizes are unrecognized
 	require.Equal(t, 0, ConvertToBytes("-5k"))
 	require.Equal(t, 0, ConvertToBytes("-5.0k"))
 
-	// Test edge cases and error conditions
 	require.Equal(t, 0, ConvertToBytes("string"))
 	require.Equal(t, 0, ConvertToBytes("MB"))
 	require.Equal(t, 0, ConvertToBytes("invalidunit"))
-	require.Equal(t, 42, ConvertToBytes("42X"))     // invalid unit
-	require.Equal(t, 123, ConvertToBytes("123a k")) // invalid unit
-	require.Equal(t, 0, ConvertToBytes("42.5.5MB")) // invalid format
+	require.Equal(t, 42, ConvertToBytes("42X"))
+	require.Equal(t, 123, ConvertToBytes("123a k"))
+	require.Equal(t, 0, ConvertToBytes("42.5.5MB"))
 
-	// Test decimal numbers with various units
 	require.Equal(t, int(1.5*1000), ConvertToBytes("1.5k"))
 	require.Equal(t, int(2.25*1000000), ConvertToBytes("2.25m"))
 	require.Equal(t, int(0.5*1000000000), ConvertToBytes("0.5g"))
 
-	// Test space handling
 	require.Equal(t, 100*1000, ConvertToBytes("100 k"))
-	require.Equal(t, 100*1000, ConvertToBytes("100  k")) // multiple spaces
+	require.Equal(t, 100*1000, ConvertToBytes("100  k"))
 }
 
-// Test_ConvertToBytes_Fractions pins fractional sizes that a float product
-// truncates ("65.35KB" is 65350, not 65349).
+// "5 kilobytes" used to be read as 5 KiB: the 'i' that makes a unit binary comes right after the
+// unit letter, and not at the start of a word.
+func Test_ConvertToBytes_UnitWords(t *testing.T) {
+	t.Parallel()
+	for in, want := range map[string]int64{
+		"5 kilobytes":  5000,
+		"5 Kilobytes":  5000,
+		"5 gigabytes":  5000000000,
+		"5 GIGABYTES":  5000000000,
+		"5 megabytes":  5000000,
+		"5 terabytes":  5000000000000,
+		"5 petabytes":  5000000000000000,
+		"5 kibibytes":  5120,
+		"5 KIBIBYTES":  5120,
+		"5 gibibytes":  5 << 30,
+		"5 Gi":         5 << 30,
+		"5Ki":          5120,
+		"5KI":          5120,
+		"5KiB":         5120,
+		"5kib":         5120,
+		"5 Ki B":       5120,
+		"5Ki!":         5120,
+		"5Ki.":         5120,
+		"1.5 kilobyte": 1500,
+	} {
+		require.Equal(t, saturate(want), ConvertToBytes(in), in)
+	}
+}
+
+// Fractional sizes that a float product truncates: "65.35KB" is 65350, not 65349.
 func Test_ConvertToBytes_Fractions(t *testing.T) {
 	t.Parallel()
 	for in, want := range map[string]int64{
@@ -233,13 +304,13 @@ func Test_ConvertToBytes_Fractions(t *testing.T) {
 		"4.35K":      4350,
 		"0.001K":     1,
 		"0.0009K":    0, // 0.9 of a byte
-		"0.5":        0, // half a byte
+		"0.5":        0,
 		".5K":        500,
-		"1.K":        1000, // trailing point
+		"1.K":        1000,
 		"2.675Ki":    2739, // 2739.2
 		"0.1Mi":      104857,
 		"1.5KiB":     1536,
-		"1.5e3K":     1500000, // exponent
+		"1.5e3K":     1500000,
 		"1.5E3K":     1500000,
 		"007.50K":    7500,
 		"1.250000K":  1250,
@@ -250,17 +321,16 @@ func Test_ConvertToBytes_Fractions(t *testing.T) {
 }
 
 var (
-	// sizeUnits are the unit spellings modelSize knows, with their multipliers.
 	sizeUnits = map[string]int64{
 		"": 1, "B": 1, "K": 1e3, "KB": 1e3, "M": 1e6, "MB": 1e6, "G": 1e9, "T": 1e12, "P": 1e15,
 		"Ki": 1 << 10, "KiB": 1 << 10, "Mi": 1 << 20, "Gi": 1 << 30, "Ti": 1 << 40, "Pi": 1 << 50,
+		"EB": 1e18, "Ei": 1 << 60, "EiB": 1 << 60,
 	}
 	sizeShape = regexp.MustCompile(`^\+?(\d+\.?\d*|\.\d+)(?:[eE]([+-]?\d+))?([A-Za-z]*)$`)
 )
 
-// modelSize is the oracle for ConvertToBytes: the size s denotes, computed from
-// every digit with big.Int and big.Rat and capped at the largest int64. The second
-// result is false unless s is a number and a known unit.
+// modelSize is the oracle for ConvertToBytes: the exact size s denotes, from every digit,
+// capped at the largest int64.
 func modelSize(s string) (int64, bool) {
 	m := sizeShape.FindStringSubmatch(s)
 	if m == nil {
@@ -276,7 +346,6 @@ func modelSize(s string) (int64, bool) {
 		return 0, true
 	}
 
-	// An exponent beyond 2^40 is as good as 2^40: no input has that many digits.
 	const maxExp = 1 << 40
 	exp := new(big.Int)
 	if m[2] != "" {
@@ -291,12 +360,12 @@ func modelSize(s string) (int64, bool) {
 	}
 	e -= int64(len(fracPart))
 
-	// The value lies in [10^(n-1+e), 10^(n+e)) before the unit, which scales it by less than 10^16.
+	// The value is in [10^(n-1+e), 10^(n+e)); the unit scales it by less than 10^19.
 	n := int64(len(digits))
 	switch {
 	case n-1+e >= 19:
 		return math.MaxInt64, true
-	case n+e+16 <= 0:
+	case n+e+19 <= 0:
 		return 0, true
 	}
 	value := new(big.Rat).SetInt(mustBigInt(digits))
@@ -322,8 +391,7 @@ func mustBigInt(s string) *big.Int {
 	return n
 }
 
-// Test_ConvertToBytes_Exact checks up to 60 digits, of any mix, with a point
-// anywhere, an optional '+' and exponent, before every unit, against modelSize.
+// Test_ConvertToBytes_Exact compares random numbers of up to 60 digits with modelSize.
 func Test_ConvertToBytes_Exact(t *testing.T) {
 	t.Parallel()
 
@@ -331,7 +399,7 @@ func Test_ConvertToBytes_Exact(t *testing.T) {
 	dropped := 0
 	for range 4_000 {
 		digits := make([]byte, 1+r.IntN(60))
-		mix := r.IntN(3) // any digit, mostly zeros, mostly nines
+		mix := r.IntN(3)
 		for i := range digits {
 			switch {
 			case mix == 1 && r.IntN(4) != 0:
@@ -372,17 +440,16 @@ func Test_ConvertToBytes_Exact(t *testing.T) {
 
 func Test_ConvertToBytes_Large(t *testing.T) {
 	t.Parallel()
-	// Past 2^53 a float64 cannot count bytes; min() is for 32-bit ints.
+	// Past 2^53 a float64 cannot count bytes.
 	for in, want := range map[string]int64{
 		"9007199254740993K":     9007199254740993000,
 		"9007199254740993B":     9007199254740993,
 		"9007199254740993.000K": 9007199254740993000,
-		"1000000.000000000001T": 1000000000000000001, // 10^18 + 1
+		"1000000.000000000001T": 1000000000000000001,
 	} {
 		require.Equal(t, min(want, math.MaxInt), int64(ConvertToBytes(in)), in)
 	}
 
-	// Saturation at the largest int, however it is reached.
 	require.Equal(t, math.MaxInt, ConvertToBytes("9223372036854775807B"))
 	require.Equal(t, math.MaxInt, ConvertToBytes("9223372036854775808"))
 	require.Equal(t, math.MaxInt, ConvertToBytes("9999999999999999999K"))
@@ -393,12 +460,11 @@ func Test_ConvertToBytes_Large(t *testing.T) {
 	require.Equal(t, math.MaxInt, ConvertToBytes("99999999999999999999"))
 	require.Equal(t, math.MaxInt, ConvertToBytes("99999999999999999999K"))
 	require.Equal(t, math.MaxInt, ConvertToBytes("99999999999999999999.5K"))
-	require.Equal(t, 1000, ConvertToBytes("1.00000000000000000000001K")) // 23 decimals
-	require.Equal(t, 999, ConvertToBytes("0.99999999999999999999K"))     // 20 decimals
+	require.Equal(t, 1000, ConvertToBytes("1.00000000000000000000001K"))
+	require.Equal(t, 999, ConvertToBytes("0.99999999999999999999K"))
 }
 
-// Test_ConvertToBytes_SignAndExponent pins the '+' and the exponent, which are
-// scaled as exactly as the digits are, and what is not a size.
+// '+' and the exponent scale exactly as the digits do; malformed input gives 0.
 func Test_ConvertToBytes_SignAndExponent(t *testing.T) {
 	t.Parallel()
 	for in, want := range map[string]int64{
@@ -418,43 +484,43 @@ func Test_ConvertToBytes_SignAndExponent(t *testing.T) {
 		"0.000e5K":                           0,
 		"1e-999K":                            0,
 		"1e-35K":                             0,
-		"3e-17P":                             0,               // 0.03 of a byte
-		"3e-10P":                             300000,          // a 64-bit division
-		"12345678901234567890e-20P":          123456789012345, // two 64-bit divisions
-		"12345678901234567890e-25P":          1234567890,      // from 20 to 34 places
-		"18446744073709551615e-34P":          1,               // the widest product
-		"18446744073709551615e-35P":          0,               // past it
-		"1e-38K":                             0,               // the last place the two-step division covers
-		"1e-39K":                             0,               // the first it skips
+		"3e-17P":                             0,
+		"3e-10P":                             300000,
+		"12345678901234567890e-20P":          123456789012345,
+		"12345678901234567890e-25P":          1234567890,
+		"18446744073709551615e-34P":          1, // the widest product
+		"18446744073709551615e-35P":          0, // past it
+		"1e-38K":                             0, // the last place the two-step division covers
+		"1e-39K":                             0, // the first it skips
 		"1e-40K":                             0,
-		"1e20":                               math.MaxInt64, // shift 20: past the table
+		"1e20":                               math.MaxInt64,
 		"18446744073709551.7K":               math.MaxInt64, // the high word equals the divisor
 		"18446744073709551.6K":               math.MaxInt64, // fits a uint64, not an int
 		"99999999999999999999e-20K":          999,           // a dropped integer digit still counts
 		"100000000000000000000e-20K":         1000,
 		"1e18446744073709551616K":            math.MaxInt64, // an exponent that would wrap to 0
 		"1e-18446744073709551616K":           0,
-		"99999999999999999e5K":               math.MaxInt64,       // overflows the power of ten, before the unit
-		"184467440737095516.161e-5Mi":        1934281311383406679, // digits past a uint64 still count
+		"99999999999999999e5K":               math.MaxInt64,
+		"184467440737095516.161e-5Mi":        1934281311383406679,
 		"1844674407370955.1616199e-3Mi":      1934281311383406679,
 		"184467440737095.51616199e-2Mi":      1934281311383406679,
 		"0.000000000931322574615478515625Gi": 1, // exactly 1: 2^-30 Gi in 21 digits
 		"3.5527136788005009293556213378906250e-15PiB": 4, // exactly 4: 2^-48 PiB in 34 digits
 		"3813733478401949641952.6807962784e-15Ti":     4193244304741554190,
 		"542202111511.42934007e-2Gi":                  5821850841909335364,
-		"73634580.130256530332175T":                   math.MaxInt64, // 73634580130256530332 bytes
+		"73634580.130256530332175T":                   math.MaxInt64,
 		"1.0e400K":                                    math.MaxInt64,
 		"1844674407370955.1615Ki":                     1888946593147858085,
-		"9e18K":                                       math.MaxInt64, // overflows the 64-bit multiply
-		"1e999K":                                      math.MaxInt64, // saturates at once
-		"1e19":                                        math.MaxInt64, // past the largest int
+		"9e18K":                                       math.MaxInt64,
+		"1e999K":                                      math.MaxInt64,
+		"1e19":                                        math.MaxInt64,
 		"-5K":                                         0,
 		"-5.0K":                                       0,
 		"-0K":                                         0,
-		"5+3K":                                        0, // a sign is only valid first
+		"5+3K":                                        0,
 		"++5K":                                        0,
 		"+-5K":                                        0,
-		"1e3.5K":                                      0, // the exponent is an integer
+		"1e3.5K":                                      0,
 		"1e3e3K":                                      0,
 		"e3K":                                         0,
 		"1.2.3K":                                      0,
@@ -466,7 +532,7 @@ func Test_ConvertToBytes_SignAndExponent(t *testing.T) {
 		require.Equal(t, min(want, math.MaxInt), int64(ConvertToBytes(in)), in)
 	}
 
-	// The largest int, reached from either side: 2^63 and 2^63-0.5 both land on it.
+	// 2^63 and 2^63-0.5 both land on the largest int.
 	for _, in := range []string{
 		"+9223372036854775808.0",
 		"9223372036854775808.0e0",
@@ -478,9 +544,7 @@ func Test_ConvertToBytes_SignAndExponent(t *testing.T) {
 	}
 }
 
-// Test_ConvertToBytes_DroppedDigits sweeps the numbers that start around
-// 1844674407370955161, the first mantissa that takes no more digits, followed by
-// digits the mantissa keeps or drops, with the point and an exponent anywhere.
+// Digits kept or dropped after 1844674407370955161, the first mantissa that takes no more digits.
 func Test_ConvertToBytes_DroppedDigits(t *testing.T) {
 	t.Parallel()
 
@@ -506,18 +570,17 @@ func Test_ConvertToBytes_DroppedDigits(t *testing.T) {
 	}
 }
 
-// Test_ConvertToBytes_Long pins numbers with more digits or a larger exponent than
-// any fixed width holds.
+// Test_ConvertToBytes_Long pins digit counts and exponents beyond any fixed width.
 func Test_ConvertToBytes_Long(t *testing.T) {
 	t.Parallel()
 
 	zeros := strings.Repeat("0", 1<<21) // more than 2^20, a limit the exponent once had
 	for in, want := range map[string]int{
 		"." + zeros[:1_048_557] + "1e10485760K": math.MaxInt, // the smallest input a limit of 2^20 gets wrong
-		"0." + zeros + "1e2097152K":             100,         // 10^-2097153 * 10^2097152 * 1000
+		"0." + zeros + "1e2097152K":             100,
 		"0." + zeros + "1e2097154K":             10000,
 		"1" + zeros + "e-2097152K":              1000,
-		"1" + zeros + "1e-2097152K":             10000, // 10.000...1 K
+		"1" + zeros + "1e-2097152K":             10000,
 		"." + zeros[:1<<20] + "1e1048576K":      100,
 		"." + zeros + "1e99999999999K":          math.MaxInt,
 		"1" + zeros + "e-99999999999K":          0,
@@ -528,15 +591,13 @@ func Test_ConvertToBytes_Long(t *testing.T) {
 		require.Equal(t, want, ConvertToBytes(in), "%.30s...", in)
 	}
 
-	// An exponent of 8 digits, offset by 11 million digits.
+	// An 8-digit exponent, offset by 11 million digits.
 	huge := strings.Repeat("0", 11_000_000)
 	require.Equal(t, 100, ConvertToBytes("0."+huge+"1e11000000K"))
 	require.Equal(t, 1000, ConvertToBytes("1"+huge+"e-11000000K"))
 }
 
-// Test_scaleDigits checks the digit-by-digit scaling on its own, against big.Int:
-// numbers of 20 to 45 digits, a point anywhere, an optional '+', every multiplier,
-// and a point from 5 places beyond the product to 60 before it.
+// Test_scaleDigits checks the digit-by-digit scaling on its own against big.Int.
 func Test_scaleDigits(t *testing.T) {
 	t.Parallel()
 
@@ -583,27 +644,25 @@ func Test_scaleDigits(t *testing.T) {
 	}
 	require.Greater(t, saturated, 1_000)
 
-	// The edges of the cap: a digit 19 places above the point, a product that fits a
-	// uint64 and not an int, and the largest int itself.
+	// Edges of the cap: 19 places above the point, a uint64 past int64, the largest int64.
 	for _, tc := range []struct {
 		digits string
 		down   int64
 		mult   uint64
 		want   int64
 	}{
-		{"20000000000000000000", 1, 10, math.MaxInt64}, // the 2 sits 19 places above the point
-		{"930000000000000000000", 2, 1, math.MaxInt64}, // 9.3e18
-		{"92233720368547758070", 1, 1, math.MaxInt64},  // 2^63 - 1
-		{"92233720368547758080", 1, 1, math.MaxInt64},  // 2^63
+		{"20000000000000000000", 1, 10, math.MaxInt64},
+		{"930000000000000000000", 2, 1, math.MaxInt64},
+		{"92233720368547758070", 1, 1, math.MaxInt64},
+		{"92233720368547758080", 1, 1, math.MaxInt64},
 		{"92233720368547758060", 1, 1, 9223372036854775806},
-		{"10000000000000000000", 0, 1, math.MaxInt64}, // no places after the point
+		{"10000000000000000000", 0, 1, math.MaxInt64},
 	} {
 		require.Equal(t, min(tc.want, math.MaxInt), int64(scaleDigits(tc.digits, len(tc.digits), tc.down, tc.mult)), "%s down %d", tc.digits, tc.down)
 	}
 }
 
-// FuzzConvertToBytes checks the result is never negative and, for numbers the
-// oracle covers, what the oracle says.
+// The result is never negative and, where modelSize applies, equal to it.
 func FuzzConvertToBytes(f *testing.F) {
 	for _, s := range []string{
 		"42", "42B", "42KB", "1.5MiB", "+2.01k", ".82e1GB", "1e3K", "9223372036854775808.0",
@@ -620,9 +679,152 @@ func FuzzConvertToBytes(f *testing.F) {
 	})
 }
 
+// parseByteSizeShape is ParseByteSize' grammar as a regexp: a number, blanks, and a unit if any. ASCII
+// classes, not (?i), which would fold the Kelvin sign into k.
+var parseByteSizeShape = regexp.MustCompile(`^\+?(\d+\.?\d*|\.\d+)([eE][+-]?\d+)?[ \t]*([bB]|[kKmMgGtTpP][iI]?[bB]?|[eE](?:[iI][bB]?|[bB]))?$`)
+
+// requireNumError requires err to be the *strconv.NumError ParseByteSize gives for in.
+func requireNumError(tb testing.TB, err, want error, in string) {
+	tb.Helper()
+	var ne *strconv.NumError
+	require.ErrorAs(tb, err, &ne, in)
+	require.Equal(tb, "ParseByteSize", ne.Func, in)
+	require.Equal(tb, in, ne.Num, in)
+	require.ErrorIs(tb, err, want, in)
+}
+
+func Test_ParseByteSize(t *testing.T) {
+	t.Parallel()
+	for in, want := range map[string]int64{
+		"0": 0, "42": 42, "+42": 42, "42b": 42, "42 B": 42, "42\tb": 42, "0.5": 0,
+		"42k": 42000, "42KB": 42000, "42 kb": 42000, "42Ki": 42 << 10, "42KiB": 42 << 10, "42kib": 42 << 10,
+		"1.5M": 1500000, ".5k": 500, "5.k": 5000, "1e3": 1000, "1.5e3K": 1500000, "1e3 B": 1000,
+		"1MiB": 1 << 20, "1GB": 1e9, "1Gi": 1 << 30, "1TB": 1e12, "1PiB": 1 << 50,
+		"1EB": 1e18, "1Eb": 1e18, "1Ei": 1 << 60, "1EiB": 1 << 60, "9EB": 9e18,
+		strconv.Itoa(math.MaxInt - 1): int64(math.MaxInt - 1),
+	} {
+		got, err := ParseByteSize(in)
+		if want >= math.MaxInt { // a 32-bit int cannot hold it
+			require.Zero(t, got, in)
+			requireNumError(t, err, strconv.ErrRange, in)
+			continue
+		}
+		require.NoError(t, err, in)
+		require.Equal(t, int(want), got, in)
+	}
+
+	// Where ConvertToBytes guesses, ParseByteSize fails: no number, a sign, text after the unit,
+	// a unit that is not listed, a bare E, which is an exponent marker.
+	for _, in := range []string{
+		"", " ", "k", "KB", "-5", "-5k", "+-5", "5 X", "5kilobytes", "5 kb extra", "5k ", " 5k", "5kbb", "5kbi",
+		"5ki b", "5 kB!", "5e", "5E", "5e+", "5e-", "5 e", "5eg", "5ex", "5bi", "5bb", "1.2.3", "1..2", ".", "+.",
+		"5,000", "0x10", "5\n", "5k\n", "1_000", "\u0663kb", "5kb\x00", "5 kib b", strings.Repeat("9", 40) + "x",
+		"5\u212aB", "5K\u0131B", "5\u017f", // letters that only fold to k, i or s
+	} {
+		got, err := ParseByteSize(in)
+		require.Zero(t, got, in)
+		requireNumError(t, err, strconv.ErrSyntax, in)
+	}
+
+	// MaxInt itself is out of range, as ConvertToBytes saturates there.
+	for _, in := range []string{strconv.Itoa(math.MaxInt), "99999999999999999999999", "10EB", "9.3EB", "8EiB", "1e30"} {
+		got, err := ParseByteSize(in)
+		require.Zero(t, got, in)
+		requireNumError(t, err, strconv.ErrRange, in)
+	}
+}
+
+// Test_ParseByteSize_AgreesWithConvertToBytes: an accepted size scales as ConvertToBytes does.
+func Test_ParseByteSize_AgreesWithConvertToBytes(t *testing.T) {
+	t.Parallel()
+	units := []string{
+		"", "b", "k", "kb", "ki", "kib", "m", "mb", "mi", "mib", "g", "gb", "gi", "gib",
+		"t", "tb", "ti", "tib", "p", "pb", "pi", "pib", "eb", "ei", "eib",
+	}
+	for _, num := range []string{"0", "1", "42", "+7", "1.5", ".5", "5.", "0.0009", "1e3", "1.5e3", "12345678901234567890", "99999999999999999999"} {
+		for _, gap := range []string{"", " ", "\t", "  "} {
+			for _, unit := range units {
+				for _, in := range []string{num + gap + unit, num + gap + strings.ToUpper(unit)} {
+					want := ConvertToBytes(in)
+					got, err := ParseByteSize(in)
+					if want == math.MaxInt {
+						requireNumError(t, err, strconv.ErrRange, in)
+						continue
+					}
+					require.NoError(t, err, in)
+					require.Equal(t, want, got, in)
+				}
+			}
+		}
+	}
+}
+
+// Test_ParseByteSize_Grammar holds ParseByteSize to the regexp over random strings, edits and short units.
+func Test_ParseByteSize_Grammar(t *testing.T) {
+	t.Parallel()
+	r := rand.New(rand.NewPCG(3, 9)) //nolint:gosec // deterministic test data
+	const alphabet = "0123456789.+-eE \tbBkKiImMgGtTpPx"
+	check := func(in string) {
+		t.Helper()
+		_, err := ParseByteSize(in)
+		if syntax := errors.Is(err, strconv.ErrSyntax); syntax == parseByteSizeShape.MatchString(in) {
+			t.Fatalf("ParseByteSize(%q) error = %v, but the grammar matches: %v", in, err, !syntax)
+		}
+	}
+	for range 100_000 {
+		b := make([]byte, r.IntN(11))
+		for i := range b {
+			b[i] = alphabet[r.IntN(len(alphabet))]
+		}
+		if len(b) > 0 && r.IntN(4) != 0 {
+			b[0] = byte('0' + r.IntN(10))
+		}
+		check(string(b))
+	}
+	for _, valid := range []string{"42", "+4.2e1 KiB", ".5k", "5.EB", "1e3 b", "7 eib", "0.5Ti"} {
+		for pos := range len(valid) {
+			for _, c := range []byte(alphabet) {
+				check(valid[:pos] + string(c) + valid[pos+1:])
+			}
+			check(valid[:pos])
+			check(valid[:pos] + valid[pos+1:])
+		}
+	}
+	for c := range 256 {
+		check("5" + string([]byte{byte(c)}))
+		check("5 " + string([]byte{byte(c)}))
+		for d := range 256 {
+			check("5" + string([]byte{byte(c), byte(d)}))
+		}
+	}
+}
+
+// FuzzParseByteSize: a size is rejected as text, out of range, or read as ConvertToBytes does.
+func FuzzParseByteSize(f *testing.F) {
+	for _, s := range []string{"42", "42KB", "1.5MiB", "+2.01k", "1e3K", "1EB", "9223372036854775807", "-5K", "5 X", "5e", ""} {
+		f.Add(s)
+	}
+	f.Fuzz(func(t *testing.T, s string) {
+		got, err := ParseByteSize(s)
+		switch {
+		case err == nil:
+			require.True(t, parseByteSizeShape.MatchString(s), s)
+			require.Equal(t, ConvertToBytes(s), got, s)
+			require.Less(t, got, math.MaxInt, s)
+		case errors.Is(err, strconv.ErrRange):
+			require.True(t, parseByteSizeShape.MatchString(s), s)
+			require.Equal(t, math.MaxInt, ConvertToBytes(s), s)
+			require.Zero(t, got, s)
+		default:
+			requireNumError(t, err, strconv.ErrSyntax, s)
+			require.False(t, parseByteSizeShape.MatchString(s), s)
+			require.Zero(t, got, s)
+		}
+	})
+}
+
 func Test_ConvertToBytes_DigitDetection(t *testing.T) {
 	t.Parallel()
-	// Test the new direct byte comparison digit detection
 	testCases := []struct {
 		input    string
 		expected int
@@ -648,7 +850,6 @@ func Test_ConvertToBytes_DigitDetection(t *testing.T) {
 func Test_GetArgument(t *testing.T) {
 	originalArgs := os.Args
 
-	// Reset os.Args
 	defer func() { os.Args = originalArgs }()
 
 	testArg := "test-arg"
@@ -666,6 +867,19 @@ func Test_GetArgument_Multiple(t *testing.T) {
 	require.True(t, GetArgument("-a"))
 	require.True(t, GetArgument("--flag"))
 	require.False(t, GetArgument("-c"))
+}
+
+// os.Args[1:] panics when os.Args is empty, as in a process started without a program name.
+func Test_GetArgument_NoArguments(t *testing.T) {
+	original := os.Args
+	defer func() { os.Args = original }()
+
+	for _, args := range [][]string{nil, {}, {"cmd"}} {
+		os.Args = args
+		require.NotPanics(t, func() { require.False(t, GetArgument("-a")) }, "%q", args)
+	}
+	os.Args = []string{"-a"}
+	require.False(t, GetArgument("-a"))
 }
 
 func Test_IncrementIPRange(t *testing.T) {
@@ -690,7 +904,6 @@ func Test_IncrementIPRange(t *testing.T) {
 	}
 }
 
-// Additional coverage for IncrementIPRange using IPv6 addresses
 func Test_IncrementIPRange_IPv6(t *testing.T) {
 	t.Parallel()
 
@@ -711,7 +924,6 @@ func Test_IncrementIPRange_IPv6(t *testing.T) {
 	}
 }
 
-// go test -v -run=^$ -bench=Benchmark_ConvertToBytes -benchmem -count=2
 func Benchmark_ConvertToBytes(b *testing.B) {
 	var res int
 	b.Run("fiber", func(b *testing.B) {
@@ -722,12 +934,11 @@ func Benchmark_ConvertToBytes(b *testing.B) {
 	})
 }
 
-// go test -v -run=^$ -bench=Benchmark_ConvertToBytes_Shapes -benchmem -count=2
 func Benchmark_ConvertToBytes_Shapes(b *testing.B) {
 	for _, in := range []string{
 		"42", "42B", "42KB", "42 MB", "1.5MB", "130.51MB", "1.5GiB", "9007199254740993K", "1e3K",
-		"1.2345678901234567890123K",          // digits past a uint64, settled by the first ones
-		"0.000000000931322574615478515625Gi", // exactly 1 byte, which only all the digits can tell
+		"1.2345678901234567890123K",
+		"0.000000000931322574615478515625Gi",
 	} {
 		b.Run(in, func(b *testing.B) {
 			b.ReportAllocs()
@@ -740,7 +951,6 @@ func Benchmark_ConvertToBytes_Shapes(b *testing.B) {
 	}
 }
 
-// go test -v -run=^$ -bench=Benchmark_GenerateSecureToken -benchmem -count=2
 func Benchmark_GenerateSecureToken(b *testing.B) {
 	var res string
 	b.Run("16_bytes", func(b *testing.B) {
@@ -757,7 +967,6 @@ func Benchmark_GenerateSecureToken(b *testing.B) {
 	})
 }
 
-// go test -v -run=^$ -bench=Benchmark_TokenGenerators -benchmem -count=2
 func Benchmark_TokenGenerators(b *testing.B) {
 	var res string
 	b.Run("UUIDv4", func(b *testing.B) {

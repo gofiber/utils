@@ -61,3 +61,12 @@ jobs:
           files: ./coverage.txt
           flags: unittests
           slug: gofiber/utils
+
+      # The word loops compare against n-K, not i+K, which wraps for a slice near math.MaxInt32 on a
+      # 32-bit platform; only a 32-bit run, with the 2 GiB scans enabled, can tell (limits_32bit_test.go).
+      - name: Test (32-bit)
+        if: ${{ runner.os == 'Linux' }}
+        env:
+          GOARCH: "386"
+          GOFIBER_TEST_HUGE_SLICES: "1"
+        run: go test ./... -count=1 -shuffle=on

@@ -14,16 +14,8 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// Differential edge-case suites for the helpers that promise byte-for-byte
-// stdlib parity. Rather than hand-picking expectations, these enumerate
-// structured input spaces — positional mutations, word-boundary offsets,
-// malformed UTF-8, calendar boundaries — and require agreement with the
-// stdlib reference on every input.
-
 func Test_ParseHTTPDate_AllMonthsAndWeekdays(t *testing.T) {
 	t.Parallel()
-	// Twelve months exercise every httpMonthNum case; seven consecutive
-	// days exercise every weekday name.
 	for month := time.January; month <= time.December; month++ {
 		tm := time.Date(2021, month, 15, 1, 2, 3, 0, time.UTC)
 		got, err := ParseHTTPDate(FormatHTTPDate(tm))
@@ -48,7 +40,6 @@ func Test_ParseHTTPDate_PositionalMutations(t *testing.T) {
 			assertHTTPDateParity(t, mutated)
 		}
 	}
-	// Length mutations: truncations and extensions.
 	for cut := range len(base) {
 		assertHTTPDateParity(t, base[:cut])
 	}
@@ -71,14 +62,11 @@ func Test_ParseHTTPDate_CalendarBoundaries(t *testing.T) {
 			}
 		}
 	}
-	// Clock-field boundaries.
 	for _, clock := range []string{"00:00:00", "23:59:59", "24:00:00", "23:60:00", "23:59:60", "99:99:99"} {
 		assertHTTPDateParity(t, "Sat, 15 Jul 2023 "+clock+" GMT")
 	}
 }
 
-// assertHTTPDateParity requires ParseHTTPDate to agree with the
-// net/http.ParseTime reference on outcome, instant, and location.
 func assertHTTPDateParity(t *testing.T, in string) {
 	t.Helper()
 	want, wantErr := refParseHTTPDate(in)
@@ -102,7 +90,7 @@ func Test_AppendUnescape_LongAndBoundaryInputs(t *testing.T) {
 		long + "%41",
 		long + "%zz",
 		"%41" + long,
-		long[:31] + "%" + long[:1], // '%' exactly at index 31
+		long[:31] + "%" + long[:1],
 		strings.Repeat("+", 64),
 		strings.Repeat("%25", 32),
 		strings.Repeat("a+", 32),
@@ -116,7 +104,7 @@ func Test_AppendUnescape_LongAndBoundaryInputs(t *testing.T) {
 		assertUnescapeParity(t, in)
 	}
 
-	// A late error must still return the original dst content untouched.
+	// A late error must leave dst's content untouched.
 	got, err := AppendQueryUnescape([]byte("keep"), long+"%zz")
 	require.Error(t, err)
 	require.Equal(t, "keep", string(got))
@@ -127,8 +115,6 @@ func Test_AppendUnescape_LongAndBoundaryInputs(t *testing.T) {
 
 func Test_AppendUnescape_EveryEscapeByte(t *testing.T) {
 	t.Parallel()
-	// Every byte in both positions of an escape pair, plus that byte alone
-	// after '%', pinned to net/url's accept set and error values.
 	for i := range 256 {
 		c := string([]byte{byte(i)})
 		assertUnescapeParity(t, "%"+c+"0ab")
@@ -137,8 +123,6 @@ func Test_AppendUnescape_EveryEscapeByte(t *testing.T) {
 	}
 }
 
-// assertUnescapeParity requires the two unescape helpers to agree with
-// net/url on output and exact error values, for both instantiations.
 func assertUnescapeParity(t *testing.T, in string) {
 	t.Helper()
 	wantQ, wantQErr := url.QueryUnescape(in)
@@ -185,9 +169,7 @@ func Test_AppendEscape_EdgeCases(t *testing.T) {
 
 func Test_AppendJSONString_BoundaryOffsets(t *testing.T) {
 	t.Parallel()
-	// Each special byte or sequence at every offset around the SWAR word
-	// width, so escapes land in every lane and on both sides of the
-	// word-loop/tail split.
+	// Each special at every offset around the SWAR word width: every lane, both sides of the tail split.
 	specials := []string{
 		"\"", "\\", "\n", "\r", "\t", "\b", "\f", "\x00", "\x1f", "\x7f",
 		"<", ">", "&", "\xff", "\xc3\xa9", "\u2028", "\u2029", "\xf0\x9f\x98\x80", "\xc3",
@@ -196,7 +178,6 @@ func Test_AppendJSONString_BoundaryOffsets(t *testing.T) {
 		for pad := range 18 {
 			in := strings.Repeat("a", pad) + sp + strings.Repeat("b", 17-pad)
 			assertJSONStringParity(t, in)
-			// And with the special at the very end, where the tail paths run.
 			assertJSONStringParity(t, strings.Repeat("a", pad)+sp)
 		}
 	}
@@ -205,21 +186,21 @@ func Test_AppendJSONString_BoundaryOffsets(t *testing.T) {
 func Test_AppendJSONString_UTF8EdgeCases(t *testing.T) {
 	t.Parallel()
 	inputs := []string{
-		"\xc0\x80",                             // overlong NUL
-		"\xc1\xbf",                             // overlong
-		"\xe0\x80\xaf",                         // overlong 3-byte
-		"\xed\xa0\x80",                         // UTF-16 surrogate half
-		"\xed\xbf\xbf",                         // UTF-16 surrogate half
-		"\xf4\x8f\xbf\xbf",                     // U+10FFFF, highest valid rune
-		"\xf4\x90\x80\x80",                     // just above U+10FFFF
-		"\xf8\x88\x80\x80\x80",                 // 5-byte form
-		"\x80",                                 // lone continuation
-		"\xbf\xbf",                             // lone continuations
-		"\xc3",                                 // truncated 2-byte
-		"\xe2\x80",                             // truncated 3-byte (prefix of U+2028)
-		"\xf0\x9f\x98",                         // truncated 4-byte
-		"\xef\xbb\xbfBOM",                      // BOM prefix
-		"ok\xc3\xa9\xc3",                       // valid then truncated
+		"\xc0\x80",
+		"\xc1\xbf",
+		"\xe0\x80\xaf",
+		"\xed\xa0\x80",
+		"\xed\xbf\xbf",
+		"\xf4\x8f\xbf\xbf", // U+10FFFF, highest valid rune
+		"\xf4\x90\x80\x80",
+		"\xf8\x88\x80\x80\x80",
+		"\x80",
+		"\xbf\xbf",
+		"\xc3",
+		"\xe2\x80", // truncated 3-byte (prefix of U+2028)
+		"\xf0\x9f\x98",
+		"\xef\xbb\xbfBOM",
+		"ok\xc3\xa9\xc3",
 		"\xe2\x80\xa8\xe2\x80\xa9\xe2\x80\xaa", // U+2028, U+2029, then U+202A (unescaped)
 		strings.Repeat("\xff", 32),
 		strings.Repeat("\xc3\xa9", 16),
@@ -229,10 +210,41 @@ func Test_AppendJSONString_UTF8EdgeCases(t *testing.T) {
 	}
 }
 
-// assertJSONStringParity requires AppendJSONString to agree with
-// encoding/json.Marshal byte for byte, for both instantiations. Go 1.27 made
-// json/v2 the default, which writes a raw U+FFFD where v1 escaped it, so for
-// invalid UTF-8 the encodings differ and only the decoded string can agree.
+// Test_AppendJSONString_InvalidUTF8Escapes pins one \ufffd escape per bad byte on every Go version
+// (a valid U+FFFD stays raw), which assertJSONStringParity cannot see.
+func Test_AppendJSONString_InvalidUTF8Escapes(t *testing.T) {
+	t.Parallel()
+	const esc = `\ufffd`
+	cases := []struct{ in, want string }{
+		{"a\xffb", `"a` + esc + `b"`},
+		{"\xc3", `"` + esc + `"`},
+		{"x\xe2\x80", `"x` + esc + esc + `"`},
+		{"\xc0\x80", `"` + esc + esc + `"`},
+		{"\xed\xa0\x80", `"` + esc + esc + esc + `"`},
+		{"\xf4\x90\x80\x80", `"` + esc + esc + esc + esc + `"`},
+		{strings.Repeat("\xff", 16), `"` + strings.Repeat(esc, 16) + `"`},
+		{strings.Repeat("a", 20) + "\xff" + strings.Repeat("b", 20), `"` + strings.Repeat("a", 20) + esc + strings.Repeat("b", 20) + `"`},
+		{"\xef\xbf\xbd", "\"\xef\xbf\xbd\""},
+	}
+
+	probe, err := json.Marshal("\xff")
+	require.NoError(t, err)
+	marshalEscapes := string(probe) == `"`+esc+`"`
+
+	for _, c := range cases {
+		for _, got := range [][]byte{AppendJSONString(nil, c.in), AppendJSONString(nil, []byte(c.in))} {
+			require.Equal(t, c.want, string(got), "input %q", c.in)
+		}
+		if marshalEscapes || utf8.ValidString(c.in) {
+			want, err := json.Marshal(c.in)
+			require.NoError(t, err)
+			require.Equal(t, c.want, string(want), "input %q", c.in)
+		}
+	}
+}
+
+// assertJSONStringParity holds AppendJSONString to json.Marshal; for invalid UTF-8 only decoded
+// strings can agree, as Go 1.27's json/v2 writes U+FFFD raw.
 func assertJSONStringParity(t *testing.T, in string) {
 	t.Helper()
 	want, err := json.Marshal(in)
@@ -266,7 +278,7 @@ func Test_ParseIP_PositionalMutations(t *testing.T) {
 			for _, r := range replacements {
 				assertParseIPParity(t, base[:pos]+string(r)+base[pos+1:])
 			}
-			assertParseIPParity(t, base[:pos]) // every truncation
+			assertParseIPParity(t, base[:pos])
 		}
 		assertParseIPParity(t, base+":")
 		assertParseIPParity(t, base+".")
@@ -278,12 +290,12 @@ func Test_ParseIP_PositionalMutations(t *testing.T) {
 func Test_ParseIP_MoreEdgeCases(t *testing.T) {
 	t.Parallel()
 	inputs := []string{
-		"1;2",       // field followed by a non-separator byte
-		"1:2;3",     // same, after a valid group
-		"fe80::1%%", // zone containing '%'
-		"1::2%",     // empty zone after valid address
+		"1;2",
+		"1:2;3",
+		"fe80::1%%",
+		"1::2%",
 		"::%25eth0",
-		"1:2:3:4:5:6:7:8%eth0", // full address with zone
+		"1:2:3:4:5:6:7:8%eth0",
 		"0.0.0.256",
 		"0.0.0.00",
 		"255.255.255.2555",
@@ -305,32 +317,26 @@ func Test_ParseIP_MoreEdgeCases(t *testing.T) {
 	}
 }
 
-// assertParseIPParity requires ParseIPv4/ParseIPv6 to accept exactly the
-// per-family netip.ParseAddr inputs and produce identical addresses, for
-// both instantiations.
-func assertParseIPParity(t *testing.T, in string) {
-	t.Helper()
+// assertParseIPParity holds ParseIPv4/ParseIPv6 to netip.ParseAddr per family. Plain conditions, not
+// require: the exhaustive loops call it hundreds of thousands of times.
+func assertParseIPParity(tb testing.TB, in string) {
+	tb.Helper()
 	want, wantErr := netip.ParseAddr(in)
 	hasColon := strings.ContainsRune(in, ':')
 
 	got4, ok4 := ParseIPv4(in)
-	_, ok4B := ParseIPv4([]byte(in))
-	require.Equal(t, wantErr == nil && !hasColon, ok4, "ParseIPv4 input %q (netip err: %v)", in, wantErr)
-	require.Equal(t, ok4, ok4B, "ParseIPv4 bytes input %q", in)
-	if ok4 {
-		require.Equal(t, want, got4, "ParseIPv4 input %q", in)
-	} else {
-		require.Equal(t, netip.Addr{}, got4, "ParseIPv4 input %q", in)
-	}
-
 	got6, ok6 := ParseIPv6(in)
-	_, ok6B := ParseIPv6([]byte(in))
-	require.Equal(t, wantErr == nil && hasColon, ok6, "ParseIPv6 input %q (netip err: %v)", in, wantErr)
-	require.Equal(t, ok6, ok6B, "ParseIPv6 bytes input %q", in)
-	if ok6 {
-		require.Equal(t, want, got6, "ParseIPv6 input %q", in)
-	} else {
-		require.Equal(t, netip.Addr{}, got6, "ParseIPv6 input %q", in)
+	if ok4 != (wantErr == nil && !hasColon) || ok6 != (wantErr == nil && hasColon) {
+		tb.Fatalf("ParseIPv4/ParseIPv6(%q) ok = %v/%v, netip.ParseAddr gives %v, %v", in, ok4, ok6, want, wantErr)
+	}
+	if ok4 && got4 != want || ok6 && got6 != want || !ok4 && got4 != (netip.Addr{}) || !ok6 && got6 != (netip.Addr{}) {
+		tb.Fatalf("ParseIPv4/ParseIPv6(%q) = %v/%v, netip.ParseAddr gives %v", in, got4, got6, want)
+	}
+	if _, bok := ParseIPv4([]byte(in)); bok != ok4 {
+		tb.Fatalf("ParseIPv4(bytes %q) diverges from the string form", in)
+	}
+	if _, bok := ParseIPv6([]byte(in)); bok != ok6 {
+		tb.Fatalf("ParseIPv6(bytes %q) diverges from the string form", in)
 	}
 }
 
@@ -351,7 +357,6 @@ func Test_CanonicalHeaderKey_PositionalMutations(t *testing.T) {
 
 func Test_CanonicalHeaderKey_InputImmutability(t *testing.T) {
 	t.Parallel()
-	// The rewrite path must copy, never mutate the caller's bytes.
 	in := []byte("content-TYPE")
 	out := CanonicalHeaderKey(in)
 	require.Equal(t, "content-TYPE", string(in))
