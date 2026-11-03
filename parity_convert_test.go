@@ -1,0 +1,327 @@
+package utils
+
+import (
+	"errors"
+	"fmt"
+	"math"
+	"net"
+	"net/netip"
+	"reflect"
+	"strconv"
+	"testing"
+	"time"
+
+	"github.com/stretchr/testify/require"
+)
+
+// ToString is fmt.Sprint with faster paths; these tests pin where they agree and where they differ.
+
+type nilReceiver struct{ name string }
+
+func (n *nilReceiver) String() string { return n.name }
+
+type nilReceiverError struct{ msg string }
+
+func (n *nilReceiverError) Error() string { return n.msg }
+
+type nilSafe struct{}
+
+func (n *nilSafe) String() string {
+	if n == nil {
+		return "no value"
+	}
+	return "a value"
+}
+
+// nilMap, nilFunc, panickyMap and holder are not pointers, but zero ones have a nil data word in
+// an interface, as nil pointers do (a struct with one pointer field is stored as that pointer).
+type nilMap map[string]int
+
+func (m nilMap) String() string { return "entries: " + strconv.Itoa(len(m)) }
+
+type nilFunc func()
+
+func (f nilFunc) String() string { return "func is nil: " + strconv.FormatBool(f == nil) }
+
+type panicky struct{}
+
+func (panicky) String() string { panic("boom") }
+
+type panickyMap map[string]int
+
+func (panickyMap) String() string { panic("boom") }
+
+type holder struct{ p *int }
+
+func (h holder) String() string { return strconv.Itoa(*h.p) }
+
+type holderError struct{ p *int }
+
+func (h holderError) Error() string { return strconv.Itoa(*h.p) }
+
+type (
+	namedInt    int
+	namedString string
+	namedFloat  float64
+	namedBool   bool
+)
+
+func Test_ToString_PointersAndEmptyCollections(t *testing.T) {
+	t.Parallel()
+
+	s, i, i64, u64, f64, b := "value", 42, int64(-64), uint64(64), 1.5, true
+	i8, u8, i32, f32 := int8(-8), uint8(8), int32(-32), float32(0.1)
+	slice := []int{1, 2}
+	ptrToInt := &i
+	strct := CustomType{Field1: "example", Field2: 42}
+
+	tests := []struct {
+		name  string
+		input any
+		want  string
+	}{
+		{"*string", &s, "value"},
+		{"*int", &i, "42"},
+		{"*int64", &i64, "-64"},
+		{"*uint64", &u64, "64"},
+		{"*float64", &f64, "1.5"},
+		{"*bool", &b, "true"},
+		{"*int8", &i8, "-8"},
+		{"*uint8", &u8, "8"},
+		{"*int32", &i32, "-32"},
+		{"*float32", &f32, "0.1"},
+		{"**int", &ptrToInt, "42"},
+		{"*[]int", &slice, "[1 2]"},
+		{"*struct", &strct, "{example 42}"},
+		{"[]string{}", []string{}, "[]"},
+		{"[]string(nil)", []string(nil), "[]"},
+		{"[]int{}", []int{}, "[]"},
+		{"[]int(nil)", []int(nil), "[]"},
+		{"[]float64{}", []float64{}, "[]"},
+		{"[]any{}", []any{}, "[]"},
+		{"[0]int", [0]int{}, "[]"},
+		{"[0]string", [0]string{}, "[]"},
+		{"[]CustomType{}", []CustomType{}, "[]"},
+		{"empty []byte", []byte{}, ""},
+		{"nil []byte", []byte(nil), ""},
+		{"[]float64", []float64{1.5, 2, 1e21}, "[1.5 2 1000000000000000000000]"},
+		{"[]bool", []bool{true, false}, "[true false]"},
+		{"[2]string", [2]string{"a", "b"}, "[a b]"},
+		{"[]*int", []*int{&i, nil}, "[42 0]"},
+		{"[]error", []error{errors.New("e1"), nil}, "[e1 ]"},
+	}
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			require.Equal(t, tc.want, ToString(tc.input))
+		})
+	}
+}
+
+// Test_ToString_FmtParity requires ToString to answer as fmt.Sprint does wherever they agree by design.
+func Test_ToString_FmtParity(t *testing.T) {
+	t.Parallel()
+
+	const maxFloat32Int = 1 << 24
+	check := func(v any) {
+		t.Helper()
+		require.Equal(t, fmt.Sprint(v), ToString(v), "%T %v", v, v)
+	}
+
+	for _, n := range []int64{0, 1, -1, 9, 10, 99, 100, 101, -99, -100, math.MaxInt8, math.MinInt8, math.MaxInt16, math.MinInt16, math.MaxInt32, math.MinInt32, math.MaxInt64, math.MinInt64, maxFloat32Int} {
+		check(int(n))
+		check(n)
+		check(int32(n))
+		check(int16(n))
+		check(int8(n))
+		check(uint(n))
+		check(uint64(n))
+		check(uint32(n))
+		check(uint16(n))
+		check(uint8(n))
+		check(namedInt(n))
+		check([]int{int(n), 7})
+	}
+	for _, n := range []uint64{math.MaxUint64, math.MaxUint32, math.MaxUint16, math.MaxUint8, 1 << 63, 10000000000000000000} {
+		check(n)
+		check(uint(n))
+	}
+	for _, v := range []string{"", "text", "multi word", "\x00\xff", "\u00fcn\u00efc\u00f6d\u00e9", "[brackets]"} {
+		check(v)
+		check(namedString(v))
+		check([]string{v, v})
+		check([2]string{v, "x"})
+		check(MyStringer{value: v})
+		check(errors.New(v))
+		check(fmt.Errorf("wrapped: %w", errors.New(v)))
+	}
+	for _, v := range []bool{true, false} {
+		check(v)
+		check(namedBool(v))
+		check([]bool{v, !v})
+	}
+	check(time.Second)
+	check(time.March)
+	check(net.IPv4(1, 2, 3, 4))
+	check(netip.MustParseAddr("2001:db8::1"))
+	check([]any{1, "a", true, 1.5, MyStringer{value: "s"}})
+	check([][]int{{1}, {2, 3}, {}})
+	check(map[string]int{"a": 1, "b": 2})
+	check(struct{ A, B int }{1, 2})
+	check(CustomType{Field1: "x", Field2: 2})
+	check(complex(1, 2))
+	check(uintptr(7))
+	check('x')
+	check(namedFloat(0.5))
+}
+
+// Test_ToString_FloatsAreNeverExponential: plain decimal at the shortest round-trip length, where fmt uses an exponent.
+func Test_ToString_FloatsAreNeverExponential(t *testing.T) {
+	t.Parallel()
+	for _, v := range []float64{0, 1, -1, 0.1, 1.5, 100, 123456789, 1e20, 1e21, 1e-6, 1e-7, 1.7976931348623157e308, 5e-324, math.Pi, math.Inf(1), math.Inf(-1), math.NaN()} {
+		want := strconv.FormatFloat(v, 'f', -1, 64)
+		require.Equal(t, want, ToString(v), "float64 %v", v)
+		require.Equal(t, want, ToString(&v), "*float64 %v", v)
+		f32 := float32(v)
+		if !math.IsInf(float64(f32), 0) || math.IsInf(v, 0) {
+			require.Equal(t, strconv.FormatFloat(float64(f32), 'f', -1, 32), ToString(f32), "float32 %v", f32)
+		}
+	}
+	require.NotEqual(t, fmt.Sprint(1e21), ToString(1e21), "fmt no longer switches to an exponent: the documented difference is gone")
+	require.Equal(t, "1000000000000000000000", ToString(1e21))
+	require.Equal(t, "0.0000001", ToString(1e-7))
+}
+
+func Test_ToString_Differences(t *testing.T) {
+	t.Parallel()
+	var nilInt *int
+	var nilString *string
+	moment := time.Date(2001, 2, 3, 4, 5, 6, 789, time.UTC)
+	n := 5
+	i := 7
+	tests := []struct {
+		name  string
+		input any
+		want  string
+		fmt   string
+	}{
+		{"nil", nil, "", "<nil>"},
+		{"[]byte is text", []byte("bytes"), "bytes", "[98 121 116 101 115]"},
+		{"nil *int is zero", nilInt, "0", "<nil>"},
+		{"nil *string is empty", nilString, "", "<nil>"},
+		{"pointers are followed", &n, "5", ""},
+		{"nil elements are empty", []any{1, nil}, "[1 ]", "[1 <nil>]"},
+		{"time.Time has a short layout", moment, "2001-02-03 04:05:06", "2001-02-03 04:05:06.000000789 +0000 UTC"},
+		{"pointer to a struct", &CustomType{Field1: "x", Field2: 1}, "{x 1}", "&{x 1}"},
+		{"slice of pointers", []*int{&i}, "[7]", ""},
+	}
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			require.Equal(t, tc.want, ToString(tc.input))
+			if tc.fmt != "" {
+				require.Equal(t, tc.fmt, fmt.Sprint(tc.input), "fmt no longer renders this differently: the documented difference is gone")
+			}
+		})
+	}
+
+	// The layout applies to time.Time wherever reached: directly, via reflect.Value, in slices and arrays.
+	require.Equal(t, "2001", ToString(moment, "2006"))
+	require.Equal(t, "2001", ToString(reflect.ValueOf(moment), "2006"))
+	require.Equal(t, "[2001 2001]", ToString([]time.Time{moment, moment}, "2006"))
+	require.Equal(t, "[2001]", ToString([1]time.Time{moment}, "2006"))
+	require.Equal(t, "[2001 x]", ToString([]any{moment, "x"}, "2006"))
+}
+
+type (
+	selfPointer *selfPointer
+	pingPointer *pongPointer
+	pongPointer *pingPointer
+)
+
+// Test_ToString_EndlessPointers: a type like T *T never ends when followed, and once overflowed the
+// stack. ToString prints the address, as fmt does.
+func Test_ToString_EndlessPointers(t *testing.T) {
+	t.Parallel()
+	var self selfPointer
+	self = &self
+	var ping pingPointer
+	var pong pongPointer
+	ping, pong = &pong, &ping
+
+	for name, v := range map[string]any{"self": self, "ping": ping, "pong": pong} {
+		var got string
+		require.NotPanics(t, func() { got = ToString(v) }, name)
+		require.Equal(t, fmt.Sprint(v), got, name)
+	}
+
+	n := 7
+	p := &n
+	pp := &p
+	ppp := &pp
+	require.Equal(t, "7", ToString(ppp))
+
+	// No fixed depth cap: only a type that comes back to itself is endless.
+	deep := reflect.ValueOf(&n)
+	for range 39 {
+		next := reflect.New(deep.Type())
+		next.Elem().Set(deep)
+		deep = next
+	}
+	require.Equal(t, "7", ToString(deep.Interface()))
+}
+
+// Test_ToString_NilReceivers requires a nil error or Stringer pointer to render as fmt does, not panic.
+func Test_ToString_NilReceivers(t *testing.T) {
+	t.Parallel()
+	var nilStringer *nilReceiver
+	var nilError *nilReceiverError
+	var nilTime *time.Time
+	var nilIP *net.IPNet
+	var nilSafeValue *nilSafe
+
+	for name, v := range map[string]any{
+		"nil Stringer":        nilStringer,
+		"nil error":           nilError,
+		"nil *time.Time":      nilTime,
+		"nil *net.IPNet":      nilIP,
+		"nil-safe Stringer":   nilSafeValue,
+		"nil map":             nilMap(nil),
+		"nil func":            nilFunc(nil),
+		"in a slice":          []any{nilStringer, nilError, nilSafeValue},
+		"slice of nil errors": []error{nilError},
+		"in an array":         [2]fmt.Stringer{nilStringer, nilSafeValue},
+	} {
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+			var got string
+			require.NotPanics(t, func() { got = ToString(v) })
+			require.Equal(t, fmt.Sprint(v), got)
+		})
+	}
+
+	// The cases that tell a guarded call from a blanket "<nil>".
+	require.Equal(t, "no value", ToString(nilSafeValue))
+	require.Equal(t, "entries: 0", ToString(nilMap(nil)))
+	require.Equal(t, "func is nil: true", ToString(nilFunc(nil)))
+	require.Equal(t, "<nil>", ToString(nilStringer))
+	require.Equal(t, "<nil>", ToString(nilError))
+
+	require.Equal(t, "named", ToString(&nilReceiver{name: "named"}))
+	require.Equal(t, "broken", ToString(&nilReceiverError{msg: "broken"}))
+	require.Equal(t, "a value", ToString(&nilSafe{}))
+	require.Equal(t, "entries: 1", ToString(nilMap{"k": 1}))
+
+	// A panic that is not a nil receiver's is not hidden.
+	require.PanicsWithValue(t, "boom", func() { ToString(panicky{}) })
+	require.PanicsWithValue(t, "boom", func() { ToString(&panicky{}) })
+
+	// Only a nil pointer gets "<nil>" for a panic; a nil map or a zero holder panics like any other value.
+	const nilDereference = "runtime error: invalid memory address or nil pointer dereference"
+	require.PanicsWithValue(t, "boom", func() { ToString(panickyMap(nil)) })
+	require.PanicsWithError(t, nilDereference, func() { ToString(holder{}) })
+	require.PanicsWithError(t, nilDereference, func() { ToString(holderError{}) })
+	seven := 7
+	require.Equal(t, "7", ToString(holder{p: &seven}))
+	require.Equal(t, "7", ToString(holderError{p: &seven}))
+}

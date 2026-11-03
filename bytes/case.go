@@ -10,6 +10,8 @@ import (
 // interleaved, Go 1.26, linux/amd64; the http-get cases reproduce it).
 
 // ToLower converts an ASCII byte slice to lower-case without modifying the input.
+// If b has no upper-case letter it is returned itself, not a copy, so a write to
+// the result then writes to b.
 func ToLower(b []byte) []byte {
 	n := len(b)
 	if n < caseconv.WordLen {
@@ -38,6 +40,8 @@ func ToLower(b []byte) []byte {
 }
 
 // ToUpper converts an ASCII byte slice to upper-case without modifying the input.
+// If b has no lower-case letter it is returned itself, not a copy, so a write to
+// the result then writes to b.
 func ToUpper(b []byte) []byte {
 	n := len(b)
 	if n < caseconv.WordLen {

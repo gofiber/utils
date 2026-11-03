@@ -5,5 +5,5 @@ type MsgPackMarshal func(v any) ([]byte, error)
 
 // MsgPackUnmarshal parses the MsgPack-encoded data and stores the result
 // in the value pointed to by v. If v is nil or not a pointer,
-// Unmarshal returns an InvalidUnmarshalError.
+// Unmarshal returns an error.
 type MsgPackUnmarshal func(data []byte, v any) error

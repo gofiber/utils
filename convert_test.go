@@ -8,6 +8,9 @@ import (
 	"errors"
 	"fmt"
 	"math"
+	"math/big"
+	"math/bits"
+	"math/rand/v2"
 	"reflect"
 	"strconv"
 	"testing"
@@ -93,7 +96,6 @@ func Test_ToString(t *testing.T) {
 		timeFormat []string
 		expected   string
 	}{
-		// Primitive types and string
 		{name: "int", input: int(42), expected: "42"},
 		{name: "int8", input: int8(42), expected: "42"},
 		{name: "int16", input: int16(42), expected: "42"},
@@ -110,26 +112,20 @@ func Test_ToString(t *testing.T) {
 		{name: "float32", input: float32(3.14), expected: "3.14"},
 		{name: "float64", input: float64(3.14159), expected: "3.14159"},
 
-		// time.Time
 		{name: "time.Time default format", input: timeSample, expected: "2000-01-01 12:34:56"},
 		{name: "time.Time custom format", input: timeSample, timeFormat: []string{"Jan 02, 2006"}, expected: "Jan 01, 2000"},
 
-		// reflect.Value
 		{name: "reflect.Value", input: reflect.ValueOf(42), expected: "42"},
 
-		// fmt.Stringer
 		{name: "fmt.Stringer", input: stringerSample, expected: "Stringer Value"},
 
-		// error
 		{name: "error", input: errors.New("something failed"), expected: "something failed"},
 
-		// Composite types (arrays, slices)
 		{name: "[]string", input: []string{"Hello", "World"}, expected: "[Hello World]"},
 		{name: "[]int", input: []int{42, 21}, expected: "[42 21]"},
 		{name: "[][]int", input: [][]int{{42, 21}, {42, 21}}, expected: "[[42 21] [42 21]]"},
 		{name: "[]any", input: []any{[]int{42, 21}, 42, "Hello", true, []string{"Hello", "World"}}, expected: "[[42 21] 42 Hello true [Hello World]]"},
 
-		// Custom unhandled type
 		{name: "CustomType", input: customInstance, expected: "{example 42}"},
 	}
 
@@ -146,7 +142,6 @@ func Test_ToString(t *testing.T) {
 		})
 	}
 
-	// Testing pointer to int
 	intPtr := 42
 	testsPtr := []struct {
 		input    any
@@ -196,7 +191,7 @@ func Test_ToString(t *testing.T) {
 		require.Empty(t, res)
 	})
 
-	// Test nil pointer handling - nil pointers return type-specific defaults
+	// A nil pointer renders as its type's zero value.
 	t.Run("nil pointer to string", func(t *testing.T) {
 		t.Parallel()
 		require.Empty(t, ToString((*string)(nil)))
@@ -234,7 +229,7 @@ func TestCopyBytes(t *testing.T) {
 		input := []byte{42}
 		copied := CopyBytes(input)
 		require.Equal(t, input, copied)
-		input[0] = 0 // Modify the input to ensure the copied slice does not change
+		input[0] = 0
 		require.NotEqual(t, input[0], copied[0])
 	})
 
@@ -242,14 +237,14 @@ func TestCopyBytes(t *testing.T) {
 		input := []byte{1, 2, 3, 4, 5}
 		copied := CopyBytes(input)
 		require.Equal(t, input, copied)
-		input[0] = 0 // Modify the input to ensure the copied slice does not change
+		input[0] = 0
 		require.NotEqual(t, input, copied)
 	})
 
 	t.Run("deep copy validation", func(t *testing.T) {
 		input := []byte{1, 2, 3, 4, 5}
 		copied := CopyBytes(input)
-		input[0] = 0 // Modify the input to ensure the copied slice does not change
+		input[0] = 0
 		require.NotEqual(t, input[0], copied[0])
 	})
 
@@ -296,27 +291,112 @@ func TestByteSize(t *testing.T) {
 		})
 	}
 
-	const maxSafe = math.MaxUint64 / 10
-	t.Run("MaxSafe", func(t *testing.T) {
-		result := ByteSize(maxSafe)
-		require.Contains(t, result, "B")
-	})
+	// Above math.MaxUint64/10, where the arithmetic was once capped, sizes are written as they are.
+	for _, tt := range []struct {
+		bytes    uint64
+		expected string
+	}{
+		{math.MaxUint64 / 10, "1.6EB"},
+		{math.MaxUint64/10 + 1, "1.6EB"},
+		{1902320482601297510, "1.6EB"},
+		{1902320482601297511, "1.7EB"},
+		{2 << 60, "2EB"},
+		{1 << 62, "4EB"},
+		{1 << 63, "8EB"},
+		{math.MaxUint64, "16EB"},
+	} {
+		require.Equal(t, tt.expected, ByteSize(tt.bytes), "%d", tt.bytes)
+	}
+}
 
-	t.Run("Overflow", func(t *testing.T) {
-		result := ByteSize(maxSafe + 1)
-		require.Contains(t, result, "B")
-		require.Equal(t, ByteSize(maxSafe), result)
-	})
+// Test_ByteSize_Rounding pins a unit's upper edge: 1023.95 of a unit is written as 1 of the next.
+func Test_ByteSize_Rounding(t *testing.T) {
+	t.Parallel()
+	for _, tt := range []struct {
+		bytes    uint64
+		expected string
+	}{
+		{1023, "1023B"},
+		{1048524, "1023.9KB"},
+		{1048525, "1MB"},
+		{1048575, "1MB"},
+		{1 << 20, "1MB"},
+		{1<<30 - 1, "1GB"},
+		{1<<40 - 1, "1TB"},
+		{1<<50 - 1, "1PB"},
+		{1<<60 - 1, "1EB"},
+		{1280, "1.3KB"}, // 1.25 exactly: half rounds up
+		{1792, "1.8KB"},
+		{1126, "1.1KB"},
+	} {
+		require.Equal(t, tt.expected, ByteSize(tt.bytes), "%d", tt.bytes)
+	}
+}
+
+// byteSizeModel recomputes ByteSize with math/big from its documented rules alone.
+func byteSizeModel(n uint64) string {
+	if n < 1024 {
+		return strconv.FormatUint(n, 10) + "B"
+	}
+	units := []string{"KB", "MB", "GB", "TB", "PB", "EB"}
+	k := (bits.Len64(n) - 1) / 10
+	unit := new(big.Int).Lsh(big.NewInt(1), uint(10*k))
+	tenths := new(big.Int).Mul(new(big.Int).SetUint64(n), big.NewInt(10))
+	tenths.Add(tenths, new(big.Int).Rsh(unit, 1))
+	tenths.Quo(tenths, unit)
+	if tenths.Cmp(big.NewInt(10240)) >= 0 {
+		tenths.SetInt64(10)
+		k++
+	}
+	whole, frac := tenths.Int64()/10, tenths.Int64()%10
+	s := strconv.FormatInt(whole, 10)
+	if frac != 0 {
+		s += "." + strconv.FormatInt(frac, 10)
+	}
+	return s + units[k-1]
+}
+
+// Test_ByteSize_Model compares ByteSize with byteSizeModel, densely around the unit edges.
+func Test_ByteSize_Model(t *testing.T) {
+	t.Parallel()
+	check := func(n uint64) {
+		t.Helper()
+		if got, want := ByteSize(n), byteSizeModel(n); got != want {
+			t.Fatalf("ByteSize(%d) = %q, want %q", n, got, want)
+		}
+	}
+	for n := range uint64(100_000) {
+		check(n)
+	}
+	for shift := range 64 {
+		for d := range uint64(300) {
+			base := uint64(1) << shift
+			check(base + d)
+			check(base - 1 - d)
+		}
+	}
+	for d := range uint64(2000) {
+		check(math.MaxUint64 - d)
+	}
+	rng := rand.New(rand.NewPCG(1, 2)) //nolint:gosec // a fixed sequence for a model test
+	for k := range 6 {
+		edge := uint64(1) << (10 * (k + 1))
+		for range 5000 {
+			check(edge - 1 - rng.Uint64N(edge/16)) // 1023.95 of the unit below is edge - edge/20480
+		}
+	}
+	for range 40_000 {
+		check(rng.Uint64() >> rng.UintN(64))
+	}
 }
 
 // Ensure ConvertToBytes caps values exceeding math.MaxInt
 func Test_ConvertToBytes_MaxInt(t *testing.T) {
 	t.Parallel()
-	big := fmt.Sprintf("%dT", int64(math.MaxInt/1000+1))
-	require.Equal(t, math.MaxInt, ConvertToBytes(big))
+	huge := fmt.Sprintf("%dT", int64(math.MaxInt/1000+1))
+	require.Equal(t, math.MaxInt, ConvertToBytes(huge))
 }
 
-// go test -v -run=^$ -bench=ToString -benchmem -count=4
 func Benchmark_ToString(b *testing.B) {
 	for _, value := range dataTypeExamples {
 		b.Run(reflect.TypeOf(value).String(), func(b *testing.B) {
@@ -329,7 +409,78 @@ func Benchmark_ToString(b *testing.B) {
 	}
 }
 
-// go test -v -run=^$ -bench=ToString_concurrency -benchmem -count=4
+// Test_mayBeNilPointer holds the gc shortcut to nilPointerReflect; a nil map, func or chan may match.
+func Test_mayBeNilPointer(t *testing.T) {
+	t.Parallel()
+	n := 7
+	var (
+		nilInt  *int
+		nilType *CustomType
+		nilTime *time.Time
+		nilErr  *nilReceiverError
+		nilStr  *nilReceiver
+	)
+	for name, v := range map[string]any{
+		"nil *int":           nilInt,
+		"nil *struct":        nilType,
+		"nil *time.Time":     nilTime,
+		"nil error receiver": nilErr,
+		"nil Stringer":       nilStr,
+		"nil **int":          (**int)(nil),
+		"nil *[]int":         (*[]int)(nil),
+		"nil *uintptr":       (*uintptr)(nil),
+	} {
+		require.True(t, nilPointerReflect(v), name)
+		require.True(t, mayBeNilPointer(v), name)
+	}
+	for name, v := range map[string]any{
+		"non-nil *int":    &n,
+		"non-nil *struct": &CustomType{},
+		"int":             0,
+		"string":          "",
+		"bool":            false,
+		"struct":          CustomType{},
+		"empty struct":    struct{}{},
+		"nil slice":       []int(nil),
+		"slice":           []int{1},
+		"map":             map[string]int{},
+		"func":            func() {},
+		"error":           errors.New("x"),
+		"time":            time.Time{},
+	} {
+		require.False(t, nilPointerReflect(v), name)
+		require.False(t, mayBeNilPointer(v), name)
+	}
+	for name, v := range map[string]any{
+		"nil map":  map[string]int(nil),
+		"nil func": (func())(nil),
+		"nil chan": (chan int)(nil),
+	} {
+		require.False(t, nilPointerReflect(v), name)
+	}
+}
+
+// Benchmark_ToString_Methods measures the types that go through an Error or String method,
+// where ToString first checks for a nil pointer receiver.
+func Benchmark_ToString_Methods(b *testing.B) {
+	for _, tc := range []struct {
+		name  string
+		value any
+	}{
+		{"error", errors.New("boom")},
+		{"stringer", MyStringer{value: "Stringer Value"}},
+		{"stringer-ptr", &MyStringer{value: "Stringer Value"}},
+		{"duration", 1500 * time.Millisecond},
+	} {
+		b.Run(tc.name, func(b *testing.B) {
+			b.ReportAllocs()
+			for b.Loop() {
+				_ = ToString(tc.value)
+			}
+		})
+	}
+}
+
 func Benchmark_ToString_concurrency(b *testing.B) {
 	for _, value := range dataTypeExamples {
 		b.Run(reflect.TypeOf(value).String(), func(b *testing.B) {
@@ -344,7 +495,6 @@ func Benchmark_ToString_concurrency(b *testing.B) {
 	}
 }
 
-// go test -v -run=^$ -bench=UnsafeBytes -benchmem -count=4
 func Benchmark_UnsafeBytes(b *testing.B) {
 	hello := "Hello, World!"
 	var res []byte
@@ -362,7 +512,6 @@ func Benchmark_UnsafeBytes(b *testing.B) {
 	})
 }
 
-// go test -v -run=^$ -bench=UnsafeString -benchmem -count=2
 func Benchmark_UnsafeString(b *testing.B) {
 	hello := []byte("Hello, World!")
 	var res string
@@ -380,7 +529,15 @@ func Benchmark_UnsafeString(b *testing.B) {
 	})
 }
 
-// go test -v -run=^$ -bench=ByteSize -benchmem -count=4
+const (
+	uKilobyte = 1 << (10 * (iota + 1))
+	uMegabyte
+	uGigabyte
+	uTerabyte
+	uPetabyte
+	uExabyte
+)
+
 func Benchmark_ByteSize(b *testing.B) {
 	testCases := []uint64{
 		0,

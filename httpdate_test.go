@@ -7,9 +7,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// refParseHTTPDate mirrors net/http.ParseTime: trim the whitespace textproto
-// would, then try the three allowed layouts in order. It is the behavioral
-// reference for ParseHTTPDate in the unit and fuzz tests.
+// refParseHTTPDate mirrors net/http.ParseTime; it is the oracle for the unit and fuzz tests.
 func refParseHTTPDate(s string) (time.Time, error) {
 	start, end := 0, len(s)
 	for start < end && isHTTPDateSpace(s[start]) {
@@ -32,15 +30,15 @@ func refParseHTTPDate(s string) (time.Time, error) {
 
 func httpDateSamples() []time.Time {
 	return []time.Time{
-		{}, // zero time: Mon, 01 Jan 0001
+		{},
 		time.Unix(0, 0),
-		time.Unix(784111777, 0), // the RFC 9110 example date
-		time.Date(2000, time.February, 29, 23, 59, 59, 0, time.UTC),                 // leap day
-		time.Date(1900, time.February, 28, 0, 0, 0, 0, time.UTC),                    // century non-leap
-		time.Date(9999, time.December, 31, 23, 59, 59, 0, time.UTC),                 // last 4-digit second
-		time.Date(0, time.January, 1, 0, 0, 0, 0, time.UTC),                         // year 0000
-		time.Date(2026, time.July, 23, 12, 34, 56, 789, time.UTC),                   // sub-second truncated by format
-		time.Date(2026, time.July, 23, 20, 0, 0, 0, time.FixedZone("PST", -8*3600)), // non-UTC input
+		time.Unix(784111777, 0),
+		time.Date(2000, time.February, 29, 23, 59, 59, 0, time.UTC),
+		time.Date(1900, time.February, 28, 0, 0, 0, 0, time.UTC),
+		time.Date(9999, time.December, 31, 23, 59, 59, 0, time.UTC),
+		time.Date(0, time.January, 1, 0, 0, 0, 0, time.UTC),
+		time.Date(2026, time.July, 23, 12, 34, 56, 789, time.UTC),
+		time.Date(2026, time.July, 23, 20, 0, 0, 0, time.FixedZone("PST", -8*3600)),
 	}
 }
 
@@ -62,15 +60,29 @@ func Test_AppendHTTPDate(t *testing.T) {
 		require.Equal(t, want, string(AppendHTTPDate(nil, tm)))
 	}
 
-	// Appending must preserve existing dst content.
 	got := AppendHTTPDate([]byte("Date: "), time.Unix(0, 0))
 	require.Equal(t, "Date: Thu, 01 Jan 1970 00:00:00 GMT", string(got))
+}
+
+// Test_FormatHTTPDate_Allocs holds FormatHTTPDate to one allocation for every time, years outside
+// 0..9999 included.
+func Test_FormatHTTPDate_Allocs(t *testing.T) {
+	// Not parallel: AllocsPerRun needs nothing else allocating.
+	var sink string
+	for _, tm := range append(httpDateSamples(),
+		time.Date(10000, time.January, 1, 0, 0, 0, 0, time.UTC),
+		time.Date(-1, time.December, 31, 23, 59, 59, 0, time.UTC),
+		time.Unix(httpDateMaxUnix+1, 0),
+	) {
+		require.Equal(t, tm.UTC().Format(httpDateLayout), FormatHTTPDate(tm))
+		require.InDelta(t, 1, testing.AllocsPerRun(100, func() { sink = FormatHTTPDate(tm) }), 0, "%v", tm)
+	}
+	_ = sink
 }
 
 func Test_ParseHTTPDate(t *testing.T) {
 	t.Parallel()
 
-	// Canonical fast-path inputs round-trip through the formatter.
 	for _, tm := range httpDateSamples() {
 		s := FormatHTTPDate(tm)
 		got, err := ParseHTTPDate(s)
@@ -83,18 +95,16 @@ func Test_ParseHTTPDate(t *testing.T) {
 		require.True(t, gotBytes.Equal(got))
 	}
 
-	// Every input, valid or not, must agree with the net/http.ParseTime
-	// reference on outcome, instant, and location.
 	inputs := []string{
 		"Sun, 06 Nov 1994 08:49:37 GMT",
-		"Sunday, 06-Nov-94 08:49:37 GMT",      // RFC 850
-		"Sun Nov  6 08:49:37 1994",            // ANSI C asctime
-		"  Sun, 06 Nov 1994 08:49:37 GMT\r\n", // padded, per textproto trim
-		"sun, 06 nov 1994 08:49:37 GMT",       // lowercase names: stdlib folds case
-		"Sun, 06 Nov 1994 08:49:37 UTC",       // non-GMT zone literal
-		"Mon, 06 Nov 1994 08:49:37 GMT",       // wrong weekday for the date: accepted
-		"Tue, 29 Feb 2000 12:00:00 GMT",       // leap day
-		"Tue, 29 Feb 1900 12:00:00 GMT",       // century non-leap: rejected
+		"Sunday, 06-Nov-94 08:49:37 GMT",
+		"Sun Nov  6 08:49:37 1994",
+		"  Sun, 06 Nov 1994 08:49:37 GMT\r\n",
+		"sun, 06 nov 1994 08:49:37 GMT",
+		"Sun, 06 Nov 1994 08:49:37 UTC",
+		"Mon, 06 Nov 1994 08:49:37 GMT", // wrong weekday: accepted
+		"Tue, 29 Feb 2000 12:00:00 GMT",
+		"Tue, 29 Feb 1900 12:00:00 GMT",
 		"Tue, 30 Feb 2020 12:00:00 GMT",
 		"Tue, 00 Feb 2020 12:00:00 GMT",
 		"Tue, 32 Jan 2020 12:00:00 GMT",
@@ -160,7 +170,6 @@ func Benchmark_ParseHTTPDate(b *testing.B) {
 	})
 }
 
-// Test_HTTPDate_DaySweep pins the formatter and parser to the time package for every day of the years 0..9999.
 func Test_HTTPDate_DaySweep(t *testing.T) {
 	t.Parallel()
 	require.Equal(t, int64(httpDateMinUnix), time.Date(0, time.January, 1, 0, 0, 0, 0, time.UTC).Unix())
@@ -180,12 +189,12 @@ func Test_HTTPDate_DaySweep(t *testing.T) {
 		if err != nil {
 			t.Fatalf("day %d: parse %q: %v", day, got, err)
 		}
-		if parsed != tm.UTC() { //nolint:revive // the exact Time value (not just the instant) is what is being pinned
+		if !parsed.Equal(tm) || parsed.Location() != time.UTC {
 			t.Fatalf("day %d: parsed %q to %v (%#v), want %v (%#v)", day, got, parsed, parsed, tm.UTC(), tm.UTC())
 		}
 	}
 
-	// The instants just outside the four-digit-year range take the stdlib path.
+	// Just outside the four-digit years, the stdlib path is taken.
 	for _, sec := range []int64{httpDateMinUnix - 1, httpDateMaxUnix + 1} {
 		tm := time.Unix(sec, 0)
 		require.Equal(t, tm.UTC().Format(httpDateLayout), FormatHTTPDate(tm))

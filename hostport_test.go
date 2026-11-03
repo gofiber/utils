@@ -40,27 +40,17 @@ func hostPortSamples() []string {
 	}
 }
 
-// checkSplitHostPort compares both input types with net.SplitHostPort.
+// checkSplitHostPort avoids require: loops call it millions of times.
 func checkSplitHostPort(tb testing.TB, in string) {
 	tb.Helper()
 	wantHost, wantPort, err := net.SplitHostPort(in)
 	host, port, ok := SplitHostPort(in)
-	require.Equal(tb, err == nil, ok, "input %q: %v", in, err)
-	if !ok {
-		require.Empty(tb, host, "input %q", in)
-		require.Empty(tb, port, "input %q", in)
-	} else {
-		require.Equal(tb, wantHost, host, "input %q", in)
-		require.Equal(tb, wantPort, port, "input %q", in)
+	if ok != (err == nil) || (ok && (host != wantHost || port != wantPort)) || (!ok && (host != "" || port != "")) {
+		tb.Fatalf("SplitHostPort(%q) = (%q, %q, %v), net.SplitHostPort gives (%q, %q, %v)", in, host, port, ok, wantHost, wantPort, err)
 	}
-
 	bh, bp, bok := SplitHostPort([]byte(in))
-	require.Equal(tb, ok, bok, "input %q bytes", in)
-	require.Equal(tb, host, string(bh), "input %q bytes", in)
-	require.Equal(tb, port, string(bp), "input %q bytes", in)
-	if !bok {
-		require.Nil(tb, bh, "input %q bytes", in)
-		require.Nil(tb, bp, "input %q bytes", in)
+	if bok != ok || string(bh) != host || string(bp) != port || (!bok && (bh != nil || bp != nil)) {
+		tb.Fatalf("SplitHostPort(bytes %q) = (%q, %q, %v), string form gives (%q, %q, %v)", in, bh, bp, bok, host, port, ok)
 	}
 }
 
@@ -70,7 +60,6 @@ func Test_SplitHostPort(t *testing.T) {
 		checkSplitHostPort(t, in)
 	}
 
-	// The parts alias the input.
 	in := []byte("[::1]:8080")
 	host, port, ok := SplitHostPort(in)
 	require.True(t, ok)

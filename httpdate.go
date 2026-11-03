@@ -4,10 +4,7 @@ import (
 	"time"
 )
 
-// httpDateLayout is the RFC 9110 preferred date format (net/http.TimeFormat),
-// a fixed-width 29-byte layout that doubles as the formatting template: every
-// separator byte is already in place, so AppendHTTPDate only overwrites the
-// fields.
+// httpDateLayout doubles as AppendHTTPDate's template: its separators stay in place.
 const (
 	httpDateLayout = "Mon, 02 Jan 2006 15:04:05 GMT"
 	httpDateLen    = len(httpDateLayout)
@@ -17,14 +14,10 @@ var (
 	httpWeekdays = [7]string{"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"}
 	httpMonths   = [12]string{"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"}
 
-	// httpDaysInMonth is indexed by time.Month; February is adjusted for
-	// leap years in daysInHTTPMonth.
 	httpDaysInMonth = [13]int{0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31}
 )
 
-// Calendar fields are converted with Hinnant's civil_from_days and
-// days_from_civil (400-year eras of 146097 days, origin -0400-03-01 so every
-// intermediate is non-negative); the tests sweep every day of 0..9999.
+// Hinnant's civil_from_days/days_from_civil; origin -0400-03-01 keeps values non-negative.
 const (
 	httpDateMinUnix        = -62167219200 // 0000-01-01T00:00:00Z
 	httpDateMaxUnix        = 253402300799 // 9999-12-31T23:59:59Z
@@ -35,15 +28,14 @@ const (
 	weekdayOfYearZero      = 6                   // 0000-01-01 was a Saturday
 )
 
-// civilFromDays converts days since 0000-01-01 (at most 3652424) into a
-// proleptic Gregorian year, month (1..12), and day (1..31).
+// civilFromDays converts days since 0000-01-01 (at most 3652424) to a proleptic Gregorian date.
 func civilFromDays(days uint64) (year, month, day uint64) { //nolint:nonamedreturns // the three calendar fields are only readable named
 	z := days + eraDaysToMarch
 	era := z / daysPerEra
-	doe := z - era*daysPerEra                              // day of era, [0, 146096]
-	yoe := (doe - doe/1460 + doe/36524 - doe/146096) / 365 // year of era, [0, 399]
-	doy := doe - (365*yoe + yoe/4 - yoe/100)               // day of March-based year, [0, 365]
-	mp := (5*doy + 2) / 153                                // March-based month, [0, 11]
+	doe := z - era*daysPerEra
+	yoe := (doe - doe/1460 + doe/36524 - doe/146096) / 365
+	doy := doe - (365*yoe + yoe/4 - yoe/100)
+	mp := (5*doy + 2) / 153
 	day = doy - (153*mp+2)/5 + 1
 	month = mp + 3
 	if mp >= 10 {
@@ -56,8 +48,7 @@ func civilFromDays(days uint64) (year, month, day uint64) { //nolint:nonamedretu
 	return year, month, day
 }
 
-// unixFromCivil returns the Unix time of valid UTC calendar fields with the
-// year in 0..9999, as parseRFC1123 guarantees.
+// unixFromCivil returns the Unix time of valid UTC fields with the year in 0..9999.
 func unixFromCivil(year, month, day, hour, minute, sec int) int64 {
 	y := year + 400 // one era back keeps January/February of year 0 non-negative
 	mp := month + 9
@@ -74,27 +65,20 @@ func unixFromCivil(year, month, day, hour, minute, sec int) int64 {
 	return int64(days)*secondsPerDay + int64(hour*3600+minute*60+sec)
 }
 
-// putPair writes n < 100 as two zero-padded digits at b[i] and b[i+1].
 func putPair(b []byte, i int, n uint64) {
 	_ = b[i+1]
 	b[i] = decimalPairs[2*n]
 	b[i+1] = decimalPairs[2*n+1]
 }
 
-// AppendHTTPDate appends t in the RFC 9110 preferred HTTP date format
-// ("Mon, 02 Jan 2006 15:04:05 GMT", net/http.TimeFormat) to dst and returns
-// the extended slice. The output is byte-identical to
-// t.UTC().AppendFormat(dst, http.TimeFormat) and always 29 bytes for the
-// years 0..9999 that HTTP dates can represent; times outside that range
-// delegate to time.AppendFormat.
+// AppendHTTPDate appends t to dst in the RFC 9110 HTTP date format, byte-identical to
+// t.UTC().AppendFormat(dst, http.TimeFormat) and always 29 bytes for the years 0..9999.
 func AppendHTTPDate(dst []byte, t time.Time) []byte {
 	sec := t.Unix()
 	if sec < httpDateMinUnix || sec > httpDateMaxUnix {
-		// RFC 1123 assumes a four-digit year; keep stdlib behavior for the
-		// unrepresentable rest instead of mis-padding it.
 		return t.UTC().AppendFormat(dst, httpDateLayout)
 	}
-	u := uint64(sec - httpDateMinUnix) // seconds since 0000-01-01, so every split is unsigned
+	u := uint64(sec - httpDateMinUnix)
 	days := u / secondsPerDay
 	sod := u - days*secondsPerDay
 	hour := sod / 3600
@@ -105,7 +89,7 @@ func AppendHTTPDate(dst []byte, t time.Time) []byte {
 
 	var b [httpDateLen]byte
 	copy(b[:], httpDateLayout)
-	weekday := httpWeekdays[(days+weekdayOfYearZero)%7] // byte stores: copy would be a memmove call
+	weekday := httpWeekdays[(days+weekdayOfYearZero)%7]
 	b[0], b[1], b[2] = weekday[0], weekday[1], weekday[2]
 	putPair(b[:], 5, day)
 	monthName := httpMonths[month-1]
@@ -119,22 +103,21 @@ func AppendHTTPDate(dst []byte, t time.Time) []byte {
 	return append(dst, b[:]...)
 }
 
-// FormatHTTPDate returns t in the RFC 9110 preferred HTTP date format, equal
-// to t.UTC().Format(http.TimeFormat) with a single allocation for the result.
+// FormatHTTPDate returns t.UTC().Format(http.TimeFormat) with a single allocation.
 func FormatHTTPDate(t time.Time) string {
+	if sec := t.Unix(); sec < httpDateMinUnix || sec > httpDateMaxUnix {
+		// A year outside 0..9999 outgrows the stack buffer below: two allocations.
+		return t.UTC().Format(httpDateLayout)
+	}
 	var buf [httpDateLen]byte
 	return string(AppendHTTPDate(buf[:0], t))
 }
 
-// ParseHTTPDate parses an HTTP date the way net/http.ParseTime does:
-// the RFC 9110 preferred format ("Mon, 02 Jan 2006 15:04:05 GMT") plus the
-// obsolete RFC 850 and ANSI C asctime forms, with surrounding ASCII
-// whitespace tolerated. Canonical preferred-format input takes a fast scalar
-// path that never calls time.Parse; every other input — legacy formats,
-// unusual casing, non-GMT zone names, padding — falls back to time.Parse
-// with byte-for-byte stdlib semantics, including its errors. The returned
-// time is in time.UTC on the fast path and whatever time.Parse yields on the
-// fallback; the instants agree in both cases.
+// ParseHTTPDate parses an HTTP date the way net/http.ParseTime does: the RFC
+// 9110 preferred format or the obsolete RFC 850 and ANSI C forms. Unlike
+// ParseTime, it ignores space, tab, CR and LF around the date. Canonical
+// preferred-format input yields a time in UTC; other forms take time.Parse's
+// location and errors.
 func ParseHTTPDate[S byteSeq](s S) (time.Time, error) {
 	if t, ok := parseRFC1123(s); ok {
 		return t, nil
@@ -142,11 +125,8 @@ func ParseHTTPDate[S byteSeq](s S) (time.Time, error) {
 	return parseHTTPDateSlow(string(s))
 }
 
-// parseRFC1123 is the strict fast path for canonical
-// "Mon, 02 Jan 2006 15:04:05 GMT" input: exact length, exact separators,
-// exact-case names. It reports ok=false for anything else — including
-// out-of-range fields — so the slow path can produce stdlib-identical
-// results and errors for the long tail.
+// parseRFC1123 is the strict fast path for canonical input; anything else,
+// out-of-range fields included, reports ok=false so time.Parse gives the errors.
 func parseRFC1123[S byteSeq](s S) (time.Time, bool) {
 	if len(s) != httpDateLen {
 		return time.Time{}, false
@@ -175,15 +155,11 @@ func parseRFC1123[S byteSeq](s S) (time.Time, bool) {
 	year := yh*100 + yl
 	if hour > 23 || minute > 59 || sec > 59 ||
 		day < 1 || day > daysInHTTPMonth(month, year) {
-		// time.Parse rejects these; let it produce the exact error.
 		return time.Time{}, false
 	}
 	return time.Unix(unixFromCivil(year, month, day, hour, minute, sec), 0).UTC(), true
 }
 
-// parseHTTPDateSlow mirrors net/http.ParseTime: trim the whitespace
-// textproto would, then try the three allowed layouts in order, returning
-// the last error when none matches.
 func parseHTTPDateSlow(s string) (time.Time, error) {
 	start, end := 0, len(s)
 	for start < end && isHTTPDateSpace(s[start]) {
@@ -212,14 +188,11 @@ func isHTTPDateSpace(c byte) bool {
 	return c == ' ' || c == '\t' || c == '\r' || c == '\n'
 }
 
-// pack3 packs three bytes for the name switches below.
 func pack3(a, b, c byte) uint32 {
 	return uint32(a)<<16 | uint32(b)<<8 | uint32(c)
 }
 
-// isHTTPWeekday reports whether w is one of the seven exact-case short
-// weekday names. Like time.Parse, callers do not check the name against the
-// date; any valid name is accepted.
+// isHTTPWeekday checks the name only, not the date, like time.Parse.
 func isHTTPWeekday(w uint32) bool {
 	switch w {
 	case 'S'<<16 | 'u'<<8 | 'n', 'M'<<16 | 'o'<<8 | 'n', 'T'<<16 | 'u'<<8 | 'e',
@@ -230,8 +203,6 @@ func isHTTPWeekday(w uint32) bool {
 	return false
 }
 
-// httpMonthNum maps an exact-case short month name to 1..12, or 0 if w is
-// not one.
 func httpMonthNum(w uint32) int {
 	switch w {
 	case 'J'<<16 | 'a'<<8 | 'n':
@@ -262,8 +233,6 @@ func httpMonthNum(w uint32) int {
 	return 0
 }
 
-// twoDigits parses two ASCII digits into an int, reporting whether both
-// bytes were digits.
 func twoDigits(a, b byte) (int, bool) {
 	a -= '0'
 	b -= '0'
@@ -273,8 +242,6 @@ func twoDigits(a, b byte) (int, bool) {
 	return int(a)*10 + int(b), true
 }
 
-// daysInHTTPMonth returns the number of days in month for year, using the
-// same leap-year rule as the time package.
 func daysInHTTPMonth(month, year int) int {
 	if month == 2 && year%4 == 0 && (year%100 != 0 || year%400 == 0) {
 		return 29
