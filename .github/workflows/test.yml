@@ -8,11 +8,17 @@ on:
       - "**"
       - "!docs/**"
       - "!**.md"
+      - "!.github/dependabot.yml"
+      - "!.github/workflows/**"
+      - ".github/workflows/test.yml"
   pull_request:
     paths:
       - "**"
       - "!docs/**"
       - "!**.md"
+      - "!.github/dependabot.yml"
+      - "!.github/workflows/**"
+      - ".github/workflows/test.yml"
 
 name: Test
 

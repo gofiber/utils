@@ -10,11 +10,17 @@ on:
       - "**"
       - "!docs/**"
       - "!**.md"
+      - "!.github/dependabot.yml"
+      - "!.github/workflows/**"
+      - ".github/workflows/benchmark.yml"
   pull_request:
     paths:
       - "**"
       - "!docs/**"
       - "!**.md"
+      - "!.github/dependabot.yml"
+      - "!.github/workflows/**"
+      - ".github/workflows/benchmark.yml"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
