@@ -123,6 +123,7 @@ func FuzzURLEscape(f *testing.F) {
 	f.Add("")
 	f.Add("a b&c=d/e?f")
 	f.Add("caf%C3%A9+r%C3%A9sum%C3%A9")
+	f.Add("%E4%BD%A0 a run of 9+%41%4g")
 	f.Add("trailing%")
 	f.Add("trailing%2")
 	f.Add("%zz%1g%%41")

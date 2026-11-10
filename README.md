@@ -556,12 +556,22 @@ this group for Fiber.
 `AppendQueryEscape`/`AppendPathEscape` and
 `AppendQueryUnescape`/`AppendPathUnescape` produce byte-identical results
 (and, for the unescape pair, identical `url.EscapeError` values) to their
-`net/url` counterparts, as append-style, allocation-free single passes.
+`net/url` counterparts, append-style and without allocating when `dst`
+has the room. When it does not, `dst` grows once, to the size of the
+result: the bytes to escape, or the `%` to decode, are counted first,
+where appending piece by piece grew a `nil` `dst` four or five times for
+a 64-byte value. Nothing is written past the result.
 The escape tables are pinned to `net/url.shouldEscape` by exhaustive
-per-byte tests. Unescaping jumps between escape sites with the vectorized
+per-byte tests, and bytes that need no escaping are skipped a word at a
+time: eight lookups from one load, and one branch. Unescaping jumps
+between escape sites with the vectorized
 scans (`IndexAny2` when `+` needs rewriting, `bytes.IndexByte` otherwise)
 and copies clean spans wholesale, so route parameters and query values
-without escapes — the common case — cost one scan and one copy. Decoding
+without escapes — the common case — cost one scan and one copy. An input
+whose first escape is followed at once by another, as percent-encoded
+UTF-8 is, is decoded by a byte loop instead, without a scan and a copy
+for each escape, which goes back to the scan after eight bytes without
+one. Decoding
 never grows the input, so `dst` may be `s[:0]` on a common backing array
 to unescape in place; escaping can grow the input, so there `dst` must
 not alias `s`.
