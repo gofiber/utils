@@ -939,6 +939,11 @@ either case, and returns a `*strconv.NumError` for anything else, such as
 The number is scaled by `ConvertToBytes`, so the two agree on every size
 `ParseByteSize` accepts.
 
+`ByteSize` goes the other way, in powers of 1024 and with one decimal
+place (`1.5KB`, `1023.9KB`, `16EB`). It writes its at most eight bytes
+right to left on the stack, so the string it returns is allocated at its
+own length, and a size of zero allocates nothing.
+
 ## SWAR primitives
 
 The [`swar`](swar/) package exports the SWAR (SIMD within a register)

@@ -12,6 +12,7 @@ import (
 	"math/bits"
 	"math/rand/v2"
 	"reflect"
+	"runtime"
 	"strconv"
 	"testing"
 	"time"
@@ -388,6 +389,29 @@ func Test_ByteSize_Model(t *testing.T) {
 	for range 40_000 {
 		check(rng.Uint64() >> rng.UintN(64))
 	}
+}
+
+// Test_ByteSize_AllocatesItsLength is not parallel: it reads the allocation counters, which
+// nothing else may move. A result costs what a string of its length costs, measured rather than
+// assumed, as the race detector rounds small allocations up.
+func Test_ByteSize_AllocatesItsLength(t *testing.T) {
+	const runs = 1024
+	defer runtime.GOMAXPROCS(runtime.GOMAXPROCS(1))
+	var sink string
+	allocated := func(fn func()) uint64 {
+		var before, after runtime.MemStats
+		runtime.ReadMemStats(&before)
+		for range runs {
+			fn()
+		}
+		runtime.ReadMemStats(&after)
+		return (after.TotalAlloc - before.TotalAlloc) / runs
+	}
+	longest := []byte("1023.9KB")
+	want := allocated(func() { sink = string(longest) })
+	got := allocated(func() { sink = ByteSize(1048524) })
+	require.Equal(t, string(longest), sink)
+	require.LessOrEqual(t, got, want)
 }
 
 // Ensure ConvertToBytes caps values exceeding math.MaxInt
