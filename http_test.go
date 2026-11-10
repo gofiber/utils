@@ -317,3 +317,20 @@ func Test_GetMIME_TableCoverage(t *testing.T) {
 		require.Equal(t, MIMEOctetStream, GetMIME(ext), "extension %q", ext)
 	}
 }
+
+func Test_StatusMessage_StdlibParity(t *testing.T) {
+	t.Parallel()
+	// Codes net/http lacks but the status table names, for Fiber and fasthttp.
+	extra := map[int]string{
+		306: "Switch Proxy",
+	}
+	for code := -20; code <= 1100; code++ {
+		got, want := StatusMessage(code), http.StatusText(code)
+		if extraText, ok := extra[code]; ok {
+			require.Empty(t, want, "net/http now names %d: drop it from the documented differences", code)
+			require.Equal(t, extraText, got, "code %d", code)
+			continue
+		}
+		require.Equal(t, want, got, "code %d", code)
+	}
+}
