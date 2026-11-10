@@ -570,11 +570,11 @@ time: eight lookups from one load, and one branch. Unescaping jumps
 between escape sites with the vectorized
 scans (`IndexAny2` when `+` needs rewriting, `bytes.IndexByte` otherwise)
 and copies clean spans wholesale, so route parameters and query values
-without escapes — the common case — cost one scan and one copy. An input
-whose first escape is followed at once by another, as percent-encoded
-UTF-8 is, is decoded by a byte loop instead, without a scan and a copy
-for each escape, which goes back to the scan after eight bytes without
-one. Decoding
+without escapes — the common case — cost one scan and one copy. Once an
+escape comes fewer than four bytes after another, as in percent-encoded
+UTF-8 or a value dense in `%20` and `+`, a byte loop decodes the rest,
+without a scan and a copy for each escape, and looks for the next one
+with a scan only after eight bytes without any. Decoding
 never grows the input, so `dst` may be `s[:0]` on a common backing array
 to unescape in place; escaping can grow the input, so there `dst` must
 not alias `s`.

@@ -190,11 +190,6 @@ func appendUnescape(dst, s []byte, mode escapeMode) ([]byte, error) {
 	if cap(dst)-len(dst) < n {
 		dst = growUnescaped(dst, s)
 	}
-	if j < n-3 && s[j] == '%' && s[j+3] == '%' {
-		// One escape right after another, as in percent-encoded UTF-8: a scan for each would
-		// cost more than the bytes between them.
-		return appendUnescapeDense(dst, s, j, mode)
-	}
 	for {
 		j += i
 		dst = append(dst, s[i:j]...)
@@ -202,16 +197,11 @@ func appendUnescape(dst, s []byte, mode escapeMode) ([]byte, error) {
 			dst = append(dst, ' ')
 			i = j + 1
 		} else {
-			// s[j] == '%': the error substrings match net/url's unescape.
-			if j >= n-2 {
-				return dst[:off], url.EscapeError(s[j:])
+			b, ok := unhexEscape(s, j)
+			if !ok {
+				return dst[:off], escapeError(s, j)
 			}
-			hi := unhexTable[s[j+1]]
-			lo := unhexTable[s[j+2]]
-			if hi > 0x0F || lo > 0x0F {
-				return dst[:off], url.EscapeError(s[j : j+3])
-			}
-			dst = append(dst, hi<<4|lo)
+			dst = append(dst, b)
 			i = j + 3
 		}
 		if i == n {
@@ -225,37 +215,57 @@ func appendUnescape(dst, s []byte, mode escapeMode) ([]byte, error) {
 		if j < 0 {
 			return append(dst, s[i:]...), nil
 		}
+		if j < denseGap {
+			// Escapes this close come in numbers, as in percent-encoded UTF-8: a scan and a
+			// copy for each cost more than the bytes between them.
+			return appendUnescapeDense(dst, s, i, mode, off)
+		}
 	}
 }
 
-// growUnescaped makes room in dst for s decoded: once and to the exact size, where appending
-// would grow it again and again. Each %XX becomes one byte, and s[:0] as dst has the room.
+// unhexEscape decodes the %XX at s[i], or reports that it is cut short or not hexadecimal.
+func unhexEscape(s []byte, i int) (byte, bool) {
+	if i >= len(s)-2 {
+		return 0, false
+	}
+	hi, lo := unhexTable[s[i+1]], unhexTable[s[i+2]]
+	return hi<<4 | lo, hi|lo <= 0x0F
+}
+
+// escapeError is net/url's error for the malformed escape at s[i]: up to three bytes of it.
+func escapeError(s []byte, i int) url.EscapeError {
+	return url.EscapeError(s[i:min(i+3, len(s))])
+}
+
+// growUnescaped makes room in dst for s decoded: once and to the size of the result, where
+// appending would grow it again and again. Each %XX becomes one byte, and s[:0] as dst has the
+// room.
 func growUnescaped(dst, s []byte) []byte {
 	return slices.Grow(dst, max(len(s)-2*bytes.Count(s, []byte{'%'}), 0))
 }
 
-// denseRun is how many bytes appendUnescapeDense copies without meeting an escape before it
-// looks for the next one with the vector scan.
-const denseRun = 8
+const (
+	// denseGap is how close to the escape before it the next one has to be for the byte loop to
+	// take over: at 8, the 4 or 5 bytes between the '+' of form-encoded words cost 18 to 28%
+	// more than a scan and a copy (benchstat, 16 layouts, Go 1.26, Xeon 2.1 GHz). denseRun is
+	// how many bytes that loop copies without meeting an escape before it looks for the next
+	// one with the vector scan.
+	denseGap = 4
+	denseRun = 8
+)
 
-// appendUnescapeDense is appendUnescape from the first escape of s on, at i, a byte at a time:
-// where escapes come in clusters, a scan and a copy for each cost more than the loop.
-func appendUnescapeDense(dst, s []byte, i int, mode escapeMode) ([]byte, error) {
-	off := len(dst)
-	dst = append(dst, s[:i]...)
+// appendUnescapeDense is appendUnescape for s from i on, a byte at a time: where escapes are
+// close together, a scan and a copy for each cost more than the loop. off is where dst began.
+func appendUnescapeDense(dst, s []byte, i int, mode escapeMode, off int) ([]byte, error) {
 	for run := 0; i < len(s); {
 		c := s[i]
 		switch {
 		case c == '%':
-			if i >= len(s)-2 {
-				return dst[:off], url.EscapeError(s[i:])
+			b, ok := unhexEscape(s, i)
+			if !ok {
+				return dst[:off], escapeError(s, i)
 			}
-			hi := unhexTable[s[i+1]]
-			lo := unhexTable[s[i+2]]
-			if hi > 0x0F || lo > 0x0F {
-				return dst[:off], url.EscapeError(s[i : i+3])
-			}
-			dst = append(dst, hi<<4|lo)
+			dst = append(dst, b)
 			i += 3
 			run = 0
 		case c == '+' && mode == escapeQuery:
@@ -266,7 +276,7 @@ func appendUnescapeDense(dst, s []byte, i int, mode escapeMode) ([]byte, error) 
 			dst = append(dst, c)
 			i++
 			if run++; run == denseRun {
-				// The cluster is behind: on to the next escape, and one copy up to it.
+				// The escapes are behind: on to the next one, and one copy up to it.
 				var j int
 				if mode == escapeQuery {
 					j = IndexAny2(s[i:], '%', '+')

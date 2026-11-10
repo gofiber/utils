@@ -253,21 +253,24 @@ func Test_AppendUnescape_Randomized(t *testing.T) {
 	}
 }
 
-// Test_AppendUnescape_Clusters walks the byte loop that decodes an input whose first escape is
-// followed at once by another: its scan after a run without escapes, with and without another
-// escape behind it, a '+' in both modes, and malformed escapes in every place it reads them.
+// Test_AppendUnescape_Clusters walks the byte loop that takes over where an escape closely
+// follows another: the gap that hands over and the one that does not, its scan after a run
+// without escapes, with and without another escape behind it, a '+' in both modes, and malformed
+// escapes in every place either loop reads them.
 func Test_AppendUnescape_Clusters(t *testing.T) {
 	t.Parallel()
 	for _, in := range []string{
 		"%E4%BD%A0%E5%A5%BD",
 		"caf%C3%A9+cr%C3%A8me+br%C3%BBl%C3%A9e",
+		"+h%C3%A9llo+w%C3%B6rld", "a%20b+cd" + "a%20b+cd", "name%20is+J%C3%BCrgen+from+K%C3%B6ln",
+		// Three bytes between two escapes hand over, four do not.
+		"x%41abc%42" + "tail%43", "x%41abcd%42" + "tail%43", "x+abc+" + "tail+", "x+abcd+" + "tail+",
 		"%C3%A9" + "1234567" + "%C3%A9" + "12345678" + "%C3%A9" + "123456789" + "%41",
 		"%C3%A9" + "12345678", "%C3%A9" + "123456789", "%C3%A9" + "12345678" + "%", "ab%C3%A9" + "12345678" + "+%zz",
 		"%C3%A9+%2B+%C3%A9",
 		"%C3%A9%", "%C3%A9%4", "%C3%A9%4g", "%C3%A9%g4", "%C3%A9ab%", "%C3%A9ab%zz", "%C3%", "%C3%A", "%C3%zz",
 		"%C3%A9" + strings.Repeat("x", 40) + "%zz",
-		// Not clusters: the escape after the first one is not right behind it.
-		"%C3a%A9", "%41+%42", "a%20b+cd%", "%20%",
+		"%C3a%A9", "%41+%42", "a%20b+cd%", "%20%", "%41abcd%", "%41abcd%4", "%41abcd%zz",
 	} {
 		assertUnescapeParity(t, in)
 		for _, fn := range []func(dst, s []byte) ([]byte, error){AppendQueryUnescape[[]byte], AppendPathUnescape[[]byte]} {
@@ -407,6 +410,8 @@ func Benchmark_AppendQueryUnescape(b *testing.B) {
 		{"plain-64B", strings.Repeat("noescape", 8)},
 		{"escaped-64B", strings.Repeat("a%20b+cd", 8)},
 		{"utf8-62B", strings.Repeat("h%C3%A9llo+w%C3%B6rld%2C+", 2) + "h%C3%A9llo+w"},
+		// Escapes 4 and 5 bytes apart: just too far for the byte loop, see denseGap.
+		{"words-64B", strings.Repeat("some+words+here+", 4)},
 	}
 	for _, input := range inputs {
 		dst := make([]byte, 0, len(input.value))
