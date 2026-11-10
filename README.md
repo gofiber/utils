@@ -488,6 +488,15 @@ as a plain string because call sites pass constant tokens. Their
 on the [benchmark charts](https://gofiber.github.io/utils/benchmarks/)
 and join the catalog above on its next regeneration.
 
+Two words are compared through their XOR instead of being folded each:
+they match when the lanes that differ do so in the case bit alone and
+hold a letter, so a word that differs anywhere else is rejected in two
+operations, and one in another case costs a single range test. A token
+of 4 to 7 bytes, as `bearer `, `basic `, `gzip` and `+json` are, is two
+overlapping 4-byte windows in one word for `EqualFold`, `HasPrefixFold`
+and `HasSuffixFold` alike, and `EqualFold` packs one of 1 to 3 bytes
+from its first, middle and last byte.
+
 `IndexFold` stays linear when the haystack is built against the needle:
 for a needle of nine bytes or more, once the candidates that fail their
 verification have cost more than a fixed share of the bytes scanned, a
