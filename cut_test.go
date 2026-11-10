@@ -136,3 +136,52 @@ func Benchmark_LastCutByte(b *testing.B) {
 	})
 	_, _ = before, after
 }
+
+func Test_CutByte_StdlibParity(t *testing.T) {
+	t.Parallel()
+	for sep := range 256 {
+		c := byte(sep)
+		needle := string([]byte{c}) // a raw byte: strings.Cut compares bytes, never runes
+		forEachString(string([]byte{c, 'a', 0xe9}), 6, func(s string) {
+			before, after, found := CutByte(s, c)
+			wantBefore, wantAfter, wantFound := strings.Cut(s, needle)
+			if before != wantBefore || after != wantAfter || found != wantFound {
+				t.Fatalf("CutByte(%q, %#x) = (%q, %q, %v), strings.Cut gives (%q, %q, %v)", s, c, before, after, found, wantBefore, wantAfter, wantFound)
+			}
+
+			b := []byte(s)
+			bb, ba, bfound := CutByte(b, c)
+			wbb, wba, wfound := bytes.Cut(b, []byte(needle))
+			if bfound != wfound {
+				t.Fatalf("CutByte(bytes %q, %#x) found = %v, bytes.Cut gives %v", s, c, bfound, wfound)
+			}
+			requireSameView(t, "CutByte before", b, bb, wbb)
+			requireSameView(t, "CutByte after", b, ba, wba)
+
+			// LastCutByte has no stdlib twin: it is Cut around LastIndex.
+			lbefore, lafter, lfound := LastCutByte(s, c)
+			if i := strings.LastIndex(s, needle); i >= 0 {
+				if lbefore != s[:i] || lafter != s[i+1:] || !lfound {
+					t.Fatalf("LastCutByte(%q, %#x) = (%q, %q, %v)", s, c, lbefore, lafter, lfound)
+				}
+			} else if lbefore != s || lafter != "" || lfound {
+				t.Fatalf("LastCutByte(%q, %#x) miss = (%q, %q, %v)", s, c, lbefore, lafter, lfound)
+			}
+			lbb, lba, lbfound := LastCutByte(b, c)
+			if i := bytes.LastIndex(b, []byte(needle)); i >= 0 {
+				requireSameView(t, "LastCutByte before", b, lbb, b[:i])
+				requireSameView(t, "LastCutByte after", b, lba, b[i+1:])
+				if !lbfound {
+					t.Fatalf("LastCutByte(bytes %q, %#x) found = false", s, c)
+				}
+			} else {
+				// A miss is the whole input and a nil after-part, as bytes.Cut's.
+				requireSameView(t, "LastCutByte miss before", b, lbb, b)
+				requireSameView(t, "LastCutByte miss after", b, lba, nil)
+				if lbfound {
+					t.Fatalf("LastCutByte(bytes %q, %#x) found = true on a miss", s, c)
+				}
+			}
+		})
+	}
+}

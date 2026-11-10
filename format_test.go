@@ -440,3 +440,78 @@ func Test_Format_Sweep(t *testing.T) {
 		check(x >> (x % 64))
 	}
 }
+
+// The narrow formatters have tables and shortcuts of their own.
+func Test_Format_StrconvParity_Exhaustive(t *testing.T) {
+	t.Parallel()
+	appended := func(prefix string, got []byte, want string) bool {
+		return string(got) == prefix+want
+	}
+	checkSigned := func(n int64, narrowest int) {
+		t.Helper()
+		want := strconv.FormatInt(n, 10)
+		if narrowest <= 8 {
+			if got := FormatInt8(int8(n)); got != want {
+				t.Fatalf("FormatInt8(%d) = %q, want %q", n, got, want)
+			}
+		}
+		if narrowest <= 16 {
+			if got := FormatInt16(int16(n)); got != want {
+				t.Fatalf("FormatInt16(%d) = %q, want %q", n, got, want)
+			}
+		}
+		if got := FormatInt32(int32(n)); got != want {
+			t.Fatalf("FormatInt32(%d) = %q, want %q", n, got, want)
+		}
+		if got := FormatInt(n); got != want {
+			t.Fatalf("FormatInt(%d) = %q, want %q", n, got, want)
+		}
+		if !appended("", AppendInt(nil, n), want) || !appended("x", AppendInt([]byte("x"), n), want) {
+			t.Fatalf("AppendInt(%d) differs from %q", n, want)
+		}
+		if got := ToString(n); got != want {
+			t.Fatalf("ToString(%d) = %q, want %q", n, got, want)
+		}
+	}
+	checkUnsigned := func(n uint64, narrowest int) {
+		t.Helper()
+		want := strconv.FormatUint(n, 10)
+		if narrowest <= 8 {
+			if got := FormatUint8(uint8(n)); got != want {
+				t.Fatalf("FormatUint8(%d) = %q, want %q", n, got, want)
+			}
+		}
+		if narrowest <= 16 {
+			if got := FormatUint16(uint16(n)); got != want {
+				t.Fatalf("FormatUint16(%d) = %q, want %q", n, got, want)
+			}
+		}
+		if got := FormatUint32(uint32(n)); got != want {
+			t.Fatalf("FormatUint32(%d) = %q, want %q", n, got, want)
+		}
+		if got := FormatUint(n); got != want {
+			t.Fatalf("FormatUint(%d) = %q, want %q", n, got, want)
+		}
+		if !appended("", AppendUint(nil, n), want) || !appended("x", AppendUint([]byte("x"), n), want) {
+			t.Fatalf("AppendUint(%d) differs from %q", n, want)
+		}
+		if got := ToString(n); got != want {
+			t.Fatalf("ToString(%d) = %q, want %q", n, got, want)
+		}
+	}
+
+	for n := math.MinInt16; n <= math.MaxInt16; n++ {
+		narrowest := 16
+		if n >= math.MinInt8 && n <= math.MaxInt8 {
+			narrowest = 8
+		}
+		checkSigned(int64(n), narrowest)
+	}
+	for n := 0; n <= math.MaxUint16; n++ {
+		narrowest := 16
+		if n <= math.MaxUint8 {
+			narrowest = 8
+		}
+		checkUnsigned(uint64(n), narrowest)
+	}
+}

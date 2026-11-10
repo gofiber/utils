@@ -5,6 +5,7 @@ import (
 	"math/rand"
 	"strings"
 	"testing"
+	"unicode/utf8"
 
 	casebytes "github.com/gofiber/utils/v2/bytes"
 	"github.com/gofiber/utils/v2/internal/unsafeconv"
@@ -93,4 +94,133 @@ func asciiFoldUpper(s string) string {
 
 func asciiFoldUpperB(b []byte) []byte {
 	return []byte(asciiFoldUpper(string(b)))
+}
+
+// deprecated holds the wrappers under test, called through it because their `//go:fix inline`
+// makes vet flag direct calls.
+var deprecated = struct {
+	toLower, toUpper           func(string) string
+	toLowerBytes, toUpperBytes func([]byte) []byte
+}{ToLower, ToUpper, ToLowerBytes, ToUpperBytes}
+
+func Test_Case_StdlibParity(t *testing.T) {
+	t.Parallel()
+	check := func(s string) {
+		t.Helper()
+		ascii := utf8.ValidString(s) && IsASCII(s)
+		wantLower, wantUpper := asciiFoldLower(s), asciiFoldUpper(s)
+		if ascii && (strings.ToLower(s) != wantLower || strings.ToUpper(s) != wantUpper) {
+			t.Fatalf("the ASCII fold disagrees with the stdlib on ASCII input %q", s)
+		}
+		if got := casestrings.ToLower(s); got != wantLower {
+			t.Fatalf("strings.ToLower(%q) = %q, want %q", s, got, wantLower)
+		}
+		if got := casestrings.ToUpper(s); got != wantUpper {
+			t.Fatalf("strings.ToUpper(%q) = %q, want %q", s, got, wantUpper)
+		}
+		if got := deprecated.toLower(s); got != wantLower {
+			t.Fatalf("ToLower(%q) = %q, want %q", s, got, wantLower)
+		}
+		if got := deprecated.toUpper(s); got != wantUpper {
+			t.Fatalf("ToUpper(%q) = %q, want %q", s, got, wantUpper)
+		}
+
+		b := []byte(s)
+		if got := casebytes.ToLower(b); string(got) != wantLower {
+			t.Fatalf("bytes.ToLower(%q) = %q, want %q", s, got, wantLower)
+		}
+		if got := casebytes.ToUpper(b); string(got) != wantUpper {
+			t.Fatalf("bytes.ToUpper(%q) = %q, want %q", s, got, wantUpper)
+		}
+		if string(b) != s {
+			t.Fatalf("bytes.ToLower/ToUpper modified their input: %q became %q", s, b)
+		}
+
+		lower := []byte(s)
+		if got := casebytes.UnsafeToLower(lower); string(got) != wantLower || string(lower) != wantLower || (len(got) > 0 && &got[0] != &lower[0]) {
+			t.Fatalf("bytes.UnsafeToLower(%q) = %q, input %q, want %q in place", s, got, lower, wantLower)
+		}
+		upper := []byte(s)
+		if got := casebytes.UnsafeToUpper(upper); string(got) != wantUpper || string(upper) != wantUpper || (len(got) > 0 && &got[0] != &upper[0]) {
+			t.Fatalf("bytes.UnsafeToUpper(%q) = %q, input %q, want %q in place", s, got, upper, wantUpper)
+		}
+		lowerB, upperB := []byte(s), []byte(s)
+		if got := deprecated.toLowerBytes(lowerB); string(got) != wantLower || string(lowerB) != wantLower {
+			t.Fatalf("ToLowerBytes(%q) = %q, input %q, want %q in place", s, got, lowerB, wantLower)
+		}
+		if got := deprecated.toUpperBytes(upperB); string(got) != wantUpper || string(upperB) != wantUpper {
+			t.Fatalf("ToUpperBytes(%q) = %q, input %q, want %q in place", s, got, upperB, wantUpper)
+		}
+		lowerS, upperS := []byte(s), []byte(s)
+		if got := casestrings.UnsafeToLower(unsafeconv.UnsafeString(lowerS)); got != wantLower || string(lowerS) != wantLower {
+			t.Fatalf("strings.UnsafeToLower(%q) = %q, backing %q, want %q", s, got, lowerS, wantLower)
+		}
+		if got := casestrings.UnsafeToUpper(unsafeconv.UnsafeString(upperS)); got != wantUpper || string(upperS) != wantUpper {
+			t.Fatalf("strings.UnsafeToUpper(%q) = %q, backing %q, want %q", s, got, upperS, wantUpper)
+		}
+	}
+
+	for c := range 256 {
+		cs := string([]byte{byte(c)})
+		check(cs)
+		check("aB" + cs + "Cd")
+		check(strings.Repeat("xY", 9) + cs + strings.Repeat("Zz", 9))
+	}
+	forEachString("aAzZ@[`{\xe9\xc9", 4, check)
+	// Lengths around the word and 32-byte block sizes, the one letter to convert at every position.
+	for n := range 100 {
+		for pos := range n {
+			plain := []byte(strings.Repeat("-4/", 40)[:n])
+			up, low := bytes.Clone(plain), bytes.Clone(plain)
+			up[pos], low[pos] = 'Q', 'q'
+			check(string(up))
+			check(string(low))
+		}
+		check(strings.Repeat("-4/", 40)[:n])
+	}
+}
+
+// Test_Case_ASCIIOnly pins that case conversion stays in ASCII, where the stdlib maps every Unicode letter.
+func Test_Case_ASCIIOnly(t *testing.T) {
+	t.Parallel()
+	for _, in := range []string{"\u00e9", "\u00c9", "\u0131", "\u212a", "\u00df", "\u01c5", "\u00e9 \u00c9 123 !", "\xff\xfe"} {
+		if casestrings.ToLower(in) != in || casestrings.ToUpper(in) != in {
+			t.Fatalf("case conversion changed the non-ASCII %q", in)
+		}
+	}
+	if strings.ToUpper("\u00e9") == "\u00e9" {
+		t.Fatal("the stdlib no longer upper-cases U+00E9: the documented difference is gone")
+	}
+	if got := casestrings.ToUpper("caf\u00e9 ok"); got != "CAF\u00e9 OK" {
+		t.Fatalf("ToUpper left %q", got)
+	}
+}
+
+// Test_CaseBytes_Aliasing pins that nothing to convert returns the argument itself, where bytes.ToLower copies.
+func Test_CaseBytes_Aliasing(t *testing.T) {
+	t.Parallel()
+	for _, n := range []int{0, 1, 7, 8, 9, 31, 32, 33, 100} {
+		plain := bytes.Repeat([]byte{'a'}, n)
+		got := casebytes.ToLower(plain)
+		if n > 0 && &got[0] != &plain[0] {
+			t.Fatalf("ToLower(%d lower-case bytes) copied", n)
+		}
+		if std := bytes.ToLower(plain); n > 0 && &std[0] == &plain[0] {
+			t.Fatalf("bytes.ToLower(%d lower-case bytes) no longer copies: the documented difference is gone", n)
+		}
+
+		upper := bytes.Repeat([]byte{'A'}, n)
+		got = casebytes.ToUpper(upper)
+		if n > 0 && &got[0] != &upper[0] {
+			t.Fatalf("ToUpper(%d upper-case bytes) copied", n)
+		}
+
+		mixed := bytes.Repeat([]byte{'a'}, n)
+		if n > 0 {
+			mixed[n-1] = 'Q'
+			if res := casebytes.ToLower(mixed); &res[0] == &mixed[0] || mixed[n-1] != 'Q' {
+				t.Fatalf("ToLower(%d bytes ending in Q) did not return a fresh array", n)
+			}
+		}
+	}
 }

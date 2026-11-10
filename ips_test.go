@@ -205,3 +205,13 @@ func Benchmark_IsIPv6(b *testing.B) {
 		require.True(b, res)
 	})
 }
+
+func Test_IP_StdlibParity_Exhaustive(t *testing.T) {
+	t.Parallel()
+	check := func(s string) {
+		assertIPGrammarParity(t, s)
+		assertParseIPParity(t, s)
+	}
+	forEachString("0:.1f", 8, check)
+	forEachString("0:.%1fg", 5, check)
+}

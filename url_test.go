@@ -471,3 +471,35 @@ func Benchmark_AppendPathUnescape(b *testing.B) {
 		})
 	}
 }
+
+// Test_AppendUnescape_InPlaceParity decodes into the input itself, as documented; an error
+// consumes the input, so only the error is compared then.
+func Test_AppendUnescape_InPlaceParity(t *testing.T) {
+	t.Parallel()
+	forEachString("%+aF1\x00\xff", 6, func(s string) {
+		for _, mode := range []struct {
+			name     string
+			unescape func(string) (string, error)
+			decode   func(dst, src []byte) ([]byte, error)
+		}{
+			{"query", url.QueryUnescape, AppendQueryUnescape[[]byte]},
+			{"path", url.PathUnescape, AppendPathUnescape[[]byte]},
+		} {
+			want, wantErr := mode.unescape(s)
+			buf := []byte(s)
+			got, err := mode.decode(buf[:0], buf)
+			if wantErr != nil {
+				if err == nil || err.Error() != wantErr.Error() {
+					t.Fatalf("%s in-place unescape of %q: error = %v, net/url gives %v", mode.name, s, err, wantErr)
+				}
+				continue
+			}
+			if err != nil || string(got) != want {
+				t.Fatalf("%s in-place unescape of %q = %q, %v; net/url gives %q", mode.name, s, got, err, want)
+			}
+			if len(got) > 0 && &got[0] != &buf[0] {
+				t.Fatalf("%s in-place unescape of %q did not decode into the input", mode.name, s)
+			}
+		}
+	})
+}

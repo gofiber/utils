@@ -130,3 +130,32 @@ func Benchmark_SplitTrimSeq(b *testing.B) {
 	}
 	_ = count
 }
+
+// Test_SplitTrimSeq_StdlibParity holds SplitTrimSeq to strings.SplitSeq with TrimSpace applied and empty elements dropped.
+func Test_SplitTrimSeq_StdlibParity(t *testing.T) {
+	t.Parallel()
+	for _, sep := range []byte{',', ';', ' ', '\t', 'a', 0x00, 0xff} {
+		alphabet := string([]byte{sep, ' ', '\t', '\n', '"', 'a'})
+		forEachString(alphabet, 6, func(s string) {
+			var want []string
+			for part := range strings.SplitSeq(s, string([]byte{sep})) {
+				if part = strings.TrimSpace(part); part != "" {
+					want = append(want, part)
+				}
+			}
+			var got, gotBytes []string
+			for elem := range SplitTrimSeq(s, sep) {
+				got = append(got, elem)
+			}
+			for elem := range SplitTrimSeq([]byte(s), sep) {
+				gotBytes = append(gotBytes, string(elem))
+			}
+			if strings.Join(got, "\x00") != strings.Join(want, "\x00") || len(got) != len(want) {
+				t.Fatalf("SplitTrimSeq(%q, %#x) = %q, want %q", s, sep, got, want)
+			}
+			if strings.Join(gotBytes, "\x00") != strings.Join(want, "\x00") || len(gotBytes) != len(want) {
+				t.Fatalf("SplitTrimSeq(bytes %q, %#x) = %q, want %q", s, sep, gotBytes, want)
+			}
+		})
+	}
+}

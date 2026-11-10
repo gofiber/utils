@@ -1,9 +1,11 @@
 package utils
 
 import (
+	"bytes"
 	"math/rand"
 	"strings"
 	"testing"
+	"unicode/utf8"
 
 	"github.com/gofiber/utils/v2/internal/caseconv"
 	"github.com/stretchr/testify/require"
@@ -709,5 +711,122 @@ func Benchmark_IndexNonQuotable(b *testing.B) {
 			}
 			_ = r
 		})
+	}
+}
+
+func Test_IndexAny_StdlibParity(t *testing.T) {
+	t.Parallel()
+	needles := [][3]byte{
+		{'a', 'b', 'c'},
+		{0x00, 0x01, 0x02},
+		{0x7f, 0x80, 0x81},
+		{0xff, 0xfe, 0x7e},
+		{'"', '\\', '\t'},
+		{0x80, 0x80, 0x80},
+	}
+	for _, nd := range needles {
+		a, b, c := nd[0], nd[1], nd[2]
+		// Fillers near the needles in value or bit pattern, which an inexact SWAR zero-lane test confuses.
+		fillers := []byte{0x00, 0x7f, 0x80, 0xff, a ^ 0x80, a + 1, a - 1, b ^ 1, c + 1, 'x'}
+		for n := 0; n <= 70; n++ {
+			for _, f := range fillers {
+				base := bytes.Repeat([]byte{f}, n)
+				requireIndexAny(t, base, a, b, c)
+				for pos := range n {
+					for _, planted := range []byte{a, b, c} {
+						h := bytes.Clone(base)
+						h[pos] = planted
+						requireIndexAny(t, h, a, b, c)
+						for later := pos + 1; later < min(n, pos+3); later++ {
+							h2 := bytes.Clone(h)
+							h2[later] = a
+							requireIndexAny(t, h2, a, b, c)
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+// requireIndexAny holds IndexAny2/3 to the earliest bytes.IndexByte hit, and ASCII needles to the stdlib IndexAny.
+func requireIndexAny(tb testing.TB, h []byte, a, b, c byte) {
+	tb.Helper()
+	earliest := func(idx ...int) int {
+		best := -1
+		for _, i := range idx {
+			if i >= 0 && (best < 0 || i < best) {
+				best = i
+			}
+		}
+		return best
+	}
+	hs := string(h)
+	want2 := earliest(bytes.IndexByte(h, a), bytes.IndexByte(h, b))
+	want3 := earliest(want2, bytes.IndexByte(h, c))
+	if a < utf8.RuneSelf && b < utf8.RuneSelf && c < utf8.RuneSelf {
+		if std := bytes.IndexAny(h, string([]byte{a, b})); std != want2 {
+			tb.Fatalf("bytes.IndexAny(%q, %q%q) = %d, but the earliest IndexByte is %d", h, a, b, std, want2)
+		}
+		if std := strings.IndexAny(hs, string([]byte{a, b, c})); std != want3 {
+			tb.Fatalf("strings.IndexAny(%q, %q%q%q) = %d, but the earliest IndexByte is %d", h, a, b, c, std, want3)
+		}
+	}
+	if got := IndexAny2(h, a, b); got != want2 {
+		tb.Fatalf("IndexAny2(len %d, %#x, %#x) = %d, want %d", len(h), a, b, got, want2)
+	}
+	if got := IndexAny2(hs, a, b); got != want2 {
+		tb.Fatalf("IndexAny2(string len %d, %#x, %#x) = %d, want %d", len(h), a, b, got, want2)
+	}
+	if got := IndexAny3(h, a, b, c); got != want3 {
+		tb.Fatalf("IndexAny3(len %d, %#x, %#x, %#x) = %d, want %d", len(h), a, b, c, got, want3)
+	}
+	if got := IndexAny3(hs, a, b, c); got != want3 {
+		tb.Fatalf("IndexAny3(string len %d, %#x, %#x, %#x) = %d, want %d", len(h), a, b, c, got, want3)
+	}
+}
+
+// Test_Fold_StdlibParity_Exhaustive checks the folded searches against stdlib on lower-cased copies,
+// over small alphabets with both cases and the bytes next to the letter ranges.
+func Test_Fold_StdlibParity_Exhaustive(t *testing.T) {
+	t.Parallel()
+	check := func(s, needle string) {
+		t.Helper()
+		ls, ln := strings.ToLower(s), strings.ToLower(needle)
+		want := strings.Index(ls, ln)
+		if got := IndexFold(s, needle); got != want {
+			t.Fatalf("IndexFold(%q, %q) = %d, want %d", s, needle, got, want)
+		}
+		if got := IndexFold([]byte(s), needle); got != want {
+			t.Fatalf("IndexFold(bytes %q, %q) = %d, want %d", s, needle, got, want)
+		}
+		if got := ContainsFold(s, needle); got != (want >= 0) {
+			t.Fatalf("ContainsFold(%q, %q) = %v, want %v", s, needle, got, want >= 0)
+		}
+		if got, want := HasPrefixFold(s, needle), strings.HasPrefix(ls, ln); got != want {
+			t.Fatalf("HasPrefixFold(%q, %q) = %v, want %v", s, needle, got, want)
+		}
+		if got, want := HasSuffixFold(s, needle), strings.HasSuffix(ls, ln); got != want {
+			t.Fatalf("HasSuffixFold(%q, %q) = %v, want %v", s, needle, got, want)
+		}
+		if got, want := EqualFold(s, needle), strings.EqualFold(s, needle); got != want {
+			t.Fatalf("EqualFold(%q, %q) = %v, want %v", s, needle, got, want)
+		}
+	}
+
+	forEachString("aA@[-", 5, func(s string) {
+		forEachString("aA@[-", 3, func(needle string) { check(s, needle) })
+	})
+	forEachString("aA", 12, func(s string) {
+		forEachString("aA", 6, func(needle string) { check(s, needle) })
+	})
+	long := "abcdefghijklmnopqrstuvwxyz"
+	for n := 0; n <= len(long); n++ {
+		for start := 0; start+n <= len(long); start++ {
+			needle := long[start : start+n]
+			check(strings.ToUpper(long)+"-"+long, needle)
+			check(long[:start]+strings.ToUpper(needle)+long[start+n:], needle)
+			check(long, strings.ToUpper(needle))
+		}
 	}
 }
