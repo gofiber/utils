@@ -392,20 +392,25 @@ func Test_ByteSize_Model(t *testing.T) {
 }
 
 // Test_ByteSize_AllocatesItsLength is not parallel: it reads the allocation counters, which
-// nothing else may move. A result costs what a string of its length costs, measured rather than
-// assumed, as the race detector rounds small allocations up.
+// anything else that allocates moves too, so each figure is the lowest of several windows. A
+// result costs what a string of its length costs, measured rather than assumed, as the race
+// detector rounds small allocations up.
 func Test_ByteSize_AllocatesItsLength(t *testing.T) {
-	const runs = 1024
+	const runs, windows = 1024, 5
 	defer runtime.GOMAXPROCS(runtime.GOMAXPROCS(1))
 	var sink string
 	allocated := func(fn func()) uint64 {
-		var before, after runtime.MemStats
-		runtime.ReadMemStats(&before)
-		for range runs {
-			fn()
+		lowest := uint64(math.MaxUint64)
+		for range windows {
+			var before, after runtime.MemStats
+			runtime.ReadMemStats(&before)
+			for range runs {
+				fn()
+			}
+			runtime.ReadMemStats(&after)
+			lowest = min(lowest, (after.TotalAlloc-before.TotalAlloc)/runs)
 		}
-		runtime.ReadMemStats(&after)
-		return (after.TotalAlloc - before.TotalAlloc) / runs
+		return lowest
 	}
 	longest := []byte("1023.9KB")
 	want := allocated(func() { sink = string(longest) })
