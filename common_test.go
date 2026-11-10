@@ -5,11 +5,13 @@
 package utils
 
 import (
+	"encoding/base64"
 	"errors"
 	"math"
 	"math/big"
 	"math/rand/v2"
 	"net"
+	"net/netip"
 	"os"
 	"reflect"
 	"regexp"
@@ -980,5 +982,100 @@ func Benchmark_TokenGenerators(b *testing.B) {
 			res = SecureToken()
 		}
 		require.Len(b, res, 43)
+	})
+}
+
+var urlSafeToken = regexp.MustCompile(`^[A-Za-z0-9_-]+$`)
+
+// Test_GenerateSecureToken_EncodingParity decodes every length with base64.RawURLEncoding,
+// covering the 32-byte and general paths and all three remainders.
+func Test_GenerateSecureToken_EncodingParity(t *testing.T) {
+	t.Parallel()
+	strict := base64.RawURLEncoding.Strict() // refuses padding bits that are not zero
+	check := func(token string, n int) {
+		t.Helper()
+		require.Len(t, token, base64.RawURLEncoding.EncodedLen(n), "length %d", n)
+		require.Regexp(t, urlSafeToken, token, "length %d", n)
+		decoded, err := strict.DecodeString(token)
+		require.NoError(t, err, "length %d", n)
+		require.Len(t, decoded, n, "length %d", n)
+		if n >= 16 {
+			require.NotEqual(t, make([]byte, n), decoded, "length %d is all zero bytes", n)
+		}
+	}
+	for n := 1; n <= 130; n++ {
+		check(GenerateSecureToken(n), n)
+	}
+	check(GenerateSecureToken(1<<16), 1<<16)
+	check(SecureToken(), 32)
+	for _, n := range []int{0, -1, -1000, math.MinInt32} {
+		check(GenerateSecureToken(n), 32) // anything below one asks for the default
+	}
+
+	seen := make(map[string]struct{})
+	for range 500 {
+		seen[GenerateSecureToken(32)] = struct{}{}
+		seen[GenerateSecureToken(33)] = struct{}{}
+	}
+	require.Len(t, seen, 1000)
+}
+
+func Test_IncrementIPRange_Parity(t *testing.T) {
+	t.Parallel()
+	// The oracle is arithmetic: big-endian number plus one, wrapping to zero.
+	bump := func(ip net.IP) net.IP {
+		n := new(big.Int).SetBytes(ip)
+		n.Add(n, big.NewInt(1))
+		n.Mod(n, new(big.Int).Lsh(big.NewInt(1), uint(8*len(ip))))
+		return n.FillBytes(make([]byte, len(ip)))
+	}
+	check := func(ip net.IP) {
+		t.Helper()
+		want := bump(ip)
+		got := append(net.IP(nil), ip...)
+		IncrementIPRange(got)
+		if !got.Equal(want) || len(got) != len(ip) || string(got) != string(want) {
+			t.Fatalf("IncrementIPRange(%v) = %v, want %v", []byte(ip), []byte(got), []byte(want))
+		}
+		if addr, ok := netip.AddrFromSlice(ip); ok {
+			if next := addr.Next(); next.IsValid() && string(next.AsSlice()) != string(got) {
+				t.Fatalf("IncrementIPRange(%v) = %v, netip.Addr.Next gives %v", ip, got, next)
+			}
+		}
+	}
+
+	r := rand.New(rand.NewPCG(0x1c4, 0x7fe)) //nolint:gosec // deterministic test data
+	for _, size := range []int{4, 16} {
+		for run := 0; run <= size; run++ {
+			ip := make(net.IP, size)
+			for i := range ip {
+				ip[i] = byte(r.IntN(255)) // never 0xff, so the run below is exact
+			}
+			for i := size - run; i < size; i++ {
+				ip[i] = 0xff
+			}
+			check(ip)
+			check(make(net.IP, size))
+		}
+		for range 2000 {
+			ip := make(net.IP, size)
+			for i := range ip {
+				ip[i] = byte(r.IntN(256))
+			}
+			check(ip)
+		}
+	}
+	// The v4-in-v6 spelling is a 16-byte number here.
+	check(net.IPv4(192, 168, 1, 255))
+	check(net.IPv4(255, 255, 255, 255))
+	check(net.IPv6zero)
+	check(net.IPv6loopback)
+
+	for _, ip := range []net.IP{{0}, {0xff}, {1, 0xff}, {0xff, 0xff, 0xff}, {0, 0, 0, 0, 0}} {
+		check(ip)
+	}
+	require.NotPanics(t, func() {
+		IncrementIPRange(nil)
+		IncrementIPRange(net.IP{})
 	})
 }

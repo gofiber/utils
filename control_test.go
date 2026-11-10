@@ -5,6 +5,7 @@ import (
 	"strings"
 	"testing"
 	"unicode"
+	"unicode/utf8"
 
 	"github.com/stretchr/testify/require"
 )
@@ -101,4 +102,45 @@ func Benchmark_IndexControl(b *testing.B) {
 		})
 	}
 	_ = res
+}
+
+// Test_IndexControl_UnicodeParity holds the scans to unicode.IsControl on ASCII; the C1 range (U+0080-U+009F) is deliberately ignored.
+func Test_IndexControl_UnicodeParity(t *testing.T) {
+	t.Parallel()
+	for b := range 256 {
+		in := string([]byte{byte(b)})
+		isControl := b < utf8.RuneSelf && unicode.IsControl(rune(b))
+		want, wantExceptTab := -1, -1
+		if isControl {
+			want = 0
+			if b != '\t' {
+				wantExceptTab = 0
+			}
+		}
+		if got := IndexControl(in); got != want {
+			t.Fatalf("IndexControl(%#x) = %d, want %d", b, got, want)
+		}
+		if got := IndexControlExceptTab(in); got != wantExceptTab {
+			t.Fatalf("IndexControlExceptTab(%#x) = %d, want %d", b, got, wantExceptTab)
+		}
+
+		for n := 0; n <= 40; n++ {
+			s := strings.Repeat("a", n) + in
+			if got := IndexControl(s); got != map[bool]int{true: n, false: -1}[isControl] {
+				t.Fatalf("IndexControl(%d bytes then %#x) = %d", n, b, got)
+			}
+			if got := IndexControlExceptTab([]byte(s)); got != map[bool]int{true: n, false: -1}[isControl && b != '\t'] {
+				t.Fatalf("IndexControlExceptTab(%d bytes then %#x) = %d", n, b, got)
+			}
+		}
+	}
+
+	for r := rune(0x80); r <= 0x9f; r++ {
+		if !unicode.IsControl(r) {
+			t.Fatalf("U+%04X is no longer a control character to the stdlib", r)
+		}
+		if got := IndexControl(string(r)); got != -1 {
+			t.Fatalf("IndexControl(U+%04X) = %d, want it ignored", r, got)
+		}
+	}
 }

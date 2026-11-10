@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"strings"
 	"testing"
+	"unicode"
+	"unicode/utf8"
 
 	"github.com/stretchr/testify/require"
 )
@@ -487,5 +489,231 @@ func Test_EqualFold_Lengths(t *testing.T) {
 	for n := 1; n <= 16; n++ {
 		require.False(t, EqualFold(strings.Repeat("[", n), strings.Repeat("{", n)), "len %d", n)
 		require.False(t, EqualFold(strings.Repeat("@", n), strings.Repeat("`", n)), "len %d", n)
+	}
+}
+
+func forEachString(alphabet string, maxLen int, fn func(s string)) {
+	buf := make([]byte, 0, maxLen)
+	var walk func(depth int)
+	walk = func(depth int) {
+		fn(string(buf))
+		if depth == 0 {
+			return
+		}
+		for i := range len(alphabet) {
+			buf = append(buf, alphabet[i])
+			walk(depth - 1)
+			buf = buf[:len(buf)-1]
+		}
+	}
+	walk(maxLen)
+}
+
+// requireSameView fails unless got is want as the stdlib returns it: same bytes, nil-ness and window.
+func requireSameView(tb testing.TB, what string, in, got, want []byte) {
+	tb.Helper()
+	switch {
+	case (got == nil) != (want == nil):
+		tb.Fatalf("%s(%q): result nil = %v, stdlib nil = %v", what, in, got == nil, want == nil)
+	case !bytes.Equal(got, want):
+		tb.Fatalf("%s(%q) = %q, stdlib gives %q", what, in, got, want)
+	case cap(got) != cap(want):
+		tb.Fatalf("%s(%q): capacity %d, stdlib's %d", what, in, cap(got), cap(want))
+	case len(got) > 0 && &got[0] != &want[0]:
+		tb.Fatalf("%s(%q): not the stdlib's window of the input", what, in)
+	}
+}
+
+// requireTrimmed is requireSameView except for an empty result: bytes.Trim, TrimLeft and TrimSpace
+// return nil there (undocumented), these return an empty slice of the input, keeping TrimSpace inlinable.
+func requireTrimmed(tb testing.TB, what string, in, got, want []byte) {
+	tb.Helper()
+	if len(want) > 0 {
+		requireSameView(tb, what, in, got, want)
+		return
+	}
+	if len(got) != 0 {
+		tb.Fatalf("%s(%q) = %q, stdlib gives nothing", what, in, got)
+	}
+	if (got == nil) != (in == nil) {
+		tb.Fatalf("%s(%q): an empty result must be a slice of the input, so nil only for nil; got nil = %v for input nil = %v", what, in, got == nil, in == nil)
+	}
+}
+
+func refTrimLeft(s string, c byte) string {
+	for len(s) > 0 && s[0] == c {
+		s = s[1:]
+	}
+	return s
+}
+
+func refTrimRight(s string, c byte) string {
+	for len(s) > 0 && s[len(s)-1] == c {
+		s = s[:len(s)-1]
+	}
+	return s
+}
+
+func Test_Trim_StdlibParity(t *testing.T) {
+	t.Parallel()
+	for cut := range 256 {
+		c := byte(cut)
+		cutset := string([]byte{c})
+		if c < utf8.RuneSelf {
+			// Empty and nil inputs: bytes.TrimRight returns its input, the others nil.
+			for _, in := range [][]byte{{}, nil} {
+				requireTrimmed(t, "TrimLeft", in, TrimLeft(in, c), bytes.TrimLeft(in, cutset))
+				requireSameView(t, "TrimRight", in, TrimRight(in, c), bytes.TrimRight(in, cutset))
+				requireTrimmed(t, "Trim", in, Trim(in, c), bytes.Trim(in, cutset))
+			}
+		}
+		forEachString(string([]byte{c, 'a', ' ', 0xe9}), 5, func(s string) {
+			wantLeft, wantRight, wantBoth := refTrimLeft(s, c), refTrimRight(s, c), refTrimRight(refTrimLeft(s, c), c)
+			if c < utf8.RuneSelf {
+				// Below 0x80 the stdlib's cutset is the byte; above it, malformed UTF-8 matching every malformed byte.
+				if strings.TrimLeft(s, cutset) != wantLeft || strings.TrimRight(s, cutset) != wantRight || strings.Trim(s, cutset) != wantBoth {
+					t.Fatalf("reference trims disagree with the stdlib for %q cutset %q", s, cutset)
+				}
+				b := []byte(s)
+				requireTrimmed(t, "TrimLeft", b, TrimLeft(b, c), bytes.TrimLeft(b, cutset))
+				requireSameView(t, "TrimRight", b, TrimRight(b, c), bytes.TrimRight(b, cutset))
+				requireTrimmed(t, "Trim", b, Trim(b, c), bytes.Trim(b, cutset))
+			}
+			if got := TrimLeft(s, c); got != wantLeft {
+				t.Fatalf("TrimLeft(%q, %#x) = %q, want %q", s, c, got, wantLeft)
+			}
+			if got := TrimRight(s, c); got != wantRight {
+				t.Fatalf("TrimRight(%q, %#x) = %q, want %q", s, c, got, wantRight)
+			}
+			if got := Trim(s, c); got != wantBoth {
+				t.Fatalf("Trim(%q, %#x) = %q, want %q", s, c, got, wantBoth)
+			}
+			b := []byte(s)
+			if got := TrimLeft(b, c); string(got) != wantLeft || (len(got) > 0 && &got[0] != &b[len(b)-len(wantLeft)]) {
+				t.Fatalf("TrimLeft(bytes %q, %#x) = %q, want the tail %q", s, c, got, wantLeft)
+			}
+			if got := TrimRight(b, c); string(got) != wantRight || cap(got) != cap(b) {
+				t.Fatalf("TrimRight(bytes %q, %#x) = %q (cap %d), want the head %q", s, c, got, cap(got), wantRight)
+			}
+			if got := Trim(b, c); string(got) != wantBoth {
+				t.Fatalf("Trim(bytes %q, %#x) = %q, want %q", s, c, got, wantBoth)
+			}
+		})
+	}
+}
+
+func Test_TrimSpace_StdlibParity(t *testing.T) {
+	t.Parallel()
+	// Whitespace and its neighbors in a table or range test.
+	forEachString("\t\n\v\f\r \x00\x08\x0e\x1f\x7f!a", 5, func(s string) {
+		if got, want := TrimSpace(s), strings.TrimSpace(s); got != want {
+			t.Fatalf("TrimSpace(%q) = %q, stdlib gives %q", s, got, want)
+		}
+		b := []byte(s)
+		requireTrimmed(t, "TrimSpace", b, TrimSpace(b), bytes.TrimSpace(b))
+	})
+	requireTrimmed(t, "TrimSpace(empty)", []byte{}, TrimSpace([]byte{}), bytes.TrimSpace([]byte{}))
+	requireTrimmed(t, "TrimSpace(nil)", nil, TrimSpace([]byte(nil)), bytes.TrimSpace(nil))
+
+	type word string
+	type blob []byte
+	if got := TrimSpace(word(" \tx\n")); got != "x" {
+		t.Fatalf("TrimSpace(word) = %q", got)
+	}
+	if got := TrimSpace(blob(" \tx\n")); string(got) != "x" {
+		t.Fatalf("TrimSpace(blob) = %q", got)
+	}
+}
+
+// Test_TrimSpace_OnlyASCIIWhitespace pins the deliberate difference: only the six ASCII whitespace
+// bytes are trimmed, not Unicode spaces such as U+00A0.
+func Test_TrimSpace_OnlyASCIIWhitespace(t *testing.T) {
+	t.Parallel()
+	for r := rune(utf8.RuneSelf); r <= unicode.MaxRune; r++ {
+		if !unicode.IsSpace(r) {
+			continue
+		}
+		in := " " + string(r) + "x" + string(r) + " "
+		want := string(r) + "x" + string(r)
+		if got := TrimSpace(in); got != want {
+			t.Fatalf("TrimSpace(%q) = %q, want %q", in, got, want)
+		}
+		if got := TrimSpace([]byte(in)); string(got) != want {
+			t.Fatalf("TrimSpace(bytes %q) = %q, want %q", in, got, want)
+		}
+		if strings.TrimSpace(in) != "x" {
+			t.Fatalf("the stdlib no longer trims U+%04X: the documented difference is gone", r)
+		}
+	}
+	// A lone byte above 0x7F is no space to either (0x85, 0xA0 too): the stdlib reads it as malformed UTF-8.
+	for b := utf8.RuneSelf; b < 256; b++ {
+		for _, in := range []string{string([]byte{byte(b)}), " " + string([]byte{byte(b)}) + " ", "x" + string([]byte{byte(b)})} {
+			if got, want := TrimSpace(in), strings.TrimSpace(in); got != want {
+				t.Fatalf("TrimSpace(%q) = %q, stdlib gives %q", in, got, want)
+			}
+		}
+	}
+	if got := TrimSpace("\u00a0 x \u00a0"); got != "\u00a0 x \u00a0" {
+		t.Fatalf("TrimSpace left %q", got)
+	}
+}
+
+func Test_EqualFold_StdlibParity(t *testing.T) {
+	t.Parallel()
+	const edges = "aAzZ@[`{1"
+	forEachString(edges, 3, func(a string) {
+		forEachString(edges, 3, func(b string) {
+			want := strings.EqualFold(a, b)
+			if got := EqualFold(a, b); got != want {
+				t.Fatalf("EqualFold(%q, %q) = %v, stdlib gives %v", a, b, got, want)
+			}
+			if got := EqualFold([]byte(a), []byte(b)); got != want {
+				t.Fatalf("EqualFold(bytes %q, %q) = %v, stdlib gives %v", a, b, got, want)
+			}
+		})
+	})
+
+	for n := 1; n <= 40; n++ {
+		base := []byte(strings.Repeat("aBcDeFgH", 6)[:n])
+		for pos := range n {
+			for v := range 256 {
+				other := bytes.Clone(base)
+				other[pos] = byte(v)
+				want := asciiFoldLower(string(base)) == asciiFoldLower(string(other))
+				if v < utf8.RuneSelf {
+					if std := bytes.EqualFold(base, other); std != want {
+						t.Fatalf("the stdlib disagrees with the ASCII fold on %q and %q", base, other)
+					}
+				}
+				if got := EqualFold(base, other); got != want {
+					t.Fatalf("EqualFold(%q, %q) = %v, want %v", base, other, got, want)
+				}
+				if got := EqualFold(string(other), string(base)); got != want {
+					t.Fatalf("EqualFold(%q, %q) = %v, want %v", other, base, got, want)
+				}
+			}
+		}
+	}
+}
+
+// Test_EqualFold_OnlyASCIIFolds pins the deliberate difference: the stdlib's Unicode folding relates letters of different bytes.
+func Test_EqualFold_OnlyASCIIFolds(t *testing.T) {
+	t.Parallel()
+	for _, tc := range [][2]string{
+		{"k", "\u212a"}, // KELVIN SIGN folds to k
+		{"s", "\u017f"}, // LONG S folds to s
+		{"\u00e9", "\u00c9"},
+		{"\u03c3", "\u03c2"},
+		{"\u01c5", "\u01c6"},
+	} {
+		if !strings.EqualFold(tc[0], tc[1]) {
+			t.Fatalf("the stdlib no longer folds %q and %q: the documented difference is gone", tc[0], tc[1])
+		}
+		if EqualFold(tc[0], tc[1]) || EqualFold([]byte(tc[0]), []byte(tc[1])) {
+			t.Fatalf("EqualFold(%q, %q) = true, want ASCII-only folding", tc[0], tc[1])
+		}
+		if !EqualFold(tc[0], tc[0]) {
+			t.Fatalf("EqualFold(%q, %q) = false for identical bytes", tc[0], tc[0])
+		}
 	}
 }

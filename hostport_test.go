@@ -106,3 +106,13 @@ func Benchmark_SplitHostPort(b *testing.B) {
 	_ = host + port
 	_ = ok
 }
+
+func Test_SplitHostPort_StdlibParity_Exhaustive(t *testing.T) {
+	t.Parallel()
+	forEachString("[]:%a", 8, func(s string) {
+		checkSplitHostPort(t, s)
+	})
+	forEachString("[]:%a1. \x00", 5, func(s string) {
+		checkSplitHostPort(t, s)
+	})
+}
