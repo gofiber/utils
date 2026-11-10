@@ -258,6 +258,14 @@ func Test_SplitHostPort_StdlibParity_Exhaustive(t *testing.T) {
 	forEachString("[]:%a1. \x00", 5, func(s string) {
 		checkSplitHostPort(t, s)
 	})
+	// The word scan: every arrangement of the four bytes that matter in six positions, moved
+	// across one, two and three words and both sides of the overlapping last one.
+	pads := []struct{ before, after int }{{0, 2}, {2, 0}, {1, 4}, {7, 0}, {0, 8}, {8, 3}, {3, 9}, {11, 7}}
+	forEachString("[]:a", 6, func(s string) {
+		for _, pad := range pads {
+			checkSplitHostPort(t, strings.Repeat("h", pad.before)+s+strings.Repeat("p", pad.after))
+		}
+	})
 }
 
 func Test_IP_StdlibParity_Exhaustive(t *testing.T) {

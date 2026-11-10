@@ -671,11 +671,13 @@ spaces alone.
 `SplitHostPort` splits `host:port`, `host%zone:port`, `[host]:port`, and
 `[host%zone]:port` with exactly `net.SplitHostPort`'s acceptance rules
 (pinned by fuzzing against it), but reports failure with a `bool` instead
-of constructing a `*net.AddrError`, and accepts byte slices. Valid input
-costs the same as the stdlib — the scan is the same three `IndexByte`
-calls — so the win is on the rejection path, where a malformed `Host` or
-`Forwarded` value no longer costs an allocation, and on `[]byte` input,
-which no longer needs a string conversion first.
+of constructing a `*net.AddrError`, and accepts byte slices. Without
+brackets, the last colon has to be the only `:`, `[` or `]` there is, so
+an input of eight bytes or more is one pass over its words that counts
+them, where the stdlib scans it four times; bracketed and shorter inputs
+keep the stdlib's `IndexByte` scans. A malformed `Host` or
+`Forwarded` value costs no allocation, and `[]byte` input needs no
+string conversion first.
 
 ## List field iteration
 

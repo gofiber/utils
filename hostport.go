@@ -2,8 +2,10 @@ package utils
 
 import (
 	"bytes"
+	"math/bits"
 
 	"github.com/gofiber/utils/v2/internal/unsafeconv"
+	"github.com/gofiber/utils/v2/swar"
 )
 
 // SplitHostPort splits "host:port", "[host]:port", and their %zone forms
@@ -12,6 +14,30 @@ import (
 // and the parts alias hostport.
 func SplitHostPort[S byteSeq](hostport S) (host, port S, ok bool) { //nolint:nonamedreturns // the two same-typed parts are only readable named
 	b := unsafeconv.Bytes(hostport)
+	if n := len(b); n >= 8 && b[0] != '[' {
+		// Without brackets the last colon must be the only ':', '[' or ']' there is: one pass
+		// over the words counts them.
+		count, last := 0, 0
+		i := 0
+		for ; i <= n-8; i += 8 {
+			if m := hostPortLanes(swar.Load8(b, i)); m != 0 {
+				count += bits.OnesCount64(m)
+				last = i + swar.LastLane(m)
+			}
+		}
+		if i < n {
+			// The last word overlaps the one before it, so only its new lanes count.
+			old := uint(8 - (n - i))
+			if m := hostPortLanes(swar.Load8(b, n-8)) &^ (1<<(8*old) - 1); m != 0 {
+				count += bits.OnesCount64(m)
+				last = n - 8 + swar.LastLane(m)
+			}
+		}
+		if count != 1 || b[last] != ':' {
+			return host, port, false
+		}
+		return hostport[:last], hostport[last+1:], true
+	}
 	// The port starts after the last colon.
 	i := bytes.LastIndexByte(b, ':')
 	if i < 0 {
@@ -32,4 +58,10 @@ func SplitHostPort[S byteSeq](hostport S) (host, port S, ok bool) { //nolint:non
 		return host, port, false
 	}
 	return hostport[j:hostEnd], hostport[i+1:], true
+}
+
+// hostPortLanes flags the lanes of w that hold a ':', a '[' or a ']', exactly per lane. At cost
+// 78 of the inlining budget 80 it has no room for more.
+func hostPortLanes(w uint64) uint64 {
+	return swar.MatchByteMask(w, ':') | swar.MatchByteMask(w, '[') | swar.MatchByteMask(w, ']')
 }
