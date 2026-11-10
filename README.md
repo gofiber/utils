@@ -602,9 +602,17 @@ trusted-proxy checks parse an IP on every request in Fiber.
 `CanonicalHeaderKey` Title-Cases an HTTP header key exactly like
 `net/http.CanonicalHeaderKey`, including its return-unchanged guard for
 keys containing non-token bytes. Already-canonical keys — the common case
-on receive paths — are validated in a single table pass and returned
-as-is with zero allocations for strings and byte slices alike. Keys that
-do need rewriting cost one allocation; note that for the ~40 header names
+on receive paths — are validated a word at a time and returned
+as-is with zero allocations for strings and byte slices alike: in a key
+of letters, digits and hyphens, as nearly all are, a letter is in the
+wrong case exactly where its case bit agrees with "follows a hyphen",
+which three lane masks settle for eight bytes at once. A key with any
+other token byte, such as `_`, takes the table pass it always took, a
+few nanoseconds later for the word test that turned it away
+(`canonical-underscore` in the benchmark), and one of fewer than four
+bytes takes nothing else. Keys that
+do need rewriting cost one allocation, and flipping that bit is the whole
+rewrite; note that for the ~40 header names
 in the stdlib's interning table the stdlib returns a cached string
 without allocating, so this helper's edge there is time, not allocations.
 

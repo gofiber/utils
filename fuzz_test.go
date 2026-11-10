@@ -333,6 +333,9 @@ func FuzzGetMIME(f *testing.F) {
 func FuzzCanonicalHeaderKey(f *testing.F) {
 	f.Add("content-type")
 	f.Add("Content-Type")
+	f.Add("access-control-Allow-origin")
+	f.Add("x-b3-traceid-")
+	f.Add("X_request_id")
 	f.Add("x--double--dash")
 	f.Add("-leading")
 	f.Add("bad key")

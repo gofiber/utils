@@ -59,6 +59,10 @@ func Benchmark_CanonicalHeaderKey(b *testing.B) {
 		{"canonical", "Content-Type"},
 		{"common-lower", "content-type"},
 		{"custom-lower", "x-custom-request-id"},
+		{"canonical-short", "Host"},
+		{"canonical-long", "Access-Control-Allow-Origin"},
+		// A token byte that is no letter, digit or hyphen takes the table loop.
+		{"canonical-underscore", "X_request_id"},
 	}
 	for _, input := range inputs {
 		b.Run(input.name+"/fiber", func(b *testing.B) {
