@@ -259,8 +259,10 @@ func Test_SplitHostPort_StdlibParity_Exhaustive(t *testing.T) {
 		checkSplitHostPort(t, s)
 	})
 	// The word scan: every arrangement of the four bytes that matter in six positions, moved
-	// across one, two and three words and both sides of the overlapping last one.
-	pads := []struct{ before, after int }{{0, 2}, {2, 0}, {1, 4}, {7, 0}, {0, 8}, {8, 3}, {3, 9}, {11, 7}}
+	// across one, two and three words and both sides of the overlapping last one, and to both
+	// sides of hostPortWordMax, the length at which the scans take over again.
+	const m = hostPortWordMax - 6 // the padding that makes the six bytes the longest input of the word scan
+	pads := []struct{ before, after int }{{0, 2}, {2, 0}, {1, 4}, {7, 0}, {0, 8}, {8, 3}, {3, 9}, {11, 7}, {m, 0}, {0, m}, {m + 1, 0}, {20, m - 14}}
 	forEachString("[]:a", 6, func(s string) {
 		for _, pad := range pads {
 			checkSplitHostPort(t, strings.Repeat("h", pad.before)+s+strings.Repeat("p", pad.after))

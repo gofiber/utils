@@ -673,9 +673,10 @@ spaces alone.
 (pinned by fuzzing against it), but reports failure with a `bool` instead
 of constructing a `*net.AddrError`, and accepts byte slices. Without
 brackets, the last colon has to be the only `:`, `[` or `]` there is, so
-an input of eight bytes or more is one pass over its words that counts
-them, where the stdlib scans it four times; bracketed and shorter inputs
-keep the stdlib's `IndexByte` scans. A malformed `Host` or
+an input of 8 to 40 bytes is one pass over its words that counts
+them, where the stdlib scans it four times; bracketed, shorter and
+longer inputs keep the stdlib's `IndexByte` scans, which are vectorized
+and overtake the word pass on a long valid `host:port`. A malformed `Host` or
 `Forwarded` value costs no allocation, and `[]byte` input needs no
 string conversion first.
 

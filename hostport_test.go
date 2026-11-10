@@ -84,6 +84,8 @@ func Benchmark_SplitHostPort(b *testing.B) {
 		{"host-port", "example.com:8080"},
 		{"ipv6-port", "[2001:db8::1]:8080"},
 		{"missing-port", "example.com"},
+		// Longer than hostPortWordMax: the scans take it, as they did.
+		{"long-host-port", "internal-load-balancer-1234567890.eu-central-1.elb.amazonaws.com:8443"},
 	}
 	var host, port string
 	var ok bool

@@ -14,7 +14,7 @@ import (
 // and the parts alias hostport.
 func SplitHostPort[S byteSeq](hostport S) (host, port S, ok bool) { //nolint:nonamedreturns // the two same-typed parts are only readable named
 	b := unsafeconv.Bytes(hostport)
-	if n := len(b); n >= 8 && b[0] != '[' {
+	if n := len(b); n >= 8 && n <= hostPortWordMax && b[0] != '[' {
 		// Without brackets the last colon must be the only ':', '[' or ']' there is: one pass
 		// over the words counts them.
 		count, last := 0, 0
@@ -59,6 +59,12 @@ func SplitHostPort[S byteSeq](hostport S) (host, port S, ok bool) { //nolint:non
 	}
 	return hostport[j:hostEnd], hostport[i+1:], true
 }
+
+// hostPortWordMax is the longest input the word pass takes. The IndexByte scans that take the
+// longer ones are vectorized and overtake it on a valid host:port: about level at 40 and at 48
+// bytes (-4% and +8%, neither significant), it costs 18% at 56, 123% at 128 and 214% at 255
+// (benchstat, ten layouts, Go 1.26, Xeon 2.1 GHz).
+const hostPortWordMax = 40
 
 // hostPortLanes flags the lanes of w that hold a ':', a '[' or a ']', exactly per lane. At cost
 // 78 of the inlining budget 80 it has no room for more.

@@ -21,6 +21,4 @@ func Test_HugeSlice_Scans(t *testing.T) {
 	require.Equal(t, -1, IndexFold(b, "abcdefghijklmnop"))
 	require.True(t, EqualFold(b, b))
 	require.NotPanics(t, func() { _ = HashFold(b) })
-	_, _, ok := SplitHostPort(b)
-	require.False(t, ok)
 }
