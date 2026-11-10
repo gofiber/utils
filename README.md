@@ -557,10 +557,13 @@ this group for Fiber.
 `AppendQueryUnescape`/`AppendPathUnescape` produce byte-identical results
 (and, for the unescape pair, identical `url.EscapeError` values) to their
 `net/url` counterparts, append-style and without allocating when `dst`
-has the room. When it does not, `dst` grows once, to the size of the
-result: the bytes to escape, or the `%` to decode, are counted first,
+has the room. A `dst` too small for `s` itself grows once, to the size of
+the result: the bytes to escape, or the `%` to decode, are counted first,
 where appending piece by piece grew a `nil` `dst` four or five times for
-a 64-byte value. Nothing is written past the result.
+a 64-byte value. One that holds `s` is not counted, so that a reused
+buffer with room for the result pays nothing for that, and grows as
+`append` does should the escapes not fit. Nothing is written past the
+result.
 The escape tables are pinned to `net/url.shouldEscape` by exhaustive
 per-byte tests, and bytes that need no escaping are skipped a word at a
 time: eight lookups from one load, and one branch. Unescaping jumps

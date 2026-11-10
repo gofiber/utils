@@ -284,7 +284,8 @@ func Test_AppendUnescape_Clusters(t *testing.T) {
 }
 
 // Test_AppendEscape_GrowsOnce is not parallel: AllocsPerRun needs nothing else allocating. A
-// dst too small grows once, whatever the number of escapes; one with the room does not.
+// dst too small for the input grows once, whatever the number of escapes; one with room for the
+// result does not grow.
 func Test_AppendEscape_GrowsOnce(t *testing.T) {
 	plain := strings.Repeat("a b&c=d/\u00e9 ", 40)
 	escaped := string(AppendQueryEscape(nil, plain))
@@ -305,6 +306,9 @@ func Test_AppendEscape_GrowsOnce(t *testing.T) {
 		require.InDelta(t, once, testing.AllocsPerRun(20, func() { sink = tc.fn(nil) }), 0, tc.name)
 		require.InDelta(t, once, testing.AllocsPerRun(20, func() { sink = tc.fn(small) }), 0, tc.name)
 		require.InDelta(t, 0, testing.AllocsPerRun(20, func() { sink = tc.fn(roomy) }), 0, tc.name)
+		// Room for the result and no more is room enough.
+		fit := make([]byte, 0, len(tc.fn(nil)))
+		require.InDelta(t, 0, testing.AllocsPerRun(20, func() { sink = tc.fn(fit) }), 0, tc.name)
 		// Grown to its size, not to the next power of two: the size classes are an eighth apart.
 		require.Less(t, cap(tc.fn(nil)), len(tc.fn(nil))*5/4, tc.name)
 	}
@@ -334,7 +338,8 @@ func Benchmark_AppendQueryEscape(b *testing.B) {
 		{"words-64B", strings.Repeat("some words here ", 4)},
 	}
 	for _, input := range inputs {
-		dst := make([]byte, 0, 3*len(input.value))
+		// A dst that just holds the result, as a reused buffer comes to be: nothing to grow.
+		dst := make([]byte, 0, len(url.QueryEscape(input.value)))
 		b.Run(input.name+"/fiber", func(b *testing.B) {
 			b.ReportAllocs()
 			for b.Loop() {

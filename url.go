@@ -63,14 +63,14 @@ func buildEscapeTable(alsoSafe string) [256]uint8 {
 }
 
 // AppendQueryEscape appends s to dst, percent-encoded exactly like net/url.QueryEscape
-// (space becomes '+'). dst must not alias s; if it is too small it grows once, to the size of
-// the result.
+// (space becomes '+'). dst must not alias s. One that cannot hold s grows once, to the size of
+// the result; one that holds s but not the escapes too grows as append does.
 func AppendQueryEscape[S byteSeq](dst []byte, s S) []byte {
 	return appendEscape(dst, unsafeconv.Bytes(s), &queryEscapeTable, escapeQuery)
 }
 
 // AppendPathEscape appends s to dst escaped as one path segment, exactly like net/url.PathEscape.
-// dst must not alias s.
+// dst must not alias s, and grows as in AppendQueryEscape.
 func AppendPathEscape[S byteSeq](dst []byte, s S) []byte {
 	return appendEscape(dst, unsafeconv.Bytes(s), &pathEscapeTable, escapePath)
 }
@@ -78,16 +78,16 @@ func AppendPathEscape[S byteSeq](dst []byte, s S) []byte {
 // AppendPathSegmentsEscape appends the multi-segment path s to dst, escaping each segment
 // like AppendPathEscape but keeping the '/' separators. Empty and dot segments pass through
 // unchanged, so clean or reject untrusted input before appending it under a fixed prefix.
-// dst must not alias s.
+// dst must not alias s, and grows as in AppendQueryEscape.
 func AppendPathSegmentsEscape[S byteSeq](dst []byte, s S) []byte {
 	return appendEscape(dst, unsafeconv.Bytes(s), &pathSegmentsEscapeTable, escapePath)
 }
 
-// escapesInWord is nonzero if any of the eight bytes of w is to be escaped: eight lookups and
-// one branch from one load, where a loop over the bytes loads and branches for each.
-func escapesInWord(w uint64, escape *[256]uint8) uint8 {
-	return escape[byte(w)] | escape[byte(w>>8)] | escape[byte(w>>16)] | escape[byte(w>>24)] |
-		escape[byte(w>>32)] | escape[byte(w>>40)] | escape[byte(w>>48)] | escape[w>>56]
+// escapesInWord is how many of the eight bytes of w are to be escaped: eight lookups from one
+// load, without a branch, where a loop over the bytes loads and branches for each.
+func escapesInWord(w uint64, escape *[256]uint8) int {
+	return int(escape[byte(w)]) + int(escape[byte(w>>8)]) + int(escape[byte(w>>16)]) + int(escape[byte(w>>24)]) +
+		int(escape[byte(w>>32)]) + int(escape[byte(w>>40)]) + int(escape[byte(w>>48)]) + int(escape[w>>56])
 }
 
 // indexEscape returns the index of the first byte of s, from i on, that is to be escaped, or len(s).
@@ -106,8 +106,12 @@ func indexEscape(s []byte, i int, escape *[256]uint8) int {
 // escapedLen returns the length of s escaped: two more bytes for each one written as %XX.
 func escapedLen(s []byte, escape *[256]uint8, mode escapeMode) int {
 	hex := 0
-	for _, c := range s {
-		hex += int(escape[c])
+	i := 0
+	for ; i <= len(s)-8; i += 8 {
+		hex += escapesInWord(swar.Load8(s, i), escape)
+	}
+	for ; i < len(s); i++ {
+		hex += int(escape[s[i]])
 	}
 	if mode == escapeQuery {
 		hex -= bytes.Count(s, []byte{' '}) // a space becomes a '+'
@@ -125,9 +129,10 @@ func appendEscape(dst, s []byte, escape *[256]uint8, mode escapeMode) []byte {
 	if i == n {
 		return append(dst, s...) // nothing to escape, the common case: one scan, one copy
 	}
-	if cap(dst)-len(dst) < i+3*(n-i) {
-		// dst may be too small: grow it once, to the exact size, where appending would grow it
-		// again and again.
+	if cap(dst)-len(dst) < n {
+		// dst cannot hold s, let alone s escaped: grow it once, to the size of the result,
+		// where appending would grow it again and again. A dst that holds s is not counted,
+		// which would cost one that holds the result too a pass over s for nothing.
 		dst = slices.Grow(dst, i+escapedLen(s[i:], escape, mode))
 	}
 	dst = append(dst, s[:i]...)
@@ -165,7 +170,7 @@ func AppendQueryUnescape[S byteSeq](dst []byte, s S) ([]byte, error) {
 }
 
 // AppendPathUnescape appends the decoded path component s to dst, like net/url.PathUnescape
-// ('+' is kept). Error and aliasing behavior match AppendQueryUnescape.
+// ('+' is kept). Error, aliasing and growth behavior match AppendQueryUnescape.
 func AppendPathUnescape[S byteSeq](dst []byte, s S) ([]byte, error) {
 	return appendUnescape(dst, unsafeconv.Bytes(s), escapePath)
 }
