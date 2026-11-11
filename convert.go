@@ -47,32 +47,43 @@ func ByteSize(bytes uint64) string {
 	if bytes == 0 {
 		return "0B"
 	}
+	return formatByteSize(bytes)
+}
 
-	buf := make([]byte, 0, 16)
+// formatByteSize is ByteSize for a size above zero, apart so that the zero case inlines.
+func formatByteSize(bytes uint64) string {
+	// Written right to left on the stack, so the string is allocated at its own length: the
+	// longest, 1023.9KB, is 8 bytes.
+	var buf [8]byte
+	i := len(buf) - 1
+	buf[i] = 'B'
+	whole := bytes
 	exp := (bits.Len64(bytes) - 1) / 10 // 0 for B, 1 for KB, ... 6 for EB
-	if exp == 0 {
-		buf = AppendUint(buf, bytes)
-		buf = append(buf, 'B')
-		return UnsafeString(buf)
+	if exp > 0 {
+		div := uint64(1) << (10 * exp)
+		// Tenths of the unit, rounded half up. No uint64 overflows:
+		// (bytes%div)*10 + div/2 stays below 1.21e19.
+		scaled := (bytes/div)*10 + ((bytes%div)*10+div/2)/div
+		if scaled >= 1024*10 {
+			// 1023.95 or more of a unit rounds to 1024.0, which is 1.0 of the next; EB tops out at 16.
+			scaled = 10
+			exp++
+		}
+		i--
+		buf[i] = "KMGTPE"[exp-1]
+		whole = scaled / 10
+		if fractional := scaled % 10; fractional > 0 {
+			i -= 2
+			buf[i], buf[i+1] = '.', byte(fractional)+'0'
+		}
 	}
-
-	div := uint64(1) << (10 * exp)
-	// Tenths of the unit, rounded half up. No uint64 overflows:
-	// (bytes%div)*10 + div/2 stays below 1.21e19.
-	scaled := (bytes/div)*10 + ((bytes%div)*10+div/2)/div
-	if scaled >= 1024*10 {
-		// 1023.95 or more of a unit rounds to 1024.0, which is 1.0 of the next; EB tops out at 16.
-		scaled = 10
-		exp++
+	for ; whole >= 10; whole /= 10 { // at most 1023
+		i--
+		buf[i] = byte(whole%10) + '0'
 	}
-
-	buf = AppendUint(buf, scaled/10)
-	if fractional := scaled % 10; fractional > 0 {
-		buf = append(buf, '.')
-		buf = AppendUint(buf, fractional)
-	}
-	buf = append(buf, "KMGTPE"[exp-1], 'B')
-	return UnsafeString(buf)
+	i--
+	buf[i] = byte(whole) + '0'
+	return string(buf[i:])
 }
 
 // ToString converts arg to a string. A time.Time, alone or in a slice or array, uses timeFormat[0],

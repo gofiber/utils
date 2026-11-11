@@ -231,15 +231,17 @@ func foldPrep(needle string) foldedNeedle {
 // foldNeedle lower-cases needle (len 1..8) into one little-endian word, lanes past it zero.
 func foldNeedle(needle string) uint64 {
 	k := len(needle)
-	if k == 8 {
-		return swar.ToLowerWord(swar.Load8(needle, 0))
-	}
-	table := caseconv.ToLowerTable
 	var word uint64
-	for j := k - 1; j >= 0; j-- {
-		word = word<<8 | uint64(table[needle[j]])
+	switch {
+	case k == 8:
+		word = swar.Load8(needle, 0)
+	case k >= 4:
+		// Two 4-byte windows; where they overlap, both hold the same bytes.
+		word = uint64(load4(needle, 0)) | uint64(load4(needle, k-4))<<(8*(k-4))
+	default:
+		word = uint64(needle[0]) | uint64(needle[k>>1])<<(8*(k>>1)) | uint64(needle[k-1])<<(8*(k-1))
 	}
-	return word
+	return swar.ToLowerWord(word)
 }
 
 // foldedWindowAt requires len(s) >= 8 and the window at pos to fit in s.
@@ -252,19 +254,36 @@ func foldedWindowAt[S byteSeq](s S, pos int, lenMask uint64) uint64 {
 	return w & lenMask
 }
 
+// caseBitLanes has the bit that tells 'a' from 'A' in every lane; caseBitLanes32 in four.
+const (
+	caseBitLanes   = 0x20 * swar.Ones
+	caseBitLanes32 = 0x20202020
+)
+
+// foldEqualWords reports whether x and y hold the same bytes lane for lane, ASCII letters
+// compared without case.
+func foldEqualWords(x, y uint64) bool {
+	d := x ^ y
+	if d&^caseBitLanes != 0 {
+		return false // a lane differs in more than the case bit; only a shortcut for the test below
+	}
+	// The lanes that differ do so in the case bit alone, which is a match only for a letter.
+	return d&^(swar.MatchRangeMask(x|caseBitLanes, 'a', 'z')>>2) == 0
+}
+
 // foldEqualAt requires len(needle) >= 8 and s[pos:pos+len(needle)] within s.
 func foldEqualAt[S byteSeq](s S, pos int, needle string) bool {
 	k := len(needle)
 	i := 0
 	for ; i <= k-8; i += 8 {
-		if swar.ToLowerWord(swar.Load8(s, pos+i)) != swar.ToLowerWord(swar.Load8(needle, i)) {
+		if !foldEqualWords(swar.Load8(s, pos+i), swar.Load8(needle, i)) {
 			return false
 		}
 	}
 	if i == k {
 		return true
 	}
-	return swar.ToLowerWord(swar.Load8(s, pos+k-8)) == swar.ToLowerWord(swar.Load8(needle, k-8))
+	return foldEqualWords(swar.Load8(s, pos+k-8), swar.Load8(needle, k-8))
 }
 
 const (
@@ -320,6 +339,15 @@ func HasPrefixFold[S byteSeq](s S, prefix string) bool {
 		}
 		return foldEqualAt(s, 0, prefix)
 	}
+	if k >= 4 {
+		// 4..7 bytes, as "bearer " and "basic " are: two overlapping 4-byte windows in one word,
+		// the first of which settles most mismatches.
+		lo, plo := load4(s, 0), load4(prefix, 0)
+		if (lo^plo)&^caseBitLanes32 != 0 {
+			return false
+		}
+		return foldEqualWords(uint64(lo)|uint64(load4(s, k-4))<<32, uint64(plo)|uint64(load4(prefix, k-4))<<32)
+	}
 	for j := range k {
 		if table[s[j]] != table[prefix[j]] {
 			return false
@@ -341,6 +369,14 @@ func HasSuffixFold[S byteSeq](s S, suffix string) bool {
 			return false
 		}
 		return foldEqualAt(s, n-k, suffix)
+	}
+	if k >= 4 {
+		// See HasPrefixFold: "gzip", "+json" and "+xml" land here.
+		lo, plo := load4(s, n-k), load4(suffix, 0)
+		if (lo^plo)&^caseBitLanes32 != 0 {
+			return false
+		}
+		return foldEqualWords(uint64(lo)|uint64(load4(s, n-4))<<32, uint64(plo)|uint64(load4(suffix, k-4))<<32)
 	}
 	for j := range k {
 		if table[s[n-k+j]] != table[suffix[j]] {

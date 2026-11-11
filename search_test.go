@@ -7,6 +7,7 @@ import (
 	"testing"
 	"unicode/utf8"
 
+	"github.com/gofiber/utils/v2/internal/caseconv"
 	"github.com/stretchr/testify/require"
 )
 
@@ -527,6 +528,81 @@ func Benchmark_IndexFold(b *testing.B) {
 			}
 			_ = r
 		})
+	}
+}
+
+// Test_foldEqualWords checks every pair of bytes in every lane against the fold table, next to
+// lanes that fold alike and next to one that only looks like a case pair.
+func Test_foldEqualWords(t *testing.T) {
+	t.Parallel()
+	const upper, lower = uint64('Q') * 0x0101010101010101, uint64('q') * 0x0101010101010101
+	table := caseconv.ToLowerTable
+	for lane := range 8 {
+		shift := 8 * lane
+		other := 8 * ((lane + 3) % 8)
+		for a := range 256 {
+			for b := range 256 {
+				x := upper&^(0xFF<<shift) | uint64(a)<<shift
+				y := lower&^(0xFF<<shift) | uint64(b)<<shift
+				if got, want := foldEqualWords(x, y), table[a] == table[b]; got != want {
+					t.Fatalf("foldEqualWords(%#x, %#x) = %v, want %v", x, y, got, want)
+				}
+				// '[' and '{' differ in the case bit alone and are no letters.
+				x = x&^(0xFF<<other) | '['<<other
+				y = y&^(0xFF<<other) | '{'<<other
+				if foldEqualWords(x, y) {
+					t.Fatalf("foldEqualWords(%#x, %#x) = true", x, y)
+				}
+			}
+		}
+	}
+}
+
+// Test_foldNeedle compares the packed needle with a byte loop for every length it takes.
+func Test_foldNeedle(t *testing.T) {
+	t.Parallel()
+	src := "aZ[9\x80-Q{\xc9z@m`\xffK" // letters, their neighbors and bytes that must not fold
+	for k := 1; k <= 8; k++ {
+		for start := 0; start+k <= len(src); start++ {
+			needle := src[start : start+k]
+			var want uint64
+			for j := k - 1; j >= 0; j-- {
+				want = want<<8 | uint64(caseconv.ToLowerTable[needle[j]])
+			}
+			require.Equal(t, want, foldNeedle(needle), "needle %q", needle)
+		}
+	}
+}
+
+// Test_HasPrefixSuffixFold_Lengths covers every needle length around the word paths, with a
+// case-flipped twin and a changed byte at every position.
+func Test_HasPrefixSuffixFold_Lengths(t *testing.T) {
+	t.Parallel()
+	base := "Bearer-Token: x7 [aZ]"
+	for k := 0; k <= len(base); k++ {
+		needle := base[:k]
+		flipped := []byte(needle)
+		for i, c := range flipped {
+			if lc := c | 0x20; lc >= 'a' && lc <= 'z' {
+				flipped[i] = c ^ 0x20
+			}
+		}
+		for _, pad := range []string{"", "-", "padding-of-13"} {
+			require.True(t, HasPrefixFold(string(flipped)+pad, needle), "len %d pad %q", k, pad)
+			require.True(t, HasSuffixFold(pad+string(flipped), needle), "len %d pad %q", k, pad)
+			require.True(t, HasPrefixFold(append(flipped[:k:k], pad...), needle), "len %d pad %q", k, pad)
+			require.True(t, HasSuffixFold(append([]byte(pad), flipped...), needle), "len %d pad %q", k, pad)
+			for i := range k {
+				for _, c := range []byte{'!', '[', '{', '@', '`', 0x00, 0x80, 0xFF, flipped[i] ^ 0x01} {
+					mutated := append([]byte(nil), flipped...)
+					mutated[i] = c
+					s := string(mutated) + pad
+					require.Equal(t, refHasPrefixFold(s, needle), HasPrefixFold(s, needle), "len %d pos %d byte %#x", k, i, c)
+					s = pad + string(mutated)
+					require.Equal(t, refHasSuffixFold(s, needle), HasSuffixFold(s, needle), "len %d pos %d byte %#x", k, i, c)
+				}
+			}
+		}
 	}
 }
 

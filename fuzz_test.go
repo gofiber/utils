@@ -123,6 +123,7 @@ func FuzzURLEscape(f *testing.F) {
 	f.Add("")
 	f.Add("a b&c=d/e?f")
 	f.Add("caf%C3%A9+r%C3%A9sum%C3%A9")
+	f.Add("%E4%BD%A0 a run of 9+%41%4g")
 	f.Add("trailing%")
 	f.Add("trailing%2")
 	f.Add("%zz%1g%%41")
@@ -333,6 +334,9 @@ func FuzzGetMIME(f *testing.F) {
 func FuzzCanonicalHeaderKey(f *testing.F) {
 	f.Add("content-type")
 	f.Add("Content-Type")
+	f.Add("access-control-Allow-origin")
+	f.Add("x-b3-traceid-")
+	f.Add("X_request_id")
 	f.Add("x--double--dash")
 	f.Add("-leading")
 	f.Add("bad key")

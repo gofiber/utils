@@ -3,7 +3,6 @@ package utils
 import (
 	"math/bits"
 
-	"github.com/gofiber/utils/v2/internal/caseconv"
 	"github.com/gofiber/utils/v2/swar"
 )
 
@@ -28,7 +27,7 @@ func EqualFold[S byteSeq](b, s S) bool {
 	for ; i <= n-8; i += 8 {
 		x := swar.Load8(b, i)
 		y := swar.Load8(s, i)
-		if x != y && swar.ToUpperWord(x) != swar.ToUpperWord(y) {
+		if x != y && !foldEqualWords(x, y) {
 			return false
 		}
 	}
@@ -38,22 +37,19 @@ func EqualFold[S byteSeq](b, s S) bool {
 	if n >= 8 {
 		x := swar.Load8(b, n-8)
 		y := swar.Load8(s, n-8)
-		return x == y || swar.ToUpperWord(x) == swar.ToUpperWord(y)
+		return x == y || foldEqualWords(x, y)
 	}
 	if n >= 4 {
 		// 4..7 bytes: two overlapping 4-byte windows packed into one word.
 		x := uint64(load4(b, 0)) | uint64(load4(b, n-4))<<32
 		y := uint64(load4(s, 0)) | uint64(load4(s, n-4))<<32
-		return x == y || swar.ToUpperWord(x) == swar.ToUpperWord(y)
+		return x == y || foldEqualWords(x, y)
 	}
 
-	table := caseconv.ToUpperTable
-	for ; i < n; i++ {
-		if table[b[i]] != table[s[i]] {
-			return false
-		}
-	}
-	return true
+	// 1..3 bytes: the first, the middle and the last one cover them all.
+	x := uint64(b[0]) | uint64(b[n>>1])<<8 | uint64(b[n-1])<<16
+	y := uint64(s[0]) | uint64(s[n>>1])<<8 | uint64(s[n-1])<<16
+	return x == y || foldEqualWords(x, y)
 }
 
 // HashFold returns a 64-bit hash of s in which ASCII letters are folded to one

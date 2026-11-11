@@ -2,6 +2,7 @@ package utils
 
 import (
 	"net"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -84,6 +85,8 @@ func Benchmark_SplitHostPort(b *testing.B) {
 		{"host-port", "example.com:8080"},
 		{"ipv6-port", "[2001:db8::1]:8080"},
 		{"missing-port", "example.com"},
+		// Longer than hostPortWordMax: the scans take it, as they did.
+		{"long-host-port", "internal-load-balancer-1234567890.eu-central-1.elb.amazonaws.com:8443"},
 	}
 	var host, port string
 	var ok bool
@@ -114,5 +117,15 @@ func Test_SplitHostPort_StdlibParity_Exhaustive(t *testing.T) {
 	})
 	forEachString("[]:%a1. \x00", 5, func(s string) {
 		checkSplitHostPort(t, s)
+	})
+	// The word scan: every arrangement of the four bytes that matter in six positions, moved
+	// across one, two and three words and both sides of the overlapping last one, and to both
+	// sides of hostPortWordMax, the length at which the scans take over again.
+	const m = hostPortWordMax - 6 // the padding that makes the six bytes the longest input of the word scan
+	pads := []struct{ before, after int }{{0, 2}, {2, 0}, {1, 4}, {7, 0}, {0, 8}, {8, 3}, {3, 9}, {11, 7}, {m, 0}, {0, m}, {m + 1, 0}, {20, m - 14}}
+	forEachString("[]:a", 6, func(s string) {
+		for _, pad := range pads {
+			checkSplitHostPort(t, strings.Repeat("h", pad.before)+s+strings.Repeat("p", pad.after))
+		}
 	})
 }

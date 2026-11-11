@@ -488,6 +488,15 @@ as a plain string because call sites pass constant tokens. Their
 on the [benchmark charts](https://gofiber.github.io/utils/benchmarks/)
 and join the catalog above on its next regeneration.
 
+Two words are compared through their XOR instead of being folded each:
+they match when the lanes that differ do so in the case bit alone and
+hold a letter, so a word that differs anywhere else is rejected in two
+operations, and one in another case costs a single range test. A token
+of 4 to 7 bytes, as `bearer `, `basic `, `gzip` and `+json` are, is two
+overlapping 4-byte windows in one word for `EqualFold`, `HasPrefixFold`
+and `HasSuffixFold` alike, and `EqualFold` packs one of 1 to 3 bytes
+from its first, middle and last byte.
+
 `IndexFold` stays linear when the haystack is built against the needle:
 for a needle of nine bytes or more, once the candidates that fail their
 verification have cost more than a fixed share of the bytes scanned, a
@@ -547,12 +556,25 @@ this group for Fiber.
 `AppendQueryEscape`/`AppendPathEscape` and
 `AppendQueryUnescape`/`AppendPathUnescape` produce byte-identical results
 (and, for the unescape pair, identical `url.EscapeError` values) to their
-`net/url` counterparts, as append-style, allocation-free single passes.
+`net/url` counterparts, append-style and without allocating when `dst`
+has the room. A `dst` too small for `s` itself grows once, to the size of
+the result: the bytes to escape, or the `%` to decode, are counted first,
+where appending piece by piece grew a `nil` `dst` four or five times for
+a 64-byte value. One that holds `s` is not counted, so that a reused
+buffer with room for the result pays nothing for that, and grows as
+`append` does should the escapes not fit. Nothing is written past the
+result.
 The escape tables are pinned to `net/url.shouldEscape` by exhaustive
-per-byte tests. Unescaping jumps between escape sites with the vectorized
+per-byte tests, and bytes that need no escaping are skipped a word at a
+time: eight lookups from one load, and one branch. Unescaping jumps
+between escape sites with the vectorized
 scans (`IndexAny2` when `+` needs rewriting, `bytes.IndexByte` otherwise)
 and copies clean spans wholesale, so route parameters and query values
-without escapes — the common case — cost one scan and one copy. Decoding
+without escapes — the common case — cost one scan and one copy. Once an
+escape comes fewer than four bytes after another, as in percent-encoded
+UTF-8 or a value dense in `%20` and `+`, a byte loop decodes the rest,
+without a scan and a copy for each escape, and looks for the next one
+with a scan only after eight bytes without any. Decoding
 never grows the input, so `dst` may be `s[:0]` on a common backing array
 to unescape in place; escaping can grow the input, so there `dst` must
 not alias `s`.
@@ -593,9 +615,17 @@ trusted-proxy checks parse an IP on every request in Fiber.
 `CanonicalHeaderKey` Title-Cases an HTTP header key exactly like
 `net/http.CanonicalHeaderKey`, including its return-unchanged guard for
 keys containing non-token bytes. Already-canonical keys — the common case
-on receive paths — are validated in a single table pass and returned
-as-is with zero allocations for strings and byte slices alike. Keys that
-do need rewriting cost one allocation; note that for the ~40 header names
+on receive paths — are validated a word at a time and returned
+as-is with zero allocations for strings and byte slices alike: in a key
+of letters, digits and hyphens, as nearly all are, a letter is in the
+wrong case exactly where its case bit agrees with "follows a hyphen",
+which three lane masks settle for eight bytes at once. A key with any
+other token byte, such as `_`, takes the table pass it always took, a
+few nanoseconds later for the word test that turned it away
+(`canonical-underscore` in the benchmark), and one of fewer than four
+bytes takes nothing else. Keys that
+do need rewriting cost one allocation, and flipping that bit is the whole
+rewrite; note that for the ~40 header names
 in the stdlib's interning table the stdlib returns a cached string
 without allocating, so this helper's edge there is time, not allocations.
 
@@ -644,11 +674,14 @@ spaces alone.
 `SplitHostPort` splits `host:port`, `host%zone:port`, `[host]:port`, and
 `[host%zone]:port` with exactly `net.SplitHostPort`'s acceptance rules
 (pinned by fuzzing against it), but reports failure with a `bool` instead
-of constructing a `*net.AddrError`, and accepts byte slices. Valid input
-costs the same as the stdlib — the scan is the same three `IndexByte`
-calls — so the win is on the rejection path, where a malformed `Host` or
-`Forwarded` value no longer costs an allocation, and on `[]byte` input,
-which no longer needs a string conversion first.
+of constructing a `*net.AddrError`, and accepts byte slices. Without
+brackets, the last colon has to be the only `:`, `[` or `]` there is, so
+an input of 8 to 40 bytes is one pass over its words that counts
+them, where the stdlib scans it four times; bracketed, shorter and
+longer inputs keep the stdlib's `IndexByte` scans, which are vectorized
+and overtake the word pass on a long valid `host:port`. A malformed `Host` or
+`Forwarded` value costs no allocation, and `[]byte` input needs no
+string conversion first.
 
 ## List field iteration
 
@@ -698,145 +731,213 @@ These helpers were added on an amd64 machine, so like the `simd` numbers
 their benchmarks are recorded separately from the arm64 catalog above and
 join it on its next regeneration. The block also carries the current
 numbers for the paths reworked on the same machine (integer formatting,
-`GetMIME`, token-sized `EqualFold`), whose arm64 rows above predate that
-work:
+`GetMIME`, `EqualFold`, the folded prefix and suffix tests, `ByteSize`,
+`AppendPathSegmentsEscape`), whose arm64 rows above predate that work:
 
 Environment:
 goos: linux
 goarch: amd64
 pkg: github.com/gofiber/utils/v2
-cpu: Intel(R) Xeon(R) Processor @ 2.30GHz
+cpu: AMD EPYC
 
 ```text
-// go test -benchmem -run=^$ -count=1 . -bench='^Benchmark_(FormatUint|FormatInt|FormatUint32|FormatInt32|FormatUint16|FormatInt16|AppendUint|AppendInt|EqualFold_Short|HashFold|GetMIME|AppendHTTPDate|ParseHTTPDate|AppendDuration|AppendQueryEscape|AppendQueryUnescape|AppendPathUnescape|AppendJSONString|ParseIPv4|ParseIPv6|CanonicalHeaderKey|IndexControl|CutByte|LastCutByte|SplitHostPort|SplitTrimSeq)$'
-Benchmark_EqualFold_Short/3B/fiber-4                               216868370    5.500  ns/op     0  B/op   0  allocs/op
-Benchmark_EqualFold_Short/3B/default-4                             222478070    5.360  ns/op     0  B/op   0  allocs/op
-Benchmark_EqualFold_Short/4B/fiber-4                               255431634    4.242  ns/op     0  B/op   0  allocs/op
-Benchmark_EqualFold_Short/4B/default-4                             207625507    5.947  ns/op     0  B/op   0  allocs/op
-Benchmark_EqualFold_Short/5B/fiber-4                               301627573    4.008  ns/op     0  B/op   0  allocs/op
-Benchmark_EqualFold_Short/5B/default-4                             185542844    6.492  ns/op     0  B/op   0  allocs/op
-Benchmark_EqualFold_Short/7B/fiber-4                               294018784    4.063  ns/op     0  B/op   0  allocs/op
-Benchmark_EqualFold_Short/7B/default-4                             169165963    7.064  ns/op     0  B/op   0  allocs/op
-Benchmark_EqualFold_Short/8B/fiber-4                               305509803    3.944  ns/op     0  B/op   0  allocs/op
-Benchmark_EqualFold_Short/8B/default-4                             163848274    7.297  ns/op     0  B/op   0  allocs/op
-Benchmark_EqualFold_Short/10B/fiber-4                              194301206    6.020  ns/op     0  B/op   0  allocs/op
-Benchmark_EqualFold_Short/10B/default-4                            100000000    11.08  ns/op     0  B/op   0  allocs/op
-Benchmark_EqualFold_Short/16B/fiber-4                              202457916    6.392  ns/op     0  B/op   0  allocs/op
-Benchmark_EqualFold_Short/16B/default-4                             78731106    16.17  ns/op     0  B/op   0  allocs/op
-Benchmark_HashFold/2B/fiber-4                                      386759509    3.113  ns/op     0  B/op   0  allocs/op
-Benchmark_HashFold/2B/default-4                                    100000000    11.14  ns/op     0  B/op   0  allocs/op
-Benchmark_HashFold/4B/fiber-4                                      452701778    2.709  ns/op     0  B/op   0  allocs/op
-Benchmark_HashFold/4B/default-4                                     32497344    36.43  ns/op     8  B/op   1  allocs/op
-Benchmark_HashFold/12B/fiber-4                                     288294152    4.276  ns/op     0  B/op   0  allocs/op
-Benchmark_HashFold/12B/default-4                                    17637711    63.01  ns/op    16  B/op   1  allocs/op
-Benchmark_HashFold/17B/fiber-4                                     157860645    7.479  ns/op     0  B/op   0  allocs/op
-Benchmark_HashFold/17B/default-4                                    15468496    76.52  ns/op    24  B/op   1  allocs/op
-Benchmark_HashFold/48B/fiber-4                                     129690970    9.739  ns/op     0  B/op   0  allocs/op
-Benchmark_HashFold/48B/default-4                                     8301454    151.4  ns/op    48  B/op   1  allocs/op
-Benchmark_IndexControl/clean-16B/fiber-4                           233868030    5.108  ns/op     0  B/op   0  allocs/op
-Benchmark_IndexControl/clean-16B/fiber-except-tab-4                247935051    4.862  ns/op     0  B/op   0  allocs/op
-Benchmark_IndexControl/clean-16B/default-4                          60814891    23.33  ns/op     0  B/op   0  allocs/op
-Benchmark_IndexControl/clean-64B/fiber-4                           120078477    9.974  ns/op     0  B/op   0  allocs/op
-Benchmark_IndexControl/clean-64B/fiber-except-tab-4                100000000    10.44  ns/op     0  B/op   0  allocs/op
-Benchmark_IndexControl/clean-64B/default-4                          14763626    72.90  ns/op     0  B/op   0  allocs/op
-Benchmark_IndexControl/ctl-at-end-64B/fiber-4                      100000000    10.71  ns/op     0  B/op   0  allocs/op
-Benchmark_IndexControl/ctl-at-end-64B/fiber-except-tab-4           100000000    10.11  ns/op     0  B/op   0  allocs/op
-Benchmark_IndexControl/ctl-at-end-64B/default-4                     17073346    75.71  ns/op     0  B/op   0  allocs/op
-Benchmark_CutByte/fiber-4                                          241813096    4.896  ns/op     0  B/op   0  allocs/op
-Benchmark_CutByte/default-4                                        191558419    6.445  ns/op     0  B/op   0  allocs/op
-Benchmark_CutByte/fiber-bytes-4                                    209851152    5.749  ns/op     0  B/op   0  allocs/op
-Benchmark_CutByte/default-bytes-4                                  140389010    8.545  ns/op     0  B/op   0  allocs/op
-Benchmark_LastCutByte/fiber-4                                      184531656    6.154  ns/op     0  B/op   0  allocs/op
-Benchmark_LastCutByte/default-4                                    188323168    6.277  ns/op     0  B/op   0  allocs/op
-Benchmark_AppendDuration/micros/fiber-4                            117165966    10.24  ns/op     0  B/op   0  allocs/op
-Benchmark_AppendDuration/micros/default-4                           39916680    29.52  ns/op     8  B/op   1  allocs/op
-Benchmark_AppendDuration/micros/fmt-4                                9768556    123.6  ns/op    16  B/op   2  allocs/op
-Benchmark_AppendDuration/millis-frac/fiber-4                        70899018    15.35  ns/op     0  B/op   0  allocs/op
-Benchmark_AppendDuration/millis-frac/default-4                      34036976    37.19  ns/op    16  B/op   1  allocs/op
-Benchmark_AppendDuration/millis-frac/fmt-4                           9782224    120.7  ns/op    24  B/op   2  allocs/op
-Benchmark_AppendDuration/hours/fiber-4                              70045983    17.53  ns/op     0  B/op   0  allocs/op
-Benchmark_AppendDuration/hours/default-4                            29855035    39.46  ns/op     8  B/op   1  allocs/op
-Benchmark_AppendDuration/hours/fmt-4                                 9310930    123.6  ns/op    16  B/op   2  allocs/op
-Benchmark_FormatUint/small/fiber-4                                 809249647    1.493  ns/op     0  B/op   0  allocs/op
-Benchmark_FormatUint/small/strconv-4                               631096440    1.913  ns/op     0  B/op   0  allocs/op
-Benchmark_FormatUint/medium/fiber-4                                 52606162    23.11  ns/op    16  B/op   1  allocs/op
-Benchmark_FormatUint/medium/strconv-4                               43411108    27.40  ns/op    16  B/op   1  allocs/op
-Benchmark_FormatUint/large/fiber-4                                  45187041    26.35  ns/op    24  B/op   1  allocs/op
-Benchmark_FormatUint/large/strconv-4                                35693152    36.13  ns/op    24  B/op   1  allocs/op
-Benchmark_FormatInt/small_pos/fiber-4                              664823427    1.783  ns/op     0  B/op   0  allocs/op
-Benchmark_FormatInt/small_pos/strconv-4                            602705583    2.136  ns/op     0  B/op   0  allocs/op
-Benchmark_FormatInt/small_neg/fiber-4                              558763431    2.130  ns/op     0  B/op   0  allocs/op
-Benchmark_FormatInt/small_neg/strconv-4                             68208922    15.60  ns/op     3  B/op   1  allocs/op
-Benchmark_FormatInt/medium_pos/fiber-4                              53351432    25.45  ns/op    16  B/op   1  allocs/op
-Benchmark_FormatInt/medium_pos/strconv-4                            47228922    25.14  ns/op    16  B/op   1  allocs/op
-Benchmark_FormatInt/medium_neg/fiber-4                              51981028    22.17  ns/op    16  B/op   1  allocs/op
-Benchmark_FormatInt/medium_neg/strconv-4                            50206854    26.90  ns/op    16  B/op   1  allocs/op
-Benchmark_FormatInt/large_pos/fiber-4                               45979017    27.01  ns/op    24  B/op   1  allocs/op
-Benchmark_FormatInt/large_pos/strconv-4                             33060873    36.28  ns/op    24  B/op   1  allocs/op
-Benchmark_FormatInt/large_neg/fiber-4                               41153070    28.79  ns/op    24  B/op   1  allocs/op
-Benchmark_FormatInt/large_neg/strconv-4                             33418716    37.57  ns/op    24  B/op   1  allocs/op
-Benchmark_FormatUint32/fiber-4                                      48333518    22.85  ns/op    16  B/op   1  allocs/op
-Benchmark_FormatUint32/strconv-4                                    47875622    28.11  ns/op    16  B/op   1  allocs/op
-Benchmark_FormatInt32/fiber-4                                       50800854    23.39  ns/op    16  B/op   1  allocs/op
-Benchmark_FormatInt32/strconv-4                                     43311554    25.94  ns/op    16  B/op   1  allocs/op
-Benchmark_FormatUint16/fiber-4                                      80362605    15.08  ns/op     5  B/op   1  allocs/op
-Benchmark_FormatUint16/strconv-4                                    65920797    18.87  ns/op     5  B/op   1  allocs/op
-Benchmark_FormatInt16/fiber-4                                       71365039    16.19  ns/op     8  B/op   1  allocs/op
-Benchmark_FormatInt16/strconv-4                                     55481508    20.96  ns/op     8  B/op   1  allocs/op
-Benchmark_AppendUint/fiber-4                                       100000000    10.06  ns/op     0  B/op   0  allocs/op
-Benchmark_AppendUint/strconv-4                                      96812635    12.45  ns/op     0  B/op   0  allocs/op
-Benchmark_AppendInt/small_neg/fiber-4                              344595301    3.596  ns/op     0  B/op   0  allocs/op
-Benchmark_AppendInt/small_neg/strconv-4                            243755337    4.947  ns/op     0  B/op   0  allocs/op
-Benchmark_AppendInt/medium_neg/fiber-4                             120066458    10.42  ns/op     0  B/op   0  allocs/op
-Benchmark_AppendInt/medium_neg/strconv-4                            89474301    13.46  ns/op     0  B/op   0  allocs/op
-Benchmark_CanonicalHeaderKey/canonical/fiber-4                      52550029    23.00  ns/op     0  B/op   0  allocs/op
-Benchmark_CanonicalHeaderKey/canonical/default-4                    61007802    20.69  ns/op     0  B/op   0  allocs/op
-Benchmark_CanonicalHeaderKey/common-lower/fiber-4                   22874547    45.97  ns/op    16  B/op   1  allocs/op
-Benchmark_CanonicalHeaderKey/common-lower/default-4                 27336062    47.89  ns/op     0  B/op   0  allocs/op
-Benchmark_CanonicalHeaderKey/custom-lower/fiber-4                   18788817    61.82  ns/op    24  B/op   1  allocs/op
-Benchmark_CanonicalHeaderKey/custom-lower/default-4                 16635841    71.56  ns/op    24  B/op   1  allocs/op
-Benchmark_SplitHostPort/host-port/fiber-4                           74919554    15.41  ns/op     0  B/op   0  allocs/op
-Benchmark_SplitHostPort/host-port/default-4                         79832212    16.21  ns/op     0  B/op   0  allocs/op
-Benchmark_SplitHostPort/ipv6-port/fiber-4                           70975998    16.92  ns/op     0  B/op   0  allocs/op
-Benchmark_SplitHostPort/ipv6-port/default-4                         70707730    18.08  ns/op     0  B/op   0  allocs/op
-Benchmark_SplitHostPort/missing-port/fiber-4                       100000000    10.68  ns/op     0  B/op   0  allocs/op
-Benchmark_SplitHostPort/missing-port/default-4                      36117877    33.52  ns/op    32  B/op   1  allocs/op
-Benchmark_GetMIME/fiber-4                                           25991878    39.16  ns/op     0  B/op   0  allocs/op
-Benchmark_GetMIME/default-4                                         13129416    92.00  ns/op     0  B/op   0  allocs/op
-Benchmark_AppendHTTPDate/fiber-4                                    62205424    19.19  ns/op     0  B/op   0  allocs/op
-Benchmark_AppendHTTPDate/default-4                                   8700108    139.6  ns/op     0  B/op   0  allocs/op
-Benchmark_ParseHTTPDate/fiber-4                                     77635720    15.06  ns/op     0  B/op   0  allocs/op
-Benchmark_ParseHTTPDate/default-4                                    6252627    188.7  ns/op     0  B/op   0  allocs/op
-Benchmark_ParseIPv4/fiber-4                                         59979507    19.79  ns/op     0  B/op   0  allocs/op
-Benchmark_ParseIPv4/default-4                                       41341878    29.34  ns/op     0  B/op   0  allocs/op
-Benchmark_ParseIPv6/compressed/fiber-4                              31259818    38.24  ns/op     0  B/op   0  allocs/op
-Benchmark_ParseIPv6/compressed/default-4                            21305965    60.06  ns/op     0  B/op   0  allocs/op
-Benchmark_ParseIPv6/full/fiber-4                                    23526598    51.03  ns/op     0  B/op   0  allocs/op
-Benchmark_ParseIPv6/full/default-4                                  15007318    76.87  ns/op     0  B/op   0  allocs/op
-Benchmark_AppendJSONString/clean-16B/fiber-4                        69241483    18.13  ns/op     0  B/op   0  allocs/op
-Benchmark_AppendJSONString/clean-16B/default-4                      10105363    125.2  ns/op    40  B/op   2  allocs/op
-Benchmark_AppendJSONString/clean-64B/fiber-4                        26140521    45.77  ns/op     0  B/op   0  allocs/op
-Benchmark_AppendJSONString/clean-64B/default-4                       6544102    183.4  ns/op    96  B/op   2  allocs/op
-Benchmark_AppendJSONString/escaped-64B/fiber-4                       9290080    127.1  ns/op     0  B/op   0  allocs/op
-Benchmark_AppendJSONString/escaped-64B/default-4                     4916450    249.5  ns/op    96  B/op   2  allocs/op
-Benchmark_AppendJSONString/unicode-64B/fiber-4                       5309510    195.2  ns/op     0  B/op   0  allocs/op
-Benchmark_AppendJSONString/unicode-64B/default-4                     4040023    286.7  ns/op   112  B/op   2  allocs/op
-Benchmark_SplitTrimSeq/accept-encoding/fiber-4                      39450651    26.90  ns/op     0  B/op   0  allocs/op
-Benchmark_SplitTrimSeq/accept-encoding/default-4                    47985436    26.49  ns/op     0  B/op   0  allocs/op
-Benchmark_SplitTrimSeq/accept/fiber-4                               22084174    48.02  ns/op     0  B/op   0  allocs/op
-Benchmark_SplitTrimSeq/accept/default-4                             23740135    54.57  ns/op     0  B/op   0  allocs/op
-Benchmark_AppendQueryEscape/clean-64B/fiber-4                       30767948    37.34  ns/op     0  B/op   0  allocs/op
-Benchmark_AppendQueryEscape/clean-64B/default-4                     45588386    26.02  ns/op     0  B/op   0  allocs/op
-Benchmark_AppendQueryEscape/mixed-64B/fiber-4                        7100626    169.1  ns/op     0  B/op   0  allocs/op
-Benchmark_AppendQueryEscape/mixed-64B/default-4                      5149764    228.8  ns/op   192  B/op   2  allocs/op
-Benchmark_AppendQueryUnescape/plain-64B/fiber-4                     89399498    13.53  ns/op     0  B/op   0  allocs/op
-Benchmark_AppendQueryUnescape/plain-64B/default-4                   13136210    89.13  ns/op     0  B/op   0  allocs/op
-Benchmark_AppendQueryUnescape/escaped-64B/fiber-4                    8347543    153.3  ns/op     0  B/op   0  allocs/op
-Benchmark_AppendQueryUnescape/escaped-64B/default-4                  5888370    192.6  ns/op    48  B/op   1  allocs/op
-Benchmark_AppendPathUnescape/plain-25B/fiber-4                     136702790    8.784  ns/op     0  B/op   0  allocs/op
-Benchmark_AppendPathUnescape/plain-25B/default-4                    34562199    34.80  ns/op     0  B/op   0  allocs/op
-Benchmark_AppendPathUnescape/escaped-31B/fiber-4                    30512154    40.93  ns/op     0  B/op   0  allocs/op
-Benchmark_AppendPathUnescape/escaped-31B/default-4                  10994758    109.6  ns/op    24  B/op   1  allocs/op
+// go test -benchmem -run=^$ -count=1 . -bench='^Benchmark_(FormatUint|FormatInt|FormatUint32|FormatInt32|FormatUint16|FormatInt16|AppendUint|AppendInt|EqualFold|EqualFoldBytes|EqualFold_Short|HasPrefixFold|HasSuffixFold|HashFold|ByteSize|GetMIME|AppendHTTPDate|ParseHTTPDate|AppendDuration|AppendQueryEscape|AppendPathSegmentsEscape|AppendQueryUnescape|AppendPathUnescape|AppendJSONString|ParseIPv4|ParseIPv6|CanonicalHeaderKey|IndexControl|CutByte|LastCutByte|SplitHostPort|SplitTrimSeq)$'
+Benchmark_EqualFoldBytes/fiber-4                                    95242539    11.41  ns/op     0  B/op   0  allocs/op
+Benchmark_EqualFoldBytes/default-4                                  31083469    34.29  ns/op     0  B/op   0  allocs/op
+Benchmark_EqualFold/fiber-4                                        100000000    10.23  ns/op     0  B/op   0  allocs/op
+Benchmark_EqualFold/default-4                                       37118374    33.01  ns/op     0  B/op   0  allocs/op
+Benchmark_EqualFold_Short/3B/fiber-4                               555012801    2.145  ns/op     0  B/op   0  allocs/op
+Benchmark_EqualFold_Short/3B/default-4                             369259904    3.172  ns/op     0  B/op   0  allocs/op
+Benchmark_EqualFold_Short/4B/fiber-4                               578990004    1.987  ns/op     0  B/op   0  allocs/op
+Benchmark_EqualFold_Short/4B/default-4                             296558700    4.032  ns/op     0  B/op   0  allocs/op
+Benchmark_EqualFold_Short/5B/fiber-4                               584135606    2.213  ns/op     0  B/op   0  allocs/op
+Benchmark_EqualFold_Short/5B/default-4                             493922005    2.369  ns/op     0  B/op   0  allocs/op
+Benchmark_EqualFold_Short/7B/fiber-4                               611238091    2.016  ns/op     0  B/op   0  allocs/op
+Benchmark_EqualFold_Short/7B/default-4                             415740052    2.827  ns/op     0  B/op   0  allocs/op
+Benchmark_EqualFold_Short/8B/fiber-4                               643355518    1.889  ns/op     0  B/op   0  allocs/op
+Benchmark_EqualFold_Short/8B/default-4                             364321028    3.336  ns/op     0  B/op   0  allocs/op
+Benchmark_EqualFold_Short/10B/fiber-4                              447896754    2.693  ns/op     0  B/op   0  allocs/op
+Benchmark_EqualFold_Short/10B/default-4                            302122399    4.018  ns/op     0  B/op   0  allocs/op
+Benchmark_EqualFold_Short/16B/fiber-4                              401625879    2.869  ns/op     0  B/op   0  allocs/op
+Benchmark_EqualFold_Short/16B/default-4                            189607155    6.431  ns/op     0  B/op   0  allocs/op
+Benchmark_IndexControl/clean-16B/fiber-4                           515043063    2.452  ns/op     0  B/op   0  allocs/op
+Benchmark_IndexControl/clean-16B/fiber-except-tab-4                488922855    2.236  ns/op     0  B/op   0  allocs/op
+Benchmark_IndexControl/clean-16B/default-4                         149038825    8.223  ns/op     0  B/op   0  allocs/op
+Benchmark_IndexControl/clean-64B/fiber-4                           207569035    5.982  ns/op     0  B/op   0  allocs/op
+Benchmark_IndexControl/clean-64B/fiber-except-tab-4                200065816    5.961  ns/op     0  B/op   0  allocs/op
+Benchmark_IndexControl/clean-64B/default-4                          32232034    37.00  ns/op     0  B/op   0  allocs/op
+Benchmark_IndexControl/ctl-at-end-64B/fiber-4                      185200905    6.394  ns/op     0  B/op   0  allocs/op
+Benchmark_IndexControl/ctl-at-end-64B/fiber-except-tab-4           178918200    6.781  ns/op     0  B/op   0  allocs/op
+Benchmark_IndexControl/ctl-at-end-64B/default-4                     32070586    43.63  ns/op     0  B/op   0  allocs/op
+Benchmark_ByteSize/0-4                                            1000000000   0.2084  ns/op     0  B/op   0  allocs/op
+Benchmark_ByteSize/1-4                                             137542143    8.351  ns/op     2  B/op   1  allocs/op
+Benchmark_ByteSize/500-4                                           134812441    10.54  ns/op     4  B/op   1  allocs/op
+Benchmark_ByteSize/1024-4                                          135406344    8.939  ns/op     3  B/op   1  allocs/op
+Benchmark_ByteSize/1126-4                                          121401331    9.771  ns/op     5  B/op   1  allocs/op
+Benchmark_ByteSize/1048576-4                                       136905632    8.886  ns/op     3  B/op   1  allocs/op
+Benchmark_ByteSize/1153024-4                                       100000000    10.16  ns/op     5  B/op   1  allocs/op
+Benchmark_ByteSize/1073741824-4                                    129641943    8.971  ns/op     3  B/op   1  allocs/op
+Benchmark_ByteSize/1180696576-4                                    100000000    10.89  ns/op     5  B/op   1  allocs/op
+Benchmark_ByteSize/1099511627776-4                                 122353975    9.391  ns/op     3  B/op   1  allocs/op
+Benchmark_ByteSize/1209033293824-4                                  96642478    11.36  ns/op     5  B/op   1  allocs/op
+Benchmark_ByteSize/1125899906842624-4                              126474978    9.147  ns/op     3  B/op   1  allocs/op
+Benchmark_ByteSize/1238050092875776-4                              100000000    11.58  ns/op     5  B/op   1  allocs/op
+Benchmark_ByteSize/1152921504606846976-4                           100000000    10.29  ns/op     3  B/op   1  allocs/op
+Benchmark_ByteSize/1267763295104794624-4                           100000000    11.22  ns/op     5  B/op   1  allocs/op
+Benchmark_CutByte/fiber-4                                          393649442    3.165  ns/op     0  B/op   0  allocs/op
+Benchmark_CutByte/default-4                                        279499384    3.970  ns/op     0  B/op   0  allocs/op
+Benchmark_CutByte/fiber-bytes-4                                    359259126    3.318  ns/op     0  B/op   0  allocs/op
+Benchmark_CutByte/default-bytes-4                                  289247341    3.995  ns/op     0  B/op   0  allocs/op
+Benchmark_LastCutByte/fiber-4                                      719761060    1.665  ns/op     0  B/op   0  allocs/op
+Benchmark_LastCutByte/default-4                                    770568099    1.541  ns/op     0  B/op   0  allocs/op
+Benchmark_AppendDuration/micros/fiber-4                            205667509    5.816  ns/op     0  B/op   0  allocs/op
+Benchmark_AppendDuration/micros/default-4                           83072940    14.72  ns/op     8  B/op   1  allocs/op
+Benchmark_AppendDuration/micros/fmt-4                               22109742    57.63  ns/op    16  B/op   2  allocs/op
+Benchmark_AppendDuration/millis-frac/fiber-4                       146680158    8.189  ns/op     0  B/op   0  allocs/op
+Benchmark_AppendDuration/millis-frac/default-4                      70176217    18.40  ns/op    16  B/op   1  allocs/op
+Benchmark_AppendDuration/millis-frac/fmt-4                          20415859    58.63  ns/op    24  B/op   2  allocs/op
+Benchmark_AppendDuration/hours/fiber-4                             167795612    7.209  ns/op     0  B/op   0  allocs/op
+Benchmark_AppendDuration/hours/default-4                            57929433    19.89  ns/op     8  B/op   1  allocs/op
+Benchmark_AppendDuration/hours/fmt-4                                19839003    59.91  ns/op    16  B/op   2  allocs/op
+Benchmark_FormatUint/small/fiber-4                                1000000000    1.098  ns/op     0  B/op   0  allocs/op
+Benchmark_FormatUint/small/strconv-4                              1000000000    1.218  ns/op     0  B/op   0  allocs/op
+Benchmark_FormatUint/medium/fiber-4                                 82577330    14.51  ns/op    16  B/op   1  allocs/op
+Benchmark_FormatUint/medium/strconv-4                               89600736    14.50  ns/op    16  B/op   1  allocs/op
+Benchmark_FormatUint/large/fiber-4                                  76925103    17.43  ns/op    24  B/op   1  allocs/op
+Benchmark_FormatUint/large/strconv-4                                57337281    21.09  ns/op    24  B/op   1  allocs/op
+Benchmark_FormatInt/small_pos/fiber-4                             1000000000    1.034  ns/op     0  B/op   0  allocs/op
+Benchmark_FormatInt/small_pos/strconv-4                           1000000000    1.154  ns/op     0  B/op   0  allocs/op
+Benchmark_FormatInt/small_neg/fiber-4                              921751848    1.257  ns/op     0  B/op   0  allocs/op
+Benchmark_FormatInt/small_neg/strconv-4                            126309010    9.483  ns/op     3  B/op   1  allocs/op
+Benchmark_FormatInt/medium_pos/fiber-4                              74587729    15.48  ns/op    16  B/op   1  allocs/op
+Benchmark_FormatInt/medium_pos/strconv-4                            90545918    13.90  ns/op    16  B/op   1  allocs/op
+Benchmark_FormatInt/medium_neg/fiber-4                              86877349    14.85  ns/op    16  B/op   1  allocs/op
+Benchmark_FormatInt/medium_neg/strconv-4                            88416847    15.03  ns/op    16  B/op   1  allocs/op
+Benchmark_FormatInt/large_pos/fiber-4                               65433602    16.88  ns/op    24  B/op   1  allocs/op
+Benchmark_FormatInt/large_pos/strconv-4                             53400705    21.95  ns/op    24  B/op   1  allocs/op
+Benchmark_FormatInt/large_neg/fiber-4                               77646357    16.77  ns/op    24  B/op   1  allocs/op
+Benchmark_FormatInt/large_neg/strconv-4                             60803770    20.78  ns/op    24  B/op   1  allocs/op
+Benchmark_FormatUint32/fiber-4                                      71134392    14.28  ns/op    16  B/op   1  allocs/op
+Benchmark_FormatUint32/strconv-4                                    83261202    14.96  ns/op    16  B/op   1  allocs/op
+Benchmark_FormatInt32/fiber-4                                       88697210    13.78  ns/op    16  B/op   1  allocs/op
+Benchmark_FormatInt32/strconv-4                                     80188908    14.30  ns/op    16  B/op   1  allocs/op
+Benchmark_FormatUint16/fiber-4                                     127857867    9.380  ns/op     5  B/op   1  allocs/op
+Benchmark_FormatUint16/strconv-4                                   100000000    10.43  ns/op     5  B/op   1  allocs/op
+Benchmark_FormatInt16/fiber-4                                      106312431    10.97  ns/op     8  B/op   1  allocs/op
+Benchmark_FormatInt16/strconv-4                                    100000000    11.40  ns/op     8  B/op   1  allocs/op
+Benchmark_AppendUint/fiber-4                                       171862742    6.993  ns/op     0  B/op   0  allocs/op
+Benchmark_AppendUint/strconv-4                                     171259778    6.968  ns/op     0  B/op   0  allocs/op
+Benchmark_AppendInt/small_neg/fiber-4                              548362210    2.293  ns/op     0  B/op   0  allocs/op
+Benchmark_AppendInt/small_neg/strconv-4                            386668742    3.265  ns/op     0  B/op   0  allocs/op
+Benchmark_AppendInt/medium_neg/fiber-4                             170506190    7.058  ns/op     0  B/op   0  allocs/op
+Benchmark_AppendInt/medium_neg/strconv-4                           162180542    7.410  ns/op     0  B/op   0  allocs/op
+Benchmark_HashFold/2B/fiber-4                                      662384479    1.846  ns/op     0  B/op   0  allocs/op
+Benchmark_HashFold/2B/default-4                                    241535532    4.928  ns/op     0  B/op   0  allocs/op
+Benchmark_HashFold/4B/fiber-4                                      769847120    1.544  ns/op     0  B/op   0  allocs/op
+Benchmark_HashFold/4B/default-4                                     65858584    17.81  ns/op     8  B/op   1  allocs/op
+Benchmark_HashFold/12B/fiber-4                                     436935361    2.619  ns/op     0  B/op   0  allocs/op
+Benchmark_HashFold/12B/default-4                                    36352672    30.86  ns/op    16  B/op   1  allocs/op
+Benchmark_HashFold/17B/fiber-4                                     300781833    3.976  ns/op     0  B/op   0  allocs/op
+Benchmark_HashFold/17B/default-4                                    35985314    33.97  ns/op    24  B/op   1  allocs/op
+Benchmark_HashFold/48B/fiber-4                                     216305008    5.534  ns/op     0  B/op   0  allocs/op
+Benchmark_HashFold/48B/default-4                                    19581700    64.92  ns/op    48  B/op   1  allocs/op
+Benchmark_CanonicalHeaderKey/canonical/fiber-4                     208397125    5.848  ns/op     0  B/op   0  allocs/op
+Benchmark_CanonicalHeaderKey/canonical/default-4                    94861126    12.76  ns/op     0  B/op   0  allocs/op
+Benchmark_CanonicalHeaderKey/common-lower/fiber-4                   63354654    18.50  ns/op    16  B/op   1  allocs/op
+Benchmark_CanonicalHeaderKey/common-lower/default-4                 42964386    27.67  ns/op     0  B/op   0  allocs/op
+Benchmark_CanonicalHeaderKey/custom-lower/fiber-4                   39557229    29.37  ns/op    24  B/op   1  allocs/op
+Benchmark_CanonicalHeaderKey/custom-lower/default-4                 21005216    48.28  ns/op    24  B/op   1  allocs/op
+Benchmark_CanonicalHeaderKey/canonical-short/fiber-4               377163668    3.192  ns/op     0  B/op   0  allocs/op
+Benchmark_CanonicalHeaderKey/canonical-short/default-4             245415436    5.073  ns/op     0  B/op   0  allocs/op
+Benchmark_CanonicalHeaderKey/canonical-long/fiber-4                100000000    10.82  ns/op     0  B/op   0  allocs/op
+Benchmark_CanonicalHeaderKey/canonical-long/default-4               43972626    28.37  ns/op     0  B/op   0  allocs/op
+Benchmark_CanonicalHeaderKey/canonical-underscore/fiber-4           91702238    13.15  ns/op     0  B/op   0  allocs/op
+Benchmark_CanonicalHeaderKey/canonical-underscore/default-4         93589179    12.77  ns/op     0  B/op   0  allocs/op
+Benchmark_SplitHostPort/host-port/fiber-4                          212407646    5.677  ns/op     0  B/op   0  allocs/op
+Benchmark_SplitHostPort/host-port/default-4                        163514972    7.458  ns/op     0  B/op   0  allocs/op
+Benchmark_SplitHostPort/ipv6-port/fiber-4                          150666772    8.119  ns/op     0  B/op   0  allocs/op
+Benchmark_SplitHostPort/ipv6-port/default-4                        151922906    7.944  ns/op     0  B/op   0  allocs/op
+Benchmark_SplitHostPort/missing-port/fiber-4                       245688876    4.768  ns/op     0  B/op   0  allocs/op
+Benchmark_SplitHostPort/missing-port/default-4                      69299520    15.95  ns/op    32  B/op   1  allocs/op
+Benchmark_SplitHostPort/long-host-port/fiber-4                     145949444    8.510  ns/op     0  B/op   0  allocs/op
+Benchmark_SplitHostPort/long-host-port/default-4                   132700629    8.889  ns/op     0  B/op   0  allocs/op
+Benchmark_GetMIME/fiber-4                                           58912044    18.25  ns/op     0  B/op   0  allocs/op
+Benchmark_GetMIME/default-4                                         20459073    52.75  ns/op     0  B/op   0  allocs/op
+Benchmark_AppendHTTPDate/fiber-4                                    82701052    14.49  ns/op     0  B/op   0  allocs/op
+Benchmark_AppendHTTPDate/default-4                                  18782808    71.80  ns/op     0  B/op   0  allocs/op
+Benchmark_ParseHTTPDate/fiber-4                                    124944092    9.542  ns/op     0  B/op   0  allocs/op
+Benchmark_ParseHTTPDate/default-4                                   14183923    84.09  ns/op     0  B/op   0  allocs/op
+Benchmark_ParseIPv4/fiber-4                                        134509474    8.779  ns/op     0  B/op   0  allocs/op
+Benchmark_ParseIPv4/default-4                                       96120033    13.16  ns/op     0  B/op   0  allocs/op
+Benchmark_ParseIPv6/compressed/fiber-4                              60667490    18.69  ns/op     0  B/op   0  allocs/op
+Benchmark_ParseIPv6/compressed/default-4                            51461449    24.07  ns/op     0  B/op   0  allocs/op
+Benchmark_ParseIPv6/full/fiber-4                                    50006224    25.44  ns/op     0  B/op   0  allocs/op
+Benchmark_ParseIPv6/full/default-4                                  29281041    34.67  ns/op     0  B/op   0  allocs/op
+Benchmark_AppendJSONString/clean-16B/fiber-4                       116575838    10.14  ns/op     0  B/op   0  allocs/op
+Benchmark_AppendJSONString/clean-16B/default-4                      18329967    66.97  ns/op    40  B/op   2  allocs/op
+Benchmark_AppendJSONString/clean-64B/fiber-4                        39247297    29.34  ns/op     0  B/op   0  allocs/op
+Benchmark_AppendJSONString/clean-64B/default-4                      11358939    100.4  ns/op    96  B/op   2  allocs/op
+Benchmark_AppendJSONString/escaped-64B/fiber-4                      16470195    74.15  ns/op     0  B/op   0  allocs/op
+Benchmark_AppendJSONString/escaped-64B/default-4                     9741043    127.1  ns/op    96  B/op   2  allocs/op
+Benchmark_AppendJSONString/unicode-64B/fiber-4                      10718854    111.9  ns/op     0  B/op   0  allocs/op
+Benchmark_AppendJSONString/unicode-64B/default-4                     7911082    149.5  ns/op   112  B/op   2  allocs/op
+Benchmark_HasPrefixFold/bearer-hit/fiber-4                         543062940    2.239  ns/op     0  B/op   0  allocs/op
+Benchmark_HasPrefixFold/bearer-hit/default-4                       396693123    3.057  ns/op     0  B/op   0  allocs/op
+Benchmark_HasPrefixFold/bearer-miss/fiber-4                        859282924    1.355  ns/op     0  B/op   0  allocs/op
+Benchmark_HasPrefixFold/bearer-miss/default-4                      481811526    2.511  ns/op     0  B/op   0  allocs/op
+Benchmark_HasPrefixFold/text-hit/fiber-4                           557733916    2.165  ns/op     0  B/op   0  allocs/op
+Benchmark_HasPrefixFold/text-hit/default-4                         281911194    4.259  ns/op     0  B/op   0  allocs/op
+Benchmark_HasPrefixFold/multipart-hit/fiber-4                      203003868    5.928  ns/op     0  B/op   0  allocs/op
+Benchmark_HasPrefixFold/multipart-hit/default-4                    100000000    10.14  ns/op     0  B/op   0  allocs/op
+Benchmark_HasPrefixFold/multipart-miss/fiber-4                     807200426    1.475  ns/op     0  B/op   0  allocs/op
+Benchmark_HasPrefixFold/multipart-miss/default-4                   707085358    1.748  ns/op     0  B/op   0  allocs/op
+Benchmark_HasSuffixFold/gzip-hit/fiber-4                           481585503    2.498  ns/op     0  B/op   0  allocs/op
+Benchmark_HasSuffixFold/gzip-hit/default-4                         284746641    4.228  ns/op     0  B/op   0  allocs/op
+Benchmark_HasSuffixFold/gzip-miss/fiber-4                          783951544    1.513  ns/op     0  B/op   0  allocs/op
+Benchmark_HasSuffixFold/gzip-miss/default-4                        577793062    1.939  ns/op     0  B/op   0  allocs/op
+Benchmark_HasSuffixFold/json-hit/fiber-4                           524795856    2.284  ns/op     0  B/op   0  allocs/op
+Benchmark_HasSuffixFold/json-hit/default-4                         282228116    4.251  ns/op     0  B/op   0  allocs/op
+Benchmark_HasSuffixFold/atomxml-hit/fiber-4                        380070187    3.268  ns/op     0  B/op   0  allocs/op
+Benchmark_HasSuffixFold/atomxml-hit/default-4                      217422844    5.573  ns/op     0  B/op   0  allocs/op
+Benchmark_HasSuffixFold/charset-miss/fiber-4                       802579796    1.526  ns/op     0  B/op   0  allocs/op
+Benchmark_HasSuffixFold/charset-miss/default-4                     641014597    1.891  ns/op     0  B/op   0  allocs/op
+Benchmark_SplitTrimSeq/accept-encoding/fiber-4                     110528046    10.79  ns/op     0  B/op   0  allocs/op
+Benchmark_SplitTrimSeq/accept-encoding/default-4                   100000000    12.17  ns/op     0  B/op   0  allocs/op
+Benchmark_SplitTrimSeq/accept/fiber-4                               45297562    25.86  ns/op     0  B/op   0  allocs/op
+Benchmark_SplitTrimSeq/accept/default-4                             44616727    26.89  ns/op     0  B/op   0  allocs/op
+Benchmark_AppendQueryEscape/clean-64B/fiber-4                       84951325    14.45  ns/op     0  B/op   0  allocs/op
+Benchmark_AppendQueryEscape/clean-64B/fiber-grow-4                  39905455    31.54  ns/op    64  B/op   1  allocs/op
+Benchmark_AppendQueryEscape/clean-64B/default-4                     81626277    14.50  ns/op     0  B/op   0  allocs/op
+Benchmark_AppendQueryEscape/mixed-64B/fiber-4                       20833869    57.30  ns/op     0  B/op   0  allocs/op
+Benchmark_AppendQueryEscape/mixed-64B/fiber-grow-4                  12820696    104.0  ns/op    96  B/op   1  allocs/op
+Benchmark_AppendQueryEscape/mixed-64B/default-4                     12114079    106.0  ns/op   192  B/op   2  allocs/op
+Benchmark_AppendQueryEscape/words-64B/fiber-4                       26774242    40.72  ns/op     0  B/op   0  allocs/op
+Benchmark_AppendQueryEscape/words-64B/fiber-grow-4                  15988232    74.43  ns/op    64  B/op   1  allocs/op
+Benchmark_AppendQueryEscape/words-64B/default-4                     23491057    52.78  ns/op    64  B/op   1  allocs/op
+Benchmark_AppendPathSegmentsEscape/1-segment/fiber-4               167753917    7.173  ns/op     0  B/op   0  allocs/op
+Benchmark_AppendPathSegmentsEscape/1-segment/split-loop-4           97259446    12.25  ns/op     0  B/op   0  allocs/op
+Benchmark_AppendPathSegmentsEscape/3-segments/fiber-4              164162836    7.302  ns/op     0  B/op   0  allocs/op
+Benchmark_AppendPathSegmentsEscape/3-segments/split-loop-4          62738319    20.08  ns/op     0  B/op   0  allocs/op
+Benchmark_AppendPathSegmentsEscape/6-segments/fiber-4              162682024    7.289  ns/op     0  B/op   0  allocs/op
+Benchmark_AppendPathSegmentsEscape/6-segments/split-loop-4          38979402    32.49  ns/op     0  B/op   0  allocs/op
+Benchmark_AppendPathSegmentsEscape/escaping/fiber-4                 78633295    17.86  ns/op     0  B/op   0  allocs/op
+Benchmark_AppendPathSegmentsEscape/escaping/split-loop-4            39662082    30.13  ns/op     0  B/op   0  allocs/op
+Benchmark_AppendQueryUnescape/plain-64B/fiber-4                    162386299    7.303  ns/op     0  B/op   0  allocs/op
+Benchmark_AppendQueryUnescape/plain-64B/fiber-grow-4                47873440    25.18  ns/op    64  B/op   1  allocs/op
+Benchmark_AppendQueryUnescape/plain-64B/default-4                   22820241    50.43  ns/op     0  B/op   0  allocs/op
+Benchmark_AppendQueryUnescape/escaped-64B/fiber-4                   22122288    54.84  ns/op     0  B/op   0  allocs/op
+Benchmark_AppendQueryUnescape/escaped-64B/fiber-grow-4              16182109    77.04  ns/op    48  B/op   1  allocs/op
+Benchmark_AppendQueryUnescape/escaped-64B/default-4                 11858275    104.1  ns/op    48  B/op   1  allocs/op
+Benchmark_AppendQueryUnescape/utf8-62B/fiber-4                      27144454    41.86  ns/op     0  B/op   0  allocs/op
+Benchmark_AppendQueryUnescape/utf8-62B/fiber-grow-4                 19416654    62.87  ns/op    48  B/op   1  allocs/op
+Benchmark_AppendQueryUnescape/utf8-62B/default-4                    15800938    74.23  ns/op    48  B/op   1  allocs/op
+Benchmark_AppendQueryUnescape/words-64B/fiber-4                     15931467    72.81  ns/op     0  B/op   0  allocs/op
+Benchmark_AppendQueryUnescape/words-64B/fiber-grow-4                12764703    98.86  ns/op    64  B/op   1  allocs/op
+Benchmark_AppendQueryUnescape/words-64B/default-4                    9407224    125.9  ns/op    64  B/op   1  allocs/op
+Benchmark_AppendPathUnescape/plain-25B/fiber-4                     230424097    5.156  ns/op     0  B/op   0  allocs/op
+Benchmark_AppendPathUnescape/plain-25B/default-4                    70821981    17.02  ns/op     0  B/op   0  allocs/op
+Benchmark_AppendPathUnescape/escaped-31B/fiber-4                    72507342    16.33  ns/op     0  B/op   0  allocs/op
+Benchmark_AppendPathUnescape/escaped-31B/default-4                  25323608    48.15  ns/op    24  B/op   1  allocs/op
 ```
 
 ## Float parsing
@@ -911,6 +1012,11 @@ either case, and returns a `*strconv.NumError` for anything else, such as
 `10 X`, `5kilobytes`, a negative size, or a size of `math.MaxInt` or more.
 The number is scaled by `ConvertToBytes`, so the two agree on every size
 `ParseByteSize` accepts.
+
+`ByteSize` goes the other way, in powers of 1024 and with one decimal
+place (`1.5KB`, `1023.9KB`, `16EB`). It writes its at most eight bytes
+right to left on the stack, so the string it returns is allocated at its
+own length, and a size of zero allocates nothing.
 
 ## SWAR primitives
 
@@ -1124,163 +1230,163 @@ Environment:
 goos: linux
 goarch: amd64
 pkg: github.com/gofiber/utils/v2/simd
-cpu: Intel(R) Xeon(R) Processor @ 2.30GHz
+cpu: AMD EPYC
 
 ```text
 // go test ./simd/ -benchmem -run=^$ -bench=Benchmark_ -count=1
-Benchmark_Memchr2/8B/simd-4                                        163223838    7.381  ns/op     0  B/op   0  allocs/op
-Benchmark_Memchr2/8B/scalar-4                                      220403118    5.688  ns/op     0  B/op   0  allocs/op
-Benchmark_Memchr2/8B/default-4                                      39779214    30.72  ns/op     0  B/op   0  allocs/op
-Benchmark_Memchr2/32B/simd-4                                       312666808    3.811  ns/op     0  B/op   0  allocs/op
-Benchmark_Memchr2/32B/scalar-4                                     151634965    7.857  ns/op     0  B/op   0  allocs/op
-Benchmark_Memchr2/32B/default-4                                     47302210    25.67  ns/op     0  B/op   0  allocs/op
-Benchmark_Memchr2/64B/simd-4                                       278823658    4.181  ns/op     0  B/op   0  allocs/op
-Benchmark_Memchr2/64B/scalar-4                                      97600944    13.38  ns/op     0  B/op   0  allocs/op
-Benchmark_Memchr2/64B/default-4                                     24859352    49.64  ns/op     0  B/op   0  allocs/op
-Benchmark_Memchr2/512B/simd-4                                      122049177    9.618  ns/op     0  B/op   0  allocs/op
-Benchmark_Memchr2/512B/scalar-4                                     15152460    77.68  ns/op     0  B/op   0  allocs/op
-Benchmark_Memchr2/512B/default-4                                     3514894    336.5  ns/op     0  B/op   0  allocs/op
-Benchmark_Memchr2/4096B/simd-4                                      19844942    57.94  ns/op     0  B/op   0  allocs/op
-Benchmark_Memchr2/4096B/scalar-4                                     2246491    570.3  ns/op     0  B/op   0  allocs/op
-Benchmark_Memchr2/4096B/default-4                                     440556     2689  ns/op     0  B/op   0  allocs/op
-Benchmark_Memchr3/8B/simd-4                                        225839479    5.398  ns/op     0  B/op   0  allocs/op
-Benchmark_Memchr3/8B/scalar-4                                      296908472    4.109  ns/op     0  B/op   0  allocs/op
-Benchmark_Memchr3/8B/default-4                                      37117809    32.63  ns/op     0  B/op   0  allocs/op
-Benchmark_Memchr3/32B/simd-4                                       255110941    4.701  ns/op     0  B/op   0  allocs/op
-Benchmark_Memchr3/32B/scalar-4                                     152303353    8.011  ns/op     0  B/op   0  allocs/op
-Benchmark_Memchr3/32B/default-4                                     44015703    27.72  ns/op     0  B/op   0  allocs/op
-Benchmark_Memchr3/64B/simd-4                                       208958654    5.442  ns/op     0  B/op   0  allocs/op
-Benchmark_Memchr3/64B/scalar-4                                      89396228    13.64  ns/op     0  B/op   0  allocs/op
-Benchmark_Memchr3/64B/default-4                                     26038789    46.63  ns/op     0  B/op   0  allocs/op
-Benchmark_Memchr3/512B/simd-4                                       98192415    12.39  ns/op     0  B/op   0  allocs/op
-Benchmark_Memchr3/512B/scalar-4                                     13208515    95.60  ns/op     0  B/op   0  allocs/op
-Benchmark_Memchr3/512B/default-4                                     3543529    342.1  ns/op     0  B/op   0  allocs/op
-Benchmark_Memchr3/4096B/simd-4                                      13478524    90.54  ns/op     0  B/op   0  allocs/op
-Benchmark_Memchr3/4096B/scalar-4                                     1572429    752.6  ns/op     0  B/op   0  allocs/op
-Benchmark_Memchr3/4096B/default-4                                     493482     2618  ns/op     0  B/op   0  allocs/op
-Benchmark_MemchrPair/8B/simd-4                                     137647610    8.631  ns/op     0  B/op   0  allocs/op
-Benchmark_MemchrPair/8B/swar-4                                     180895180    6.368  ns/op     0  B/op   0  allocs/op
-Benchmark_MemchrPair/8B/scalar-4                                   202734766    5.657  ns/op     0  B/op   0  allocs/op
-Benchmark_MemchrPair/32B/simd-4                                    128088404    9.209  ns/op     0  B/op   0  allocs/op
-Benchmark_MemchrPair/32B/swar-4                                    163652424    7.388  ns/op     0  B/op   0  allocs/op
-Benchmark_MemchrPair/32B/scalar-4                                   73024104    16.53  ns/op     0  B/op   0  allocs/op
-Benchmark_MemchrPair/64B/simd-4                                    214676979    5.591  ns/op     0  B/op   0  allocs/op
-Benchmark_MemchrPair/64B/swar-4                                     97148960    11.90  ns/op     0  B/op   0  allocs/op
-Benchmark_MemchrPair/64B/scalar-4                                   38951116    31.57  ns/op     0  B/op   0  allocs/op
-Benchmark_MemchrPair/512B/simd-4                                    92245372    12.86  ns/op     0  B/op   0  allocs/op
-Benchmark_MemchrPair/512B/swar-4                                    15626982    78.90  ns/op     0  B/op   0  allocs/op
-Benchmark_MemchrPair/512B/scalar-4                                   4699668    263.4  ns/op     0  B/op   0  allocs/op
-Benchmark_MemchrPair/4096B/simd-4                                   16299256    79.29  ns/op     0  B/op   0  allocs/op
-Benchmark_MemchrPair/4096B/swar-4                                    1978568    612.1  ns/op     0  B/op   0  allocs/op
-Benchmark_MemchrPair/4096B/scalar-4                                   581733     1987  ns/op     0  B/op   0  allocs/op
-Benchmark_MemchrDigit/8B/simd-4                                    138359964    8.750  ns/op     0  B/op   0  allocs/op
-Benchmark_MemchrDigit/8B/scalar-4                                  194877894    6.085  ns/op     0  B/op   0  allocs/op
-Benchmark_MemchrDigit/32B/simd-4                                   320304793    3.650  ns/op     0  B/op   0  allocs/op
-Benchmark_MemchrDigit/32B/scalar-4                                 157400190    7.614  ns/op     0  B/op   0  allocs/op
-Benchmark_MemchrDigit/64B/simd-4                                   284828822    4.258  ns/op     0  B/op   0  allocs/op
-Benchmark_MemchrDigit/64B/scalar-4                                 100000000    10.43  ns/op     0  B/op   0  allocs/op
-Benchmark_MemchrDigit/512B/simd-4                                  149082781    8.406  ns/op     0  B/op   0  allocs/op
-Benchmark_MemchrDigit/512B/scalar-4                                 19803118    60.07  ns/op     0  B/op   0  allocs/op
-Benchmark_MemchrDigit/4096B/simd-4                                  24030127    49.81  ns/op     0  B/op   0  allocs/op
-Benchmark_MemchrDigit/4096B/scalar-4                                 2512970    474.9  ns/op     0  B/op   0  allocs/op
-Benchmark_MemchrWord/8B/simd-4                                     178299544    6.750  ns/op     0  B/op   0  allocs/op
-Benchmark_MemchrWord/8B/scalar-4                                   263884887    4.594  ns/op     0  B/op   0  allocs/op
-Benchmark_MemchrWord/32B/simd-4                                    285046492    4.432  ns/op     0  B/op   0  allocs/op
-Benchmark_MemchrWord/32B/scalar-4                                  135822624    8.478  ns/op     0  B/op   0  allocs/op
-Benchmark_MemchrWord/64B/simd-4                                    236263441    5.255  ns/op     0  B/op   0  allocs/op
-Benchmark_MemchrWord/64B/scalar-4                                   77558670    15.16  ns/op     0  B/op   0  allocs/op
-Benchmark_MemchrWord/512B/simd-4                                    90156414    13.34  ns/op     0  B/op   0  allocs/op
-Benchmark_MemchrWord/512B/scalar-4                                   9321330    122.7  ns/op     0  B/op   0  allocs/op
-Benchmark_MemchrWord/4096B/simd-4                                   13992052    88.91  ns/op     0  B/op   0  allocs/op
-Benchmark_MemchrWord/4096B/scalar-4                                  1409242    926.8  ns/op     0  B/op   0  allocs/op
-Benchmark_MemchrNotWord/8B/simd-4                                  188111439    6.459  ns/op     0  B/op   0  allocs/op
-Benchmark_MemchrNotWord/8B/scalar-4                                268971849    4.500  ns/op     0  B/op   0  allocs/op
-Benchmark_MemchrNotWord/32B/simd-4                                 267004086    4.671  ns/op     0  B/op   0  allocs/op
-Benchmark_MemchrNotWord/32B/scalar-4                               131273421    9.029  ns/op     0  B/op   0  allocs/op
-Benchmark_MemchrNotWord/64B/simd-4                                 235827067    5.110  ns/op     0  B/op   0  allocs/op
-Benchmark_MemchrNotWord/64B/scalar-4                                71256892    18.29  ns/op     0  B/op   0  allocs/op
-Benchmark_MemchrNotWord/512B/simd-4                                 94014446    12.42  ns/op     0  B/op   0  allocs/op
-Benchmark_MemchrNotWord/512B/scalar-4                                9779750    122.9  ns/op     0  B/op   0  allocs/op
-Benchmark_MemchrNotWord/4096B/simd-4                                14442020    83.85  ns/op     0  B/op   0  allocs/op
-Benchmark_MemchrNotWord/4096B/scalar-4                               1263746    927.1  ns/op     0  B/op   0  allocs/op
-Benchmark_Memmem/8B/simd-4                                         100000000    10.48  ns/op     0  B/op   0  allocs/op
-Benchmark_Memmem/8B/default-4                                      128781562    9.208  ns/op     0  B/op   0  allocs/op
-Benchmark_Memmem/32B/simd-4                                        100000000    10.50  ns/op     0  B/op   0  allocs/op
-Benchmark_Memmem/32B/default-4                                     136736558    8.674  ns/op     0  B/op   0  allocs/op
-Benchmark_Memmem/64B/simd-4                                         86872292    13.07  ns/op     0  B/op   0  allocs/op
-Benchmark_Memmem/64B/default-4                                     100000000    11.55  ns/op     0  B/op   0  allocs/op
-Benchmark_Memmem/96B/simd-4                                         67794943    19.16  ns/op     0  B/op   0  allocs/op
-Benchmark_Memmem/96B/default-4                                      35085406    34.83  ns/op     0  B/op   0  allocs/op
-Benchmark_Memmem/128B/simd-4                                        58757683    20.73  ns/op     0  B/op   0  allocs/op
-Benchmark_Memmem/128B/default-4                                     23391030    46.43  ns/op     0  B/op   0  allocs/op
-Benchmark_Memmem/192B/simd-4                                        64681166    18.59  ns/op     0  B/op   0  allocs/op
-Benchmark_Memmem/192B/default-4                                     17413057    71.13  ns/op     0  B/op   0  allocs/op
-Benchmark_Memmem/512B/simd-4                                        54063534    23.96  ns/op     0  B/op   0  allocs/op
-Benchmark_Memmem/512B/default-4                                      5196966    231.7  ns/op     0  B/op   0  allocs/op
-Benchmark_Memmem/4096B/simd-4                                       14285628    84.46  ns/op     0  B/op   0  allocs/op
-Benchmark_Memmem/4096B/default-4                                      741338     1644  ns/op     0  B/op   0  allocs/op
-Benchmark_Memmem_Prefilter/8B/paired-4                             100000000    11.10  ns/op     0  B/op   0  allocs/op
-Benchmark_Memmem_Prefilter/8B/paired-stdlib-4                      136195389    8.848  ns/op     0  B/op   0  allocs/op
-Benchmark_Memmem_Prefilter/32B/paired-4                             91527246    12.65  ns/op     0  B/op   0  allocs/op
-Benchmark_Memmem_Prefilter/32B/paired-stdlib-4                     136155064    8.780  ns/op     0  B/op   0  allocs/op
-Benchmark_Memmem_Prefilter/32B/single-4                             96447368    12.12  ns/op     0  B/op   0  allocs/op
-Benchmark_Memmem_Prefilter/32B/single-stdlib-4                      93651979    13.24  ns/op     0  B/op   0  allocs/op
-Benchmark_Memmem_Prefilter/64B/paired-4                            132946413    9.212  ns/op     0  B/op   0  allocs/op
-Benchmark_Memmem_Prefilter/64B/paired-stdlib-4                     101844316    11.62  ns/op     0  B/op   0  allocs/op
-Benchmark_Memmem_Prefilter/64B/single-4                             50785782    24.43  ns/op     0  B/op   0  allocs/op
-Benchmark_Memmem_Prefilter/64B/single-stdlib-4                      45737925    25.35  ns/op     0  B/op   0  allocs/op
-Benchmark_Memmem_Prefilter/96B/paired-4                            120954412    9.836  ns/op     0  B/op   0  allocs/op
-Benchmark_Memmem_Prefilter/96B/paired-stdlib-4                      37225718    33.61  ns/op     0  B/op   0  allocs/op
-Benchmark_Memmem_Prefilter/96B/single-4                             36624890    31.47  ns/op     0  B/op   0  allocs/op
-Benchmark_Memmem_Prefilter/96B/single-stdlib-4                      51132355    22.72  ns/op     0  B/op   0  allocs/op
-Benchmark_Memmem_Prefilter/128B/paired-4                           100000000    11.57  ns/op     0  B/op   0  allocs/op
-Benchmark_Memmem_Prefilter/128B/paired-stdlib-4                     26690694    47.88  ns/op     0  B/op   0  allocs/op
-Benchmark_Memmem_Prefilter/128B/single-4                            26789299    43.89  ns/op     0  B/op   0  allocs/op
-Benchmark_Memmem_Prefilter/128B/single-stdlib-4                     36123922    33.18  ns/op     0  B/op   0  allocs/op
-Benchmark_Memmem_Prefilter/192B/paired-4                           100000000    10.20  ns/op     0  B/op   0  allocs/op
-Benchmark_Memmem_Prefilter/192B/paired-stdlib-4                     16660519    72.98  ns/op     0  B/op   0  allocs/op
-Benchmark_Memmem_Prefilter/192B/single-4                            14980336    81.66  ns/op     0  B/op   0  allocs/op
-Benchmark_Memmem_Prefilter/192B/single-stdlib-4                     20875334    58.10  ns/op     0  B/op   0  allocs/op
-Benchmark_Memmem_Prefilter/512B/paired-4                            78980623    15.98  ns/op     0  B/op   0  allocs/op
-Benchmark_Memmem_Prefilter/512B/paired-stdlib-4                      5053633    244.9  ns/op     0  B/op   0  allocs/op
-Benchmark_Memmem_Prefilter/512B/single-4                             5332924    225.7  ns/op     0  B/op   0  allocs/op
-Benchmark_Memmem_Prefilter/512B/single-stdlib-4                      5536302    221.6  ns/op     0  B/op   0  allocs/op
-Benchmark_Memmem_Prefilter/4096B/paired-4                           15045468    80.58  ns/op     0  B/op   0  allocs/op
-Benchmark_Memmem_Prefilter/4096B/paired-stdlib-4                      766984     1597  ns/op     0  B/op   0  allocs/op
-Benchmark_Memmem_Prefilter/4096B/single-4                             701262     1714  ns/op     0  B/op   0  allocs/op
-Benchmark_Memmem_Prefilter/4096B/single-stdlib-4                      722846     1658  ns/op     0  B/op   0  allocs/op
-Benchmark_Memmem_Adversarial/simd-4                                      706  1684375  ns/op     0  B/op   0  allocs/op
-Benchmark_Memmem_Adversarial/default-4                                   714  1662946  ns/op     0  B/op   0  allocs/op
-Benchmark_IsASCII/8B/simd-4                                        339066433    3.302  ns/op     0  B/op   0  allocs/op
-Benchmark_IsASCII/8B/swar-4                                        741428154    1.612  ns/op     0  B/op   0  allocs/op
-Benchmark_IsASCII/32B/simd-4                                       346464981    3.513  ns/op     0  B/op   0  allocs/op
-Benchmark_IsASCII/32B/swar-4                                       283798622    4.261  ns/op     0  B/op   0  allocs/op
-Benchmark_IsASCII/64B/simd-4                                       244679335    4.910  ns/op     0  B/op   0  allocs/op
-Benchmark_IsASCII/64B/swar-4                                       227000787    5.128  ns/op     0  B/op   0  allocs/op
-Benchmark_IsASCII/512B/simd-4                                      214921719    5.639  ns/op     0  B/op   0  allocs/op
-Benchmark_IsASCII/512B/swar-4                                       83113578    14.01  ns/op     0  B/op   0  allocs/op
-Benchmark_IsASCII/4096B/simd-4                                      44166258    26.51  ns/op     0  B/op   0  allocs/op
-Benchmark_IsASCII/4096B/swar-4                                      14718542    89.15  ns/op     0  B/op   0  allocs/op
-Benchmark_FirstNonASCII/8B/simd-4                                  183310850    6.571  ns/op     0  B/op   0  allocs/op
-Benchmark_FirstNonASCII/8B/swar-4                                  246415456    4.626  ns/op     0  B/op   0  allocs/op
-Benchmark_FirstNonASCII/32B/simd-4                                 277790518    4.413  ns/op     0  B/op   0  allocs/op
-Benchmark_FirstNonASCII/32B/swar-4                                 215803005    5.794  ns/op     0  B/op   0  allocs/op
-Benchmark_FirstNonASCII/64B/simd-4                                 258967251    4.800  ns/op     0  B/op   0  allocs/op
-Benchmark_FirstNonASCII/64B/swar-4                                 169597692    7.344  ns/op     0  B/op   0  allocs/op
-Benchmark_FirstNonASCII/512B/simd-4                                145282233    7.758  ns/op     0  B/op   0  allocs/op
-Benchmark_FirstNonASCII/512B/swar-4                                 49222238    24.28  ns/op     0  B/op   0  allocs/op
-Benchmark_FirstNonASCII/4096B/simd-4                                45028603    27.52  ns/op     0  B/op   0  allocs/op
-Benchmark_FirstNonASCII/4096B/swar-4                                 6690974    182.0  ns/op     0  B/op   0  allocs/op
-Benchmark_CountNonASCII/8B/simd-4                                  216842838    5.552  ns/op     0  B/op   0  allocs/op
-Benchmark_CountNonASCII/8B/swar-4                                  293867199    3.981  ns/op     0  B/op   0  allocs/op
-Benchmark_CountNonASCII/32B/simd-4                                 360431781    3.646  ns/op     0  B/op   0  allocs/op
-Benchmark_CountNonASCII/32B/swar-4                                 226715292    5.325  ns/op     0  B/op   0  allocs/op
-Benchmark_CountNonASCII/64B/simd-4                                 290987624    4.109  ns/op     0  B/op   0  allocs/op
-Benchmark_CountNonASCII/64B/swar-4                                 153041892    7.837  ns/op     0  B/op   0  allocs/op
-Benchmark_CountNonASCII/512B/simd-4                                159127372    7.441  ns/op     0  B/op   0  allocs/op
-Benchmark_CountNonASCII/512B/swar-4                                 28561411    35.05  ns/op     0  B/op   0  allocs/op
-Benchmark_CountNonASCII/4096B/simd-4                                31115862    38.66  ns/op     0  B/op   0  allocs/op
-Benchmark_CountNonASCII/4096B/swar-4                                 4006736    257.9  ns/op     0  B/op   0  allocs/op
+Benchmark_Memchr2/8B/simd-4                                        438827100    2.751  ns/op     0  B/op   0  allocs/op
+Benchmark_Memchr2/8B/scalar-4                                      593404477    2.041  ns/op     0  B/op   0  allocs/op
+Benchmark_Memchr2/8B/default-4                                      80032118    15.64  ns/op     0  B/op   0  allocs/op
+Benchmark_Memchr2/32B/simd-4                                       512293941    2.395  ns/op     0  B/op   0  allocs/op
+Benchmark_Memchr2/32B/scalar-4                                     301949120    4.649  ns/op     0  B/op   0  allocs/op
+Benchmark_Memchr2/32B/default-4                                     76776531    15.63  ns/op     0  B/op   0  allocs/op
+Benchmark_Memchr2/64B/simd-4                                       433758777    2.715  ns/op     0  B/op   0  allocs/op
+Benchmark_Memchr2/64B/scalar-4                                     184668122    6.490  ns/op     0  B/op   0  allocs/op
+Benchmark_Memchr2/64B/default-4                                     41520069    27.35  ns/op     0  B/op   0  allocs/op
+Benchmark_Memchr2/512B/simd-4                                      262840983    4.351  ns/op     0  B/op   0  allocs/op
+Benchmark_Memchr2/512B/scalar-4                                     27931284    43.70  ns/op     0  B/op   0  allocs/op
+Benchmark_Memchr2/512B/default-4                                     5704527    210.4  ns/op     0  B/op   0  allocs/op
+Benchmark_Memchr2/4096B/simd-4                                      38343454    28.02  ns/op     0  B/op   0  allocs/op
+Benchmark_Memchr2/4096B/scalar-4                                     3376074    354.0  ns/op     0  B/op   0  allocs/op
+Benchmark_Memchr2/4096B/default-4                                     711501     1714  ns/op     0  B/op   0  allocs/op
+Benchmark_Memchr3/8B/simd-4                                        354681948    3.244  ns/op     0  B/op   0  allocs/op
+Benchmark_Memchr3/8B/scalar-4                                      439717762    2.660  ns/op     0  B/op   0  allocs/op
+Benchmark_Memchr3/8B/default-4                                      70377523    16.67  ns/op     0  B/op   0  allocs/op
+Benchmark_Memchr3/32B/simd-4                                       491647814    2.388  ns/op     0  B/op   0  allocs/op
+Benchmark_Memchr3/32B/scalar-4                                     221500863    5.426  ns/op     0  B/op   0  allocs/op
+Benchmark_Memchr3/32B/default-4                                     74339248    17.10  ns/op     0  B/op   0  allocs/op
+Benchmark_Memchr3/64B/simd-4                                       433255318    2.765  ns/op     0  B/op   0  allocs/op
+Benchmark_Memchr3/64B/scalar-4                                     134343738    9.015  ns/op     0  B/op   0  allocs/op
+Benchmark_Memchr3/64B/default-4                                     44080189    27.44  ns/op     0  B/op   0  allocs/op
+Benchmark_Memchr3/512B/simd-4                                      218295508    5.438  ns/op     0  B/op   0  allocs/op
+Benchmark_Memchr3/512B/scalar-4                                     19787991    62.38  ns/op     0  B/op   0  allocs/op
+Benchmark_Memchr3/512B/default-4                                     4982817    220.9  ns/op     0  B/op   0  allocs/op
+Benchmark_Memchr3/4096B/simd-4                                      31439382    38.11  ns/op     0  B/op   0  allocs/op
+Benchmark_Memchr3/4096B/scalar-4                                     2460133    488.3  ns/op     0  B/op   0  allocs/op
+Benchmark_Memchr3/4096B/default-4                                     759471     1599  ns/op     0  B/op   0  allocs/op
+Benchmark_MemchrPair/8B/simd-4                                     221210430    5.232  ns/op     0  B/op   0  allocs/op
+Benchmark_MemchrPair/8B/swar-4                                     348585800    3.556  ns/op     0  B/op   0  allocs/op
+Benchmark_MemchrPair/8B/scalar-4                                   529277721    2.295  ns/op     0  B/op   0  allocs/op
+Benchmark_MemchrPair/32B/simd-4                                    202178641    5.984  ns/op     0  B/op   0  allocs/op
+Benchmark_MemchrPair/32B/swar-4                                    253528896    4.717  ns/op     0  B/op   0  allocs/op
+Benchmark_MemchrPair/32B/scalar-4                                   94890778    12.35  ns/op     0  B/op   0  allocs/op
+Benchmark_MemchrPair/64B/simd-4                                    345571293    3.425  ns/op     0  B/op   0  allocs/op
+Benchmark_MemchrPair/64B/swar-4                                    154802499    7.898  ns/op     0  B/op   0  allocs/op
+Benchmark_MemchrPair/64B/scalar-4                                   79833866    24.55  ns/op     0  B/op   0  allocs/op
+Benchmark_MemchrPair/512B/simd-4                                   195209959    6.152  ns/op     0  B/op   0  allocs/op
+Benchmark_MemchrPair/512B/swar-4                                    22109486    51.10  ns/op     0  B/op   0  allocs/op
+Benchmark_MemchrPair/512B/scalar-4                                   5816596    222.8  ns/op     0  B/op   0  allocs/op
+Benchmark_MemchrPair/4096B/simd-4                                   33390804    36.36  ns/op     0  B/op   0  allocs/op
+Benchmark_MemchrPair/4096B/swar-4                                    2868840    418.4  ns/op     0  B/op   0  allocs/op
+Benchmark_MemchrPair/4096B/scalar-4                                   706368     1692  ns/op     0  B/op   0  allocs/op
+Benchmark_MemchrDigit/8B/simd-4                                    428286242    3.066  ns/op     0  B/op   0  allocs/op
+Benchmark_MemchrDigit/8B/scalar-4                                  801597561    1.579  ns/op     0  B/op   0  allocs/op
+Benchmark_MemchrDigit/32B/simd-4                                   531411568    2.375  ns/op     0  B/op   0  allocs/op
+Benchmark_MemchrDigit/32B/scalar-4                                 369762055    3.232  ns/op     0  B/op   0  allocs/op
+Benchmark_MemchrDigit/64B/simd-4                                   454296792    2.509  ns/op     0  B/op   0  allocs/op
+Benchmark_MemchrDigit/64B/scalar-4                                 243953842    4.928  ns/op     0  B/op   0  allocs/op
+Benchmark_MemchrDigit/512B/simd-4                                  291673386    3.973  ns/op     0  B/op   0  allocs/op
+Benchmark_MemchrDigit/512B/scalar-4                                 34388494    36.83  ns/op     0  B/op   0  allocs/op
+Benchmark_MemchrDigit/4096B/simd-4                                  56277913    22.34  ns/op     0  B/op   0  allocs/op
+Benchmark_MemchrDigit/4096B/scalar-4                                 4410810    279.9  ns/op     0  B/op   0  allocs/op
+Benchmark_MemchrWord/8B/simd-4                                     405158480    2.988  ns/op     0  B/op   0  allocs/op
+Benchmark_MemchrWord/8B/scalar-4                                   539351959    2.206  ns/op     0  B/op   0  allocs/op
+Benchmark_MemchrWord/32B/simd-4                                    449819178    2.570  ns/op     0  B/op   0  allocs/op
+Benchmark_MemchrWord/32B/scalar-4                                  215114436    5.620  ns/op     0  B/op   0  allocs/op
+Benchmark_MemchrWord/64B/simd-4                                    432078406    2.905  ns/op     0  B/op   0  allocs/op
+Benchmark_MemchrWord/64B/scalar-4                                  120594146    9.878  ns/op     0  B/op   0  allocs/op
+Benchmark_MemchrWord/512B/simd-4                                   202084159    5.930  ns/op     0  B/op   0  allocs/op
+Benchmark_MemchrWord/512B/scalar-4                                  17016954    72.36  ns/op     0  B/op   0  allocs/op
+Benchmark_MemchrWord/4096B/simd-4                                   27692071    44.06  ns/op     0  B/op   0  allocs/op
+Benchmark_MemchrWord/4096B/scalar-4                                  2019286    576.4  ns/op     0  B/op   0  allocs/op
+Benchmark_MemchrNotWord/8B/simd-4                                  391076607    3.136  ns/op     0  B/op   0  allocs/op
+Benchmark_MemchrNotWord/8B/scalar-4                                476869863    2.345  ns/op     0  B/op   0  allocs/op
+Benchmark_MemchrNotWord/32B/simd-4                                 422039916    2.676  ns/op     0  B/op   0  allocs/op
+Benchmark_MemchrNotWord/32B/scalar-4                               213930672    5.661  ns/op     0  B/op   0  allocs/op
+Benchmark_MemchrNotWord/64B/simd-4                                 424848363    2.867  ns/op     0  B/op   0  allocs/op
+Benchmark_MemchrNotWord/64B/scalar-4                               100000000    10.09  ns/op     0  B/op   0  allocs/op
+Benchmark_MemchrNotWord/512B/simd-4                                204526584    6.270  ns/op     0  B/op   0  allocs/op
+Benchmark_MemchrNotWord/512B/scalar-4                               15132284    77.17  ns/op     0  B/op   0  allocs/op
+Benchmark_MemchrNotWord/4096B/simd-4                                26726410    43.51  ns/op     0  B/op   0  allocs/op
+Benchmark_MemchrNotWord/4096B/scalar-4                               1967492    605.1  ns/op     0  B/op   0  allocs/op
+Benchmark_Memmem/8B/simd-4                                         238297198    5.078  ns/op     0  B/op   0  allocs/op
+Benchmark_Memmem/8B/default-4                                      312963876    3.837  ns/op     0  B/op   0  allocs/op
+Benchmark_Memmem/32B/simd-4                                        223399807    5.164  ns/op     0  B/op   0  allocs/op
+Benchmark_Memmem/32B/default-4                                     280149112    4.328  ns/op     0  B/op   0  allocs/op
+Benchmark_Memmem/64B/simd-4                                        181056466    6.644  ns/op     0  B/op   0  allocs/op
+Benchmark_Memmem/64B/default-4                                     208156309    5.839  ns/op     0  B/op   0  allocs/op
+Benchmark_Memmem/96B/simd-4                                        140714542    8.129  ns/op     0  B/op   0  allocs/op
+Benchmark_Memmem/96B/default-4                                      59551779    22.04  ns/op     0  B/op   0  allocs/op
+Benchmark_Memmem/128B/simd-4                                       121754152    9.157  ns/op     0  B/op   0  allocs/op
+Benchmark_Memmem/128B/default-4                                     46335471    25.74  ns/op     0  B/op   0  allocs/op
+Benchmark_Memmem/192B/simd-4                                       141431370    8.391  ns/op     0  B/op   0  allocs/op
+Benchmark_Memmem/192B/default-4                                     30501302    39.63  ns/op     0  B/op   0  allocs/op
+Benchmark_Memmem/512B/simd-4                                       100000000    10.81  ns/op     0  B/op   0  allocs/op
+Benchmark_Memmem/512B/default-4                                     10538218    114.6  ns/op     0  B/op   0  allocs/op
+Benchmark_Memmem/4096B/simd-4                                       32581954    38.96  ns/op     0  B/op   0  allocs/op
+Benchmark_Memmem/4096B/default-4                                     1352824    888.7  ns/op     0  B/op   0  allocs/op
+Benchmark_Memmem_Prefilter/8B/paired-4                             199809792    5.930  ns/op     0  B/op   0  allocs/op
+Benchmark_Memmem_Prefilter/8B/paired-stdlib-4                      291923088    4.013  ns/op     0  B/op   0  allocs/op
+Benchmark_Memmem_Prefilter/32B/paired-4                            143105328    8.440  ns/op     0  B/op   0  allocs/op
+Benchmark_Memmem_Prefilter/32B/paired-stdlib-4                     269666610    4.364  ns/op     0  B/op   0  allocs/op
+Benchmark_Memmem_Prefilter/32B/single-4                            178805293    6.793  ns/op     0  B/op   0  allocs/op
+Benchmark_Memmem_Prefilter/32B/single-stdlib-4                     252354752    4.979  ns/op     0  B/op   0  allocs/op
+Benchmark_Memmem_Prefilter/64B/paired-4                            220193251    5.567  ns/op     0  B/op   0  allocs/op
+Benchmark_Memmem_Prefilter/64B/paired-stdlib-4                     203060490    6.002  ns/op     0  B/op   0  allocs/op
+Benchmark_Memmem_Prefilter/64B/single-4                             80880027    14.56  ns/op     0  B/op   0  allocs/op
+Benchmark_Memmem_Prefilter/64B/single-stdlib-4                     100000000    11.58  ns/op     0  B/op   0  allocs/op
+Benchmark_Memmem_Prefilter/96B/paired-4                            190965673    5.694  ns/op     0  B/op   0  allocs/op
+Benchmark_Memmem_Prefilter/96B/paired-stdlib-4                      57875270    20.70  ns/op     0  B/op   0  allocs/op
+Benchmark_Memmem_Prefilter/96B/single-4                             65319981    17.73  ns/op     0  B/op   0  allocs/op
+Benchmark_Memmem_Prefilter/96B/single-stdlib-4                      76707356    15.73  ns/op     0  B/op   0  allocs/op
+Benchmark_Memmem_Prefilter/128B/paired-4                           200099610    6.044  ns/op     0  B/op   0  allocs/op
+Benchmark_Memmem_Prefilter/128B/paired-stdlib-4                     38150725    26.76  ns/op     0  B/op   0  allocs/op
+Benchmark_Memmem_Prefilter/128B/single-4                            48030675    25.40  ns/op     0  B/op   0  allocs/op
+Benchmark_Memmem_Prefilter/128B/single-stdlib-4                     56638509    21.41  ns/op     0  B/op   0  allocs/op
+Benchmark_Memmem_Prefilter/192B/paired-4                           199293573    6.187  ns/op     0  B/op   0  allocs/op
+Benchmark_Memmem_Prefilter/192B/paired-stdlib-4                     29952097    40.70  ns/op     0  B/op   0  allocs/op
+Benchmark_Memmem_Prefilter/192B/single-4                            30438082    39.93  ns/op     0  B/op   0  allocs/op
+Benchmark_Memmem_Prefilter/192B/single-stdlib-4                     31924005    37.64  ns/op     0  B/op   0  allocs/op
+Benchmark_Memmem_Prefilter/512B/paired-4                           139797565    8.697  ns/op     0  B/op   0  allocs/op
+Benchmark_Memmem_Prefilter/512B/paired-stdlib-4                      9185761    122.8  ns/op     0  B/op   0  allocs/op
+Benchmark_Memmem_Prefilter/512B/single-4                             9594715    121.1  ns/op     0  B/op   0  allocs/op
+Benchmark_Memmem_Prefilter/512B/single-stdlib-4                      9683748    121.5  ns/op     0  B/op   0  allocs/op
+Benchmark_Memmem_Prefilter/4096B/paired-4                           32443600    39.69  ns/op     0  B/op   0  allocs/op
+Benchmark_Memmem_Prefilter/4096B/paired-stdlib-4                     1267646    962.3  ns/op     0  B/op   0  allocs/op
+Benchmark_Memmem_Prefilter/4096B/single-4                            1218538    931.7  ns/op     0  B/op   0  allocs/op
+Benchmark_Memmem_Prefilter/4096B/single-stdlib-4                     1293177    927.2  ns/op     0  B/op   0  allocs/op
+Benchmark_Memmem_Adversarial/simd-4                                     1089  1059972  ns/op     0  B/op   0  allocs/op
+Benchmark_Memmem_Adversarial/default-4                                  1124  1045770  ns/op     0  B/op   0  allocs/op
+Benchmark_IsASCII/8B/simd-4                                        493146400    2.510  ns/op     0  B/op   0  allocs/op
+Benchmark_IsASCII/8B/swar-4                                       1000000000    1.086  ns/op     0  B/op   0  allocs/op
+Benchmark_IsASCII/32B/simd-4                                       549037777    2.331  ns/op     0  B/op   0  allocs/op
+Benchmark_IsASCII/32B/swar-4                                       657224274    1.863  ns/op     0  B/op   0  allocs/op
+Benchmark_IsASCII/64B/simd-4                                       537544213    2.260  ns/op     0  B/op   0  allocs/op
+Benchmark_IsASCII/64B/swar-4                                       563848951    2.175  ns/op     0  B/op   0  allocs/op
+Benchmark_IsASCII/512B/simd-4                                      335413507    3.293  ns/op     0  B/op   0  allocs/op
+Benchmark_IsASCII/512B/swar-4                                      149214904    7.730  ns/op     0  B/op   0  allocs/op
+Benchmark_IsASCII/4096B/simd-4                                      78255848    14.58  ns/op     0  B/op   0  allocs/op
+Benchmark_IsASCII/4096B/swar-4                                      22478596    54.43  ns/op     0  B/op   0  allocs/op
+Benchmark_FirstNonASCII/8B/simd-4                                  416852157    2.938  ns/op     0  B/op   0  allocs/op
+Benchmark_FirstNonASCII/8B/swar-4                                  673407130    1.810  ns/op     0  B/op   0  allocs/op
+Benchmark_FirstNonASCII/32B/simd-4                                 520230950    2.360  ns/op     0  B/op   0  allocs/op
+Benchmark_FirstNonASCII/32B/swar-4                                 606508831    1.989  ns/op     0  B/op   0  allocs/op
+Benchmark_FirstNonASCII/64B/simd-4                                 484232101    2.402  ns/op     0  B/op   0  allocs/op
+Benchmark_FirstNonASCII/64B/swar-4                                 432093866    2.813  ns/op     0  B/op   0  allocs/op
+Benchmark_FirstNonASCII/512B/simd-4                                354636026    3.395  ns/op     0  B/op   0  allocs/op
+Benchmark_FirstNonASCII/512B/swar-4                                 79015945    15.00  ns/op     0  B/op   0  allocs/op
+Benchmark_FirstNonASCII/4096B/simd-4                                83377725    16.17  ns/op     0  B/op   0  allocs/op
+Benchmark_FirstNonASCII/4096B/swar-4                                10899777    110.7  ns/op     0  B/op   0  allocs/op
+Benchmark_CountNonASCII/8B/simd-4                                  407292187    2.925  ns/op     0  B/op   0  allocs/op
+Benchmark_CountNonASCII/8B/swar-4                                  633446112    1.876  ns/op     0  B/op   0  allocs/op
+Benchmark_CountNonASCII/32B/simd-4                                 527741985    2.267  ns/op     0  B/op   0  allocs/op
+Benchmark_CountNonASCII/32B/swar-4                                 520401512    2.198  ns/op     0  B/op   0  allocs/op
+Benchmark_CountNonASCII/64B/simd-4                                 528453115    2.183  ns/op     0  B/op   0  allocs/op
+Benchmark_CountNonASCII/64B/swar-4                                 376214196    3.276  ns/op     0  B/op   0  allocs/op
+Benchmark_CountNonASCII/512B/simd-4                                305556792    3.753  ns/op     0  B/op   0  allocs/op
+Benchmark_CountNonASCII/512B/swar-4                                 52532768    20.09  ns/op     0  B/op   0  allocs/op
+Benchmark_CountNonASCII/4096B/simd-4                                67882563    18.61  ns/op     0  B/op   0  allocs/op
+Benchmark_CountNonASCII/4096B/swar-4                                 8308380    143.3  ns/op     0  B/op   0  allocs/op
 ```
 
 <!-- skip-docs -->

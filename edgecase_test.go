@@ -1,8 +1,10 @@
 package utils
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
+	"math/rand/v2"
 	"net/http"
 	"net/netip"
 	"net/url"
@@ -342,7 +344,14 @@ func assertParseIPParity(tb testing.TB, in string) {
 
 func Test_CanonicalHeaderKey_PositionalMutations(t *testing.T) {
 	t.Parallel()
-	bases := []string{"content-type", "X-Request-Id", "a", "-", "--", "a-", "-a", "A--b"}
+	bases := []string{
+		"content-type", "X-Request-Id", "a", "-", "--", "a-", "-a", "A--b",
+		// Every length from the one-word path to three words, with hyphens on both sides of
+		// a word boundary and in the byte before the overlapping last word.
+		"Host", "etag-", "cookie", "x-b3-id", "If-Match", "x-real-ip", "sec-ch-ua-", "keep-alive-",
+		"content-md5-", "www-authentic", "abcdefg-hijklm", "accept-encoding", "x-forwarded-for-",
+		"if-modified-since", "ABCDEFGH-IJKLMNO-P", "access-control-allow-origin",
+	}
 	for _, base := range bases {
 		for pos := range len(base) {
 			for c := range 256 {
@@ -351,6 +360,37 @@ func Test_CanonicalHeaderKey_PositionalMutations(t *testing.T) {
 				require.Equal(t, want, CanonicalHeaderKey(in), "input %q", in)
 				require.Equal(t, want, string(CanonicalHeaderKey([]byte(in))), "input %q", in)
 			}
+		}
+	}
+}
+
+// Test_CanonicalHeaderKey_Randomized draws keys from the bytes that matter to the word path, at
+// every length up to five words, and checks which results are the input itself.
+func Test_CanonicalHeaderKey_Randomized(t *testing.T) {
+	t.Parallel()
+	const alphabet = "abcxyzABCXYZ--------0189_.~! :\x00\x7f\x80\xe9@[`{/"
+	rng := rand.New(rand.NewPCG(3, 4)) //nolint:gosec // a fixed sequence for a differential test
+	for range 200_000 {
+		in := make([]byte, rng.IntN(41))
+		// Mostly letters, digits and hyphens, so that many keys stay on the word path.
+		limit := 24
+		if rng.IntN(4) == 0 {
+			limit = len(alphabet)
+		}
+		for i := range in {
+			in[i] = alphabet[rng.IntN(limit)]
+		}
+		want := http.CanonicalHeaderKey(string(in))
+		if got := CanonicalHeaderKey(string(in)); got != want {
+			t.Fatalf("CanonicalHeaderKey(%q) = %q, want %q", in, got, want)
+		}
+		kept := append([]byte(nil), in...)
+		got := CanonicalHeaderKey(in)
+		if string(got) != want || !bytes.Equal(in, kept) {
+			t.Fatalf("CanonicalHeaderKey(bytes %q) = %q, want %q, input now %q", kept, got, want, in)
+		}
+		if len(in) > 0 && (want == string(in)) != (&got[0] == &in[0]) {
+			t.Fatalf("CanonicalHeaderKey(bytes %q): a copy = %v, want %v", in, &got[0] != &in[0], want != string(in))
 		}
 	}
 }
